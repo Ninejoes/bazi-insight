@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BaZi Insight - ดูดวงจีนส่วนบุคคล</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell is-locked" id="appShell">
+      <header class="topbar">
+        <button class="icon-btn" aria-label="เมนู" hidden>☰</button>
+        <div>
+          <p class="brand">BAZI INSIGHT</p>
+          <h1 id="appTitle">ปาจื้อ 八字</h1>
+        </div>
+        <button class="reset-btn" id="resetBtn">ตั้งดวงใหม่</button>
+      </header>
+
+      <section class="birth-panel" aria-label="ตั้งค่าดวงเกิด">
+        <div class="field">
+          <label for="name">ชื่อ</label>
+          <input id="name" type="text" placeholder="ชื่อของคุณ" />
+        </div>
+        <div class="field">
+          <label for="email">อีเมล</label>
+          <input id="email" type="email" placeholder="you@example.com" />
+        </div>
+        <div class="field">
+          <label for="gender">เพศ</label>
+          <select id="gender">
+            <option value="" selected>เลือกเพศ</option>
+            <option value="หญิง">หญิง</option>
+            <option value="ชาย">ชาย</option>
+            <option value="ไม่ระบุ">ไม่ระบุ</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="date">วันเกิด</label>
+          <input id="date" type="date" />
+        </div>
+        <div class="field">
+          <label for="time">เวลาเกิด</label>
+          <input id="time" type="time" />
+        </div>
+        <div class="field action-field">
+          <label>&nbsp;</label>
+          <button class="predict-btn" id="predictBtn" type="button">คำนายดวง</button>
+        </div>
+        <p class="prediction-status" id="predictionStatus">กรอกข้อมูลให้ครบ แล้วกด “คำนายดวง” เพื่อแสดงผล</p>
+      </section>
+
+      <section class="profile-status" id="profileStatus">กำลังอ่านดวงส่วนตัว...</section>
+
+      <nav class="tabs" id="baziTabs" aria-label="มุมมอง">
+        <button class="tab is-active" data-tab="overview">ภาพรวม</button>
+        <button class="tab" data-tab="luck">โชควัยจร</button>
+        <button class="tab" data-tab="stars">ดาว</button>
+        <button class="tab" data-tab="compare">หลักการ</button>
+      </nav>
+
+      <footer class="bottom-nav">
+        <button class="is-active" data-module="bazi">ปาจื้อ</button>
+        <button data-module="oracle">พยากรณ์</button>
+        <button data-module="calendar">ปฏิทินมงคล</button>
+        <button data-module="qimen">ฉีเหมิน</button>
+      </footer>
+
+      <main>
+        <section class="module is-active" id="module-bazi">
+          <section class="tab-panel is-active" id="overview">
+          <section class="today-card">
+            <div class="today-hero">
+              <div>
+                <p class="eyebrow">คำทำนายวันนี้</p>
+                <h2 id="todayTitle">-</h2>
+                <p id="todaySummary"></p>
+              </div>
+              <div class="fortune-score">
+                <span id="todayScore">--</span>
+                <small>คะแนนวัน</small>
+              </div>
+            </div>
+            <div class="fortune-strip">
+              <div><span>เลขมงคล</span><strong id="luckyNumbers">-</strong></div>
+              <div><span>สีเสริม</span><strong id="luckyColor">-</strong></div>
+              <div><span>เวลาดี</span><strong id="luckyTime">-</strong></div>
+            </div>
+            <div class="advice-grid" id="todayAdvice"></div>
+            <div class="insight-panel" id="insightPanel"></div>
+          </section>
+
+          <section class="chart-card">
+            <div class="card-title">
+              <h2>ดวงชะตา 本命八字</h2>
+              <span id="birthLine"></span>
+            </div>
+            <div class="pillar-grid" id="pillarGrid"></div>
+          </section>
+
+          <section class="identity">
+            <p>ธาตุประจำตัว</p>
+            <h2 id="dayMasterTitle">-</h2>
+            <blockquote id="dayMasterQuote"></blockquote>
+            <div class="meter">
+              <div id="strengthBar"></div>
+            </div>
+            <p id="strengthText" class="fine"></p>
+          </section>
+
+          <section class="matrix">
+            <h2>เมตริกซ์แห่งโชคชะตา</h2>
+            <div class="matrix-grid" id="matrixGrid"></div>
+          </section>
+        </section>
+
+        <section class="tab-panel" id="luck">
+          <section class="chart-card">
+            <h2>โชควัยจร 大运</h2>
+            <div class="luck-list" id="luckList"></div>
+          </section>
+        </section>
+
+        <section class="tab-panel" id="stars">
+          <section class="chart-card">
+            <h2>ดาวสิบเทพ 十神</h2>
+            <div class="star-list" id="starList"></div>
+          </section>
+        </section>
+
+        <section class="tab-panel" id="compare">
+          <section class="chart-card reading-principles">
+            <h2>หลักการดูดวงปาจื้อ</h2>
+            <p>ปาจื้ออ่านจากวัน เดือน ปี และเวลาเกิด แปลงเป็น 4 เสา แต่ละเสามี “ก้านฟ้า” และ “กิ่งดิน” รวมเป็น 8 ตัวอักษรจีนเพื่อดูสมดุลธาตุในชีวิต</p>
+            <ol>
+              <li><strong>วันเกิดคือแกนหลัก</strong> ก้านฟ้าของวันเกิดเรียกว่า Day Master ใช้แทนตัวเรา</li>
+              <li><strong>ดูฤดูกาลและธาตุรอบตัว</strong> เดือนเกิดบอกสภาพแวดล้อม ส่วนปี วัน และยามช่วยเสริมภาพรวม</li>
+              <li><strong>ประเมินความแข็งแรง</strong> ถ้าธาตุตัวตนมีพวกเดียวกันหรือธาตุแม่มากจะถือว่าแข็งแรง ถ้าน้อยจะถือว่าอ่อน</li>
+              <li><strong>หาธาตุให้คุณ</strong> ดวงแข็งมักต้องการธาตุระบาย/ควบคุม ดวงอ่อนมักต้องการธาตุสนับสนุน</li>
+              <li><strong>อ่านดาวสิบเทพ</strong> ความสัมพันธ์ของธาตุกับ Day Master แปลเป็นเรื่องงาน เงิน ความรัก ความคิด และผู้ช่วยเหลือ</li>
+            </ol>
+            <p class="fine">เว็บนี้เป็นต้นแบบเชิงวิเคราะห์และความบันเทิง สูตรเดือน/วันใช้การประมาณแบบวงจร 60 ก้านฟ้า-กิ่งดิน ไม่แทนที่ซินแสมืออาชีพที่ใช้สุริยคติและเวลาเกิดละเอียดระดับท้องถิ่น</p>
+          </section>
+        </section>
+        </section>
+
+        <section class="module" id="module-calendar">
+          <section class="today-card compact">
+            <div class="today-hero">
+              <div>
+                <p class="eyebrow">ปฏิทินส่วนตัว</p>
+                <h2 id="calendarTitle">เลือกวันให้ถูกจังหวะ</h2>
+                <p id="calendarSummary">ระบบจัดอันดับวันจากธาตุให้คุณ ดาวประจำวัน และความสัมพันธ์กับดวงเกิดของคุณ</p>
+              </div>
+            </div>
+            <div class="calendar-filters">
+              <button class="filter-chip is-active" data-filter="all">ทั้งหมด</button>
+              <button class="filter-chip" data-filter="work">งาน/เงิน</button>
+              <button class="filter-chip" data-filter="love">รัก/เจรจา</button>
+              <button class="filter-chip" data-filter="rest">พัก/แก้เคล็ด</button>
+            </div>
+          </section>
+          <section class="chart-card">
+            <div class="card-title">
+              <h2>ปฏิทินมงคล 吉祥日历</h2>
+              <span>อิงธาตุให้คุณของดวงนี้</span>
+            </div>
+            <div class="calendar-list" id="calendarList"></div>
+          </section>
+        </section>
+
+        <section class="module" id="module-qimen">
+          <section class="today-card compact">
+            <div class="today-hero">
+              <div>
+                <p class="eyebrow">ฉีเหมินรายยาม</p>
+                <h2 id="qimenTitle">ทิศเปิดพลังวันนี้</h2>
+                <p id="qimenSummary">ใช้เลือกทิศเริ่มต้นก่อนคุยงาน ส่งข้อความสำคัญ ไลฟ์ขายของ หรือเริ่มเดินทาง</p>
+              </div>
+              <div class="fortune-score small">
+                <span id="qimenBestScore">--</span>
+                <small>ทิศเด่น</small>
+              </div>
+            </div>
+          </section>
+          <section class="chart-card">
+            <div class="card-title">
+              <h2>ฉีเหมิน 奇门</h2>
+              <span>ทิศมงคลรายยาม</span>
+            </div>
+            <div class="qimen-board" id="qimenBoard"></div>
+            <div class="qimen-note" id="qimenNote"></div>
+            <div class="qimen-use" id="qimenUse"></div>
+          </section>
+        </section>
+
+        <section class="module" id="module-oracle">
+          <section class="today-card compact">
+            <div class="today-hero">
+              <div>
+                <p class="eyebrow">คำพยากรณ์ส่วนตัว</p>
+                <h2 id="oracleTitle">เปิดคำทำนายเฉพาะเรื่อง</h2>
+                <p id="oracleSummary">เลือกหัวข้อที่อยากดู ระบบจะอ่านจากดวงเกิด ธาตุให้คุณ และพลังของวันนี้</p>
+              </div>
+              <div class="fortune-score small">
+                <span id="oracleScore">--</span>
+                <small>พลังเรื่องนี้</small>
+              </div>
+            </div>
+            <div class="oracle-controls" aria-label="เลือกหัวข้อคำพยากรณ์">
+              <button class="oracle-chip is-active" data-oracle="overall">ภาพรวม</button>
+              <button class="oracle-chip" data-oracle="work">งาน</button>
+              <button class="oracle-chip" data-oracle="money">เงิน</button>
+              <button class="oracle-chip" data-oracle="love">ความรัก</button>
+              <button class="oracle-chip" data-oracle="health">สุขภาพใจ</button>
+            </div>
+            <div class="field oracle-question">
+              <label for="oracleQuestion">ถามเรื่องที่ค้างใจ</label>
+              <div class="question-row">
+                <input id="oracleQuestion" type="text" placeholder="เช่น เดือนนี้ควรเริ่มโปรเจกต์ใหม่ไหม" />
+                <button class="analyze-btn" id="analyzeQuestion" type="button">วิเคราะห์คำถาม</button>
+              </div>
+              <p class="analysis-state" id="analysisState">ระบบจะอ่านคำถามร่วมกับดวงเกิดและพลังของวันนี้</p>
+            </div>
+          </section>
+
+          <section class="chart-card">
+            <div class="card-title">
+              <h2>ผลคำพยากรณ์ 占断</h2>
+              <span id="oracleMeta">อ่านจากดวงวันนี้</span>
+            </div>
+            <div class="oracle-reading" id="oracleReading"></div>
+          </section>
+        </section>
+      </main>
+
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

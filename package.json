@@ -1,0 +1,13 @@
+{
+  "name": "bazi-insight",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node outputs/server.mjs",
+    "check": "node --check outputs/app.js && node --check outputs/server.mjs && node --check api/leads.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
