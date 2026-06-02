@@ -213,6 +213,32 @@ const branchClashes = {
   "巳": "亥",
   "亥": "巳",
 };
+const branchCombinations = {
+  "子": ["丑"],
+  "丑": ["子"],
+  "寅": ["亥"],
+  "亥": ["寅"],
+  "卯": ["戌"],
+  "戌": ["卯"],
+  "辰": ["酉"],
+  "酉": ["辰"],
+  "巳": ["申"],
+  "申": ["巳"],
+  "午": ["未"],
+  "未": ["午"],
+};
+const stemCombinations = {
+  "甲": { pair: "己", element: "ดิน" },
+  "己": { pair: "甲", element: "ดิน" },
+  "乙": { pair: "庚", element: "ทอง" },
+  "庚": { pair: "乙", element: "ทอง" },
+  "丙": { pair: "辛", element: "น้ำ" },
+  "辛": { pair: "丙", element: "น้ำ" },
+  "丁": { pair: "壬", element: "ไม้" },
+  "壬": { pair: "丁", element: "ไม้" },
+  "戊": { pair: "癸", element: "ไฟ" },
+  "癸": { pair: "戊", element: "ไฟ" },
+};
 let activeCalendarFilter = "all";
 let activeOracleTopic = "overall";
 let analyzedQuestion = "";
@@ -367,6 +393,30 @@ function chartContext(chart, score) {
   };
 }
 
+function chartPillarEntries(chart) {
+  return [
+    ["ปี", chart.year],
+    ["เดือน", chart.month],
+    ["วัน", chart.day],
+    ["ยาม", chart.hour],
+  ];
+}
+
+function branchMatches(chart, todayBranch, matchMap) {
+  const targets = matchMap[todayBranch.han] || [];
+  return chartPillarEntries(chart)
+    .filter(([, pillar]) => targets.includes(pillar.branch.han))
+    .map(([label, pillar]) => ({ label, branch: pillar.branch }));
+}
+
+function stemCombinationMatches(chart, todayStem) {
+  const combo = stemCombinations[todayStem.han];
+  if (!combo) return [];
+  return chartPillarEntries(chart)
+    .filter(([, pillar]) => pillar.stem.han === combo.pair)
+    .map(([label, pillar]) => ({ label, stem: pillar.stem, element: combo.element }));
+}
+
 function dailyScore(chart, score, today = new Date()) {
   const ctx = chartContext(chart, score);
   const todayPillar = pillarFromIndex(daysSinceBase(today));
@@ -375,8 +425,63 @@ function dailyScore(chart, score, today = new Date()) {
   const stemMatch = ctx.useful.includes(todayPillar.stem.element);
   const sameBranch = todayPillar.branch.han === chart.day.branch.han;
   const monthSupport = todayPillar.branch.element === chart.month.branch.element;
-  const value = Math.min(99, Math.max(38, 48 + (stemMatch ? 15 : 0) + (branchMatch ? 13 : 0) + (sameBranch ? 7 : 0) + (monthSupport ? 5 : 0) + mod(today.getDate() + chart.day.index, 11)));
-  return { value, todayPillar, stemRelation, branchMatch, stemMatch, sameBranch, monthSupport };
+  const clashMatches = branchMatches(chart, todayPillar.branch, branchClashes);
+  const combinationMatches = branchMatches(chart, todayPillar.branch, branchCombinations);
+  const stemCombos = stemCombinationMatches(chart, todayPillar.stem);
+  const tenGodScore = {
+    "เพื่อนร่วมทาง": 2,
+    "แรงแข่งขัน": score >= 70 ? 2 : -5,
+    "พรสวรรค์": 7,
+    "นักแสดงออก": score >= 70 ? 5 : 1,
+    "รายได้เสริม": 8,
+    "ทรัพย์หลัก": 7,
+    "แรงกดดัน": score >= 70 ? 4 : -6,
+    "ระเบียบ": 5,
+    "ญาณ/กลยุทธ์": 5,
+    "ผู้สนับสนุน": 6,
+  }[stemRelation[1]] || 0;
+  const components = [
+    { label: "ฐานวัน", points: 46, detail: `ตั้งต้นจากเสาวัน ${todayPillar.stem.han}${todayPillar.branch.han}` },
+    {
+      label: "ก้านฟ้า",
+      points: stemMatch ? 14 : -4,
+      detail: `${todayPillar.stem.han} ${todayPillar.stem.element} ${stemMatch ? "เป็นธาตุให้คุณ" : "ไม่ใช่ธาตุให้คุณหลัก"} ของ Day Master ${ctx.dm.han}`,
+    },
+    {
+      label: "กิ่งดิน",
+      points: branchMatch ? 12 : -3,
+      detail: `${todayPillar.branch.han} ${todayPillar.branch.element} ${branchMatch ? "ช่วยเติมธาตุที่ดวงต้องการ" : "ยังไม่เติมธาตุหลักของดวงนี้"}`,
+    },
+    {
+      label: "สิบเทพวันนี้",
+      points: tenGodScore,
+      detail: `${todayPillar.stem.han} เมื่อเทียบกับ Day Master ${ctx.dm.han} คือ “${stemRelation[1]}” (${stemRelation[2]})`,
+    },
+    ...(sameBranch ? [{ label: "กิ่งวันซ้ำ", points: 4, detail: `กิ่งวันนี้ซ้ำกับกิ่งวันเกิด ${chart.day.branch.han} ทำให้เรื่องตัวเองเด่นขึ้น` }] : []),
+    ...(monthSupport ? [{ label: "ฤดูกาลหนุน", points: 5, detail: `กิ่งวันนี้เป็นธาตุเดียวกับเดือนเกิด ${chart.month.branch.han}` }] : []),
+    ...combinationMatches.map((item) => ({
+      label: "กิ่ง合",
+      points: 8,
+      detail: `${todayPillar.branch.han} 合 กับกิ่ง${item.label}${item.branch.han} ช่วยให้เรื่องนั้นเปิดง่ายขึ้น`,
+    })),
+    ...clashMatches.map((item) => ({
+      label: "กิ่ง冲",
+      points: -12,
+      detail: `${todayPillar.branch.han} 冲 กับกิ่ง${item.label}${item.branch.han} ต้องประคองเรื่อง${item.label}`,
+    })),
+    ...stemCombos.map((item) => ({
+      label: "ก้าน合",
+      points: 6,
+      detail: `${todayPillar.stem.han} 合 กับก้าน${item.label}${item.stem.han} เกิดพลัง${item.element}`,
+    })),
+    {
+      label: "จังหวะเฉพาะดวง",
+      points: mod(chart.day.index + chart.hour.index + today.getDate(), 7) - 3,
+      detail: `ปรับจากดัชนีเสาวันเกิดและยามเกิดของดวงนี้`,
+    },
+  ];
+  const value = Math.min(99, Math.max(28, components.reduce((sum, item) => sum + item.points, 0)));
+  return { value, todayPillar, stemRelation, branchMatch, stemMatch, sameBranch, monthSupport, clashMatches, combinationMatches, stemCombos, components };
 }
 
 function analyzeQuestionText(rawQuestion) {
@@ -412,15 +517,9 @@ function pickBySeed(items, seed) {
 }
 
 function branchClashText(chart, todayPillar) {
-  const clash = branchClashes[todayPillar.branch.han];
-  const targets = [
-    ["วันเกิด", chart.day.branch],
-    ["เดือนเกิด", chart.month.branch],
-    ["ยามเกิด", chart.hour.branch],
-    ["ปีเกิด", chart.year.branch],
-  ].filter(([, branch]) => branch.han === clash);
+  const targets = branchMatches(chart, todayPillar.branch, branchClashes);
   if (!targets.length) return "";
-  return `วันนี้กิ่ง ${todayPillar.branch.han}${todayPillar.branch.th} ปะทะกับ${targets.map(([label, branch]) => `${label}${branch.han}`).join(" / ")} จึงควรลดการปะทะตรง ๆ`;
+  return `วันนี้กิ่ง ${todayPillar.branch.han}${todayPillar.branch.th} ปะทะกับ${targets.map((item) => `${item.label}${item.branch.han}`).join(" / ")} จึงควรลดการปะทะตรง ๆ`;
 }
 
 function personalDailyAdvice(chart, ctx, daily, dayScore) {
@@ -542,9 +641,23 @@ function todayReading(chart, score, today = new Date()) {
   const luckyTime = `${String(startHour).padStart(2, "0")}:00-${String(mod(startHour + 2, 24)).padStart(2, "0")}:00`;
   const relationInsight = relationProfiles[relationName] || daily.stemRelation[2];
   const opening = dayScore >= 82 ? "จังหวะเปิดชัด" : dayScore >= 68 ? "จังหวะค่อย ๆ ขยับ" : "จังหวะต้องประคอง";
+  const positiveFactors = daily.components.filter((item) => item.points > 0).sort((a, b) => b.points - a.points);
+  const negativeFactors = daily.components.filter((item) => item.points < 0).sort((a, b) => a.points - b.points);
+  const mainPositive = positiveFactors.find((item) => item.label !== "ฐานวัน") || positiveFactors[0];
+  const mainNegative = negativeFactors[0];
+  const branchEffect = daily.clashMatches.length
+    ? `กิ่ง ${todayPillar.branch.han} 冲 กับ${daily.clashMatches.map((item) => `${item.label}${item.branch.han}`).join(" / ")}`
+    : daily.combinationMatches.length
+      ? `กิ่ง ${todayPillar.branch.han} 合 กับ${daily.combinationMatches.map((item) => `${item.label}${item.branch.han}`).join(" / ")}`
+      : `กิ่ง ${todayPillar.branch.han} ไม่มี冲/合เด่นกับ 4 เสาเกิด`;
   const personalSignal = ctx.topRelation
     ? `พื้นดวงเด่นด้าน “${ctx.topRelation.label}” (${ctx.topRelation.meaning}) จึงควรใช้วันนี้เพื่อ${topGuide.focus}`
     : `พื้นดวงต้องใช้ธาตุ ${ctx.useful.join(" / ")} เพื่อเปิดจังหวะ`;
+  const summary = [
+    `วันนี้ ${todayPillar.stem.han}${todayPillar.branch.han} ไม่ได้อ่านเหมือนกันทุกคน: สำหรับ Day Master ${ctx.dm.han}${ctx.dm.element}, ก้าน ${todayPillar.stem.han} คือ “${relationName}” (${daily.stemRelation[2]})`,
+    `${branchEffect}; ${mainPositive ? `ตัวหนุนหลักคือ ${mainPositive.detail}` : personalSignal}`,
+    mainNegative ? `จุดที่ต้องประคองคือ ${mainNegative.detail}` : `จุดเด่นวันนี้คือ ${personalSignal}`,
+  ].join(" ");
 
   return {
     todayPillar,
@@ -552,14 +665,11 @@ function todayReading(chart, score, today = new Date()) {
     lucky,
     luckyTime,
     luckyColor: colorByElement[ctx.useful[0]],
-    title: `${todayPillar.stem.han}${todayPillar.branch.han} · ${opening}`,
-    summary: dayScore >= 82
-      ? `วันนี้ธาตุของวันหนุน ${els.name.value.trim() || "คุณ"} โดยตรง (${usefulText}) เหมาะเปิดเรื่องสำคัญ โดยเฉพาะ${dayGuide.work}`
-      : dayScore >= 68
-        ? `วันนี้พลังใช้งานได้ดี ความสัมพันธ์ของวันคือ “${relationName}” ${relationInsight} ${personalSignal}`
-        : `วันนี้ธาตุยังไม่หนุนเต็มที่ ${personalSignal} และควรเลี่ยง ${dayGuide.avoid}`,
+    title: `${todayPillar.stem.han}${todayPillar.branch.han} · ${relationName}`,
+    summary: `${opening} · ${summary}`,
     advice: personalDailyAdvice(chart, ctx, daily, dayScore),
     insight: `${relationInsight} ${ctx.seasonNote} ภาพรวมดวงคือ ${ctx.strengthLabel} ธาตุเด่นคือ ${ctx.dominant.slice(0, 2).map(([e]) => e).join(" / ")} ธาตุที่ควรเติมคือ ${ctx.useful.join(" / ")} และสิบเทพเด่นคือ ${ctx.relations.slice(0, 2).map((r) => r.label).join(" / ")}`,
+    components: daily.components,
   };
 }
 
@@ -953,6 +1063,14 @@ function renderToday(chart, score, date) {
     <span>อ่านเชิงระบบ</span>
     <strong>${scoreLabel(reading.dayScore)} · ${reading.insight}</strong>
     <small>ฐานคำนวณ: Day Master ${chart.day.stem.han}${ctx.dm.element}, เดือนเกิด ${chart.month.stem.han}${chart.month.branch.han}, ยามเกิด ${chart.hour.stem.han}${chart.hour.branch.han}, สิบเทพเด่น ${ctx.relations.slice(0, 3).map((r) => r.label).join(" / ")}</small>
+    <div class="calc-breakdown">
+      ${reading.components
+        .filter((item) => item.label !== "ฐานวัน")
+        .sort((a, b) => Math.abs(b.points) - Math.abs(a.points))
+        .slice(0, 5)
+        .map((item) => `<small><b>${item.points > 0 ? "+" : ""}${item.points}</b> ${item.label}: ${item.detail}</small>`)
+        .join("")}
+    </div>
   `;
   const today = new Date();
   els.calendarTitle.textContent = `14 วันถัดไปจากวันนี้`;

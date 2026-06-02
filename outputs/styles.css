@@ -521,6 +521,20 @@ h1 span {
   font-size: 12px;
 }
 
+.calc-breakdown {
+  display: grid;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.calc-breakdown small {
+  color: #52635b;
+}
+
+.calc-breakdown b {
+  color: var(--green);
+}
+
 .insight-panel strong {
   display: block;
   margin: 4px 0;
