@@ -3,16 +3,43 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>BaZi Insight - ดูดวงจีนส่วนบุคคล</title>
+    <title>Likhitfa - ดูดวงจีนส่วนบุคคล</title>
     <link rel="stylesheet" href="./styles.css" />
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7F7B1DXGC1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-7F7B1DXGC1');
+    </script>
   </head>
   <body>
     <div class="app-shell is-locked" id="appShell">
       <header class="topbar">
         <button class="icon-btn" aria-label="เมนู" hidden>☰</button>
-        <div>
-          <p class="brand">BAZI INSIGHT</p>
-          <h1 id="appTitle">ปาจื้อ 八字</h1>
+        <div class="brand-lockup" aria-label="Likhitfa ลิขิตฟ้า">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 72 72" role="img">
+              <defs>
+                <linearGradient id="logoGold" x1="16" y1="8" x2="58" y2="64" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#f1c66a" />
+                  <stop offset="0.48" stop-color="#b47a24" />
+                  <stop offset="1" stop-color="#082234" />
+                </linearGradient>
+              </defs>
+              <circle cx="36" cy="36" r="30" fill="none" stroke="url(#logoGold)" stroke-width="3.2" />
+              <path d="M18 49c7-6 12-6 18 0 6-6 12-6 18 0" fill="none" stroke="#0d2633" stroke-width="3" stroke-linecap="round" />
+              <path d="M26 31c6 2 18 2 24 0M28 39c5-3 15-3 20 0" fill="none" stroke="#c89645" stroke-width="4" stroke-linecap="round" />
+              <path d="M36 18v40M33 22h6M31 46c3 3 7 3 10 0" fill="none" stroke="#4d350d" stroke-width="2.8" stroke-linecap="round" />
+              <path d="M53 23l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#d4a045" />
+            </svg>
+          </div>
+          <div>
+            <p class="brand">likhitfa</p>
+            <h1>Likhitfa <span>ลิขิตฟ้า</span></h1>
+            <p class="module-title" id="appTitle">ปาจื้อ 八字</p>
+          </div>
         </div>
         <button class="reset-btn" id="resetBtn">ตั้งดวงใหม่</button>
       </header>
