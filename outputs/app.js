@@ -651,9 +651,9 @@ async function requestPrediction(reason = "prediction-request") {
     return;
   }
   if (!els.privacyConsent.checked) {
-    els.predictionStatus.textContent = "กรุณาติ๊กยินยอมก่อนคำนาย เพื่อให้ระบบใช้ข้อมูลนี้คำนวณและบันทึกผลอ่านให้คุณ";
+    els.predictionStatus.textContent = "เลื่อนลงไปท้ายหน้าแล้วติ๊กข้อความรับทราบเล็ก ๆ ก่อน ระบบจึงจะเปิดคำทำนายให้";
     els.consentLine.classList.add("is-attention");
-    els.privacyConsent.focus();
+    els.consentLine.scrollIntoView({ behavior: "smooth", block: "center" });
     return;
   }
   unlockResults();
