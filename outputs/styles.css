@@ -497,6 +497,15 @@ h1 span {
   font-size: 16px;
 }
 
+.formula-note {
+  display: block;
+  margin-top: 6px;
+  color: #7a837f;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
 .advice-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

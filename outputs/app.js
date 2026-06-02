@@ -568,49 +568,49 @@ function dailyScore(chart, score, today = new Date()) {
     {
       label: "ก้านฟ้า",
       points: stemMatch ? 14 : -4,
-      detail: `${todayPillar.stem.han} ${todayPillar.stem.element} ${stemMatch ? "เป็นธาตุให้คุณ" : "ไม่ใช่ธาตุให้คุณหลัก"} ของ Day Master ${ctx.dm.han}`,
+      detail: `พลังหลักของวันนี้เป็นธาตุ${todayPillar.stem.element} ${stemMatch ? "ซึ่งช่วยเปิดทางให้ดวงนี้" : "ซึ่งยังไม่ใช่แรงหนุนหลักของดวงนี้"}`,
     },
     {
       label: "กิ่งดิน",
       points: branchMatch ? 12 : -3,
-      detail: `${todayPillar.branch.han} ${todayPillar.branch.element} ${branchMatch ? "ช่วยเติมธาตุที่ดวงต้องการ" : "ยังไม่เติมธาตุหลักของดวงนี้"}`,
+      detail: `บรรยากาศของวันนี้เป็นธาตุ${todayPillar.branch.element} ${branchMatch ? "ช่วยเติมธาตุที่ดวงต้องการ" : "ยังไม่เติมธาตุหลักของดวงนี้"}`,
     },
     {
       label: "สิบเทพวันนี้",
       points: tenGodScore,
-      detail: `${todayPillar.stem.han} เมื่อเทียบกับ Day Master ${ctx.dm.han} คือ “${stemRelation[1]}” (${stemRelation[2]})`,
+      detail: `เมื่อเทียบกับตัวตนหลักของดวง วันนี้กระตุ้นเรื่อง “${stemRelation[1]}” (${stemRelation[2]})`,
     },
     ...(sameBranch ? [{ label: "กิ่งวันซ้ำ", points: 4, detail: `กิ่งวันนี้ซ้ำกับกิ่งวันเกิด ${chart.day.branch.han} ทำให้เรื่องตัวเองเด่นขึ้น` }] : []),
     ...(monthSupport ? [{ label: "ฤดูกาลหนุน", points: 5, detail: `กิ่งวันนี้เป็นธาตุเดียวกับเดือนเกิด ${chart.month.branch.han}` }] : []),
     ...combinationMatches.map((item) => ({
       label: "กิ่ง合",
       points: 8,
-      detail: `${todayPillar.branch.han} 合 กับกิ่ง${item.label}${item.branch.han} ช่วยให้เรื่องนั้นเปิดง่ายขึ้น`,
+      detail: `มีแรงส่งเสริมกับ${item.label} ช่วยให้เรื่องนั้นเปิดง่ายขึ้น`,
     })),
     ...clashMatches.map((item) => ({
       label: "กิ่ง冲",
       points: -12,
-      detail: `${todayPillar.branch.han} 冲 กับกิ่ง${item.label}${item.branch.han} ต้องประคองเรื่อง${item.label}`,
+      detail: `มีแรงปะทะกับ${item.label} ควรลดการตัดสินใจแบบชนตรง ๆ`,
     })),
     ...harmMatches.map((item) => ({
       label: "กิ่ง害",
       points: -7,
-      detail: `${todayPillar.branch.han} 害 กับกิ่ง${item.label}${item.branch.han} ระวังเรื่องแทรกเงียบ ๆ`,
+      detail: `มีจุดรบกวนกับ${item.label} ระวังเรื่องเล็กที่ค้างสะสม`,
     })),
     ...punishmentMatches.map((item) => ({
       label: "กิ่ง刑",
       points: -6,
-      detail: `${todayPillar.branch.han} 刑 กับกิ่ง${item.label}${item.branch.han} ระวังแรงกดดันซ้ำหรือการตัดสินใจแข็ง`,
+      detail: `มีแรงกดซ้ำกับ${item.label} ระวังตัดสินใจแข็งหรือกดดันตัวเองเกินไป`,
     })),
     ...stemCombos.map((item) => ({
       label: "ก้าน合",
       points: 6,
-      detail: `${todayPillar.stem.han} 合 กับก้าน${item.label}${item.stem.han} เกิดพลัง${item.element}`,
+      detail: `ก้านวันนี้เข้าคู่กับ${item.label} ช่วยเปิดพลังธาตุ${item.element}`,
     })),
     {
       label: "จังหวะเฉพาะดวง",
       points: mod(chart.day.index + chart.hour.index + today.getDate(), 7) - 3,
-      detail: `ปรับจากดัชนีเสาวันเกิดและยามเกิดของดวงนี้`,
+      detail: `ปรับจากเสาวันเกิดและยามเกิดของดวงนี้`,
     },
   ];
   const value = Math.min(99, Math.max(28, components.reduce((sum, item) => sum + item.points, 0)));
@@ -652,7 +652,11 @@ function pickBySeed(items, seed) {
 function branchClashText(chart, todayPillar) {
   const targets = branchMatches(chart, todayPillar.branch, branchClashes);
   if (!targets.length) return "";
-  return `วันนี้กิ่ง ${todayPillar.branch.han}${todayPillar.branch.th} ปะทะกับ${targets.map((item) => `${item.label}${item.branch.han}`).join(" / ")} จึงควรลดการปะทะตรง ๆ`;
+  return `วันนี้มีสัญญาณปะทะกับ${targets.map((item) => `${item.label}`).join(" / ")} จึงควรลดการคุยแบบชนตรง ๆ`;
+}
+
+function termNote(text) {
+  return `<small class="formula-note">${text}</small>`;
 }
 
 function personalDailyAdvice(chart, ctx, daily, dayScore) {
@@ -662,29 +666,29 @@ function personalDailyAdvice(chart, ctx, daily, dayScore) {
   const hourRelation = relation(chart.day.stem, chart.hour.stem);
   const gender = els.gender.value || "ไม่ระบุ";
   const spouseElement = gender === "หญิง" ? ctx.roles.officer : ctx.roles.wealth;
-  const spouseStar = gender === "หญิง" ? "官杀 คู่ครอง/สถานะความสัมพันธ์" : "财星 คู่สัมพันธ์/แรงดึงดูด";
-  const clashText = branchClashText(chart, todayPillar) || "ไม่พบ冲ตรงกับ 4 เสา แต่ยังต้องดู刑/害และธาตุเสียสมดุล";
-  const harmText = daily.harmMatches.length ? `${daily.harmMatches.map((item) => `${item.label}${item.branch.han}`).join(" / ")} มี害กับกิ่งวันนี้` : "ไม่พบ害เด่น";
-  const punishmentText = daily.punishmentMatches.length ? `${daily.punishmentMatches.map((item) => `${item.label}${item.branch.han}`).join(" / ")} มี刑กับกิ่งวันนี้` : "ไม่พบ刑เด่น";
+  const spouseStar = gender === "หญิง" ? "ดาวคู่ครอง/สถานะความสัมพันธ์" : "ดาวคู่สัมพันธ์/แรงดึงดูด";
+  const clashText = branchClashText(chart, todayPillar) || "ไม่พบแรงปะทะเด่นกับดวงเกิด";
+  const harmText = daily.harmMatches.length ? `มีจุดรบกวนกับ${daily.harmMatches.map((item) => item.label).join(" / ")}` : "ไม่พบจุดรบกวนเด่น";
+  const punishmentText = daily.punishmentMatches.length ? `มีแรงกดซ้ำกับ${daily.punishmentMatches.map((item) => item.label).join(" / ")}` : "ไม่พบแรงกดซ้ำเด่น";
   const workScore = (ctx.relationCounts["ระเบียบ"] || 0) + (ctx.relationCounts["แรงกดดัน"] || 0) + (ctx.relationCounts["ผู้สนับสนุน"] || 0) + (ctx.relationCounts["ญาณ/กลยุทธ์"] || 0);
   const moneyScore = (ctx.relationCounts["ทรัพย์หลัก"] || 0) + (ctx.relationCounts["รายได้เสริม"] || 0);
   const loveScore = ctx.dominant.find(([element]) => element === spouseElement)?.[1] || 0;
   return [
     [
-      "งาน · 官杀/印",
-      `งานอ่านจาก官杀+印: พบดาวงาน/แรงกดดัน/ผู้สนับสนุนรวม ${workScore} จุด เดือนเกิดขึ้น “${monthRelation[1]}” และวันนี้ ${todayPillar.stem.han} เป็น “${relationName}” (${daily.stemRelation[2]}) จึงควรใช้ธาตุงาน ${ctx.roles.officer} เป็นกรอบและธาตุ印 ${ctx.roles.resource} เป็นข้อมูลรองรับ`,
+      "งาน",
+      `วันนี้เหมาะกับงานที่มีกรอบชัด ใช้ข้อมูลช่วยตัดสินใจ และค่อย ๆ ปิดทีละเรื่อง เพราะดวงมีแรงงาน/แรงกดดัน/ผู้สนับสนุนรวม ${workScore} จุด เดือนเกิดเน้น “${monthRelation[1]}” ส่วนพลังวันนี้เน้น “${relationName}” ${termNote(`สูตร: 官杀/印 · ธาตุงาน ${ctx.roles.officer} · ธาตุสนับสนุน ${ctx.roles.resource}`)}`,
     ],
     [
-      "เงิน · 财星",
-      `เงินอ่านจาก财星: ธาตุทรัพย์ของ Day Master ${ctx.dm.han} คือ ${ctx.roles.wealth} พบดาวทรัพย์ในดวง ${moneyScore} จุด และ${ctx.useful.includes(ctx.roles.wealth) ? "ธาตุทรัพย์อยู่ในธาตุให้คุณ" : "ธาตุทรัพย์ยังไม่ใช่ธาตุให้คุณหลัก"} วันนี้ ${todayPillar.stem.han}${todayPillar.branch.han} จึงควรใช้ตัวเลข/สัญญาเป็นฐานก่อนตัดสินใจ`,
+      "เงิน",
+      `เรื่องเงินควรใช้ตัวเลขและเงื่อนไขที่ตรวจสอบได้เป็นหลัก ดวงนี้มีจุดเกี่ยวกับรายรับ/ทรัพย์ ${moneyScore} จุด และ${ctx.useful.includes(ctx.roles.wealth) ? "ธาตุทรัพย์อยู่ในกลุ่มที่ช่วยเปิดทาง" : "ธาตุทรัพย์ยังไม่ใช่แรงหนุนหลัก"} จึงเหมาะกับการเช็กสัญญา ราคา หรืองบก่อนตัดสินใจ ${termNote(`สูตร: 财星 · ธาตุทรัพย์ของ ${ctx.dm.han} คือ ${ctx.roles.wealth}`)}`,
     ],
     [
-      "ความรัก · spouse star",
-      `ความรักอ่านจาก${spouseStar}: ธาตุคู่สัมพันธ์คือ ${spouseElement} มีน้ำหนักประมาณ ${loveScore.toFixed(1)} ในดวง กิ่งวันเกิดคือ ${chart.day.branch.han}${chart.day.branch.th} และยามเกิดขึ้น “${hourRelation[1]}” จึงควรคุยจากจังหวะที่อีกฝ่ายตอบได้ ไม่บีบให้สรุปทันที`,
+      "ความรัก",
+      `ความสัมพันธ์ควรคุยด้วยจังหวะที่เปิดพื้นที่ให้อีกฝ่ายตอบ ไม่บีบให้สรุปทันที จุดคู่สัมพันธ์ของดวงนี้อยู่ที่ธาตุ ${spouseElement} น้ำหนักประมาณ ${loveScore.toFixed(1)} และยามเกิดเน้น “${hourRelation[1]}” ${termNote(`สูตร: ${spouseStar} · กิ่งวันเกิด ${chart.day.branch.han}${chart.day.branch.th}`)}`,
     ],
     [
-      "ควรเลี่ยง · 冲/刑/害",
-      `${clashText}; ${harmText}; ${punishmentText}. ธาตุควรเลี่ยงของดวงนี้คือ ${ctx.unfavorable.join(" / ")} โดยเฉพาะเมื่อทำเรื่องใหญ่ในช่วงคะแนนวันต่ำกว่า 70`,
+      "ควรเลี่ยง",
+      `${clashText}; ${harmText}; ${punishmentText}. ถ้าจะทำเรื่องใหญ่ ควรระวังวันที่คะแนนต่ำกว่า 70 และลดการใช้พลังแบบฝืน โดยเฉพาะธาตุที่ทำให้ดวงเสียสมดุล: ${ctx.unfavorable.join(" / ")} ${termNote("สูตร: ตรวจ冲/刑/害 และธาตุที่ไม่หนุนดวง")}`,
     ],
   ];
 }
@@ -699,38 +703,38 @@ function personalTopicReading(topicKey, base, ctx, today, analysis, topicScore) 
   const topicLines = {
     overall: {
       title: `${ctx.strengthLabel} · เด่นที่${topRelation}`,
-      high: `พื้นดวงมี ${topRelation} เด่น และธาตุให้คุณคือ ${ctx.useful.join(" / ")} จึงควรเลือกเรื่องที่ใช้ ${topGuide.focus} ก่อน`,
-      low: `คะแนนวันนี้ยังไม่สูงพอ ให้กลับมาจัดสมดุล Day Master ${ctx.dm.han}${ctx.dm.element}; ธาตุควรเลี่ยงคือ ${ctx.unfavorable.join(" / ")}`,
+      high: `ภาพรวมวันนี้พอขยับได้ ให้เลือกเรื่องสำคัญเพียง 1 เรื่องก่อน แล้วใช้จุดเด่นของดวงคือ “${topRelation}” ช่วยพาไป`,
+      low: `วันนี้ควรตั้งหลักก่อน ไม่ต้องเร่งทุกอย่างพร้อมกัน จุดที่ควรระวังคือการใช้พลังกับเรื่องที่ยังไม่ชัด`,
       focus: topGuide.focus,
       avoid: topGuide.risk,
     },
     work: {
-      title: `งาน · 官杀 ${officerCount} / 印 ${resourceCount} / 食伤 ${outputCount}`,
-      high: `เรื่องงานหนุนเพราะ官杀/印รวม ${officerCount + resourceCount} จุด วันนี้ขึ้น ${today.todayPillar.stem.han}${today.todayPillar.branch.han} เป็น “${today.stemRelation[1]}” เหมาะใช้${today.stemRelation[2]}กับงานที่มีกรอบชัด`,
-      low: `งานควรตั้งหลักก่อน เพราะ官杀/印รวม ${officerCount + resourceCount} จุดและธาตุควรเลี่ยงคือ ${ctx.unfavorable.join(" / ")} ให้ลดงานที่ไม่อยู่ในขอบเขต`,
-      focus: `ใช้ธาตุงาน ${ctx.roles.officer} และธาตุความรู้ ${ctx.roles.resource} เป็นตัวนำ`,
+      title: `งาน · มีแรงงาน ${officerCount} / แรงสนับสนุน ${resourceCount} / แรงสื่อสาร ${outputCount}`,
+      high: `งานเดินได้ดีเมื่อมีขอบเขตชัด เหมาะกับการจัดลำดับ วางแผน เอกสาร หรือคุยงานที่ต้องมีหลักฐานรองรับ`,
+      low: `งานยังควรประคอง ให้ลดงานแทรกและหลีกเลี่ยงการรับปากก่อนเห็นขอบเขตจริง`,
+      focus: `ทำเป้าหมาย ขอบเขต และ next step ให้ชัด`,
       avoid: topGuide.risk,
     },
     money: {
-      title: `เงิน · 财星 ${wealthCount} จุด`,
-      high: `ธาตุทรัพย์ของ Day Master คือ ${ctx.roles.wealth}; พบ财星 ${wealthCount} จุด และวันนี้คะแนน ${today.dayScore}/100 จึงเหมาะจัดราคา สัญญา หรือสิ่งที่วัดผลได้`,
-      low: `财星 มี ${wealthCount} จุด แต่วันนี้ยังควรประคอง ให้แยกเงินจำเป็น/เงินเสี่ยง และหลีกเลี่ยงธาตุ ${ctx.unfavorable.join(" / ")}`,
-      focus: `ตรวจจุดที่เกี่ยวกับ财星 ${ctx.roles.wealth} และใช้ธาตุให้คุณ ${ctx.useful.join(" / ")}`,
+      title: `เงิน · จุดทรัพย์ ${wealthCount} จุด`,
+      high: `เรื่องเงินเหมาะกับสิ่งที่วัดผลได้ เช่น ราคา สัญญา ยอดค้าง หรืองบประมาณ ไม่ควรตัดสินใจจากความรู้สึกอย่างเดียว`,
+      low: `เงินควรเน้นปิดรอยรั่วก่อนเพิ่มความเสี่ยง แยกเงินจำเป็น เงินลงทุน และเงินตามใจให้ชัด`,
+      focus: `ตรวจตัวเลข เงื่อนไข และหลักฐานก่อนตอบตกลง`,
       avoid: ctx.profile.stress,
     },
     love: {
-      title: `ความรัก · กิ่งวัน ${ctx.dm.han}${ctx.dm.element}`,
-      high: `ความสัมพันธ์อ่านจากกิ่งวันเกิดและ spouse star: เพศ${els.gender.value || "ไม่ระบุ"} ใช้ธาตุคู่สัมพันธ์ ${els.gender.value === "หญิง" ? ctx.roles.officer : ctx.roles.wealth}; วันนี้ให้คะแนน ${today.dayScore}/100`,
-      low: `ถ้าคุยเรื่องสำคัญให้ดู冲/刑/害 ก่อน เพราะ interaction สำคัญคือ ${ctx.interactions.clash.length ? `冲 ${ctx.interactions.clash.map((i) => i.label + i.branch.han).join(" / ")}` : "ไม่พบ冲เด่น"}`,
-      focus: `ใช้ธาตุคู่สัมพันธ์ ${els.gender.value === "หญิง" ? ctx.roles.officer : ctx.roles.wealth} และธาตุให้คุณ ${ctx.useful.join(" / ")}`,
+      title: `ความรัก · ต้องคุยให้มีพื้นที่`,
+      high: `เหมาะกับการคุยแบบตรงแต่ไม่กดดัน บอกความต้องการให้ชัด และเปิดโอกาสให้อีกฝ่ายตอบในจังหวะของเขา`,
+      low: `ถ้าคุยเรื่องสำคัญ ให้ชะลอคำพูดแรง ๆ และอย่ารีบสรุปแทนอีกฝ่าย`,
+      focus: `ถามทีละประเด็น ฟังให้ครบ แล้วค่อยสรุป`,
       avoid: topGuide.risk,
     },
     health: {
-      title: `สุขภาพใจของ ${ctx.dm.han} ${ctx.dm.element} ต้องการจังหวะที่พอดี`,
-      high: `ธาตุให้คุณ ${ctx.useful.join(" / ")} ช่วยปรับสมดุล Day Master ${ctx.dm.han}; วันนี้เหมาะทำ routine ที่ลดธาตุควรเลี่ยง ${ctx.unfavorable.join(" / ")}`,
-      low: `จุดเครียดหลักคือ ${ctx.profile.stress}; ให้ลดกิจกรรมที่กระตุ้นธาตุควรเลี่ยง ${ctx.unfavorable.join(" / ")}`,
+      title: `สุขภาพใจ · ลดสิ่งรบกวนและกลับมาที่จังหวะตัวเอง`,
+      high: `เหมาะกับการจัด routine เล็ก ๆ ที่ทำได้จริง เช่น พักเป็นรอบ ดื่มน้ำ เดินเบา ๆ หรือจัดพื้นที่ทำงาน`,
+      low: `ใจอาจล้าง่ายถ้ารับข้อมูลมากเกินไป ให้ลดสิ่งกระตุ้นและแยกเรื่องที่ควบคุมได้ก่อน`,
       focus: ctx.useful.includes("น้ำ") ? "พักใจด้วยความเงียบ ดื่มน้ำ และลดหน้าจอ" : "จัดพื้นที่ ทำ checklist และพักเป็นรอบสั้น",
-      avoid: `ธาตุควรเลี่ยง ${ctx.unfavorable.join(" / ")}`,
+      avoid: `ฝืนทำหลายเรื่องพร้อมกันจนพักไม่พอ`,
     },
   };
   const personalized = topicLines[topicKey] || topicLines.overall;
@@ -762,23 +766,23 @@ function todayReading(chart, score, today = new Date()) {
   const startHour = mod(seed, 12) * 2;
   const luckyTime = `${String(startHour).padStart(2, "0")}:00-${String(mod(startHour + 2, 24)).padStart(2, "0")}:00`;
   const relationInsight = relationProfiles[relationName] || daily.stemRelation[2];
-  const opening = dayScore >= 82 ? "จังหวะเปิดชัด" : dayScore >= 68 ? "จังหวะค่อย ๆ ขยับ" : "จังหวะต้องประคอง";
+  const opening = dayScore >= 82 ? "วันนี้ค่อนข้างเปิดทาง" : dayScore >= 68 ? "วันนี้ค่อย ๆ ขยับได้" : "วันนี้ควรประคองจังหวะ";
   const positiveFactors = daily.components.filter((item) => item.points > 0).sort((a, b) => b.points - a.points);
   const negativeFactors = daily.components.filter((item) => item.points < 0).sort((a, b) => a.points - b.points);
   const mainPositive = positiveFactors.find((item) => item.label !== "ฐานวัน") || positiveFactors[0];
   const mainNegative = negativeFactors[0];
   const branchEffect = daily.clashMatches.length
-    ? `กิ่ง ${todayPillar.branch.han} 冲 กับ${daily.clashMatches.map((item) => `${item.label}${item.branch.han}`).join(" / ")}`
+    ? `มีแรงปะทะกับ${daily.clashMatches.map((item) => item.label).join(" / ")}`
     : daily.combinationMatches.length
-      ? `กิ่ง ${todayPillar.branch.han} 合 กับ${daily.combinationMatches.map((item) => `${item.label}${item.branch.han}`).join(" / ")}`
-      : `กิ่ง ${todayPillar.branch.han} ไม่มี冲/合เด่นกับ 4 เสาเกิด`;
+      ? `มีแรงส่งเสริมกับ${daily.combinationMatches.map((item) => item.label).join(" / ")}`
+      : `ไม่พบแรงปะทะหรือแรงส่งเสริมเด่นกับดวงเกิด`;
   const personalSignal = ctx.topRelation
     ? `พื้นดวงเด่นด้าน “${ctx.topRelation.label}” (${ctx.topRelation.meaning}) จึงควรใช้วันนี้เพื่อ${topGuide.focus}`
     : `พื้นดวงต้องใช้ธาตุ ${ctx.useful.join(" / ")} เพื่อเปิดจังหวะ`;
   const summary = [
-    `วันนี้ ${todayPillar.stem.han}${todayPillar.branch.han} ไม่ได้อ่านเหมือนกันทุกคน: สำหรับ Day Master ${ctx.dm.han}${ctx.dm.element}, ก้าน ${todayPillar.stem.han} คือ “${relationName}” (${daily.stemRelation[2]})`,
-    `${branchEffect}; ${mainPositive ? `ตัวหนุนหลักคือ ${mainPositive.detail}` : personalSignal}`,
-    mainNegative ? `จุดที่ต้องประคองคือ ${mainNegative.detail}` : `จุดเด่นวันนี้คือ ${personalSignal}`,
+    `ผลวันนี้อ่านจากดวงเกิดของคุณ ไม่ใช่คำทำนายรวม: พลังวันนี้เน้น “${relationName}” (${daily.stemRelation[2]})`,
+    `${branchEffect}; ${mainPositive ? `ตัวช่วยหลักคือ ${mainPositive.detail}` : personalSignal}`,
+    mainNegative ? `จุดที่ควรระวังคือ ${mainNegative.detail}` : `จุดเด่นคือ ${personalSignal}`,
   ].join(" ");
 
   return {
@@ -790,7 +794,7 @@ function todayReading(chart, score, today = new Date()) {
     title: `${todayPillar.stem.han}${todayPillar.branch.han} · ${relationName}`,
     summary: `${opening} · ${summary}`,
     advice: personalDailyAdvice(chart, ctx, daily, dayScore),
-    insight: `${relationInsight} ${ctx.seasonNote} ภาพรวมดวงคือ ${ctx.strengthLabel} ธาตุเด่นคือ ${ctx.dominant.slice(0, 2).map(([e]) => e).join(" / ")} ธาตุที่ควรเติมคือ ${ctx.useful.join(" / ")} และสิบเทพเด่นคือ ${ctx.relations.slice(0, 2).map((r) => r.label).join(" / ")}`,
+    insight: `${relationInsight} ภาพรวมวันนี้ควรใช้จังหวะที่วางแผนได้ ไม่เร่งจนเกินจำเป็น ดวงนี้มีจุดเด่นด้าน ${ctx.relations.slice(0, 2).map((r) => r.label).join(" / ")} ธาตุที่ช่วยปรับสมดุลคือ ${ctx.useful.join(" / ")}`,
     stemRelation: daily.stemRelation,
     components: daily.components,
   };
@@ -808,8 +812,8 @@ function oracleReading(chart, score, date) {
     overall: {
       label: "ภาพรวม",
       title: "ช่วงนี้ควรจัดลำดับชีวิตใหม่",
-      high: "พลังวันนี้ช่วยให้คุณมองเห็นจังหวะสำคัญ เหมาะตัดสินใจเรื่องที่ค้างมานาน",
-      low: "พลังวันนี้เหมาะกับการตั้งหลักมากกว่าการเร่งผลลัพธ์ อย่ากดดันตัวเองเกินไป",
+      high: "วันนี้พอเห็นทิศทางชัดขึ้น เหมาะเลือกเรื่องสำคัญและลงมือแบบมีแผน",
+      low: "วันนี้เหมาะกับการตั้งหลัก ตรวจข้อมูล และลดความคาดหวังที่เร่งเกินไป",
       focus: "เลือก 1 เรื่องหลักแล้วทำให้จบ",
       avoid: "เปิดหลายเรื่องพร้อมกันจนพลังแตก",
     },
@@ -888,8 +892,8 @@ function oracleReading(chart, score, date) {
   const questionMode = analysis?.intent === "timing" ? timingAnswer : analysis?.intent === "advice" ? adviceAnswer : decisionAnswer;
   const todayTenGod = relation(dm, today.todayPillar.stem);
   const answer = question
-    ? `คำถาม “${question}” ถูกจัดเป็นเรื่อง${topic.label} / เจตนา${analysis.intent === "decision" ? "ตัดสินใจ" : analysis.intent === "timing" ? "ถามจังหวะเวลา" : analysis.intent === "advice" ? "ขอคำแนะนำ" : "อ่านแนวโน้ม"} / ความเร่ง ${analysis.urgency}: ${decisive ? questionMode : questionMode}`
-    : `คำพยากรณ์ตั้งต้นจากดวงเกิด: วันนี้ Day Master ${dm.han}${dm.element} เจอวัน ${today.todayPillar.stem.han}${today.todayPillar.branch.han} โดยก้าน ${today.todayPillar.stem.han} เป็นสิบเทพ “${todayTenGod[1]}” (${todayTenGod[2]}) ของดวงนี้ และอ่านร่วมกับธาตุให้คุณ ${useful.join(" / ")} ด้านล่างคือผลตั้งต้นเรื่องงาน เงิน ความรัก และสุขภาพใจ หากมีคำถามเฉพาะให้พิมพ์แล้วกด “วิเคราะห์คำถาม”`;
+    ? `ระบบอ่านคำถามนี้เป็นเรื่อง${topic.label} และประเมินว่าเป็นคำถามแบบ${analysis.intent === "decision" ? "ตัดสินใจ" : analysis.intent === "timing" ? "ถามจังหวะเวลา" : analysis.intent === "advice" ? "ขอคำแนะนำ" : "อ่านแนวโน้ม"} ระดับความเร่ง: ${analysis.urgency}. ${decisive ? questionMode : questionMode}`
+    : `นี่คือคำพยากรณ์ตั้งต้นจากวันและเวลาเกิดของคุณ วันนี้พลังหลักของดวงเน้น “${todayTenGod[1]}” (${todayTenGod[2]}) และใช้ธาตุที่ช่วยปรับสมดุลคือ ${useful.join(" / ")} เป็นตัวอ่านผล ด้านล่างคือภาพรวมเรื่องงาน เงิน ความรัก และสุขภาพใจ หากมีเรื่องเฉพาะ ให้พิมพ์คำถามแล้วกด “วิเคราะห์คำถาม”`;
   const timeline = [
     ["วันนี้", topicScore >= 72 ? "เริ่มจาก action ที่วัดผลได้หนึ่งอย่าง" : "เก็บข้อมูลและลดความคาดหวังที่ไม่จำเป็น"],
     ["3 วัน", useful.includes("ดิน") ? "เห็นความคืบหน้าจากสิ่งที่มีโครงสร้างชัด" : "มีบทสนทนาหรือข้อมูลใหม่ช่วยให้ตัดสินใจง่ายขึ้น"],
@@ -1148,21 +1152,21 @@ function renderMatrix(chart, score) {
   const resource = ctx.roles.resource;
   const personality = score >= 70 ? "พลังสูง ชอบนำเกม" : score >= 45 ? "สมดุล ปรับตัวได้" : "ละเอียดอ่อน ต้องการแรงหนุน";
   const interactionText = [
-    ctx.interactions.clash.length ? `冲: ${ctx.interactions.clash.map((i) => `${i.label}${i.branch.han}`).join(" / ")}` : "",
-    ctx.interactions.combine.length ? `合: ${ctx.interactions.combine.map((i) => `${i.label}${i.branch.han}`).join(" / ")}` : "",
-    ctx.interactions.harm.length ? `害: ${ctx.interactions.harm.map((i) => `${i.label}${i.branch.han}`).join(" / ")}` : "",
-    ctx.interactions.punishment.length ? `刑: ${ctx.interactions.punishment.map((i) => `${i.label}${i.branch.han}`).join(" / ")}` : "",
-  ].filter(Boolean).join(" · ") || "ไม่พบ冲/合/刑/害เด่นกับกิ่งวันเกิด";
+    ctx.interactions.clash.length ? `แรงปะทะ: ${ctx.interactions.clash.map((i) => i.label).join(" / ")}` : "",
+    ctx.interactions.combine.length ? `แรงส่งเสริม: ${ctx.interactions.combine.map((i) => i.label).join(" / ")}` : "",
+    ctx.interactions.harm.length ? `จุดรบกวน: ${ctx.interactions.harm.map((i) => i.label).join(" / ")}` : "",
+    ctx.interactions.punishment.length ? `แรงกดซ้ำ: ${ctx.interactions.punishment.map((i) => i.label).join(" / ")}` : "",
+  ].filter(Boolean).join(" · ") || "ไม่พบแรงปะทะ/แรงส่งเสริมเด่นกับกิ่งวันเกิด";
   const metrics = [
-    ["Day Master", `${dm.han}${dm.element} · ${personality} · ฤดูกาลเดือน ${chart.month.branch.han}${chart.month.branch.th} (${chart.month.solarTerm?.name || "节气"})`],
-    ["เหตุผลแข็ง/อ่อน", `คะแนน ${score}/100 เพราะเดือนเกิดให้พลัง ${ctx.monthEnergy}, ธาตุเด่น ${ctx.dominant.slice(0, 2).map(([e, v]) => `${e} ${v.toFixed(1)}`).join(" / ")}`],
-    ["ธาตุให้คุณ", useful.map((e) => `${elementHan[e]} ${e}`).join(" / ")],
-    ["ธาตุควรเลี่ยง", ctx.unfavorable.map((e) => `${elementHan[e]} ${e}`).join(" / ")],
-    ["财星 เงิน", `${elementHan[wealth]} ${wealth} · พบดาวทรัพย์ ${(ctx.relationCounts["ทรัพย์หลัก"] || 0) + (ctx.relationCounts["รายได้เสริม"] || 0)} จุด`],
-    ["官杀 งาน/สถานะ", `${elementHan[officer]} ${officer} · พบ官杀 ${(ctx.relationCounts["ระเบียบ"] || 0) + (ctx.relationCounts["แรงกดดัน"] || 0)} จุด`],
-    ["食伤 ผลงาน", `${elementHan[output]} ${output} · พบ食伤 ${(ctx.relationCounts["พรสวรรค์"] || 0) + (ctx.relationCounts["นักแสดงออก"] || 0)} จุด`],
-    ["印 ความรู้/ผู้ช่วย", `${elementHan[resource]} ${resource} · พบ印 ${(ctx.relationCounts["ผู้สนับสนุน"] || 0) + (ctx.relationCounts["ญาณ/กลยุทธ์"] || 0)} จุด`],
-    ["Interaction สำคัญ", interactionText],
+    ["ตัวตนหลัก", `${dm.han}${dm.element} · ${personality} · เดือนเกิดอยู่ในช่วง ${chart.month.solarTerm?.th || "ฤดูกาลจีน"}`],
+    ["น้ำหนักดวง", `คะแนน ${score}/100 จากเดือนเกิด ธาตุเด่น และธาตุแฝงใน 4 เสา`],
+    ["ธาตุที่ช่วยปรับสมดุล", useful.map((e) => `${elementHan[e]} ${e}`).join(" / ")],
+    ["ธาตุที่ควรใช้พอดี", ctx.unfavorable.map((e) => `${elementHan[e]} ${e}`).join(" / ")],
+    ["การเงิน", `${elementHan[wealth]} ${wealth} · จุดทรัพย์ ${(ctx.relationCounts["ทรัพย์หลัก"] || 0) + (ctx.relationCounts["รายได้เสริม"] || 0)} จุด ${termNote("สูตร: 财星")}`],
+    ["งาน/สถานะ", `${elementHan[officer]} ${officer} · จุดงาน ${(ctx.relationCounts["ระเบียบ"] || 0) + (ctx.relationCounts["แรงกดดัน"] || 0)} จุด ${termNote("สูตร: 官杀")}`],
+    ["การสื่อสาร/ผลงาน", `${elementHan[output]} ${output} · จุดสื่อสาร ${(ctx.relationCounts["พรสวรรค์"] || 0) + (ctx.relationCounts["นักแสดงออก"] || 0)} จุด ${termNote("สูตร: 食伤")}`],
+    ["ความรู้/ผู้สนับสนุน", `${elementHan[resource]} ${resource} · จุดสนับสนุน ${(ctx.relationCounts["ผู้สนับสนุน"] || 0) + (ctx.relationCounts["ญาณ/กลยุทธ์"] || 0)} จุด ${termNote("สูตร: 印")}`],
+    ["ความสัมพันธ์ของเสา", interactionText],
   ];
   els.matrixGrid.innerHTML = metrics.map(([k, v]) => `<div class="metric"><span>${k}</span><strong>${v}</strong></div>`).join("");
 }
@@ -1206,10 +1210,10 @@ function renderToday(chart, score, date) {
   `).join("");
   els.insightPanel.innerHTML = `
     <span>อ่านเชิงระบบ</span>
-    <strong>${scoreLabel(reading.dayScore)} · คะแนนวันนี้ ${reading.dayScore}/100 จากเสาวัน ${reading.todayPillar.stem.han}${reading.todayPillar.branch.han} เทียบกับดวงเกิด</strong>
-    <small>ฐานคำนวณ: ปี ${chart.year.stem.han}${chart.year.branch.han}, เดือน ${chart.month.stem.han}${chart.month.branch.han} (${chart.month.solarTerm?.name || "节气"}), วัน ${chart.day.stem.han}${chart.day.branch.han}, ยาม ${chart.hour.stem.han}${chart.hour.branch.han}</small>
-    <small>Day Master: ${chart.day.stem.han}${ctx.dm.element} · ดวง ${ctx.strengthLabel} (${score}/100) · ธาตุให้คุณ ${ctx.useful.join(" / ")} · ธาตุควรเลี่ยง ${ctx.unfavorable.join(" / ")}</small>
-    <small>สิบเทพเด่น: ${ctx.relations.slice(0, 4).map((r) => `${r.han}${r.label} ${r.count.toFixed(1)}`).join(" / ")}</small>
+    <strong>${scoreLabel(reading.dayScore)} · คะแนนวันนี้ ${reading.dayScore}/100 จากพลังวันเทียบกับดวงเกิด</strong>
+    <small>ฐานคำนวณ: ปี ${chart.year.stem.han}${chart.year.branch.han}, เดือน ${chart.month.stem.han}${chart.month.branch.han}, วัน ${chart.day.stem.han}${chart.day.branch.han}, ยาม ${chart.hour.stem.han}${chart.hour.branch.han}</small>
+    <small>ตัวตนหลัก: ${chart.day.stem.han}${ctx.dm.element} · น้ำหนักดวง ${score}/100 · ธาตุที่ช่วยปรับสมดุล ${ctx.useful.join(" / ")}</small>
+    <small>จุดเด่นในดวง: ${ctx.relations.slice(0, 4).map((r) => `${r.label} ${r.count.toFixed(1)}`).join(" / ")}</small>
     <div class="calc-breakdown">
       ${reading.components
         .filter((item) => item.label !== "ฐานวัน")
@@ -1237,14 +1241,14 @@ function renderCalendar(chart, score, startDate) {
     const topNegative = day.components.filter((c) => c.points < 0).sort((a, b) => a.points - b.points)[0];
     const tags = [
       dayRelation[1],
-      day.branchMatch ? "ธาตุให้คุณ" : "ธาตุไม่หนุนหลัก",
-      day.combinationMatches.length ? "มี合" : "",
-      day.clashMatches.length ? "มี冲" : "",
-      day.harmMatches.length ? "มี害" : "",
-      day.punishmentMatches.length ? "มี刑" : "",
+      day.branchMatch ? "ธาตุช่วยสมดุล" : "ธาตุไม่หนุนหลัก",
+      day.combinationMatches.length ? "มีแรงส่งเสริม" : "",
+      day.clashMatches.length ? "มีแรงปะทะ" : "",
+      day.harmMatches.length ? "มีจุดรบกวน" : "",
+      day.punishmentMatches.length ? "มีแรงกดซ้ำ" : "",
     ].filter(Boolean);
     const action = `${topPositive ? topPositive.detail : `วันนี้ขึ้นดาว${dayRelation[1]}`} · เหมาะกับ${dayRelation[2]}`;
-    const avoid = topNegative ? topNegative.detail : "ไม่พบ冲/刑/害เด่น แต่ยังควรเลือกงานให้ตรงจังหวะ";
+    const avoid = topNegative ? topNegative.detail : "ไม่พบแรงปะทะเด่น แต่ยังควรเลือกงานให้ตรงจังหวะ";
     if (activeCalendarFilter !== "all" && activeCalendarFilter !== category) return "";
     return `
       <article class="calendar-item ${dayScore >= 82 ? "is-top" : ""}">
