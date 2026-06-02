@@ -791,6 +791,7 @@ function todayReading(chart, score, today = new Date()) {
     summary: `${opening} · ${summary}`,
     advice: personalDailyAdvice(chart, ctx, daily, dayScore),
     insight: `${relationInsight} ${ctx.seasonNote} ภาพรวมดวงคือ ${ctx.strengthLabel} ธาตุเด่นคือ ${ctx.dominant.slice(0, 2).map(([e]) => e).join(" / ")} ธาตุที่ควรเติมคือ ${ctx.useful.join(" / ")} และสิบเทพเด่นคือ ${ctx.relations.slice(0, 2).map((r) => r.label).join(" / ")}`,
+    stemRelation: daily.stemRelation,
     components: daily.components,
   };
 }
@@ -854,10 +855,21 @@ function oracleReading(chart, score, date) {
     love: useful.includes("น้ำ") || useful.includes("ไฟ") ? 8 : 0,
     health: useful.includes("ไม้") || useful.includes("น้ำ") ? 6 : 0,
   };
-  const seed = chart.day.index + chart.month.index + today.dayScore + inferredTopic.length + (analysis?.question.length || 0);
+  const baseSeed = chart.day.index + chart.month.index + today.dayScore;
+  const scoreForTopic = (topicKey, extra = 0) => Math.min(99, Math.max(38, today.dayScore + topicBoost[topicKey] + extra + mod(baseSeed + topicKey.length, 9) - 5));
+  const defaultCards = ["work", "money", "love", "health"].map((topicKey) => {
+    const cardScore = scoreForTopic(topicKey);
+    const cardTopic = personalTopicReading(topicKey, topicMap[topicKey], ctx, today, null, cardScore);
+    return {
+      label: cardTopic.label,
+      title: cardTopic.title,
+      text: cardScore >= 72 ? cardTopic.high : cardTopic.low,
+      score: cardScore,
+    };
+  });
   const intentBoost = analysis?.intent === "timing" ? 4 : analysis?.intent === "decision" ? 2 : analysis?.intent === "advice" ? 3 : 0;
   const urgencyPenalty = analysis?.urgency === "เร่งด่วน" && today.dayScore < 70 ? -7 : 0;
-  const topicScore = Math.min(99, Math.max(38, today.dayScore + topicBoost[inferredTopic] + intentBoost + urgencyPenalty + mod(seed, 9) - 5));
+  const topicScore = scoreForTopic(inferredTopic, intentBoost + urgencyPenalty + (analysis?.question.length ? mod(analysis.question.length, 7) : 0));
   const topic = personalTopicReading(inferredTopic, topicBase, ctx, today, analysis, topicScore);
   const tone = topicScore >= 72 ? topic.high : topic.low;
   const decisive = analysis?.intent === "decision";
@@ -874,16 +886,17 @@ function oracleReading(chart, score, date) {
       ? `คำตอบคือไปต่อแบบทดลองเล็ก ๆ ก่อน ยังไม่ควรลงเต็มแรงหรือผูกมัดยาว จุดระวังคือ ${topGuide.risk}`
       : `คำตอบคือรอก่อนหรือชะลอไว้ จังหวะตอนนี้เหมาะกับการเก็บข้อมูลมากกว่า เพราะ ${ctx.profile.stress}`;
   const questionMode = analysis?.intent === "timing" ? timingAnswer : analysis?.intent === "advice" ? adviceAnswer : decisionAnswer;
+  const todayTenGod = relation(dm, today.todayPillar.stem);
   const answer = question
     ? `คำถาม “${question}” ถูกจัดเป็นเรื่อง${topic.label} / เจตนา${analysis.intent === "decision" ? "ตัดสินใจ" : analysis.intent === "timing" ? "ถามจังหวะเวลา" : analysis.intent === "advice" ? "ขอคำแนะนำ" : "อ่านแนวโน้ม"} / ความเร่ง ${analysis.urgency}: ${decisive ? questionMode : questionMode}`
-    : "พิมพ์คำถามแล้วกด “วิเคราะห์คำถาม” ระบบจะแยกหัวข้อและเจตนาก่อนสร้างคำตอบเฉพาะคำถาม";
+    : `คำพยากรณ์ตั้งต้นจากดวงเกิด: วันนี้ Day Master ${dm.han}${dm.element} เจอวัน ${today.todayPillar.stem.han}${today.todayPillar.branch.han} โดยก้าน ${today.todayPillar.stem.han} เป็นสิบเทพ “${todayTenGod[1]}” (${todayTenGod[2]}) ของดวงนี้ และอ่านร่วมกับธาตุให้คุณ ${useful.join(" / ")} ด้านล่างคือผลตั้งต้นเรื่องงาน เงิน ความรัก และสุขภาพใจ หากมีคำถามเฉพาะให้พิมพ์แล้วกด “วิเคราะห์คำถาม”`;
   const timeline = [
     ["วันนี้", topicScore >= 72 ? "เริ่มจาก action ที่วัดผลได้หนึ่งอย่าง" : "เก็บข้อมูลและลดความคาดหวังที่ไม่จำเป็น"],
     ["3 วัน", useful.includes("ดิน") ? "เห็นความคืบหน้าจากสิ่งที่มีโครงสร้างชัด" : "มีบทสนทนาหรือข้อมูลใหม่ช่วยให้ตัดสินใจง่ายขึ้น"],
     ["7 วัน", topicScore >= 72 ? "มีโอกาสปิดเรื่องหรือได้คำตอบที่รอ ถ้าตามต่อเนื่อง" : "จังหวะจะชัดขึ้นหลังตัดเรื่องรบกวนออก"],
   ];
 
-  return { topic, topicScore, tone, answer, today, useful, timeline, dm, date, ctx, analysis };
+  return { topic, topicScore, tone, answer, today, useful, timeline, dm, date, ctx, analysis, defaultCards };
 }
 
 function getProfile() {
@@ -1286,23 +1299,21 @@ function renderQimen(chart, date, hour) {
 
 function renderOracle(chart, score, date) {
   const reading = oracleReading(chart, score, date);
-  els.oracleTitle.textContent = `${reading.topic.label} · ${reading.topic.title}`;
-  els.oracleSummary.textContent = `อ่านจาก Day Master ${reading.dm.han} ${reading.dm.element} และธาตุให้คุณ ${reading.useful.join(" / ")}`;
+  els.oracleTitle.textContent = reading.analysis ? `${reading.topic.label} · ${reading.topic.title}` : "คำพยากรณ์ตั้งต้น · งาน เงิน ความรัก สุขภาพใจ";
+  els.oracleSummary.textContent = reading.analysis
+    ? `อ่านจาก Day Master ${reading.dm.han} ${reading.dm.element} และธาตุให้คุณ ${reading.useful.join(" / ")}`
+    : `ระบบอ่านตั้งต้นจากดวงเกิด Day Master ${reading.dm.han}${reading.dm.element}, ธาตุให้คุณ ${reading.useful.join(" / ")} และพลังวันนี้`;
   els.oracleScore.textContent = reading.topicScore;
-  els.oracleMeta.textContent = `${date.toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })} · ${reading.topic.label}`;
-  els.oracleReading.innerHTML = `
-    <article class="oracle-main">
-      <h3>${reading.topicScore >= 72 ? "จังหวะเปิด" : "จังหวะตั้งหลัก"}</h3>
-      <p>${reading.tone}</p>
-    </article>
-    <div class="oracle-grid">
+  els.oracleMeta.textContent = `${date.toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })} · ${reading.analysis ? reading.topic.label : "ตั้งต้น"}`;
+  const oracleCards = reading.analysis
+    ? `
       <article class="oracle-card">
-        <span>${reading.analysis ? "ผลวิเคราะห์คำถาม" : "คำตอบจากคำถาม"}</span>
+        <span>ผลวิเคราะห์คำถาม</span>
         <strong>${reading.answer}</strong>
       </article>
       <article class="oracle-card">
         <span>ระบบตรวจพบ</span>
-        <strong>${reading.analysis ? `หัวข้อ ${reading.topic.label} · เจตนา ${reading.analysis.intent} · ความชัดเจน ${reading.analysis.clarity}` : "ยังไม่มีคำถามเฉพาะ ระบบจึงอ่านจากหัวข้อที่เลือกก่อน"}</strong>
+        <strong>หัวข้อ ${reading.topic.label} · เจตนา ${reading.analysis.intent} · ความชัดเจน ${reading.analysis.clarity}</strong>
       </article>
       <article class="oracle-card">
         <span>ควรโฟกัส</span>
@@ -1312,6 +1323,20 @@ function renderOracle(chart, score, date) {
         <span>ควรเลี่ยง</span>
         <strong>${reading.topic.avoid}</strong>
       </article>
+    `
+    : reading.defaultCards.map((card) => `
+      <article class="oracle-card">
+        <span>${card.label} · ${card.score}/100</span>
+        <strong>${card.text}</strong>
+      </article>
+    `).join("");
+  els.oracleReading.innerHTML = `
+    <article class="oracle-main">
+      <h3>${reading.analysis ? (reading.topicScore >= 72 ? "จังหวะเปิด" : "จังหวะตั้งหลัก") : "คำพยากรณ์ตั้งต้น"}</h3>
+      <p>${reading.analysis ? reading.tone : reading.answer}</p>
+    </article>
+    <div class="oracle-grid">
+      ${oracleCards}
       <article class="oracle-card">
         <span>เคล็ดเสริม</span>
         <strong>ใช้เลข ${reading.today.lucky} สี${reading.today.luckyColor} และเริ่มเรื่องสำคัญช่วง ${reading.today.luckyTime}</strong>
