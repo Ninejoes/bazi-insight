@@ -239,6 +239,48 @@ const stemCombinations = {
   "戊": { pair: "癸", element: "ไฟ" },
   "癸": { pair: "戊", element: "ไฟ" },
 };
+const branchHarms = {
+  "子": ["未"],
+  "未": ["子"],
+  "丑": ["午"],
+  "午": ["丑"],
+  "寅": ["巳"],
+  "巳": ["寅", "申"],
+  "卯": ["辰"],
+  "辰": ["卯"],
+  "申": ["亥", "巳"],
+  "亥": ["申"],
+  "酉": ["戌"],
+  "戌": ["酉"],
+};
+const branchPunishments = {
+  "子": ["卯"],
+  "卯": ["子"],
+  "寅": ["巳", "申"],
+  "巳": ["寅", "申"],
+  "申": ["寅", "巳"],
+  "丑": ["戌", "未"],
+  "戌": ["丑", "未"],
+  "未": ["丑", "戌"],
+  "辰": ["辰"],
+  "午": ["午"],
+  "酉": ["酉"],
+  "亥": ["亥"],
+};
+const solarMonthStarts = [
+  { month: 0, day: 6, branch: 1, name: "小寒", th: "เสี่ยวหาน" },
+  { month: 1, day: 4, branch: 2, name: "立春", th: "ลี่ชุน" },
+  { month: 2, day: 6, branch: 3, name: "惊蛰", th: "จิงเจ๋อ" },
+  { month: 3, day: 5, branch: 4, name: "清明", th: "ชิงหมิง" },
+  { month: 4, day: 6, branch: 5, name: "立夏", th: "ลี่เซี่ย" },
+  { month: 5, day: 6, branch: 6, name: "芒种", th: "หมางจ้ง" },
+  { month: 6, day: 7, branch: 7, name: "小暑", th: "เสี่ยวสู่" },
+  { month: 7, day: 8, branch: 8, name: "立秋", th: "ลี่ชิว" },
+  { month: 8, day: 8, branch: 9, name: "白露", th: "ไป๋ลู่" },
+  { month: 9, day: 8, branch: 10, name: "寒露", th: "หานลู่" },
+  { month: 10, day: 7, branch: 11, name: "立冬", th: "ลี่ตง" },
+  { month: 11, day: 7, branch: 0, name: "大雪", th: "ต้าเสวี่ย" },
+];
 let activeCalendarFilter = "all";
 let activeOracleTopic = "overall";
 let analyzedQuestion = "";
@@ -277,19 +319,45 @@ function indexFromStemBranch(stemIndex, branchIndex) {
   return mod(stemIndex, 60);
 }
 
+function isBeforeApproxLichun(date) {
+  return date.getMonth() === 0 || (date.getMonth() === 1 && date.getDate() < 4);
+}
+
+function solarYear(date) {
+  return isBeforeApproxLichun(date) ? date.getFullYear() - 1 : date.getFullYear();
+}
+
+function solarMonthInfo(date) {
+  let selected = solarMonthStarts[solarMonthStarts.length - 1];
+  solarMonthStarts.forEach((item) => {
+    if (date.getMonth() > item.month || (date.getMonth() === item.month && date.getDate() >= item.day)) {
+      selected = item;
+    }
+  });
+  return selected;
+}
+
+function monthStemIndex(yearStemIndex, monthBranchIndex) {
+  const tigerStemByYearStem = [2, 4, 6, 8, 0, 2, 4, 6, 8, 0];
+  const tigerOffset = mod(monthBranchIndex - 2, 12);
+  return mod(tigerStemByYearStem[yearStemIndex] + tigerOffset, 10);
+}
+
 function getChart(date, hour) {
-  const yearIndex = mod(date.getFullYear() - 4, 60);
-  const monthBranch = mod(date.getMonth() + 2, 12);
-  const monthStem = mod(mod(yearIndex, 10) * 2 + date.getMonth() + 1, 10);
+  const baziYear = solarYear(date);
+  const yearIndex = mod(baziYear - 4, 60);
+  const monthInfo = solarMonthInfo(date);
+  const monthBranch = monthInfo.branch;
+  const monthStem = monthStemIndex(mod(yearIndex, 10), monthBranch);
   const dayIndex = mod(daysSinceBase(date), 60);
-  const hourBranch = mod(Math.floor((hour + 1) / 2), 12);
+  const hourBranch = hour === 23 ? 0 : mod(Math.floor((hour + 1) / 2), 12);
   const hourStem = mod((mod(dayIndex, 10) % 5) * 2 + hourBranch, 10);
 
   return {
-    year: pillarFromIndex(yearIndex),
-    month: { stem: stems[monthStem], branch: branches[monthBranch], index: indexFromStemBranch(monthStem, monthBranch) },
-    day: pillarFromIndex(dayIndex),
-    hour: { stem: stems[hourStem], branch: branches[hourBranch], index: indexFromStemBranch(hourStem, hourBranch) },
+    year: { ...pillarFromIndex(yearIndex), source: `ปีจีนเริ่มประมาณ立春 ${baziYear}` },
+    month: { stem: stems[monthStem], branch: branches[monthBranch], index: indexFromStemBranch(monthStem, monthBranch), solarTerm: monthInfo },
+    day: { ...pillarFromIndex(dayIndex), source: "คำนวณจากวงจร 60 วัน" },
+    hour: { stem: stems[hourStem], branch: branches[hourBranch], index: indexFromStemBranch(hourStem, hourBranch), source: "ยามจีน 2 ชั่วโมง" },
   };
 }
 
@@ -310,15 +378,21 @@ function strength(chart) {
   const dayElement = chart.day.stem.element;
   const mother = elementOrder[mod(elementOrder.indexOf(dayElement) - 1, 5)];
   const pillars = [chart.year, chart.month, chart.day, chart.hour];
-  let score = 28;
+  let score = 24;
   pillars.forEach((p) => {
-    if (p.stem.element === dayElement) score += 10;
-    if (p.branch.element === dayElement) score += 12;
-    if (p.stem.element === mother) score += 7;
-    if (p.branch.element === mother) score += 8;
+    if (p.stem.element === dayElement) score += 8;
+    if (p.branch.element === dayElement) score += 10;
+    if (p.stem.element === mother) score += 6;
+    if (p.branch.element === mother) score += 7;
+    p.branch.hidden.forEach((idx, hiddenIndex) => {
+      const hiddenElement = stems[idx].element;
+      const weight = hiddenIndex === 0 ? 3 : 1.5;
+      if (hiddenElement === dayElement) score += weight;
+      if (hiddenElement === mother) score += weight * 0.8;
+    });
   });
-  if (chart.month.branch.element === dayElement) score += 16;
-  if (chart.month.branch.element === mother) score += 10;
+  if (chart.month.branch.element === dayElement) score += 18;
+  if (chart.month.branch.element === mother) score += 12;
   return Math.max(12, Math.min(96, score));
 }
 
@@ -328,6 +402,13 @@ function usefulElements(dayElement, score) {
     return [elementOrder[mod(i + 1, 5)], elementOrder[mod(i + 2, 5)], elementOrder[mod(i + 3, 5)]];
   }
   return [elementOrder[i], elementOrder[mod(i - 1, 5)], elementOrder[mod(i + 1, 5)]];
+}
+
+function unfavorableElements(dayElement, score) {
+  const i = elementOrder.indexOf(dayElement);
+  return score >= 58
+    ? [dayElement, elementOrder[mod(i - 1, 5)]]
+    : [elementOrder[mod(i + 2, 5)], elementOrder[mod(i + 3, 5)]];
 }
 
 function scoreLabel(score) {
@@ -372,21 +453,61 @@ function dominantRelations(chart) {
   return [...counts.values()].sort((a, b) => b.count - a.count);
 }
 
+function elementRole(dayElement) {
+  const i = elementOrder.indexOf(dayElement);
+  return {
+    self: dayElement,
+    output: elementOrder[mod(i + 1, 5)],
+    wealth: elementOrder[mod(i + 2, 5)],
+    officer: elementOrder[mod(i + 3, 5)],
+    resource: elementOrder[mod(i - 1, 5)],
+  };
+}
+
+function countRelations(chart) {
+  const counts = {};
+  [chart.year, chart.month, chart.hour].forEach((p) => {
+    [p.stem, ...p.branch.hidden.map((idx) => stems[idx])].forEach((stem) => {
+      const r = relation(chart.day.stem, stem);
+      counts[r[1]] = (counts[r[1]] || 0) + 1;
+    });
+  });
+  return counts;
+}
+
+function chartInteractions(chart, targetPillar = null) {
+  const target = targetPillar || chart.day;
+  return {
+    clash: branchMatches(chart, target.branch, branchClashes),
+    combine: branchMatches(chart, target.branch, branchCombinations),
+    harm: branchMatches(chart, target.branch, branchHarms),
+    punishment: branchMatches(chart, target.branch, branchPunishments),
+    stemCombine: stemCombinationMatches(chart, target.stem),
+  };
+}
+
 function chartContext(chart, score) {
   const dm = chart.day.stem;
   const useful = usefulElements(dm.element, score);
+  const unfavorable = unfavorableElements(dm.element, score);
   const dominant = dominantElements(chart);
   const relations = dominantRelations(chart);
+  const roles = elementRole(dm.element);
+  const relationCounts = countRelations(chart);
   const weak = [...dominant].reverse().slice(0, 2).map(([e]) => e);
   const monthEnergy = chart.month.branch.element;
   return {
     dm,
     useful,
+    unfavorable,
     dominant,
     relations,
+    roles,
+    relationCounts,
     topRelation: relations[0],
     weak,
     monthEnergy,
+    interactions: chartInteractions(chart),
     seasonNote: seasonalGuides[monthEnergy],
     profile: stemProfiles[dm.element],
     strengthLabel: score >= 70 ? "ดวงมีกำลังมาก" : score >= 48 ? "ดวงค่อนข้างสมดุล" : "ดวงต้องการแรงสนับสนุน",
@@ -427,6 +548,8 @@ function dailyScore(chart, score, today = new Date()) {
   const monthSupport = todayPillar.branch.element === chart.month.branch.element;
   const clashMatches = branchMatches(chart, todayPillar.branch, branchClashes);
   const combinationMatches = branchMatches(chart, todayPillar.branch, branchCombinations);
+  const harmMatches = branchMatches(chart, todayPillar.branch, branchHarms);
+  const punishmentMatches = branchMatches(chart, todayPillar.branch, branchPunishments);
   const stemCombos = stemCombinationMatches(chart, todayPillar.stem);
   const tenGodScore = {
     "เพื่อนร่วมทาง": 2,
@@ -469,6 +592,16 @@ function dailyScore(chart, score, today = new Date()) {
       points: -12,
       detail: `${todayPillar.branch.han} 冲 กับกิ่ง${item.label}${item.branch.han} ต้องประคองเรื่อง${item.label}`,
     })),
+    ...harmMatches.map((item) => ({
+      label: "กิ่ง害",
+      points: -7,
+      detail: `${todayPillar.branch.han} 害 กับกิ่ง${item.label}${item.branch.han} ระวังเรื่องแทรกเงียบ ๆ`,
+    })),
+    ...punishmentMatches.map((item) => ({
+      label: "กิ่ง刑",
+      points: -6,
+      detail: `${todayPillar.branch.han} 刑 กับกิ่ง${item.label}${item.branch.han} ระวังแรงกดดันซ้ำหรือการตัดสินใจแข็ง`,
+    })),
     ...stemCombos.map((item) => ({
       label: "ก้าน合",
       points: 6,
@@ -481,7 +614,7 @@ function dailyScore(chart, score, today = new Date()) {
     },
   ];
   const value = Math.min(99, Math.max(28, components.reduce((sum, item) => sum + item.points, 0)));
-  return { value, todayPillar, stemRelation, branchMatch, stemMatch, sameBranch, monthSupport, clashMatches, combinationMatches, stemCombos, components };
+  return { value, todayPillar, stemRelation, branchMatch, stemMatch, sameBranch, monthSupport, clashMatches, combinationMatches, harmMatches, punishmentMatches, stemCombos, components };
 }
 
 function analyzeQuestionText(rawQuestion) {
@@ -524,91 +657,80 @@ function branchClashText(chart, todayPillar) {
 
 function personalDailyAdvice(chart, ctx, daily, dayScore) {
   const todayPillar = daily.todayPillar;
-  const dayElement = todayPillar.stem.element;
-  const elementGuide = elementDailyGuides[dayElement];
   const relationName = daily.stemRelation[1];
-  const relationGuide = relationActionGuides[relationName] || { focus: "เลือกเรื่องที่สำคัญที่สุดก่อน", risk: "กระจายพลังหลายทาง" };
-  const topRelation = ctx.topRelation?.label || relationName;
-  const topGuide = relationActionGuides[topRelation] || relationGuide;
-  const useful = ctx.useful[0];
-  const usefulGuide = elementDailyGuides[useful];
-  const dmIndex = elementOrder.indexOf(ctx.dm.element);
-  const wealthElement = elementOrder[mod(dmIndex + 2, 5)];
-  const officerElement = elementOrder[mod(dmIndex + 3, 5)];
-  const outputElement = elementOrder[mod(dmIndex + 1, 5)];
-  const resourceElement = elementOrder[mod(dmIndex - 1, 5)];
   const monthRelation = relation(chart.day.stem, chart.month.stem);
   const hourRelation = relation(chart.day.stem, chart.hour.stem);
-  const seed = chart.day.index + chart.month.index + chart.hour.index + todayPillar.index + dayScore;
-  const workLines = [
-    `งานวันนี้อ่านจากเดือนเกิดที่ขึ้น “${monthRelation[1]}” และวันปัจจุบันขึ้น “${relationName}”: เหมาะ${topGuide.focus} แล้วปิดงานด้วยหลักฐานหรือ next step`,
-    `Day Master ${ctx.dm.han}${ctx.dm.element} เจอวัน ${todayPillar.stem.han}${todayPillar.branch.han} ให้ใช้ธาตุ${outputElement}เพื่อสื่อสารงาน และธาตุ${officerElement}เพื่อคุมกรอบเวลา`,
-    `${elementGuide.work} แต่พื้นดวงเด่น “${topRelation}” จึงควรเลือกงานที่ตรงกับบทบาทหลัก ไม่รับงานแทรกพร่ำเพรื่อ`,
-  ];
-  const moneyLines = [
-    `การเงินของดวงนี้ดูที่ธาตุทรัพย์ ${wealthElement}; วันนี้ให้ใช้ธาตุ${useful}ช่วยเปิดทาง จึงเหมาะ${usefulGuide.money}`,
-    `ถ้าจะคุยราคา ให้ยึดโครงสร้างจากธาตุ${officerElement}และข้อมูลจากธาตุ${resourceElement} อย่าตอบราคาจากความเกรงใจ`,
-    `พื้นดวงมีจุดเด่น “${topRelation}” เงินจะเดินเมื่อ${topGuide.focus} และตัดรายจ่ายที่ไม่ตรงเป้าหมาย`,
-  ];
-  const loveLines = [
-    `ความรักอ่านจากกิ่งวันเกิด ${chart.day.branch.han}${chart.day.branch.th}; วันนี้ควรใช้โทนของธาตุ${dayElement}: ${elementGuide.love}`,
-    `ยามเกิดขึ้น “${hourRelation[1]}” ทำให้เรื่องความรู้สึกต้องการจังหวะเฉพาะ วันนี้ให้ถามทีละประเด็นและไม่สรุปแทนอีกฝ่าย`,
-    `ถ้ามีเรื่องค้างใจ ให้ใช้ธาตุ${ctx.useful.includes("น้ำ") ? "น้ำเพื่อฟัง" : `${useful}เพื่อปรับบรรยากาศ`} มากกว่าการบีบคำตอบ`,
-  ];
-  const clashText = branchClashText(chart, todayPillar);
-  const avoidLines = [
-    clashText || `ระวัง ${relationGuide.risk} เพราะวันปัจจุบันขึ้น “${relationName}”`,
-    `เลี่ยงจุดเครียดเดิมของ Day Master ${ctx.dm.element}: ${ctx.profile.stress}`,
-    `อย่าฝืนใช้ธาตุที่ดวงขาด (${ctx.weak.join(" / ")}) แบบเร่งด่วน ให้เติมผ่านสี เวลา คน หรือสภาพแวดล้อมก่อน`,
-  ];
+  const gender = els.gender.value || "ไม่ระบุ";
+  const spouseElement = gender === "หญิง" ? ctx.roles.officer : ctx.roles.wealth;
+  const spouseStar = gender === "หญิง" ? "官杀 คู่ครอง/สถานะความสัมพันธ์" : "财星 คู่สัมพันธ์/แรงดึงดูด";
+  const clashText = branchClashText(chart, todayPillar) || "ไม่พบ冲ตรงกับ 4 เสา แต่ยังต้องดู刑/害และธาตุเสียสมดุล";
+  const harmText = daily.harmMatches.length ? `${daily.harmMatches.map((item) => `${item.label}${item.branch.han}`).join(" / ")} มี害กับกิ่งวันนี้` : "ไม่พบ害เด่น";
+  const punishmentText = daily.punishmentMatches.length ? `${daily.punishmentMatches.map((item) => `${item.label}${item.branch.han}`).join(" / ")} มี刑กับกิ่งวันนี้` : "ไม่พบ刑เด่น";
+  const workScore = (ctx.relationCounts["ระเบียบ"] || 0) + (ctx.relationCounts["แรงกดดัน"] || 0) + (ctx.relationCounts["ผู้สนับสนุน"] || 0) + (ctx.relationCounts["ญาณ/กลยุทธ์"] || 0);
+  const moneyScore = (ctx.relationCounts["ทรัพย์หลัก"] || 0) + (ctx.relationCounts["รายได้เสริม"] || 0);
+  const loveScore = ctx.dominant.find(([element]) => element === spouseElement)?.[1] || 0;
   return [
-    ["งาน", pickBySeed(workLines, seed)],
-    ["เงิน", pickBySeed(moneyLines, seed + chart.year.index)],
-    ["ความรัก", pickBySeed(loveLines, seed + chart.day.branch.hidden[0])],
-    ["ควรเลี่ยง", pickBySeed(avoidLines, seed + chart.month.branch.hidden[0])],
+    [
+      "งาน · 官杀/印",
+      `งานอ่านจาก官杀+印: พบดาวงาน/แรงกดดัน/ผู้สนับสนุนรวม ${workScore} จุด เดือนเกิดขึ้น “${monthRelation[1]}” และวันนี้ ${todayPillar.stem.han} เป็น “${relationName}” (${daily.stemRelation[2]}) จึงควรใช้ธาตุงาน ${ctx.roles.officer} เป็นกรอบและธาตุ印 ${ctx.roles.resource} เป็นข้อมูลรองรับ`,
+    ],
+    [
+      "เงิน · 财星",
+      `เงินอ่านจาก财星: ธาตุทรัพย์ของ Day Master ${ctx.dm.han} คือ ${ctx.roles.wealth} พบดาวทรัพย์ในดวง ${moneyScore} จุด และ${ctx.useful.includes(ctx.roles.wealth) ? "ธาตุทรัพย์อยู่ในธาตุให้คุณ" : "ธาตุทรัพย์ยังไม่ใช่ธาตุให้คุณหลัก"} วันนี้ ${todayPillar.stem.han}${todayPillar.branch.han} จึงควรใช้ตัวเลข/สัญญาเป็นฐานก่อนตัดสินใจ`,
+    ],
+    [
+      "ความรัก · spouse star",
+      `ความรักอ่านจาก${spouseStar}: ธาตุคู่สัมพันธ์คือ ${spouseElement} มีน้ำหนักประมาณ ${loveScore.toFixed(1)} ในดวง กิ่งวันเกิดคือ ${chart.day.branch.han}${chart.day.branch.th} และยามเกิดขึ้น “${hourRelation[1]}” จึงควรคุยจากจังหวะที่อีกฝ่ายตอบได้ ไม่บีบให้สรุปทันที`,
+    ],
+    [
+      "ควรเลี่ยง · 冲/刑/害",
+      `${clashText}; ${harmText}; ${punishmentText}. ธาตุควรเลี่ยงของดวงนี้คือ ${ctx.unfavorable.join(" / ")} โดยเฉพาะเมื่อทำเรื่องใหญ่ในช่วงคะแนนวันต่ำกว่า 70`,
+    ],
   ];
 }
 
 function personalTopicReading(topicKey, base, ctx, today, analysis, topicScore) {
   const topRelation = ctx.topRelation?.label || today.todayPillar.stem.element;
   const topGuide = relationActionGuides[topRelation] || relationActionGuides[today.stemRelation?.[1]] || { focus: base.focus, risk: base.avoid };
-  const usefulGuide = elementDailyGuides[ctx.useful[0]];
-  const dmGuide = elementDailyGuides[ctx.dm.element];
+  const wealthCount = (ctx.relationCounts["ทรัพย์หลัก"] || 0) + (ctx.relationCounts["รายได้เสริม"] || 0);
+  const officerCount = (ctx.relationCounts["ระเบียบ"] || 0) + (ctx.relationCounts["แรงกดดัน"] || 0);
+  const outputCount = (ctx.relationCounts["พรสวรรค์"] || 0) + (ctx.relationCounts["นักแสดงออก"] || 0);
+  const resourceCount = (ctx.relationCounts["ผู้สนับสนุน"] || 0) + (ctx.relationCounts["ญาณ/กลยุทธ์"] || 0);
   const topicLines = {
     overall: {
       title: `${ctx.strengthLabel} · เด่นที่${topRelation}`,
-      high: `${ctx.seasonNote} ช่วงนี้เหมาะจัดลำดับจากเรื่องที่ใช้ ${topGuide.focus} ก่อน เพราะธาตุให้คุณคือ ${ctx.useful.join(" / ")}`,
-      low: `${ctx.seasonNote} ตอนนี้ยังไม่ควรกระจายแรง ให้กลับมาที่พื้นดวง ${ctx.dm.han} ${ctx.dm.element}: ${ctx.profile.remedy}`,
+      high: `พื้นดวงมี ${topRelation} เด่น และธาตุให้คุณคือ ${ctx.useful.join(" / ")} จึงควรเลือกเรื่องที่ใช้ ${topGuide.focus} ก่อน`,
+      low: `คะแนนวันนี้ยังไม่สูงพอ ให้กลับมาจัดสมดุล Day Master ${ctx.dm.han}${ctx.dm.element}; ธาตุควรเลี่ยงคือ ${ctx.unfavorable.join(" / ")}`,
       focus: topGuide.focus,
       avoid: topGuide.risk,
     },
     work: {
-      title: `งานเด่นจาก${topRelation}และธาตุ${ctx.useful[0]}`,
-      high: `${usefulGuide.work} ถ้าจะเปิดงาน ให้ใช้จุดแข็ง ${ctx.profile.nature} และปิดด้วย next step ที่วัดผลได้`,
-      low: `${dmGuide.work} แต่ยังต้องระวัง ${ctx.profile.stress} จึงควรทำทีละขั้น`,
-      focus: `งานที่เหมาะตอนนี้: ${ctx.profile.career}`,
+      title: `งาน · 官杀 ${officerCount} / 印 ${resourceCount} / 食伤 ${outputCount}`,
+      high: `เรื่องงานหนุนเพราะ官杀/印รวม ${officerCount + resourceCount} จุด วันนี้ขึ้น ${today.todayPillar.stem.han}${today.todayPillar.branch.han} เป็น “${today.stemRelation[1]}” เหมาะใช้${today.stemRelation[2]}กับงานที่มีกรอบชัด`,
+      low: `งานควรตั้งหลักก่อน เพราะ官杀/印รวม ${officerCount + resourceCount} จุดและธาตุควรเลี่ยงคือ ${ctx.unfavorable.join(" / ")} ให้ลดงานที่ไม่อยู่ในขอบเขต`,
+      focus: `ใช้ธาตุงาน ${ctx.roles.officer} และธาตุความรู้ ${ctx.roles.resource} เป็นตัวนำ`,
       avoid: topGuide.risk,
     },
     money: {
-      title: `การเงินอ่านจากธาตุให้คุณ ${ctx.useful.join(" / ")}`,
-      high: `${usefulGuide.money} คะแนนเรื่องเงินดีขึ้นเมื่อทำตัวเลขให้ชัดและไม่ปะปนกับอารมณ์`,
-      low: `${dmGuide.money} ให้เน้นปิดรูรั่วก่อนเพิ่มความเสี่ยง`,
-      focus: ctx.useful.includes("ทอง") || ctx.useful.includes("ดิน") ? "ตั้งราคา ทบทวนสัญญา และติดตามยอดค้าง" : "เก็บข้อมูล เปรียบเทียบราคา และชะลอการจ่ายใหญ่",
+      title: `เงิน · 财星 ${wealthCount} จุด`,
+      high: `ธาตุทรัพย์ของ Day Master คือ ${ctx.roles.wealth}; พบ财星 ${wealthCount} จุด และวันนี้คะแนน ${today.dayScore}/100 จึงเหมาะจัดราคา สัญญา หรือสิ่งที่วัดผลได้`,
+      low: `财星 มี ${wealthCount} จุด แต่วันนี้ยังควรประคอง ให้แยกเงินจำเป็น/เงินเสี่ยง และหลีกเลี่ยงธาตุ ${ctx.unfavorable.join(" / ")}`,
+      focus: `ตรวจจุดที่เกี่ยวกับ财星 ${ctx.roles.wealth} และใช้ธาตุให้คุณ ${ctx.useful.join(" / ")}`,
       avoid: ctx.profile.stress,
     },
     love: {
-      title: `ความรักต้องใช้โทน${ctx.useful.includes("น้ำ") ? "รับฟัง" : "ชัดแต่ไม่กดดัน"}`,
-      high: `${usefulGuide.love} พื้นดวงเด่น ${topRelation} จึงควรพูดให้ตรงกับความต้องการจริง`,
-      low: `${dmGuide.love} ถ้าคำถามยังไม่ชัด อย่ารีบสรุปแทนอีกฝ่าย`,
-      focus: ctx.useful.includes("น้ำ") ? "ฟังให้ครบ ถามทีละประเด็น และตอบด้วยน้ำเสียงนิ่ง" : "พูดความต้องการให้ชัด แต่ลดการตัดสินเร็ว",
+      title: `ความรัก · กิ่งวัน ${ctx.dm.han}${ctx.dm.element}`,
+      high: `ความสัมพันธ์อ่านจากกิ่งวันเกิดและ spouse star: เพศ${els.gender.value || "ไม่ระบุ"} ใช้ธาตุคู่สัมพันธ์ ${els.gender.value === "หญิง" ? ctx.roles.officer : ctx.roles.wealth}; วันนี้ให้คะแนน ${today.dayScore}/100`,
+      low: `ถ้าคุยเรื่องสำคัญให้ดู冲/刑/害 ก่อน เพราะ interaction สำคัญคือ ${ctx.interactions.clash.length ? `冲 ${ctx.interactions.clash.map((i) => i.label + i.branch.han).join(" / ")}` : "ไม่พบ冲เด่น"}`,
+      focus: `ใช้ธาตุคู่สัมพันธ์ ${els.gender.value === "หญิง" ? ctx.roles.officer : ctx.roles.wealth} และธาตุให้คุณ ${ctx.useful.join(" / ")}`,
       avoid: topGuide.risk,
     },
     health: {
       title: `สุขภาพใจของ ${ctx.dm.han} ${ctx.dm.element} ต้องการจังหวะที่พอดี`,
-      high: `${ctx.profile.remedy} วันนี้เหมาะเริ่ม routine เล็กที่ทำซ้ำได้จริง`,
-      low: `จุดเครียดหลักคือ ${ctx.profile.stress} ให้ลดข้อมูลเข้าและแยกเรื่องที่ควบคุมได้ก่อน`,
+      high: `ธาตุให้คุณ ${ctx.useful.join(" / ")} ช่วยปรับสมดุล Day Master ${ctx.dm.han}; วันนี้เหมาะทำ routine ที่ลดธาตุควรเลี่ยง ${ctx.unfavorable.join(" / ")}`,
+      low: `จุดเครียดหลักคือ ${ctx.profile.stress}; ให้ลดกิจกรรมที่กระตุ้นธาตุควรเลี่ยง ${ctx.unfavorable.join(" / ")}`,
       focus: ctx.useful.includes("น้ำ") ? "พักใจด้วยความเงียบ ดื่มน้ำ และลดหน้าจอ" : "จัดพื้นที่ ทำ checklist และพักเป็นรอบสั้น",
-      avoid: dmGuide.avoid,
+      avoid: `ธาตุควรเลี่ยง ${ctx.unfavorable.join(" / ")}`,
     },
   };
   const personalized = topicLines[topicKey] || topicLines.overall;
@@ -1007,17 +1129,27 @@ function renderMatrix(chart, score) {
   const dm = chart.day.stem;
   const ctx = chartContext(chart, score);
   const useful = usefulElements(dm.element, score);
-  const wealth = elementOrder[mod(elementOrder.indexOf(dm.element) + 2, 5)];
-  const officer = elementOrder[mod(elementOrder.indexOf(dm.element) + 3, 5)];
-  const output = elementOrder[mod(elementOrder.indexOf(dm.element) + 1, 5)];
+  const wealth = ctx.roles.wealth;
+  const officer = ctx.roles.officer;
+  const output = ctx.roles.output;
+  const resource = ctx.roles.resource;
   const personality = score >= 70 ? "พลังสูง ชอบนำเกม" : score >= 45 ? "สมดุล ปรับตัวได้" : "ละเอียดอ่อน ต้องการแรงหนุน";
+  const interactionText = [
+    ctx.interactions.clash.length ? `冲: ${ctx.interactions.clash.map((i) => `${i.label}${i.branch.han}`).join(" / ")}` : "",
+    ctx.interactions.combine.length ? `合: ${ctx.interactions.combine.map((i) => `${i.label}${i.branch.han}`).join(" / ")}` : "",
+    ctx.interactions.harm.length ? `害: ${ctx.interactions.harm.map((i) => `${i.label}${i.branch.han}`).join(" / ")}` : "",
+    ctx.interactions.punishment.length ? `刑: ${ctx.interactions.punishment.map((i) => `${i.label}${i.branch.han}`).join(" / ")}` : "",
+  ].filter(Boolean).join(" · ") || "ไม่พบ冲/合/刑/害เด่นกับกิ่งวันเกิด";
   const metrics = [
-    ["บุคลิกภาพหลัก", `${personality} · ${ctx.profile.nature}`],
+    ["Day Master", `${dm.han}${dm.element} · ${personality} · ฤดูกาลเดือน ${chart.month.branch.han}${chart.month.branch.th} (${chart.month.solarTerm?.name || "节气"})`],
+    ["เหตุผลแข็ง/อ่อน", `คะแนน ${score}/100 เพราะเดือนเกิดให้พลัง ${ctx.monthEnergy}, ธาตุเด่น ${ctx.dominant.slice(0, 2).map(([e, v]) => `${e} ${v.toFixed(1)}`).join(" / ")}`],
     ["ธาตุให้คุณ", useful.map((e) => `${elementHan[e]} ${e}`).join(" / ")],
-    ["ธาตุโชคลาภ", `${elementHan[wealth]} ${wealth}`],
-    ["ธาตุงานและวินัย", `${elementHan[officer]} ${officer}`],
-    ["งานที่ส่งเสริม", ctx.profile.career],
-    ["คำแนะนำ", score >= 58 ? `${ctx.profile.remedy} ใช้พลังให้เกิดผลงานจริง ลดการฝืนควบคุมทุกอย่าง` : `${ctx.profile.remedy} เพิ่มระบบสนับสนุน เลือกงานที่ค่อย ๆ สะสมแรงได้`],
+    ["ธาตุควรเลี่ยง", ctx.unfavorable.map((e) => `${elementHan[e]} ${e}`).join(" / ")],
+    ["财星 เงิน", `${elementHan[wealth]} ${wealth} · พบดาวทรัพย์ ${(ctx.relationCounts["ทรัพย์หลัก"] || 0) + (ctx.relationCounts["รายได้เสริม"] || 0)} จุด`],
+    ["官杀 งาน/สถานะ", `${elementHan[officer]} ${officer} · พบ官杀 ${(ctx.relationCounts["ระเบียบ"] || 0) + (ctx.relationCounts["แรงกดดัน"] || 0)} จุด`],
+    ["食伤 ผลงาน", `${elementHan[output]} ${output} · พบ食伤 ${(ctx.relationCounts["พรสวรรค์"] || 0) + (ctx.relationCounts["นักแสดงออก"] || 0)} จุด`],
+    ["印 ความรู้/ผู้ช่วย", `${elementHan[resource]} ${resource} · พบ印 ${(ctx.relationCounts["ผู้สนับสนุน"] || 0) + (ctx.relationCounts["ญาณ/กลยุทธ์"] || 0)} จุด`],
+    ["Interaction สำคัญ", interactionText],
   ];
   els.matrixGrid.innerHTML = metrics.map(([k, v]) => `<div class="metric"><span>${k}</span><strong>${v}</strong></div>`).join("");
 }
@@ -1061,8 +1193,10 @@ function renderToday(chart, score, date) {
   `).join("");
   els.insightPanel.innerHTML = `
     <span>อ่านเชิงระบบ</span>
-    <strong>${scoreLabel(reading.dayScore)} · ${reading.insight}</strong>
-    <small>ฐานคำนวณ: Day Master ${chart.day.stem.han}${ctx.dm.element}, เดือนเกิด ${chart.month.stem.han}${chart.month.branch.han}, ยามเกิด ${chart.hour.stem.han}${chart.hour.branch.han}, สิบเทพเด่น ${ctx.relations.slice(0, 3).map((r) => r.label).join(" / ")}</small>
+    <strong>${scoreLabel(reading.dayScore)} · คะแนนวันนี้ ${reading.dayScore}/100 จากเสาวัน ${reading.todayPillar.stem.han}${reading.todayPillar.branch.han} เทียบกับดวงเกิด</strong>
+    <small>ฐานคำนวณ: ปี ${chart.year.stem.han}${chart.year.branch.han}, เดือน ${chart.month.stem.han}${chart.month.branch.han} (${chart.month.solarTerm?.name || "节气"}), วัน ${chart.day.stem.han}${chart.day.branch.han}, ยาม ${chart.hour.stem.han}${chart.hour.branch.han}</small>
+    <small>Day Master: ${chart.day.stem.han}${ctx.dm.element} · ดวง ${ctx.strengthLabel} (${score}/100) · ธาตุให้คุณ ${ctx.useful.join(" / ")} · ธาตุควรเลี่ยง ${ctx.unfavorable.join(" / ")}</small>
+    <small>สิบเทพเด่น: ${ctx.relations.slice(0, 4).map((r) => `${r.han}${r.label} ${r.count.toFixed(1)}`).join(" / ")}</small>
     <div class="calc-breakdown">
       ${reading.components
         .filter((item) => item.label !== "ฐานวัน")
@@ -1078,23 +1212,26 @@ function renderToday(chart, score, date) {
 }
 
 function renderCalendar(chart, score, startDate) {
-  const ctx = chartContext(chart, score);
-  const useful = ctx.useful;
   const items = Array.from({ length: 14 }, (_, i) => {
     const date = new Date(startDate);
     date.setDate(startDate.getDate() + i);
-    const dayPillar = pillarFromIndex(daysSinceBase(date));
-    const match = useful.includes(dayPillar.stem.element) + useful.includes(dayPillar.branch.element);
-    const dayRelation = relation(chart.day.stem, dayPillar.stem);
-    const dayScore = Math.min(98, 48 + match * 17 + (dayPillar.branch.element === chart.day.stem.element ? 7 : 0) + (dayPillar.branch.element === chart.month.branch.element ? 5 : 0) + (i % 4) * 2);
+    const day = dailyScore(chart, score, date);
+    const dayPillar = day.todayPillar;
+    const dayRelation = day.stemRelation;
+    const dayScore = day.value;
     const category = dayScore >= 82 ? "work" : dayScore >= 70 ? "love" : "rest";
-    const tags = calendarCategories[category];
-    const action = category === "work"
-      ? `เหมาะเปิดตัว นัดคุยดีล หรือตัดสินใจเรื่องงาน เพราะวันนี้ขึ้นดาว${dayRelation[1]}`
-      : category === "love"
-        ? `เหมาะเจรจา นัดพบ หรือปรับความเข้าใจ ใช้โทนนุ่มแต่ชัด`
-        : `เหมาะเก็บรายละเอียด พักแรง เคลียร์พื้นที่ และแก้เคล็ดด้วยสี${colorByElement[useful[0]]}`;
-    const avoid = dayScore >= 82 ? "เลี่ยงรับปากเกินกำลัง" : dayScore >= 70 ? "เลี่ยงพูดตอนอารมณ์ไว" : "เลี่ยงเปิดเรื่องใหม่ใหญ่ ๆ";
+    const topPositive = day.components.filter((c) => c.points > 0 && c.label !== "ฐานวัน").sort((a, b) => b.points - a.points)[0];
+    const topNegative = day.components.filter((c) => c.points < 0).sort((a, b) => a.points - b.points)[0];
+    const tags = [
+      dayRelation[1],
+      day.branchMatch ? "ธาตุให้คุณ" : "ธาตุไม่หนุนหลัก",
+      day.combinationMatches.length ? "มี合" : "",
+      day.clashMatches.length ? "มี冲" : "",
+      day.harmMatches.length ? "มี害" : "",
+      day.punishmentMatches.length ? "มี刑" : "",
+    ].filter(Boolean);
+    const action = `${topPositive ? topPositive.detail : `วันนี้ขึ้นดาว${dayRelation[1]}`} · เหมาะกับ${dayRelation[2]}`;
+    const avoid = topNegative ? topNegative.detail : "ไม่พบ冲/刑/害เด่น แต่ยังควรเลือกงานให้ตรงจังหวะ";
     if (activeCalendarFilter !== "all" && activeCalendarFilter !== category) return "";
     return `
       <article class="calendar-item ${dayScore >= 82 ? "is-top" : ""}">
@@ -1137,12 +1274,12 @@ function renderQimen(chart, date, hour) {
   els.qimenBoard.innerHTML = cells.join("");
   els.qimenBestScore.textContent = best.score;
   els.qimenTitle.textContent = `${best.direction} · ${best.door}门`;
-  els.qimenSummary.textContent = `ทิศนี้ให้พลัง ${elementHan[best.element]} ${best.element} เข้ากับธาตุให้คุณของดวง ${ctx.dm.han} ${ctx.dm.element} เหมาะใช้เริ่มเรื่องสำคัญ`;
-  els.qimenNote.innerHTML = `<strong>ทิศแนะนำตอนนี้: ${best.direction}</strong><br>หันหน้าไปทางนี้ 3-9 นาที ก่อนโทรหาลูกค้า ส่งข้อความสำคัญ ไลฟ์ขายของ หรือเริ่มเดินทาง แล้วตั้งเจตนาให้ชัดหนึ่งเรื่อง`;
+  els.qimenSummary.textContent = `โหมดนี้เป็นฉีเหมินเบื้องต้น/จำลองจากเวลา ธาตุให้คุณ และทิศ ไม่ใช่การตั้งกระดานฉีเหมินเต็มสูตรแบบซินแส`;
+  els.qimenNote.innerHTML = `<strong>ทิศแนะนำแบบจำลอง: ${best.direction}</strong><br>ระบบให้คะแนนจากธาตุ ${elementHan[best.element]} ${best.element}, ยามเกิด และธาตุให้คุณ ${ctx.useful.join(" / ")} หากต้องการความแม่นระดับซินแสต้องใช้การตั้งกระดานฉีเหมินเต็มสูตร`;
   els.qimenUse.innerHTML = [
-    ["งาน/ขาย", "เริ่มโทรหรือส่งข้อเสนอจากทิศนี้ ใช้ข้อความสั้น ชัด และปิดด้วย next step"],
-    ["ความรัก", "เหมาะเริ่มบทสนทนาด้วยคำถามอ่อนโยน เลี่ยงการทวงคำตอบทันที"],
-    ["การเงิน", "ตรวจตัวเลขก่อนโอนหรือเซ็น ถ้าคะแนนทิศเกิน 80 ใช้ยื่นราคาได้"],
+    ["งาน/ขาย", `ใช้เป็นตัวช่วยเลือกจังหวะเริ่มต้นเท่านั้น ถ้าคะแนน ${best.score} สูง ให้เริ่มเรื่องที่ต้องใช้ธาตุ${best.element}`],
+    ["ความรัก", "ใช้เพื่อเลือกบรรยากาศและทิศนั่งคุย ไม่ใช่คำตัดสินความสัมพันธ์"],
+    ["การเงิน", "ใช้ประกอบการวางแผน ไม่แทนการตรวจตัวเลข สัญญา หรือความเสี่ยงจริง"],
     ["แก้เคล็ด", `วางของสี${colorByElement[best.element]}หรือเปิดไฟเล็ก ๆ ทางทิศ${best.direction}`],
   ].map(([title, text]) => `<article class="use-card"><span>${title}</span><strong>${text}</strong></article>`).join("");
 }
@@ -1204,12 +1341,12 @@ function update() {
   const dm = chart.day.stem;
   const ctx = chartContext(chart, score);
 
-  els.profileStatus.textContent = `${els.name.value.trim() || "ผู้มาเยือน"} · ${ctx.strengthLabel} · Day Master ${dm.han} ${dm.element} · ธาตุให้คุณ ${ctx.useful.join(" / ")}`;
-  els.birthLine.textContent = `${els.gender.value} · ${date.toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })} ${els.time.value}`;
+  els.profileStatus.textContent = `${els.name.value.trim() || "ผู้มาเยือน"} · ${ctx.strengthLabel} · Day Master ${dm.han} ${dm.element} · เดือนจีน ${chart.month.branch.han}${chart.month.branch.th} (${chart.month.solarTerm?.name || "节气"}) · ธาตุให้คุณ ${ctx.useful.join(" / ")}`;
+  els.birthLine.textContent = `${els.gender.value} · ${date.toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })} ${els.time.value} · 4 เสา ${chart.year.stem.han}${chart.year.branch.han}/${chart.month.stem.han}${chart.month.branch.han}/${chart.day.stem.han}${chart.day.branch.han}/${chart.hour.stem.han}${chart.hour.branch.han}`;
   els.dayMasterTitle.textContent = `${dm.element}${dm.polarity === "+" ? "หยาง" : "หยิน"} (${dm.th} ${dm.han})`;
   els.dayMasterQuote.textContent = `"${dm.quote}"`;
   els.strengthBar.style.width = `${score}%`;
-  els.strengthText.textContent = `ความแข็งแรงโดยประมาณ ${score}/100 จากฤดูกาล ก้านฟ้า กิ่งดิน และธาตุแฝง`;
+  els.strengthText.textContent = `ความแข็งแรง ${score}/100 จากเดือนจีน ${chart.month.solarTerm?.name || "节气"}, ก้านฟ้า, กิ่งดิน และธาตุแฝง`;
 
   renderPillars(chart);
   renderToday(chart, score, date);
