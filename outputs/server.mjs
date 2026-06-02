@@ -17,6 +17,8 @@ const mime = {
   ".mjs": "text/javascript; charset=utf-8",
   ".png": "image/png",
   ".json": "application/json; charset=utf-8",
+  ".xml": "application/xml; charset=utf-8",
+  ".txt": "text/plain; charset=utf-8",
 };
 
 async function readJson(file, fallback) {
