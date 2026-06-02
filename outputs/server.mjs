@@ -34,7 +34,6 @@ async function saveLead(payload) {
     const clean = {
       id: String(payload.id || randomUUID()).slice(0, 80),
       name: String(payload.name || "").slice(0, 120),
-      email: String(payload.email || "").toLowerCase().slice(0, 180),
       gender: String(payload.gender || "").slice(0, 40),
       birth_date: String(payload.birthDate || "").slice(0, 30),
       birth_time: String(payload.birthTime || "").slice(0, 20),
@@ -43,7 +42,7 @@ async function saveLead(payload) {
       updated_at: new Date().toISOString(),
       created_at: new Date().toISOString(),
     };
-    const response = await fetch(`${supabaseUrl.replace(/\/$/, "")}/rest/v1/leads`, {
+    const response = await fetch(`${supabaseUrl.replace(/\/$/, "")}/rest/v1/leads?on_conflict=id`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -63,7 +62,6 @@ async function saveLead(payload) {
   const clean = {
     id: String(payload.id || randomUUID()),
     name: String(payload.name || "").slice(0, 120),
-    email: String(payload.email || "").toLowerCase().slice(0, 180),
     gender: String(payload.gender || "").slice(0, 40),
     birthDate: String(payload.birthDate || "").slice(0, 30),
     birthTime: String(payload.birthTime || "").slice(0, 20),
@@ -73,7 +71,7 @@ async function saveLead(payload) {
     updatedAt: now,
   };
 
-  const index = leads.findIndex((lead) => lead.email === clean.email || lead.id === clean.id);
+  const index = leads.findIndex((lead) => lead.id === clean.id);
   if (index >= 0) {
     leads[index] = { ...leads[index], ...clean, createdAt: leads[index].createdAt || clean.createdAt };
   } else {
@@ -100,10 +98,6 @@ createServer(async (req, res) => {
 
     if (url.pathname === "/api/leads" && req.method === "POST") {
       const body = JSON.parse(await readBody(req) || "{}");
-      if (!body.email || !body.email.includes("@")) {
-        send(res, 400, JSON.stringify({ ok: false, error: "valid email is required" }));
-        return;
-      }
       const lead = await saveLead(body);
       send(res, 200, JSON.stringify({ ok: true, lead }));
       return;

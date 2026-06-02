@@ -5,7 +5,6 @@ function sanitizeLead(payload = {}) {
   return {
     id: String(payload.id || randomUUID()).slice(0, 80),
     name: String(payload.name || "").slice(0, 120),
-    email: String(payload.email || "").toLowerCase().slice(0, 180),
     gender: String(payload.gender || "").slice(0, 40),
     birth_date: String(payload.birthDate || payload.birth_date || "").slice(0, 30),
     birth_time: String(payload.birthTime || payload.birth_time || "").slice(0, 20),
@@ -22,7 +21,7 @@ async function saveToSupabase(lead) {
     return { configured: false };
   }
 
-  const endpoint = `${url.replace(/\/$/, "")}/rest/v1/leads?on_conflict=email`;
+  const endpoint = `${url.replace(/\/$/, "")}/rest/v1/leads?on_conflict=id`;
   const response = await fetch(endpoint, {
     method: "POST",
     headers: {
@@ -59,11 +58,6 @@ export default async function handler(req, res) {
 
   try {
     const lead = sanitizeLead(req.body);
-    if (!lead.email || !lead.email.includes("@")) {
-      res.status(400).json({ ok: false, error: "Valid email is required" });
-      return;
-    }
-
     const result = await saveToSupabase(lead);
     res.status(200).json({ ok: true, stored: result.configured ? "supabase" : "browser-fallback", lead });
   } catch (error) {

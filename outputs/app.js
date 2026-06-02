@@ -42,12 +42,9 @@ const els = {
   baziTabs: document.querySelector("#baziTabs"),
   profileStatus: document.querySelector("#profileStatus"),
   name: document.querySelector("#name"),
-  email: document.querySelector("#email"),
   gender: document.querySelector("#gender"),
   date: document.querySelector("#date"),
   time: document.querySelector("#time"),
-  privacyConsent: document.querySelector("#privacyConsent"),
-  consentLine: document.querySelector(".consent-line"),
   predictBtn: document.querySelector("#predictBtn"),
   predictionStatus: document.querySelector("#predictionStatus"),
   birthLine: document.querySelector("#birthLine"),
@@ -443,7 +440,6 @@ function getProfile() {
   return {
     id: currentProfile?.id || (crypto.randomUUID ? crypto.randomUUID() : `lead-${Date.now()}-${Math.random().toString(16).slice(2)}`),
     name: els.name.value.trim() || "ผู้มาเยือน",
-    email: els.email.value.trim().toLowerCase(),
     gender: els.gender.value,
     birthDate: els.date.value,
     birthTime: els.time.value,
@@ -482,7 +478,7 @@ async function saveLead(reason = "update") {
 
 function renderLockedPreview(message = "กรอกข้อมูลให้ครบ แล้วกด “คำนายดวง” เพื่อแสดงผล") {
   const today = new Date();
-  els.profileStatus.textContent = "ยังไม่ได้ประมวลผลดวง · กรอกชื่อ อีเมล เพศ วันเกิด และเวลาเกิด แล้วกดคำนายดวง";
+  els.profileStatus.textContent = "ยังไม่ได้ประมวลผลดวง · กรอกชื่อ เพศ วันเกิด และเวลาเกิด แล้วกดคำนายดวง";
   els.birthLine.textContent = "รอข้อมูลเกิด";
   els.todayTitle.textContent = "พร้อมเปิดคำทำนายส่วนตัว";
   els.todaySummary.textContent = "ด้านล่างคือโครงผลวิเคราะห์ที่จะได้รับ หลังกรอกข้อมูลและกดคำนาย ระบบจะแปลงวันเวลาเกิดเป็นดวงปาจื้อและอ่านร่วมกับพลังของวันนี้";
@@ -621,18 +617,12 @@ function unlockResults() {
 
 async function requestPrediction(reason = "prediction-request") {
   const name = els.name.value.trim();
-  const email = els.email.value.trim();
   const gender = els.gender.value;
   const date = els.date.value;
   const time = els.time.value;
   if (!name || name === "ผู้มาเยือน") {
     els.predictionStatus.textContent = "กรุณากรอกชื่อก่อนคำนาย";
     els.name.focus();
-    return;
-  }
-  if (!email || !email.includes("@")) {
-    els.predictionStatus.textContent = "กรุณากรอกอีเมลให้ถูกต้องก่อนคำนาย";
-    els.email.focus();
     return;
   }
   if (!gender) {
@@ -648,12 +638,6 @@ async function requestPrediction(reason = "prediction-request") {
   if (!time) {
     els.predictionStatus.textContent = "กรุณาเลือกเวลาเกิดก่อนคำนาย";
     els.time.focus();
-    return;
-  }
-  if (!els.privacyConsent.checked) {
-    els.predictionStatus.textContent = "เลื่อนลงไปท้ายหน้าแล้วติ๊กข้อความรับทราบเล็ก ๆ ก่อน ระบบจึงจะเปิดคำทำนายให้";
-    els.consentLine.classList.add("is-attention");
-    els.consentLine.scrollIntoView({ behavior: "smooth", block: "center" });
     return;
   }
   unlockResults();
@@ -982,29 +966,20 @@ els.oracleQuestion.addEventListener("keydown", (event) => {
 
 document.querySelector("#resetBtn").addEventListener("click", () => {
   els.name.value = "";
-  els.email.value = "";
   els.gender.value = "";
   els.date.value = "";
   els.time.value = "";
-  els.privacyConsent.checked = false;
-  els.consentLine.classList.remove("is-attention");
   lockResults("ตั้งดวงใหม่แล้ว กรอกข้อมูลให้ครบก่อนคำนาย");
 });
 
 els.predictBtn.addEventListener("click", () => requestPrediction("prediction-button"));
 
-[els.name, els.email, els.gender, els.date, els.time].forEach((el) => {
+[els.name, els.gender, els.date, els.time].forEach((el) => {
   el.addEventListener("input", () => {
     if (predictionMade) {
       lockResults("ข้อมูลเปลี่ยนแล้ว กด “คำนายดวง” อีกครั้งเพื่อแสดงผลใหม่");
     }
   });
-});
-
-els.privacyConsent.addEventListener("change", () => {
-  if (els.privacyConsent.checked) {
-    els.consentLine.classList.remove("is-attention");
-  }
 });
 
 els.oracleQuestion.addEventListener("input", () => {

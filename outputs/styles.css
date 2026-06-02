@@ -215,51 +215,6 @@ h1 {
   line-height: 1.45;
 }
 
-.privacy-footer {
-  margin: 18px 0 10px;
-  border-top: 1px solid rgba(16, 61, 39, 0.14);
-  padding-top: 12px;
-  color: #66736d;
-  font-size: 12px;
-  line-height: 1.55;
-}
-
-.privacy-footer p {
-  margin: 6px 0 0 27px;
-  color: #7b8580;
-}
-
-.consent-line {
-  display: grid;
-  grid-template-columns: 18px minmax(0, 1fr);
-  gap: 8px;
-  align-items: start;
-  width: fit-content;
-  max-width: 100%;
-  color: #66736d;
-  font-size: 12px;
-  line-height: 1.55;
-}
-
-.consent-line input {
-  width: 16px;
-  height: 16px;
-  margin: 2px 0 0;
-  accent-color: var(--green);
-}
-
-.consent-line span {
-  overflow-wrap: anywhere;
-}
-
-.consent-line.is-attention {
-  border-radius: 8px;
-  padding: 8px 10px;
-  color: #4d3d21;
-  background: rgba(255, 250, 240, 0.72);
-  box-shadow: inset 0 0 0 1px rgba(200, 150, 69, 0.42);
-}
-
 .field label {
   display: block;
   margin-bottom: 5px;

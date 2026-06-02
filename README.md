@@ -18,7 +18,6 @@ npm run dev
 create table if not exists public.leads (
   id text primary key,
   name text,
-  email text unique not null,
   gender text,
   birth_date text,
   birth_time text,
