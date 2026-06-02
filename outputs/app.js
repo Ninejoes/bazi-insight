@@ -148,6 +148,57 @@ const relationProfiles = {
   "ญาณ/กลยุทธ์": "เหมาะศึกษา วางแผน อ่านสัญญาณ และใช้ข้อมูลเงียบ ๆ ก่อนขยับ",
   "ผู้สนับสนุน": "มีพลังผู้ช่วย ความรู้ และคำแนะนำจากคนมีประสบการณ์",
 };
+const elementDailyGuides = {
+  "ไม้": {
+    work: "ต่อยอดงานที่ต้องคุยกับคนหรือวางโครงใหม่ แบ่งงานเป็นลำดับแล้วเริ่มจากจุดที่โตต่อได้",
+    money: "เงินเด่นจากการต่อยอดลูกค้าเดิม แพ็กเกจใหม่ หรือไอเดียที่ยังขยายได้",
+    love: "ความสัมพันธ์ดีขึ้นเมื่อพูดเรื่องอนาคตแบบค่อยเป็นค่อยไป ไม่กดให้อีกฝ่ายตอบทันที",
+    avoid: "เปลี่ยนแผนหลายรอบจนคนตามไม่ทัน",
+  },
+  "ไฟ": {
+    work: "ใช้กับงานพรีเซนต์ ไลฟ์ ขาย อธิบาย หรือปล่อยคอนเทนต์ที่ต้องการให้คนเห็น",
+    money: "เงินมาจากการทำให้ข้อเสนอชัดและน่าสนใจ ระวังซื้อเพราะอารมณ์ตอนเห็นของ",
+    love: "พูดตรงได้แต่ต้องเหลือพื้นที่ให้อีกฝ่ายตอบ ความอบอุ่นสำคัญกว่าการชนะเหตุผล",
+    avoid: "เร่งทุกอย่างพร้อมกันจนพลังตกก่อนถึงงานสำคัญ",
+  },
+  "ดิน": {
+    work: "เหมาะเก็บรายละเอียด จัดระบบ สรุป requirement และทำเรื่องซับซ้อนให้อยู่ใน checklist",
+    money: "ดีต่อการปิดรูรั่ว ตรวจบิล ตั้งงบ หรือคุยเรื่องราคาแบบมีหลักฐาน",
+    love: "แสดงความใส่ใจผ่านการช่วยจัดการเรื่องจริงมากกว่าพูดหวานอย่างเดียว",
+    avoid: "แบกรับปัญหาคนอื่นจนเรื่องตัวเองค้าง",
+  },
+  "ทอง": {
+    work: "เหมาะตัดสินใจ ตรวจคุณภาพ เซ็นเอกสาร ตั้งมาตรฐาน หรือเจรจาเงื่อนไขให้คม",
+    money: "ใช้กับการตั้งราคา ทวงยอดค้าง ตรวจสัญญา และตัดรายจ่ายที่ไม่จำเป็น",
+    love: "ความชัดเจนช่วยได้ แต่ลดโทนคำพูดแข็งเพื่อไม่ให้อีกฝ่ายตั้งการ์ด",
+    avoid: "รอให้ทุกอย่างสมบูรณ์ก่อนเริ่มจนพลาดจังหวะ",
+  },
+  "น้ำ": {
+    work: "เหมาะวิจัย อ่านข้อมูล วางกลยุทธ์ คุยหลังบ้าน หรือเตรียมคำตอบก่อนเจรจา",
+    money: "เงินเด่นจากข้อมูล การเปรียบเทียบราคา การอ่านแนวโน้ม และการไม่รีบโอน",
+    love: "ฟังให้มากขึ้น ถามให้ลึกขึ้น แล้วค่อยสรุป จะลดการเข้าใจผิดได้ดี",
+    avoid: "คิดวนหรือรับข้อมูลมากเกินไปจนไม่ลงมือ",
+  },
+};
+const relationActionGuides = {
+  "เพื่อนร่วมทาง": { focus: "ยืนจุดยืนของตัวเอง", risk: "ดื้อหรือถือความเห็นตัวเองเกินไป" },
+  "แรงแข่งขัน": { focus: "ใช้แรงกดจากคนรอบตัวเป็นวินัย", risk: "เปรียบเทียบจนตัดสินใจพลาด" },
+  "พรสวรรค์": { focus: "ปล่อยผลงาน ทดลอง และสร้างประโยชน์ให้คนเห็น", risk: "เพลินกับไอเดียจนไม่สรุปผล" },
+  "นักแสดงออก": { focus: "สื่อสารให้ชัด ขายไอเดีย หรือทำคอนเทนต์", risk: "พูดตรงเกินจนคนรับสารปิดใจ" },
+  "รายได้เสริม": { focus: "มองหาโอกาสเงินจากช่องทางใหม่", risk: "ขยายเร็วเกินก่อนพิสูจน์ตัวเลข" },
+  "ทรัพย์หลัก": { focus: "จัดการเงิน สัญญา ราคา และสิ่งที่วัดผลได้", risk: "ยึดผลประโยชน์จนความสัมพันธ์ตึง" },
+  "แรงกดดัน": { focus: "รับโจทย์ท้าทายแบบมีแผน", risk: "ฝืนรับภาระเพื่อพิสูจน์ตัวเอง" },
+  "ระเบียบ": { focus: "ทำเรื่องทางการ เอกสาร กติกา และความน่าเชื่อถือ", risk: "เคร่งกฎจนขยับช้า" },
+  "ญาณ/กลยุทธ์": { focus: "อ่านข้อมูลลึก วางแผน และใช้ความรู้เฉพาะทาง", risk: "เก็บตัววิเคราะห์นานเกินไป" },
+  "ผู้สนับสนุน": { focus: "ขอคำแนะนำ เรียนรู้ หรือใช้ผู้ช่วยให้ถูกคน", risk: "รอคนช่วยจนไม่เริ่มเอง" },
+};
+const seasonalGuides = {
+  "ไม้": "เดือนเกิดให้พลังการเติบโตและการเริ่มใหม่ ดวงจะตอบสนองดีเมื่อมีแผนระยะยาว",
+  "ไฟ": "เดือนเกิดให้พลังการมองเห็นและชื่อเสียง ดวงจะเด่นเมื่อกล้าแสดงผลงาน",
+  "ดิน": "เดือนเกิดให้พลังโครงสร้างและความรับผิดชอบ ดวงจะดีเมื่อจัดระบบก่อนเร่งผล",
+  "ทอง": "เดือนเกิดให้พลังมาตรฐานและการตัดสินใจ ดวงจะชัดเมื่อมีเกณฑ์วัดผล",
+  "น้ำ": "เดือนเกิดให้พลังข้อมูลและความยืดหยุ่น ดวงจะเดินดีเมื่อฟังสัญญาณรอบตัว",
+};
 let activeCalendarFilter = "all";
 let activeOracleTopic = "overall";
 let analyzedQuestion = "";
@@ -258,18 +309,45 @@ function dominantElements(chart) {
   return Object.entries(counts).sort((a, b) => b[1] - a[1]);
 }
 
+function dominantRelations(chart) {
+  const counts = new Map();
+  [chart.year, chart.month, chart.hour].forEach((p) => {
+    const direct = relation(chart.day.stem, p.stem);
+    counts.set(direct[1], {
+      han: direct[0],
+      label: direct[1],
+      meaning: direct[2],
+      count: (counts.get(direct[1])?.count || 0) + 1.35,
+    });
+    p.branch.hidden.forEach((idx) => {
+      const hidden = relation(chart.day.stem, stems[idx]);
+      counts.set(hidden[1], {
+        han: hidden[0],
+        label: hidden[1],
+        meaning: hidden[2],
+        count: (counts.get(hidden[1])?.count || 0) + 0.45,
+      });
+    });
+  });
+  return [...counts.values()].sort((a, b) => b.count - a.count);
+}
+
 function chartContext(chart, score) {
   const dm = chart.day.stem;
   const useful = usefulElements(dm.element, score);
   const dominant = dominantElements(chart);
+  const relations = dominantRelations(chart);
   const weak = [...dominant].reverse().slice(0, 2).map(([e]) => e);
   const monthEnergy = chart.month.branch.element;
   return {
     dm,
     useful,
     dominant,
+    relations,
+    topRelation: relations[0],
     weak,
     monthEnergy,
+    seasonNote: seasonalGuides[monthEnergy],
     profile: stemProfiles[dm.element],
     strengthLabel: score >= 70 ? "ดวงมีกำลังมาก" : score >= 48 ? "ดวงค่อนข้างสมดุล" : "ดวงต้องการแรงสนับสนุน",
   };
@@ -315,12 +393,84 @@ function topicFromAnalysis(analysis) {
   return analysis?.topic && analysis.topic !== "overall" ? analysis.topic : activeOracleTopic;
 }
 
+function personalDailyAdvice(ctx, dayElement, relationName, dayScore) {
+  const elementGuide = elementDailyGuides[dayElement];
+  const relationGuide = relationActionGuides[relationName] || { focus: "เลือกเรื่องที่สำคัญที่สุดก่อน", risk: "กระจายพลังหลายทาง" };
+  const useful = ctx.useful[0];
+  const usefulGuide = elementDailyGuides[useful];
+  return [
+    ["งาน", `${elementGuide.work} วันนี้ให้โฟกัส: ${relationGuide.focus}`],
+    ["เงิน", usefulGuide.money],
+    ["ความรัก", elementGuide.love],
+    ["ควรเลี่ยง", dayScore >= 75 ? relationGuide.risk : elementGuide.avoid],
+  ];
+}
+
+function personalTopicReading(topicKey, base, ctx, today, analysis, topicScore) {
+  const topRelation = ctx.topRelation?.label || today.todayPillar.stem.element;
+  const topGuide = relationActionGuides[topRelation] || relationActionGuides[today.stemRelation?.[1]] || { focus: base.focus, risk: base.avoid };
+  const usefulGuide = elementDailyGuides[ctx.useful[0]];
+  const dmGuide = elementDailyGuides[ctx.dm.element];
+  const topicLines = {
+    overall: {
+      title: `${ctx.strengthLabel} · เด่นที่${topRelation}`,
+      high: `${ctx.seasonNote} ช่วงนี้เหมาะจัดลำดับจากเรื่องที่ใช้ ${topGuide.focus} ก่อน เพราะธาตุให้คุณคือ ${ctx.useful.join(" / ")}`,
+      low: `${ctx.seasonNote} ตอนนี้ยังไม่ควรกระจายแรง ให้กลับมาที่พื้นดวง ${ctx.dm.han} ${ctx.dm.element}: ${ctx.profile.remedy}`,
+      focus: topGuide.focus,
+      avoid: topGuide.risk,
+    },
+    work: {
+      title: `งานเด่นจาก${topRelation}และธาตุ${ctx.useful[0]}`,
+      high: `${usefulGuide.work} ถ้าจะเปิดงาน ให้ใช้จุดแข็ง ${ctx.profile.nature} และปิดด้วย next step ที่วัดผลได้`,
+      low: `${dmGuide.work} แต่ยังต้องระวัง ${ctx.profile.stress} จึงควรทำทีละขั้น`,
+      focus: `งานที่เหมาะตอนนี้: ${ctx.profile.career}`,
+      avoid: topGuide.risk,
+    },
+    money: {
+      title: `การเงินอ่านจากธาตุให้คุณ ${ctx.useful.join(" / ")}`,
+      high: `${usefulGuide.money} คะแนนเรื่องเงินดีขึ้นเมื่อทำตัวเลขให้ชัดและไม่ปะปนกับอารมณ์`,
+      low: `${dmGuide.money} ให้เน้นปิดรูรั่วก่อนเพิ่มความเสี่ยง`,
+      focus: ctx.useful.includes("ทอง") || ctx.useful.includes("ดิน") ? "ตั้งราคา ทบทวนสัญญา และติดตามยอดค้าง" : "เก็บข้อมูล เปรียบเทียบราคา และชะลอการจ่ายใหญ่",
+      avoid: ctx.profile.stress,
+    },
+    love: {
+      title: `ความรักต้องใช้โทน${ctx.useful.includes("น้ำ") ? "รับฟัง" : "ชัดแต่ไม่กดดัน"}`,
+      high: `${usefulGuide.love} พื้นดวงเด่น ${topRelation} จึงควรพูดให้ตรงกับความต้องการจริง`,
+      low: `${dmGuide.love} ถ้าคำถามยังไม่ชัด อย่ารีบสรุปแทนอีกฝ่าย`,
+      focus: ctx.useful.includes("น้ำ") ? "ฟังให้ครบ ถามทีละประเด็น และตอบด้วยน้ำเสียงนิ่ง" : "พูดความต้องการให้ชัด แต่ลดการตัดสินเร็ว",
+      avoid: topGuide.risk,
+    },
+    health: {
+      title: `สุขภาพใจของ ${ctx.dm.han} ${ctx.dm.element} ต้องการจังหวะที่พอดี`,
+      high: `${ctx.profile.remedy} วันนี้เหมาะเริ่ม routine เล็กที่ทำซ้ำได้จริง`,
+      low: `จุดเครียดหลักคือ ${ctx.profile.stress} ให้ลดข้อมูลเข้าและแยกเรื่องที่ควบคุมได้ก่อน`,
+      focus: ctx.useful.includes("น้ำ") ? "พักใจด้วยความเงียบ ดื่มน้ำ และลดหน้าจอ" : "จัดพื้นที่ ทำ checklist และพักเป็นรอบสั้น",
+      avoid: dmGuide.avoid,
+    },
+  };
+  const personalized = topicLines[topicKey] || topicLines.overall;
+  const questionTail = analysis
+    ? ` คำถามนี้ถูกอ่านเป็น${analysis.intent} / ${analysis.urgency} / โทน${analysis.polarity}`
+    : "";
+  return {
+    ...base,
+    title: personalized.title,
+    high: `${personalized.high}${questionTail}`,
+    low: `${personalized.low}${questionTail}`,
+    focus: personalized.focus,
+    avoid: personalized.avoid,
+    tone: topicScore >= 72 ? personalized.high : personalized.low,
+  };
+}
+
 function todayReading(chart, score, today = new Date()) {
   const ctx = chartContext(chart, score);
   const daily = dailyScore(chart, score, today);
   const todayPillar = daily.todayPillar;
   const dayScore = daily.value;
   const relationName = daily.stemRelation[1];
+  const dayGuide = elementDailyGuides[todayPillar.stem.element];
+  const topGuide = relationActionGuides[ctx.topRelation?.label] || relationActionGuides[relationName];
   const usefulText = ctx.useful.map((e) => `${elementHan[e]} ${e}`).join(" / ");
   const seed = daysSinceBase(today) + chart.day.index;
   const lucky = [mod(seed + score, 10), mod(seed + chart.month.index, 10), mod(seed + chart.hour.index + ctx.useful.length, 10)].join(" · ");
@@ -328,6 +478,9 @@ function todayReading(chart, score, today = new Date()) {
   const luckyTime = `${String(startHour).padStart(2, "0")}:00-${String(mod(startHour + 2, 24)).padStart(2, "0")}:00`;
   const relationInsight = relationProfiles[relationName] || daily.stemRelation[2];
   const opening = dayScore >= 82 ? "จังหวะเปิดชัด" : dayScore >= 68 ? "จังหวะค่อย ๆ ขยับ" : "จังหวะต้องประคอง";
+  const personalSignal = ctx.topRelation
+    ? `พื้นดวงเด่นด้าน “${ctx.topRelation.label}” (${ctx.topRelation.meaning}) จึงควรใช้วันนี้เพื่อ${topGuide.focus}`
+    : `พื้นดวงต้องใช้ธาตุ ${ctx.useful.join(" / ")} เพื่อเปิดจังหวะ`;
 
   return {
     todayPillar,
@@ -337,17 +490,12 @@ function todayReading(chart, score, today = new Date()) {
     luckyColor: colorByElement[ctx.useful[0]],
     title: `${todayPillar.stem.han}${todayPillar.branch.han} · ${opening}`,
     summary: dayScore >= 82
-      ? `วันนี้ธาตุของวันหนุน ${els.name.value.trim() || "คุณ"} โดยตรง (${usefulText}) เหมาะเปิดเรื่องสำคัญ นัดคุย หรือปล่อยงานที่ต้องการแรงตอบรับ`
+      ? `วันนี้ธาตุของวันหนุน ${els.name.value.trim() || "คุณ"} โดยตรง (${usefulText}) เหมาะเปิดเรื่องสำคัญ โดยเฉพาะ${dayGuide.work}`
       : dayScore >= 68
-        ? `วันนี้พลังใช้งานได้ดีแต่ต้องเลือกจังหวะ ความสัมพันธ์ของวันคือ “${relationName}” จึงเหมาะทำเรื่องที่ต้องใช้ความนิ่งและการวางแผน`
-        : `วันนี้ธาตุยังไม่หนุนเต็มที่ ใช้วันเพื่อจัดระบบ เก็บข้อมูล และลดภาระที่ไม่จำเป็น จะได้ผลจริงกว่าการเร่งปิดทุกเรื่อง`,
-    advice: [
-      ["งาน", dayScore >= 75 ? "เริ่มจากงานที่วัดผลได้ ส่งข้อเสนอ หรือคุยกับคนที่มีอำนาจตัดสินใจ" : "เก็บ requirement ให้ครบ แยกงานด่วนกับงานสำคัญ และเลี่ยงประชุมที่ไม่มีข้อสรุป"],
-      ["เงิน", ctx.useful.includes("ทอง") ? "เหมาะทบทวนราคา ติดตามยอดค้าง หรือทำข้อเสนอที่มีตัวเลขชัด" : "ตรวจรายจ่ายซ้ำซ้อนและชะลอการซื้อของที่เกิดจากอารมณ์"],
-      ["ความรัก", ctx.useful.includes("น้ำ") ? "คุยด้วยเหตุผลและความอ่อนโยน จะคลี่คลายเรื่องค้างใจได้ง่าย" : "ฟังให้จบก่อนตอบ อย่ารีบแปลเจตนาของอีกฝ่าย"],
-      ["ควรเลี่ยง", dayScore >= 75 ? "รับปากเร็วเกินไป เพราะโอกาสเข้ามาพร้อมภาระ" : "ตัดสินใจตอนหงุดหงิดหรือเหนื่อย"],
-    ],
-    insight: `${relationInsight} ภาพรวมดวงคือ ${ctx.strengthLabel} ธาตุเด่นคือ ${ctx.dominant.slice(0, 2).map(([e]) => e).join(" / ")} และธาตุที่ควรเติมคือ ${ctx.useful.join(" / ")}`,
+        ? `วันนี้พลังใช้งานได้ดี ความสัมพันธ์ของวันคือ “${relationName}” ${relationInsight} ${personalSignal}`
+        : `วันนี้ธาตุยังไม่หนุนเต็มที่ ${personalSignal} และควรเลี่ยง ${dayGuide.avoid}`,
+    advice: personalDailyAdvice(ctx, todayPillar.stem.element, relationName, dayScore),
+    insight: `${relationInsight} ${ctx.seasonNote} ภาพรวมดวงคือ ${ctx.strengthLabel} ธาตุเด่นคือ ${ctx.dominant.slice(0, 2).map(([e]) => e).join(" / ")} ธาตุที่ควรเติมคือ ${ctx.useful.join(" / ")} และสิบเทพเด่นคือ ${ctx.relations.slice(0, 2).map((r) => r.label).join(" / ")}`,
   };
 }
 
@@ -402,7 +550,7 @@ function oracleReading(chart, score, date) {
     },
   };
   const inferredTopic = topicFromAnalysis(analysis);
-  const topic = topicMap[inferredTopic] || topicMap[activeOracleTopic];
+  const topicBase = topicMap[inferredTopic] || topicMap[activeOracleTopic];
   const topicBoost = {
     overall: useful.includes(dm.element) ? 4 : 0,
     work: useful.includes("น้ำ") || useful.includes("ไม้") ? 7 : 0,
@@ -414,15 +562,21 @@ function oracleReading(chart, score, date) {
   const intentBoost = analysis?.intent === "timing" ? 4 : analysis?.intent === "decision" ? 2 : analysis?.intent === "advice" ? 3 : 0;
   const urgencyPenalty = analysis?.urgency === "เร่งด่วน" && today.dayScore < 70 ? -7 : 0;
   const topicScore = Math.min(99, Math.max(38, today.dayScore + topicBoost[inferredTopic] + intentBoost + urgencyPenalty + mod(seed, 9) - 5));
+  const topic = personalTopicReading(inferredTopic, topicBase, ctx, today, analysis, topicScore);
   const tone = topicScore >= 72 ? topic.high : topic.low;
   const decisive = analysis?.intent === "decision";
-  const timingAnswer = topicScore >= 72 ? `ช่วงที่เหมาะคือ ${today.luckyTime} หรือวันที่คะแนนปฏิทินมงคลเกิน 70` : `ยังไม่ใช่จังหวะรีบ ให้ใช้ ${today.luckyTime} เพื่อวางแผน ไม่ใช่ตัดสินใจสุดท้าย`;
-  const adviceAnswer = topicScore >= 72 ? "เริ่มจากขั้นตอนเล็กที่พิสูจน์ผลได้ภายใน 3 วัน แล้วค่อยขยาย" : "ลดความเสี่ยงก่อน ทำ checklist และขอข้อมูลเพิ่มหนึ่งชุดก่อนลงมือ";
+  const topGuide = relationActionGuides[ctx.topRelation?.label] || { focus: topic.focus, risk: topic.avoid };
+  const timingAnswer = topicScore >= 72
+    ? `ช่วงที่เหมาะคือ ${today.luckyTime} หรือวันที่คะแนนปฏิทินมงคลเกิน 70 โดยเลือกงานที่ใช้ ${topGuide.focus}`
+    : `ยังไม่ใช่จังหวะรีบ ให้ใช้ ${today.luckyTime} เพื่อวางแผนและลดความเสี่ยงเรื่อง ${topGuide.risk}`;
+  const adviceAnswer = topicScore >= 72
+    ? `เริ่มจากขั้นตอนเล็กที่พิสูจน์ผลได้ภายใน 3 วัน และใช้ธาตุ ${useful[0]} เป็นตัวนำ`
+    : `ลดความเสี่ยงก่อน ทำ checklist และขอข้อมูลเพิ่มหนึ่งชุด โดยเฉพาะจุดที่เกี่ยวกับ ${ctx.profile.stress}`;
   const decisionAnswer = topicScore >= 78
-    ? "คำตอบคือไปต่อได้ แต่ต้องกำหนดขอบเขต งบ เวลา และตัวชี้วัดให้ชัดก่อน"
+    ? `คำตอบคือไปต่อได้ แต่ต้องกำหนดขอบเขต งบ เวลา และตัวชี้วัดให้ชัดก่อน เพราะดวงนี้เดินดีเมื่อ ${topGuide.focus}`
     : topicScore >= 62
-      ? "คำตอบคือไปต่อแบบทดลองเล็ก ๆ ก่อน ยังไม่ควรลงเต็มแรงหรือผูกมัดยาว"
-      : "คำตอบคือรอก่อนหรือชะลอไว้ จังหวะตอนนี้เหมาะกับการเก็บข้อมูลมากกว่าตัดสินใจ";
+      ? `คำตอบคือไปต่อแบบทดลองเล็ก ๆ ก่อน ยังไม่ควรลงเต็มแรงหรือผูกมัดยาว จุดระวังคือ ${topGuide.risk}`
+      : `คำตอบคือรอก่อนหรือชะลอไว้ จังหวะตอนนี้เหมาะกับการเก็บข้อมูลมากกว่า เพราะ ${ctx.profile.stress}`;
   const questionMode = analysis?.intent === "timing" ? timingAnswer : analysis?.intent === "advice" ? adviceAnswer : decisionAnswer;
   const answer = question
     ? `คำถาม “${question}” ถูกจัดเป็นเรื่อง${topic.label} / เจตนา${analysis.intent === "decision" ? "ตัดสินใจ" : analysis.intent === "timing" ? "ถามจังหวะเวลา" : analysis.intent === "advice" ? "ขอคำแนะนำ" : "อ่านแนวโน้ม"} / ความเร่ง ${analysis.urgency}: ${decisive ? questionMode : questionMode}`
