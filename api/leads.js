@@ -22,7 +22,8 @@ async function saveToSupabase(lead) {
     return { configured: false };
   }
 
-  const response = await fetch(`${url.replace(/\/$/, "")}/rest/v1/leads`, {
+  const endpoint = `${url.replace(/\/$/, "")}/rest/v1/leads?on_conflict=email`;
+  const response = await fetch(endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

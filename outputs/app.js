@@ -46,6 +46,8 @@ const els = {
   gender: document.querySelector("#gender"),
   date: document.querySelector("#date"),
   time: document.querySelector("#time"),
+  privacyConsent: document.querySelector("#privacyConsent"),
+  consentLine: document.querySelector(".consent-line"),
   predictBtn: document.querySelector("#predictBtn"),
   predictionStatus: document.querySelector("#predictionStatus"),
   birthLine: document.querySelector("#birthLine"),
@@ -648,6 +650,12 @@ async function requestPrediction(reason = "prediction-request") {
     els.time.focus();
     return;
   }
+  if (!els.privacyConsent.checked) {
+    els.predictionStatus.textContent = "กรุณาติ๊กยินยอมก่อนคำนาย เพื่อให้ระบบใช้ข้อมูลนี้คำนวณและบันทึกผลอ่านให้คุณ";
+    els.consentLine.classList.add("is-attention");
+    els.privacyConsent.focus();
+    return;
+  }
   unlockResults();
   update();
   await saveLead(reason);
@@ -978,6 +986,8 @@ document.querySelector("#resetBtn").addEventListener("click", () => {
   els.gender.value = "";
   els.date.value = "";
   els.time.value = "";
+  els.privacyConsent.checked = false;
+  els.consentLine.classList.remove("is-attention");
   lockResults("ตั้งดวงใหม่แล้ว กรอกข้อมูลให้ครบก่อนคำนาย");
 });
 
@@ -989,6 +999,12 @@ els.predictBtn.addEventListener("click", () => requestPrediction("prediction-but
       lockResults("ข้อมูลเปลี่ยนแล้ว กด “คำนายดวง” อีกครั้งเพื่อแสดงผลใหม่");
     }
   });
+});
+
+els.privacyConsent.addEventListener("change", () => {
+  if (els.privacyConsent.checked) {
+    els.consentLine.classList.remove("is-attention");
+  }
 });
 
 els.oracleQuestion.addEventListener("input", () => {

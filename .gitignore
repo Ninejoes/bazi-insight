@@ -5,3 +5,4 @@ outputs/data/
 *.log
 .DS_Store
 work/
+.vercel
