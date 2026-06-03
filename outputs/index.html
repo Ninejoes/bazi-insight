@@ -17,10 +17,10 @@
     </script>
   </head>
   <body>
-    <div class="app-shell is-locked" id="appShell">
+    <div class="app-shell is-locked" id="appShell" data-method="choose">
       <header class="topbar">
         <button class="icon-btn" aria-label="เมนู" hidden>☰</button>
-        <div class="brand-lockup" aria-label="Likhitfa ลิขิตฟ้า">
+        <button class="brand-lockup" id="brandHomeBtn" type="button" aria-label="กลับหน้าหลัก Likhitfa">
           <div class="brand-mark" aria-hidden="true">
             <svg viewBox="0 0 72 72" role="img">
               <defs>
@@ -40,11 +40,54 @@
           <div>
             <p class="brand">likhitfa</p>
             <h1>Likhitfa <span>ลิขิตฟ้า</span></h1>
-            <p class="module-title" id="appTitle">ปาจื้อ 八字</p>
+            <p class="module-title" id="appTitle">เลือกวิธีทำนาย</p>
           </div>
+        </button>
+        <div class="top-actions">
+          <button class="home-btn" id="homeBtn" type="button">หน้าหลัก</button>
+          <button class="reset-btn" id="resetBtn">ตั้งดวงใหม่</button>
         </div>
-        <button class="reset-btn" id="resetBtn">ตั้งดวงใหม่</button>
       </header>
+
+      <section class="home-screen" id="homeScreen" aria-label="หน้าหลักเลือกบริการ">
+        <div class="method-heading">
+          <p class="eyebrow">Likhitfa Services</p>
+          <h2>เลือกบริการดูดวง</h2>
+          <p>หน้าหลักนี้เตรียมไว้สำหรับเพิ่มบริการอื่นในอนาคต เลือกประเภทที่ต้องการ แล้วระบบจะพาเข้าไปหน้าใช้งานของบริการนั้นโดยตรง</p>
+        </div>
+        <div class="method-grid">
+          <button class="method-card" type="button" data-method="bazi">
+            <div class="method-media">
+              <img src="https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476320/Cover_image_of_Bazi_kayjbu.png" alt="" />
+            </div>
+            <div class="method-copy">
+              <span>ดวงจีน</span>
+              <strong>ปาจื้อ 八字</strong>
+              <small>คำนวณจากชื่อ เพศ วันเกิด และเวลาเกิด เพื่ออ่าน 4 เสา ธาตุ และจังหวะวันนี้</small>
+            </div>
+          </button>
+          <button class="method-card" type="button" data-method="tarot">
+            <div class="method-media">
+              <img src="https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476321/Bipsie_playing_card_cover_image_vnl9v2.png" alt="" />
+            </div>
+            <div class="method-copy">
+              <span>ไพ่ยิปซี</span>
+              <strong>Tarot Reading</strong>
+              <small>เลือกช่วงเวลา 1 วัน 7 วัน หรือ 30 วัน แล้วเปิดไพ่ตามเรื่องที่อยากรู้</small>
+            </div>
+          </button>
+          <article class="method-card is-coming">
+            <div class="method-media is-placeholder">
+              <span>+</span>
+            </div>
+            <div class="method-copy">
+              <span>เร็ว ๆ นี้</span>
+              <strong>บริการใหม่</strong>
+              <small>พื้นที่สำหรับเพิ่มดูดวงรายเดือน เลขมงคล หรือระบบอื่นในอนาคต</small>
+            </div>
+          </article>
+        </div>
+      </section>
 
       <section class="birth-panel" aria-label="ตั้งค่าดวงเกิด">
         <div class="field">
@@ -258,6 +301,66 @@
           </section>
         </section>
       </main>
+
+      <section class="tarot-workspace" id="tarotWorkspace" aria-label="ระบบทำนายไพ่ยิปซี">
+        <section class="tarot-reader" aria-label="เลือกไพ่">
+          <div class="tarot-step-card">
+            <div class="step-label">1</div>
+            <div>
+              <h3>เลือกช่วงคำทำนาย</h3>
+              <div class="tarot-tabs" id="tarotSpreadTabs" aria-label="เลือกรูปแบบคำทำนาย">
+                <button class="is-active" type="button" data-spread="day">1 วัน</button>
+                <button type="button" data-spread="week">7 วัน</button>
+                <button type="button" data-spread="month">30 วัน</button>
+                <button type="button" data-spread="celtic">Celtic Cross</button>
+              </div>
+            </div>
+          </div>
+          <div class="tarot-step-card">
+            <div class="step-label">2</div>
+            <div>
+              <h3>เลือกเรื่องที่อยากดู</h3>
+              <div class="tarot-tabs secondary" id="tarotTopicTabs" aria-label="เลือกเรื่องที่อยากดู">
+                <button class="is-active" type="button" data-topic="overall">ภาพรวม</button>
+                <button type="button" data-topic="work">งาน</button>
+                <button type="button" data-topic="money">เงิน</button>
+                <button type="button" data-topic="love">ความรัก</button>
+                <button type="button" data-topic="mind">สุขภาพใจ</button>
+              </div>
+              <div class="field tarot-question-field">
+                <label for="tarotQuestion">คำถามเพิ่มเติม</label>
+                <input id="tarotQuestion" type="text" placeholder="เช่น 7 วันนี้ควรโฟกัสเรื่องอะไร" />
+              </div>
+            </div>
+          </div>
+          <div class="tarot-deck-panel">
+            <div class="tarot-deck-head">
+              <div>
+                <strong id="tarotSelectionTitle">กรุณาเลือกไพ่ 3 ใบ</strong>
+                <span id="tarotSelectionHelp">แตะไพ่จากสำรับด้านล่าง เลือกครบแล้วกดอ่านคำทำนาย</span>
+                <div class="tarot-progress" aria-hidden="true"><span id="tarotPickProgress"></span></div>
+              </div>
+            </div>
+            <div class="tarot-deck-grid" id="tarotDeckGrid" aria-label="สำรับไพ่ให้เลือก"></div>
+            <div class="tarot-actions tarot-deck-actions">
+              <button class="ghost-btn" id="shuffleTarotBtn" type="button">สับไพ่ใหม่</button>
+              <button class="predict-btn" id="drawTarotBtn" type="button" disabled>อ่านคำทำนาย</button>
+            </div>
+            <p class="tarot-warning">คำทำนายไพ่เป็นแนวทางเพื่อการทบทวนตนเอง ไม่ควรใช้แทนคำแนะนำด้านการแพทย์ การเงิน หรือกฎหมาย</p>
+          </div>
+        </section>
+
+        <section class="chart-card tarot-result-card" id="tarotResultCard">
+          <div class="card-title">
+            <h2>ผลทำนายไพ่ยิปซี</h2>
+            <div class="result-title-actions">
+              <span id="tarotMeta">รอเปิดไพ่</span>
+              <button class="ghost-btn tarot-back-btn" id="tarotBackBtn" type="button">กลับไปเลือกไพ่</button>
+            </div>
+          </div>
+          <div class="tarot-result" id="tarotResult"></div>
+        </section>
+      </section>
 
     </div>
 

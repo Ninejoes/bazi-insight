@@ -39,6 +39,9 @@ const labels = [
 const els = {
   appShell: document.querySelector("#appShell"),
   appTitle: document.querySelector("#appTitle"),
+  homeScreen: document.querySelector("#homeScreen"),
+  homeBtn: document.querySelector("#homeBtn"),
+  brandHomeBtn: document.querySelector("#brandHomeBtn"),
   baziTabs: document.querySelector("#baziTabs"),
   profileStatus: document.querySelector("#profileStatus"),
   name: document.querySelector("#name"),
@@ -81,6 +84,21 @@ const els = {
   analysisState: document.querySelector("#analysisState"),
   oracleMeta: document.querySelector("#oracleMeta"),
   oracleReading: document.querySelector("#oracleReading"),
+  tarotWorkspace: document.querySelector("#tarotWorkspace"),
+  tarotQuestion: document.querySelector("#tarotQuestion"),
+  drawTarotBtn: document.querySelector("#drawTarotBtn"),
+  shuffleTarotBtn: document.querySelector("#shuffleTarotBtn"),
+  tarotSpreadTabs: document.querySelector("#tarotSpreadTabs"),
+  tarotTopicTabs: document.querySelector("#tarotTopicTabs"),
+  tarotDeckGrid: document.querySelector("#tarotDeckGrid"),
+  tarotSelectionTitle: document.querySelector("#tarotSelectionTitle"),
+  tarotSelectionHelp: document.querySelector("#tarotSelectionHelp"),
+  tarotPickProgress: document.querySelector("#tarotPickProgress"),
+  tarotMeta: document.querySelector("#tarotMeta"),
+  tarotDeckCount: document.querySelector("#tarotDeckCount"),
+  tarotResult: document.querySelector("#tarotResult"),
+  tarotResultCard: document.querySelector("#tarotResultCard"),
+  tarotBackBtn: document.querySelector("#tarotBackBtn"),
 };
 
 const leadKey = "baziInsightLead";
@@ -281,12 +299,266 @@ const solarMonthStarts = [
   { month: 10, day: 7, branch: 11, name: "立冬", th: "ลี่ตง" },
   { month: 11, day: 7, branch: 0, name: "大雪", th: "ต้าเสวี่ย" },
 ];
+
+const tarotMajor = [
+  ["fool", "The Fool", "ไพ่คนเดินทาง", "เริ่มต้น", "ลองเริ่มแบบไม่แบกความคาดหวังมากเกินไป"],
+  ["magician", "The Magician", "ไพ่นักสร้าง", "ลงมือ", "มีเครื่องมือพร้อมแล้ว เหลือการเลือกใช้ให้ตรงจุด"],
+  ["high-priestess", "The High Priestess", "ไพ่เสียงข้างใน", "สัญชาตญาณ", "ข้อมูลเงียบ ๆ และความรู้สึกแรกมีน้ำหนัก"],
+  ["empress", "The Empress", "ไพ่ความอุดมสมบูรณ์", "ดูแล", "สิ่งที่เลี้ยงดูต่อเนื่องจะค่อย ๆ ให้ผล"],
+  ["emperor", "The Emperor", "ไพ่โครงสร้าง", "วินัย", "ตั้งขอบเขตและกติกาให้ชัดก่อนเดินต่อ"],
+  ["hierophant", "The Hierophant", "ไพ่ครู", "หลักการ", "ใช้ความรู้ ระบบ หรือคำแนะนำจากคนมีประสบการณ์"],
+  ["lovers", "The Lovers", "ไพ่ทางเลือก", "สัมพันธ์", "ตัดสินใจจากคุณค่าที่ตรงกัน ไม่ใช่ความกลัวชั่วคราว"],
+  ["chariot", "The Chariot", "ไพ่รถศึก", "ควบคุม", "โฟกัสเป้าหมายเดียว แล้วคุมจังหวะให้ไปถึง"],
+  ["strength", "Strength", "ไพ่กำลังใจ", "อ่อนโยนแต่มั่นคง", "ใช้ความนุ่มนวลควบคู่กับความเด็ดขาด"],
+  ["hermit", "The Hermit", "ไพ่ผู้ค้นหา", "ทบทวน", "ถอยมามองภาพรวมก่อนตอบหรือเดินหน้า"],
+  ["wheel", "Wheel of Fortune", "ไพ่วงล้อ", "จังหวะ", "สถานการณ์กำลังเปลี่ยน เลือกขยับในจังหวะที่เปิด"],
+  ["justice", "Justice", "ไพ่ความยุติธรรม", "ชัดเจน", "ตรวจเงื่อนไข หลักฐาน และผลลัพธ์ทั้งสองด้าน"],
+  ["hanged-man", "The Hanged Man", "ไพ่มุมมองใหม่", "รอจังหวะ", "เปลี่ยนมุมมองก่อนสรุปว่าไปต่อหรือหยุด"],
+  ["death", "Death", "ไพ่เปลี่ยนผ่าน", "ปล่อยของเก่า", "ตัดสิ่งที่หมดรอบ เพื่อให้พื้นที่กับสิ่งใหม่"],
+  ["temperance", "Temperance", "ไพ่สมดุล", "ปรับจูน", "ประนีประนอมและค่อย ๆ ผสมทางเลือกให้ลงตัว"],
+  ["devil", "The Devil", "ไพ่พันธนาการ", "รู้เท่าทัน", "ระวังความอยาก ความกลัว หรือข้อผูกมัดที่ทำให้มองไม่ชัด"],
+  ["tower", "The Tower", "ไพ่การรื้อ", "เปลี่ยนฉับพลัน", "ถ้าสิ่งเดิมไม่มั่นคง ต้องกล้ารื้อให้ปลอดภัยกว่าเดิม"],
+  ["star", "The Star", "ไพ่ความหวัง", "เยียวยา", "กลับมาเชื่อในทิศทางระยะยาวและดูแลใจให้พอ"],
+  ["moon", "The Moon", "ไพ่เงาใจ", "ไม่ชัดเจน", "ตรวจข้อมูลซ้ำ อย่าให้ความกังวลเป็นคนตัดสิน"],
+  ["sun", "The Sun", "ไพ่แสงสว่าง", "เปิดเผย", "เรื่องที่ชัด ตรง และจริงใจจะเดินได้ดีที่สุด"],
+  ["judgement", "Judgement", "ไพ่การตื่นรู้", "สรุปบทเรียน", "มองบทเรียนเดิม แล้วเลือกทางที่โตขึ้น"],
+  ["world", "The World", "ไพ่ครบวงจร", "ปิดรอบ", "มีโอกาสปิดงานหรือสรุปบทสำคัญให้สมบูรณ์"],
+];
+
+const tarotSuitProfiles = {
+  wands: { th: "ไม้เท้า", symbol: "ไม้เท้า", theme: "แรงผลัก งาน ไอเดีย และการเริ่มต้น", topic: "work" },
+  cups: { th: "ถ้วย", symbol: "ถ้วย", theme: "อารมณ์ ความสัมพันธ์ ความรู้สึก และการเยียวยา", topic: "love" },
+  swords: { th: "ดาบ", symbol: "ดาบ", theme: "ความคิด การตัดสินใจ การสื่อสาร และความจริง", topic: "mind" },
+  pentacles: { th: "เหรียญ", symbol: "เหรียญ", theme: "เงิน งานจริง ทรัพย์สิน สุขภาพกาย และความมั่นคง", topic: "money" },
+};
+
+const tarotRanks = [
+  ["ace", "Ace", "หนึ่ง", "เมล็ดเริ่มต้น", "เริ่มจากก้าวเล็กที่จับต้องได้"],
+  ["two", "Two", "สอง", "การเลือก", "ต้องชั่งน้ำหนักสองทางให้ชัด"],
+  ["three", "Three", "สาม", "การร่วมมือ", "มีแรงสนับสนุนจากการประสานคนหรือข้อมูล"],
+  ["four", "Four", "สี่", "ฐานมั่นคง", "จัดระบบให้แน่นก่อนขยาย"],
+  ["five", "Five", "ห้า", "แรงเสียดทาน", "ระวังปะทะหรือเสียพลังกับเรื่องเล็ก"],
+  ["six", "Six", "หก", "การปรับสมดุล", "คืนสมดุลด้วยการให้และรับอย่างพอดี"],
+  ["seven", "Seven", "เจ็ด", "การประเมิน", "ต้องเลือกจุดยืนและตรวจข้อเท็จจริง"],
+  ["eight", "Eight", "แปด", "การฝึกฝน", "ทำซ้ำอย่างมีวินัยแล้วผลจะค่อย ๆ ชัด"],
+  ["nine", "Nine", "เก้า", "ผลใกล้สำเร็จ", "เก็บรายละเอียดสุดท้ายก่อนสรุป"],
+  ["ten", "Ten", "สิบ", "บทสรุป", "ปิดรอบเก่าและจัดภาระให้เบาลง"],
+  ["page", "Page", "มหาดเล็ก", "ข่าวสาร", "เริ่มเรียนรู้หรือรับข่าวใหม่ด้วยใจเปิด"],
+  ["knight", "Knight", "อัศวิน", "การเคลื่อนไหว", "ขยับอย่างมีทิศทาง ระวังเร่งเกินจริง"],
+  ["queen", "Queen", "ราชินี", "การดูแล", "ใช้ความเข้าใจและการจัดการอารมณ์ให้ดี"],
+  ["king", "King", "ราชา", "การควบคุม", "ตัดสินใจแบบผู้รับผิดชอบภาพรวม"],
+];
+
+const tarotTopics = {
+  overall: "ภาพรวม",
+  work: "งาน",
+  money: "เงิน",
+  love: "ความรัก",
+  mind: "สุขภาพใจ",
+  question: "คำถามเฉพาะ",
+};
+
+const tarotDeck = [
+  ...tarotMajor.map(([id, en, th, keyword, advice], index) => ({
+    number: index,
+    id: `major-${id}`,
+    arcana: "major",
+    name: en,
+    th,
+    keyword,
+    advice,
+    theme: "บทเรียนหลักของชีวิตและจังหวะสำคัญ",
+    topic: "overall",
+  })),
+  ...Object.entries(tarotSuitProfiles).flatMap(([suit, suitProfile], suitIndex) => tarotRanks.map(([rank, enRank, thRank, keyword, advice], rankIndex) => ({
+    number: 22 + (suitIndex * 14) + rankIndex,
+    id: `${suit}-${rank}`,
+    arcana: "minor",
+    suit,
+    rank,
+    name: `${enRank} of ${suitProfile.th}`,
+    th: `${thRank} ${suitProfile.th}`,
+    keyword,
+    advice,
+    theme: suitProfile.theme,
+    topic: suitProfile.topic,
+  }))),
+];
+
+const cloudinaryCloud = "dhhzjeskm";
+const tarotCardBackUrl = "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476296/00_back_of_cards_xxwsgr.png";
+const tarotCardUrlsByNumber = {
+  "0": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476296/0_The_Fool_ddtsof.png",
+  "1": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476296/1_The_Magician_a82rmz.png",
+  "2": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476296/2_The_Empress_ehvoac.png",
+  "3": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476296/3_The_Empress_fvyqvg.png",
+  "4": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476296/4_The_Emperor_ymgc9b.png",
+  "5": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476297/5_The_Hierophant_pvehid.png",
+  "6": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476297/6_The_Lovers_hcekpx.png",
+  "7": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476297/7_The_Chariot_ieudqc.png",
+  "8": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476298/8_Strength_e00dbe.png",
+  "9": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476298/9_The_Hermit_rolln7.png",
+  "10": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476298/10_Wheel_of_Fortune_fwr6id.png",
+  "11": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476298/11_Justice_oul52r.png",
+  "12": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476298/12_The_Hanged_Man_obdnym.png",
+  "13": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476299/13_Death_hfwity.png",
+  "14": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476299/14_Temperance_m7jz9m.png",
+  "15": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476299/15_The_Devil_y8pqy5.png",
+  "16": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476299/16_The_Tower_fjrvch.png",
+  "17": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476299/17_The_Star_liofrx.png",
+  "18": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476299/18_The_Moon_wwu1hc.png",
+  "19": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476300/19_The_Sun_vpisw2.png",
+  "20": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476300/20_Judgement_dyzzv1.png",
+  "21": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476300/21_The_World_ixawwn.png",
+  "22": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476301/22_Ace_of_Wands_vaoaps.png",
+  "23": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476301/23_Two_of_Wands_pyehl1.png",
+  "24": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476301/24_Three_of_Wands_qygkeb.png",
+  "25": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476302/25_Four_of_Wands_laqrah.png",
+  "26": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476302/26_Five_of_Wands_ggunmk.png",
+  "27": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476302/27_Six_of_Wands_rrwwnp.png",
+  "28": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476303/28_Seven_of_Wands_omtetf.png",
+  "29": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476303/29_Eight_of_Wands_m7x0i6.png",
+  "30": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476303/30_Nine_of_Wands_aojkpr.png",
+  "31": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476304/31_Ten_of_Wands_aq0azu.png",
+  "32": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476304/32_Page_of_Wands_zozh8e.png",
+  "33": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476304/33_Knight_of_Wands_mh41nx.png",
+  "34": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476305/34_Queen_of_Wands_mx2oqw.png",
+  "35": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476305/35_King_of_Wands_ocm4os.png",
+  "36": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476306/36_Ace_of_Cups_vbvzqu.png",
+  "37": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476306/37_Two_of_Cups_lmyo3g.png",
+  "38": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476306/38_Three_of_Cups_i7rlbl.png",
+  "39": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476307/39_Four_of_Cups_iyzht0.png",
+  "40": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476307/40_Five_of_Cups_fezato.png",
+  "41": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476307/41_Six_of_Cups_oqlq3x.png",
+  "42": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476308/42_Seven_of_Cups_jwl1ih.png",
+  "43": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476309/43_Eight_of_Cups_qwdmhv.png",
+  "44": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476308/44_Nine_of_Cups_wgfbpi.png",
+  "45": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476309/45_Ten_of_Cups_iw8qme.png",
+  "46": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476309/46_Page_of_Cups_ttq7zt.png",
+  "47": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476310/47_Knight_of_Cups_gboclo.png",
+  "48": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476309/48_Queen_of_Cups_tljicg.png",
+  "49": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476310/49_King_of_Cups_idlimu.png",
+  "50": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476310/50_Ace_of_Swords_bdqsrx.png",
+  "51": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476311/51_Two_of_Swords_wdfwcs.png",
+  "52": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476311/52_Three_of_Swords_nvcgfc.png",
+  "53": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476311/53_Four_of_Swords_ivroe6.png",
+  "54": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476312/54_Five_of_Swords_koz9bt.png",
+  "55": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476312/55_Six_of_Swords_mdum3b.png",
+  "56": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476313/56_Seven_of_Swords_vv8coa.png",
+  "57": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476313/57_Eight_of_Swords_cra0dp.png",
+  "58": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476313/58_Nine_of_Swords_wdlil7.png",
+  "59": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476314/59_Ten_of_Swords_nyulxr.png",
+  "60": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476314/60_Page_of_Swords_wysolw.png",
+  "61": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476314/61_Knight_of_Swords_efn0te.png",
+  "62": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476315/62_Queen_of_Swords_rrnnj3.png",
+  "63": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476315/63_King_of_Swords_env2fk.png",
+  "64": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476315/64_Ace_of_Pentacles_yes80s.png",
+  "65": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476316/65_Two_of_Pentacles_puwghn.png",
+  "66": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476316/66_Three_of_Pentacles_ys1gsv.png",
+  "67": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476316/67_Four_of_Pentacles_lhohyp.png",
+  "68": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476317/68_Five_of_Pentacles_wh5nmk.png",
+  "69": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476317/69_Six_of_Pentacles_rjdiwl.png",
+  "70": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476317/70_Seven_of_Pentacles_wqegm0.png",
+  "71": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476318/71_Eight_of_Pentacles_badshe.png",
+  "72": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476318/72_Nine_of_Pentacles_obm1w7.png",
+  "73": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476319/73_Ten_of_Pentacles_wi6vzp.png",
+  "74": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476319/74_Page_of_Pentacles_qyfqiu.png",
+  "75": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476319/75_Knight_of_Pentacles_jvbmuf.png",
+  "76": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476319/76_Queen_of_Pentacles_wlsy73.png",
+  "77": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780476320/77_King_of_Pentacles_gqho9y.png",
+};
+const tarotKnownPublicIds = {
+  "major-fool": "0_The_Fool_ddtsof",
+  "major-magician": "1_The_Magician_a82rmz",
+  "major-high-priestess": "2_The_High_Priestess_mrcwss",
+  "major-empress": "3_The_Empress_ehvoac",
+  "major-emperor": "4_The_Emperor_fvyqvg",
+  "major-hierophant": "5_The_Hierophant_pvehid",
+  "major-lovers": "6_The_Lovers_hcekpx",
+  "major-chariot": "7_The_Chariot_ieudqj",
+  "major-strength": "8_Strength_e00dbe",
+  "major-hermit": "9_The_Hermit_rolln7",
+  "major-wheel": "10_Wheel_of_Fortune_fwr6e",
+  "major-justice": "11_Justice_oul52r",
+  "major-hanged-man": "12_The_Hanged_Man_obdnym",
+  "major-death": "13_Death_hfwity",
+  "major-temperance": "14_Temperance_m7jz9",
+  "major-devil": "15_The_Devil_y8pqy5",
+  "major-tower": "16_The_Tower_fjrvch",
+  "major-star": "17_The_Star_liofro",
+  "major-moon": "18_The_Moon_wwu1hl",
+  "major-sun": "19_The_Sun_vpisw2",
+  "major-judgement": "20_Judgement_dyzzv1",
+  "major-world": "21_The_World_ixawwn",
+  "wands-ace": "22_Ace_of_Wands_vaoaps",
+  "wands-two": "23_Two_of_Wands_pyehl",
+  "wands-three": "24_Three_of_Wands_qygke",
+  "wands-four": "25_Four_of_Wands_laqra",
+  "wands-five": "26_Five_of_Wands_ggunmk",
+  "wands-six": "27_Six_of_Wands_rrwwnp",
+  "wands-seven": "28_Seven_of_Wands_omtet",
+  "wands-eight": "29_Eight_of_Wands_m7x0i6",
+  "wands-nine": "30_Nine_of_Wands_aojkp",
+  "wands-ten": "31_Ten_of_Wands_aq0azu",
+  "wands-page": "32_Page_of_Wands_zozh8",
+  "wands-knight": "33_Knight_of_Wands_h41n",
+  "wands-queen": "34_Queen_of_Wands_mx2oqw",
+  "wands-king": "35_King_of_Wands_ocm4o",
+  "cups-ace": "36_Ace_of_Cups_lmyo3",
+  "cups-two": "37_Two_of_Cups_vbvzq",
+  "cups-three": "38_Three_of_Cups_i7rlbl",
+  "cups-four": "39_Four_of_Cups_yzht0",
+  "cups-five": "40_Five_of_Cups_fezato",
+  "cups-six": "41_Six_of_Cups_oqlq3",
+  "cups-seven": "42_Seven_of_Cups_jwl1i",
+  "cups-eight": "43_Eight_of_Cups_qwdmhv",
+  "cups-nine": "44_Nine_of_Cups_wgfbpi",
+  "cups-ten": "45_Ten_of_Cups_iw8qme",
+  "cups-page": "46_Page_of_Cups_tljic",
+  "cups-knight": "47_Knight_of_Cups_gbocl",
+  "cups-queen": "48_Queen_of_Cups_idlim",
+  "cups-king": "49_King_of_Cups_idlim",
+  "swords-ace": "50_Ace_of_Swords_bdqs",
+  "swords-two": "51_Two_of_Swords_wdfwc",
+  "swords-three": "52_Three_of_Swords_nvcgf",
+  "swords-four": "53_Four_of_Swords_ivroe",
+  "swords-five": "54_Five_of_Swords_koz9b",
+  "swords-six": "55_Six_of_Swords_mdum3",
+  "swords-seven": "56_Seven_of_Swords_vv8coa",
+  "swords-eight": "57_Eight_of_Swords_cra0d",
+  "swords-nine": "58_Nine_of_Swords_wdlil7",
+  "swords-ten": "59_Ten_of_Swords_nyulxr",
+  "swords-page": "60_Page_of_Swords_wysolw",
+  "swords-knight": "61_Knight_of_Swords_efn0te",
+  "swords-queen": "62_Queen_of_Swords_rrnnj3",
+  "swords-king": "63_King_of_Swords_env2fk",
+  "pentacles-ace": "64_Ace_of_Pentacles_yes80s",
+  "pentacles-two": "65_Two_of_Pentacles_puwghn",
+  "pentacles-three": "66_Three_of_Pentacles_ys1gsv",
+  "pentacles-four": "67_Four_of_Pentacles_lhohyp",
+  "pentacles-five": "68_Five_of_Pentacles_wh5nmk",
+  "pentacles-six": "69_Six_of_Pentacles_rjdiwl",
+  "pentacles-seven": "70_Seven_of_Pentacles_wqegm0",
+  "pentacles-eight": "71_Eight_of_Pentacles_badshe",
+  "pentacles-nine": "72_Nine_of_Pentacles_obm1w7",
+  "pentacles-ten": "73_Ten_of_Pentacles_wi6vzp",
+  "pentacles-page": "74_Page_of_Pentacles_qyfqiu",
+  "pentacles-knight": "75_Knight_of_Pentacles_jvbmuf",
+  "pentacles-queen": "76_Queen_of_Pentacles_wlsy73",
+  "pentacles-king": "77_King_of_Pentacles_gqho9y",
+};
+
 let activeCalendarFilter = "all";
 let activeOracleTopic = "overall";
 let analyzedQuestion = "";
 let questionAnalysis = null;
 let currentProfile = null;
 let predictionMade = false;
+let tarotReadingMade = false;
+let activeTarotSpread = "day";
+let activeTarotTopic = "overall";
+let shuffledTarotDeck = [];
+let selectedTarotCards = [];
 
 function loadCustomBackgrounds() {
   [
@@ -647,6 +919,354 @@ function topicFromAnalysis(analysis) {
 
 function pickBySeed(items, seed) {
   return items[mod(seed, items.length)];
+}
+
+function hashString(value) {
+  return [...value].reduce((hash, char) => mod((hash * 31) + char.charCodeAt(0), 2147483647), 7);
+}
+
+function seededRandom(seed) {
+  let value = mod(seed || 1, 2147483647);
+  return () => {
+    value = mod(value * 48271, 2147483647);
+    return value / 2147483647;
+  };
+}
+
+function shuffleBySeed(items, seed) {
+  const random = seededRandom(seed);
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function tarotImage(publicId, width = 460) {
+  return `https://res.cloudinary.com/${cloudinaryCloud}/image/upload/f_auto,q_auto,w_${width}/${publicId}`;
+}
+
+function resizeCloudinaryUrl(url, width = 460) {
+  if (!url) return "";
+  if (url.includes("/image/upload/q_auto/f_auto/")) {
+    return url.replace("/image/upload/q_auto/f_auto/", `/image/upload/f_auto,q_auto,w_${width}/`);
+  }
+  return url.replace("/image/upload/", `/image/upload/f_auto,q_auto,w_${width}/`);
+}
+
+function tarotCardImage(card, width = 460) {
+  const directUrl = tarotCardUrlsByNumber[String(card.number)];
+  if (directUrl) return resizeCloudinaryUrl(directUrl, width);
+
+  const publicId = tarotKnownPublicIds[card.id];
+  return publicId ? tarotImage(publicId, width) : "";
+}
+
+function tarotCardBackImage(width = 220) {
+  return resizeCloudinaryUrl(tarotCardBackUrl, width);
+}
+
+function tarotSpreadConfig(spread = activeTarotSpread) {
+  const spreads = {
+    day: {
+      label: "1 วัน",
+      cards: 3,
+      title: "ไพ่ 3 ใบสำหรับวันนี้",
+      summary: "อ่านพลังหลัก สิ่งที่ควรทำ และสิ่งที่ควรระวังในวันนี้",
+      positions: ["พลังวันนี้", "สิ่งที่ควรทำ", "สิ่งที่ควรระวัง"],
+    },
+    week: {
+      label: "7 วัน",
+      cards: 7,
+      title: "ไพ่ 7 ใบสำหรับ 7 วัน",
+      summary: "อ่านแนวโน้มรายวันและจังหวะที่ควรโฟกัสในสัปดาห์นี้",
+      positions: ["วันที่ 1", "วันที่ 2", "วันที่ 3", "วันที่ 4", "วันที่ 5", "วันที่ 6", "วันที่ 7"],
+    },
+    month: {
+      label: "30 วัน",
+      cards: 10,
+      title: "Celtic Cross สำหรับ 30 วัน",
+      summary: "อ่านภาพรวมเดือนด้วยไพ่ 10 ใบ เพื่อดูแกนเรื่อง อุปสรรค แนวโน้ม และผลลัพธ์",
+      positions: ["แกนสถานการณ์", "สิ่งที่ท้าทาย", "รากของเรื่อง", "อดีตใกล้", "เป้าหมาย", "แนวโน้มถัดไป", "ตัวคุณ", "สิ่งรอบตัว", "ความหวัง/ความกังวล", "ผลลัพธ์"],
+    },
+    celtic: {
+      label: "Celtic Cross",
+      cards: 10,
+      title: "Celtic Cross 10 ใบ",
+      summary: "อ่านคำถามแบบละเอียดจากสถานการณ์ปัจจุบัน รากของเรื่อง อิทธิพลรอบตัว และทิศทางผลลัพธ์",
+      positions: ["สถานการณ์ปัจจุบัน", "อุปสรรค/แรงต้าน", "รากของเรื่อง", "อดีตที่ส่งผล", "สิ่งที่มองเห็น/เป้าหมาย", "อนาคตใกล้", "ท่าทีของคุณ", "อิทธิพลรอบตัว", "ความหวัง/ความกลัว", "ผลลัพธ์โดยรวม"],
+    },
+  };
+  return spreads[spread] || spreads.day;
+}
+
+function tarotTopicText(topic) {
+  return tarotTopics[topic] || tarotTopics.overall;
+}
+
+function tarotCardEnergy(card) {
+  if (card.arcana === "major") return "จังหวะสำคัญที่ควรรับฟังเป็นพิเศษ";
+  const suitEnergy = {
+    wands: "แรงผลัก การเริ่มต้น และการลงมือ",
+    cups: "ความรู้สึก ความสัมพันธ์ และการเยียวยา",
+    swords: "ความคิด การสื่อสาร และการตัดสินใจ",
+    pentacles: "ความมั่นคง เงิน งานจริง และสุขภาพกาย",
+  };
+  return suitEnergy[card.suit] || "พลังภาพรวมของสถานการณ์";
+}
+
+function tarotTopicAction(card, topic, reversed) {
+  const topicRules = {
+    overall: {
+      upright: "จัดลำดับเรื่องสำคัญก่อน แล้วเดินทีละขั้นให้เห็นผลจริง",
+      reversed: "ชะลอการสรุปภาพรวม เพราะยังมีข้อมูลหรืออารมณ์ที่ทำให้มองไม่ครบ",
+    },
+    work: {
+      upright: "ใช้พลังใบนี้กับงานที่ต้องสื่อสาร ตัดสินใจ วางแผน หรือผลักงานให้จบ",
+      reversed: "ระวังรับงานเกินกำลัง สื่อสารเร็วเกินไป หรือข้ามขั้นตอนที่ควรตรวจ",
+    },
+    money: {
+      upright: "เหมาะกับการดูตัวเลข วางงบ ตรวจเงื่อนไข และเลือกทางที่จับต้องได้",
+      reversed: "หลีกเลี่ยงการจ่ายตามอารมณ์ ลงทุนเพราะกลัวพลาด หรือเชื่อข้อมูลด้านเดียว",
+    },
+    love: {
+      upright: "พูดคุยอย่างตรงไปตรงมาแต่ยังรักษาความรู้สึกของกันและกัน",
+      reversed: "อย่าเร่งคำตอบหรือใช้ความเงียบเป็นการทดสอบ ควรให้พื้นที่ก่อนคุยต่อ",
+    },
+    mind: {
+      upright: "กลับมาอยู่กับสิ่งที่ควบคุมได้ หายใจให้ช้าลง แล้วเลือกก้าวเล็กที่ทำได้วันนี้",
+      reversed: "ลดสิ่งกระตุ้นและพักจากการคิดวน ก่อนตัดสินใจเรื่องที่ใช้พลังใจสูง",
+    },
+  };
+  const rule = topicRules[topic] || topicRules.overall;
+  const suitHint = card.topic && card.topic === topic
+    ? ` ไพ่ใบนี้ตรงกับหัวข้อ${tarotTopicText(topic)} จึงให้น้ำหนักมากกว่าปกติ`
+    : "";
+  return `${reversed ? rule.reversed : rule.upright}${suitHint}`;
+}
+
+function tarotPositionReading(position, card, topic, reversed) {
+  const topicName = tarotTopicText(topic);
+  const orientation = reversed ? "พลังติดขัด/ต้องทบทวน" : "พลังเปิดทาง";
+  const positionHint = {
+    "พลังวันนี้": "เป็นบรรยากาศหลักของวันนี้",
+    "สิ่งที่ควรทำ": "คือวิธีใช้พลังให้เกิดผล",
+    "สิ่งที่ควรระวัง": "คือจุดที่ควรตรวจให้รอบคอบ",
+    "แกนสถานการณ์": "บอกแกนของเรื่องในช่วงนี้",
+    "สิ่งที่ท้าทาย": "ชี้แรงต้านหรือเงื่อนไขที่ต้องจัดการ",
+    "รากของเรื่อง": "อธิบายเหตุลึกที่ทำให้เรื่องนี้สำคัญ",
+    "อดีตใกล้": "สะท้อนสิ่งที่เพิ่งส่งผลมาถึงตอนนี้",
+    "เป้าหมาย": "บอกภาพที่ใจอยากไปให้ถึง",
+    "แนวโน้มถัดไป": "แสดงจังหวะที่จะเริ่มเห็นต่อจากนี้",
+    "ตัวคุณ": "สะท้อนท่าทีของผู้ถาม",
+    "สิ่งรอบตัว": "บอกแรงจากคน สถานการณ์ หรือสภาพแวดล้อม",
+    "ความหวัง/ความกังวล": "เผยความคาดหวังหรือความกลัวที่มีผลต่อคำถาม",
+    "ผลลัพธ์": "สรุปทิศทางหากยังเดินตามรูปแบบเดิม",
+    "สถานการณ์ปัจจุบัน": "คือหน้าตาของเรื่องตอนนี้",
+    "อุปสรรค/แรงต้าน": "คือสิ่งที่ทำให้เรื่องไม่ไหลลื่น",
+    "อดีตที่ส่งผล": "คือบทเรียนหรือเหตุการณ์ที่ยังทิ้งแรงไว้",
+    "สิ่งที่มองเห็น/เป้าหมาย": "คือสิ่งที่ผู้ถามกำลังมองหา",
+    "อนาคตใกล้": "คือจังหวะที่ใกล้จะเกิดขึ้น",
+    "ท่าทีของคุณ": "คือวิธีที่ผู้ถามกำลังรับมือ",
+    "อิทธิพลรอบตัว": "คือแรงจากคนหรือบริบทภายนอก",
+    "ความหวัง/ความกลัว": "คือความรู้สึกที่ดึงคำตอบให้เอียง",
+    "ผลลัพธ์โดยรวม": "คือภาพรวมปลายทางของหน้าไพ่ชุดนี้",
+  };
+  const lead = positionHint[position] || "เป็นส่วนหนึ่งของคำตอบ";
+  if (reversed) {
+    return `${topicName}: ${lead} ในรูปแบบ${orientation}. ${card.th} ชี้ให้ตรวจเรื่อง “${card.keyword}” ที่อาจยังไม่ลงตัว. ${tarotTopicAction(card, topic, true)}.`;
+  }
+  return `${topicName}: ${lead} ในรูปแบบ${orientation}. ${card.th} เปิดพลังด้าน${tarotCardEnergy(card)} โดยจุดเด่นคือ “${card.keyword}”. ${tarotTopicAction(card, topic, false)}.`;
+}
+
+function tarotSummary(cards, topic, spread) {
+  const majorCount = cards.filter((card) => card.card.arcana === "major").length;
+  const reversedCount = cards.filter((card) => card.reversed).length;
+  const topicHits = cards.filter((card) => card.card.topic === topic).length;
+  const firstCard = cards[0]?.card;
+  const outcomeCard = cards[cards.length - 1]?.card || firstCard;
+  const spreadInfo = tarotSpreadConfig(spread);
+  const tone = majorCount >= Math.max(2, Math.floor(cards.length / 3)) ? "มีบทเรียนใหญ่หรือการตัดสินใจสำคัญ" : "เป็นจังหวะที่จัดการได้ด้วยการลงมือทีละขั้น";
+  const caution = reversedCount >= Math.ceil(cards.length / 2)
+    ? "ไพ่กลับหัวมาก แนะนำให้ชะลอ ตรวจข้อมูล และไม่รีบสรุป"
+    : "ไพ่ส่วนใหญ่เปิดทางพอสมควร แต่ยังควรวางแผนก่อนตัดสินใจ";
+  const topicLine = topicHits
+    ? `มีไพ่ที่ตรงกับหัวข้อ ${tarotTopicText(topic)} ${topicHits} ใบ จึงอ่านเรื่องนี้ได้ค่อนข้างชัด`
+    : `หัวข้อ ${tarotTopicText(topic)} ต้องอ่านร่วมกับภาพรวมและบริบทของคำถาม`;
+  const opening = firstCard ? `แกนแรกเปิดด้วย ${firstCard.th} จึงเริ่มจากเรื่อง “${firstCard.keyword}”` : "";
+  const ending = outcomeCard ? `ทิศทางปลายทางโยงกับ ${outcomeCard.th} คือ “${outcomeCard.keyword}”` : "";
+  return `${spreadInfo.label}: ${tone}. ${topicLine}. ${opening}. ${ending}. ${caution}.`;
+}
+
+function tarotPlainSummary(cards, topic) {
+  const first = cards[0]?.card;
+  const second = cards[1]?.card;
+  const last = cards[cards.length - 1]?.card || first;
+  const reversedCount = cards.filter((item) => item.reversed).length;
+  const topicCards = cards.filter((item) => item.card.topic === topic);
+  const mood = reversedCount >= Math.ceil(cards.length / 2)
+    ? "ควรชะลอและตรวจความพร้อมก่อนเดินหน้า"
+    : "เดินหน้าได้ แต่ควรมีแผนและจังหวะที่ชัด";
+  const focus = topicCards[0]?.card || first;
+  return {
+    headline: focus ? `${tarotTopicText(topic)}ช่วงนี้เด่นที่ “${focus.keyword}”` : "อ่านไพ่ครบแล้วระบบจะสรุปให้",
+    body: first && last
+      ? `ไพ่เปิดเรื่องด้วย ${first.th} และปลายทางโยงกับ ${last.th} ภาพรวมจึงเป็นจังหวะที่${mood}. ถ้ามีคำถามเฉพาะ ให้ใช้คำตอบนี้เป็นแนวทางทบทวนก่อนตัดสินใจจริง`
+      : "",
+    next: second ? `เริ่มจาก ${second.advice}` : "เริ่มจากเรื่องเล็กที่ควบคุมได้ก่อน",
+  };
+}
+
+function tarotActionSummary(cards, topic) {
+  const uprightCards = cards.filter((item) => !item.reversed);
+  const reversedCards = cards.filter((item) => item.reversed);
+  const strongest = uprightCards[0]?.card || cards[0]?.card;
+  const caution = reversedCards[0]?.card || cards[cards.length - 1]?.card;
+  const outcome = cards[cards.length - 1]?.card || strongest;
+  return {
+    main: strongest ? `เริ่มจากพลังของ ${strongest.th}: ใช้ “${strongest.keyword}” เป็นแกนตัดสินใจ` : "เลือกไพ่ครบแล้วระบบจะสรุปแกนคำตอบให้",
+    action: strongest ? tarotTopicAction(strongest, topic, false) : "",
+    caution: caution ? `${caution.th}: ระวังด้าน “${caution.keyword}” โดยเฉพาะเมื่อเรื่องเริ่มเร่งหรือมีข้อมูลไม่ครบ` : "",
+    outcome: outcome ? `หากเดินตามคำแนะนำ ทิศทางจะไปสู่บทเรียนของ ${outcome.th}: ${outcome.advice}` : "",
+  };
+}
+
+function updateTarotSelectionState() {
+  const spread = tarotSpreadConfig();
+  els.tarotSelectionTitle.textContent = `กรุณาเลือกไพ่ ${spread.cards} ใบ`;
+  els.tarotSelectionHelp.textContent = selectedTarotCards.length
+    ? `เลือกแล้ว ${selectedTarotCards.length}/${spread.cards} ใบ ${selectedTarotCards.length >= spread.cards ? "กดอ่านคำทำนายได้เลย" : "เลือกไพ่ต่อให้ครบ"}`
+    : spread.summary;
+  if (els.tarotPickProgress) {
+    els.tarotPickProgress.style.width = `${Math.min(100, (selectedTarotCards.length / spread.cards) * 100)}%`;
+  }
+  els.drawTarotBtn.disabled = selectedTarotCards.length !== spread.cards;
+  document.querySelectorAll(".deck-select-card").forEach((button) => {
+    const selectedIndex = selectedTarotCards.findIndex((item) => String(item.deckIndex) === button.dataset.deckIndex);
+    button.classList.toggle("is-selected", selectedIndex >= 0);
+    const order = button.querySelector(".pick-order");
+    if (order) order.textContent = selectedIndex >= 0 ? selectedIndex + 1 : "";
+  });
+}
+
+function renderTarotDeck() {
+  if (!shuffledTarotDeck.length) {
+    shuffledTarotDeck = shuffleBySeed(tarotDeck, hashString(`${Date.now()}|${Math.random()}`));
+  }
+  if (els.tarotDeckCount) els.tarotDeckCount.textContent = tarotDeck.length;
+  els.tarotDeckGrid.innerHTML = shuffledTarotDeck.map((card, deckIndex) => `
+    <button class="deck-select-card" type="button" data-deck-index="${deckIndex}" style="--deck-i: ${deckIndex};" aria-label="เลือกไพ่ใบที่ ${deckIndex + 1}">
+      <img src="${tarotCardBackImage(180)}" alt="" onerror="this.remove()" />
+      <span class="card-back-fallback">✦</span>
+      <span class="pick-order"></span>
+    </button>
+  `).join("");
+  document.querySelectorAll(".deck-select-card").forEach((button) => {
+    button.addEventListener("click", () => {
+      const deckIndex = Number(button.dataset.deckIndex);
+      const selectedIndex = selectedTarotCards.findIndex((item) => item.deckIndex === deckIndex);
+      if (selectedIndex >= 0) {
+        selectedTarotCards.splice(selectedIndex, 1);
+      } else if (selectedTarotCards.length < tarotSpreadConfig().cards) {
+        const card = shuffledTarotDeck[deckIndex];
+        selectedTarotCards.push({ deckIndex, card, reversed: mod(hashString(`${card.id}|${deckIndex}|${selectedTarotCards.length}`), 5) === 0 });
+      }
+      tarotReadingMade = false;
+      updateTarotSelectionState();
+    });
+  });
+  updateTarotSelectionState();
+}
+
+function resetTarotDeck() {
+  const seed = hashString(`${Date.now()}|${activeTarotSpread}|${activeTarotTopic}|${els.tarotQuestion.value.trim()}`);
+  shuffledTarotDeck = shuffleBySeed(tarotDeck, seed);
+  selectedTarotCards = [];
+  tarotReadingMade = false;
+  els.tarotWorkspace?.classList.remove("is-result-mode");
+  renderTarotDeck();
+  renderTarotEmpty();
+}
+
+function showTarotPicker() {
+  els.tarotWorkspace?.classList.remove("is-result-mode");
+  els.tarotWorkspace?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function renderTarotEmpty() {
+  if (!els.tarotResult) return;
+  const spread = tarotSpreadConfig();
+  els.tarotMeta.textContent = `รอเลือกไพ่ · ${spread.label}`;
+  if (els.tarotDeckCount) els.tarotDeckCount.textContent = tarotDeck.length;
+  els.tarotResult.innerHTML = `
+    <article class="tarot-empty">
+      <span>พร้อมเริ่มอ่านไพ่</span>
+      <h3>${spread.title}</h3>
+      <p>${spread.summary} เลือกไพ่ให้ครบตามจำนวน แล้วกด “อ่านคำทำนาย” ระบบจะแสดงสรุปผลก่อน แล้วค่อยลงรายละเอียดรายใบ</p>
+    </article>
+  `;
+}
+
+function renderTarotReading() {
+  const spread = activeTarotSpread;
+  const topic = activeTarotTopic;
+  const question = els.tarotQuestion.value.trim();
+  const spreadInfo = tarotSpreadConfig(spread);
+  if (selectedTarotCards.length !== spreadInfo.cards) {
+    updateTarotSelectionState();
+    return;
+  }
+  const cards = spreadInfo.positions.map((position, index) => ({
+    position,
+    card: selectedTarotCards[index].card,
+    reversed: selectedTarotCards[index].reversed,
+  }));
+  tarotReadingMade = true;
+  els.tarotWorkspace?.classList.add("is-result-mode");
+  els.tarotMeta.textContent = `${tarotTopicText(topic)} · ${spreadInfo.label}`;
+  const questionLine = question ? `<p><strong>คำถาม:</strong> ${question}</p>` : "";
+  const action = tarotActionSummary(cards, topic);
+  const plainSummary = tarotPlainSummary(cards, topic);
+  els.tarotResult.innerHTML = `
+    <article class="tarot-final-summary">
+      <span>สรุปผลทำนาย</span>
+      <h3>${plainSummary.headline}</h3>
+      <p>${plainSummary.body}</p>
+      <strong>${plainSummary.next}</strong>
+    </article>
+    <article class="tarot-summary">
+      <h3>${tarotTopicText(topic)} · ${spreadInfo.title}</h3>
+      ${questionLine}
+      <p>${tarotSummary(cards, topic, spread)}</p>
+      <div class="tarot-insight-grid">
+        <div><span>ภาพรวมผลดวง</span><strong>${action.main}</strong></div>
+        <div><span>คำแนะนำ</span><strong>${action.action}</strong></div>
+        <div><span>ควรระวัง</span><strong>${action.caution}</strong></div>
+        <div><span>แนวโน้ม</span><strong>${action.outcome}</strong></div>
+      </div>
+    </article>
+    <div class="tarot-cards">
+      ${cards.map(({ position, card, reversed }) => `
+        <article class="tarot-card ${reversed ? "is-reversed" : ""}">
+          <div class="tarot-card-face">
+            <img src="${tarotCardImage(card) || tarotCardBackImage(460)}" alt="${card.th}" onerror="this.onerror=null;this.src='${tarotCardBackImage(460)}'" />
+            ${reversed ? `<span class="reversed-badge">ไพ่กลับหัว</span>` : ""}
+            <div class="tarot-card-symbol">
+              <b>${card.arcana === "major" ? "✦" : "✧"} ${card.th}</b>
+              <small>${card.theme}</small>
+            </div>
+          </div>
+          <div class="tarot-card-copy">
+            <span>${position}${reversed ? " · ไพ่กลับหัว" : ""}</span>
+            <h3>${card.th}</h3>
+            <p>${tarotPositionReading(position, card, topic, reversed)}</p>
+          </div>
+        </article>
+      `).join("")}
+    </div>
+  `;
+  els.tarotWorkspace?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function branchClashText(chart, todayPillar) {
@@ -1416,6 +2036,35 @@ function topicMapLabel(topic) {
   return ({ overall: "ภาพรวม", work: "งาน", money: "เงิน", love: "ความรัก", health: "สุขภาพใจ" })[topic] || "ภาพรวม";
 }
 
+function setPredictionMethod(method) {
+  els.appShell.dataset.method = method;
+  document.querySelectorAll(".method-card").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.method === method);
+  });
+  if (method === "bazi") {
+    els.appTitle.textContent = moduleTitles.bazi;
+    if (!predictionMade) renderLockedPreview();
+    return;
+  }
+  if (method === "tarot") {
+    els.appTitle.textContent = "ไพ่ยิปซี Tarot";
+    if (!tarotReadingMade) {
+      if (!shuffledTarotDeck.length) resetTarotDeck();
+      else {
+        renderTarotDeck();
+        renderTarotEmpty();
+      }
+    }
+    return;
+  }
+  els.appTitle.textContent = "หน้าหลัก";
+}
+
+document.querySelectorAll(".method-card").forEach((button) => {
+  if (!button.dataset.method) return;
+  button.addEventListener("click", () => setPredictionMethod(button.dataset.method));
+});
+
 document.querySelectorAll(".tab").forEach((button) => {
   button.addEventListener("click", () => {
     document.querySelectorAll(".tab, .tab-panel").forEach((el) => el.classList.remove("is-active"));
@@ -1474,7 +2123,37 @@ document.querySelector("#resetBtn").addEventListener("click", () => {
   lockResults("ตั้งดวงใหม่แล้ว กรอกข้อมูลให้ครบก่อนคำนาย");
 });
 
+els.homeBtn.addEventListener("click", () => setPredictionMethod("choose"));
+els.brandHomeBtn.addEventListener("click", () => setPredictionMethod("choose"));
+
 els.predictBtn.addEventListener("click", () => requestPrediction("prediction-button"));
+
+document.querySelectorAll("#tarotSpreadTabs button").forEach((button) => {
+  button.addEventListener("click", () => {
+    activeTarotSpread = button.dataset.spread;
+    document.querySelectorAll("#tarotSpreadTabs button").forEach((item) => item.classList.toggle("is-active", item === button));
+    resetTarotDeck();
+  });
+});
+
+document.querySelectorAll("#tarotTopicTabs button").forEach((button) => {
+  button.addEventListener("click", () => {
+    activeTarotTopic = button.dataset.topic;
+    document.querySelectorAll("#tarotTopicTabs button").forEach((item) => item.classList.toggle("is-active", item === button));
+    els.tarotWorkspace?.classList.remove("is-result-mode");
+    renderTarotEmpty();
+  });
+});
+
+els.shuffleTarotBtn.addEventListener("click", resetTarotDeck);
+els.drawTarotBtn.addEventListener("click", renderTarotReading);
+els.tarotBackBtn.addEventListener("click", showTarotPicker);
+els.tarotQuestion.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    if (selectedTarotCards.length === tarotSpreadConfig().cards) renderTarotReading();
+  }
+});
 
 [els.name, els.gender, els.date, els.time].forEach((el) => {
   el.addEventListener("input", () => {
@@ -1496,3 +2175,5 @@ els.oracleQuestion.addEventListener("input", () => {
 
 loadCustomBackgrounds();
 lockResults();
+renderTarotEmpty();
+setPredictionMethod("choose");
