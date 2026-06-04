@@ -3295,10 +3295,12 @@ blockquote {
 /* Home service chooser final layout. Keep this after global responsive rules. */
 .app-shell[data-method="choose"] {
   display: flex;
-  width: min(calc(100% - 48px), 1380px);
+  width: 100%;
+  max-width: none;
   min-height: 100svh;
   flex-direction: column;
   justify-content: flex-start;
+  margin: 0;
   padding: clamp(18px, 2.5svh, 34px) clamp(24px, 4vw, 72px) clamp(22px, 3svh, 44px);
 }
 
@@ -3330,8 +3332,7 @@ blockquote {
 
 .app-shell[data-method="choose"] .method-card,
 .app-shell[data-method="choose"] .method-card.is-coming {
-  display: grid;
-  grid-template-rows: minmax(170px, 42%) minmax(0, 1fr);
+  display: block;
   height: clamp(370px, 53svh, 520px);
   min-height: 0;
   max-height: none;
@@ -3339,36 +3340,126 @@ blockquote {
 
 .app-shell[data-method="choose"] .method-media,
 .app-shell[data-method="choose"] .method-card.is-coming .method-media {
-  position: relative;
-  inset: auto;
+  position: absolute;
+  inset: 0;
   min-height: 0;
+}
+
+.app-shell[data-method="choose"] .method-media::after {
+  background:
+    linear-gradient(180deg, rgba(255, 250, 244, 0.06) 0%, rgba(255, 250, 244, 0) 34%, rgba(13, 22, 18, 0.18) 56%, rgba(11, 18, 15, 0.66) 100%),
+    radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.16), transparent 32%);
+}
+
+.app-shell[data-method="choose"] .method-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .app-shell[data-method="choose"] .method-copy,
 .app-shell[data-method="choose"] .method-card.is-coming .method-copy {
-  position: relative;
-  inset: auto;
+  position: absolute;
+  inset: 0;
   display: flex;
   min-height: 0;
   flex-direction: column;
-  justify-content: space-between;
-  padding: clamp(20px, 2.5svh, 30px) clamp(22px, 2.4vw, 34px) clamp(20px, 2.5svh, 30px);
-  background: rgba(255, 250, 244, 0.98);
+  justify-content: flex-end;
+  padding: clamp(18px, 2.4svh, 26px);
+  color: #fffaf4;
+  border-top: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.app-shell[data-method="choose"] .method-card span,
+.app-shell[data-method="choose"] .method-card.is-coming span {
+  position: absolute;
+  top: clamp(14px, 2svh, 22px);
+  left: clamp(14px, 2svh, 22px);
+  margin: 0;
+  padding: 6px 12px;
+  color: #fff7ea;
+  border: 1px solid rgba(255, 244, 225, 0.42);
+  border-radius: 999px;
+  font-size: clamp(13px, 1.55svh, 15px);
+  line-height: 1;
+  background: rgba(39, 27, 19, 0.42);
+  box-shadow: 0 10px 26px rgba(15, 13, 11, 0.18);
+  backdrop-filter: blur(12px);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+}
+
+.app-shell[data-method="choose"] .method-card[data-method="bazi"] .method-copy span,
+.app-shell[data-method="choose"] .method-card[data-method="tarot"] .method-copy span {
+  color: #fff7ea;
 }
 
 .app-shell[data-method="choose"] .method-card strong,
 .app-shell[data-method="choose"] .method-card.is-coming strong {
-  font-size: clamp(30px, 4svh, 44px);
+  margin-bottom: 8px;
+  color: #fff;
+  font-size: clamp(28px, 4svh, 42px);
+  line-height: 1.06;
+  text-shadow: 0 8px 24px rgba(0, 0, 0, 0.46);
 }
 
 .app-shell[data-method="choose"] .method-card small,
 .app-shell[data-method="choose"] .method-card.is-coming small {
   min-height: 0;
-  font-size: clamp(15px, 1.8svh, 18px);
+  max-width: 30ch;
+  color: rgba(255, 250, 244, 0.9);
+  font-size: clamp(13px, 1.65svh, 16px);
+  line-height: 1.35;
+  text-shadow: 0 5px 18px rgba(0, 0, 0, 0.42);
 }
 
 .app-shell[data-method="choose"] .method-cta {
-  margin-top: clamp(16px, 2.5svh, 26px);
+  width: min(100%, 260px);
+  min-height: 40px;
+  margin-top: clamp(14px, 2svh, 22px);
+  font-size: clamp(15px, 1.8svh, 17px);
+  background: rgba(141, 16, 26, 0.92);
+  box-shadow: 0 12px 28px rgba(18, 14, 12, 0.24);
+  backdrop-filter: blur(10px);
+}
+
+.app-shell[data-method="choose"] .method-card[data-method="tarot"] .method-cta {
+  background: rgba(85, 46, 145, 0.92);
+}
+
+.app-shell[data-method="choose"] .method-card.is-coming .method-media::after {
+  background: linear-gradient(180deg, rgba(255, 250, 244, 0.08), rgba(255, 250, 244, 0.72));
+}
+
+.app-shell[data-method="choose"] .method-card.is-coming .method-copy {
+  color: #6e6258;
+  text-align: center;
+}
+
+.app-shell[data-method="choose"] .method-card.is-coming span,
+.app-shell[data-method="choose"] .method-card.is-coming strong {
+  color: #776a5e;
+}
+
+.app-shell[data-method="choose"] .method-card.is-coming span {
+  left: 50%;
+  transform: translateX(-50%);
+  color: #8a7b6b;
+  background: rgba(255, 255, 255, 0.58);
+  text-shadow: none;
+}
+
+.app-shell[data-method="choose"] .method-card.is-coming small {
+  max-width: 32ch;
+  margin-inline: auto;
+  color: #6e6258;
+  text-shadow: none;
+}
+
+.app-shell[data-method="choose"] .method-card.is-coming .method-cta {
+  width: min(100%, 260px);
+  margin-inline: auto;
 }
 
 @media (max-height: 780px) and (min-width: 981px) {
@@ -3435,7 +3526,8 @@ blockquote {
 
 @media (max-width: 980px) {
   .app-shell[data-method="choose"] {
-    width: min(calc(100% - 28px), 760px);
+    width: 100%;
+    max-width: none;
     padding: 24px 14px 48px;
   }
 
