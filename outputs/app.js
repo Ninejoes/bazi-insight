@@ -1,3 +1,23 @@
+const isBlockedDomain = typeof document !== "undefined" && document.documentElement.dataset.domainAllowed === "false";
+
+if ((typeof window !== "undefined" && window.__LIKHITFA_DOMAIN_ALLOWED__ === false) || isBlockedDomain) {
+  throw new Error("Likhitfa domain lock: unauthorized host");
+}
+
+if (typeof document !== "undefined") {
+  document.addEventListener("contextmenu", (event) => event.preventDefault());
+  document.addEventListener("dragstart", (event) => {
+    if (event.target?.closest?.("img, .deck-select-card, .tarot-card-face")) event.preventDefault();
+  });
+  document.addEventListener("copy", (event) => {
+    if (!event.target?.closest?.("input, textarea")) event.preventDefault();
+  });
+  document.addEventListener("keydown", (event) => {
+    const key = event.key.toLowerCase();
+    if ((event.metaKey || event.ctrlKey) && ["s", "u", "p"].includes(key)) event.preventDefault();
+  });
+}
+
 const stems = [
   { han: "甲", th: "เจี่ย", element: "ไม้", polarity: "+", className: "wood", quote: "เหมือนต้นไม้ใหญ่ที่ยืนหยัด เติบโตช้าแต่มั่นคง" },
   { han: "乙", th: "อี่", element: "ไม้", polarity: "-", className: "wood", quote: "เหมือนเถาวัลย์อ่อนโยน ปรับตัวเก่งและเชื่อมผู้คน" },
@@ -86,7 +106,6 @@ const els = {
   oracleReading: document.querySelector("#oracleReading"),
   tarotWorkspace: document.querySelector("#tarotWorkspace"),
   tarotQuestion: document.querySelector("#tarotQuestion"),
-  drawTarotBtn: document.querySelector("#drawTarotBtn"),
   shuffleTarotBtn: document.querySelector("#shuffleTarotBtn"),
   tarotSpreadTabs: document.querySelector("#tarotSpreadTabs"),
   tarotTopicTabs: document.querySelector("#tarotTopicTabs"),
@@ -558,7 +577,9 @@ let tarotReadingMade = false;
 let activeTarotSpread = "day";
 let activeTarotTopic = "overall";
 let shuffledTarotDeck = [];
+let visibleTarotDeck = [];
 let selectedTarotCards = [];
+let tarotHasShuffled = false;
 
 function loadCustomBackgrounds() {
   [
@@ -970,35 +991,28 @@ function tarotCardBackImage(width = 220) {
 function tarotSpreadConfig(spread = activeTarotSpread) {
   const spreads = {
     day: {
-      label: "1 วัน",
-      cards: 3,
-      title: "ไพ่ 3 ใบสำหรับวันนี้",
-      summary: "อ่านพลังหลัก สิ่งที่ควรทำ และสิ่งที่ควรระวังในวันนี้",
-      positions: ["พลังวันนี้", "สิ่งที่ควรทำ", "สิ่งที่ควรระวัง"],
+      label: "วันนี้",
+      cards: 1,
+      title: "ดวงวันนี้",
+      summary: "เลือกไพ่ 1 ใบ เพื่ออ่านพลังวันนี้ แล้วแยกผลเป็นภาพรวม งาน เงิน ความรัก ควรระวัง และคำแนะนำ",
+      positions: ["พลังวันนี้"],
     },
     week: {
-      label: "7 วัน",
+      label: "สัปดาห์นี้",
       cards: 7,
-      title: "ไพ่ 7 ใบสำหรับ 7 วัน",
-      summary: "อ่านแนวโน้มรายวันและจังหวะที่ควรโฟกัสในสัปดาห์นี้",
-      positions: ["วันที่ 1", "วันที่ 2", "วันที่ 3", "วันที่ 4", "วันที่ 5", "วันที่ 6", "วันที่ 7"],
+      title: "ดวงสัปดาห์นี้",
+      summary: "เลือกไพ่ 7 ใบ เพื่ออ่านแนวโน้มรายวัน พร้อมสรุปภาพรวมของสัปดาห์",
+      positions: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
     },
     month: {
-      label: "30 วัน",
+      label: "เดือนนี้",
       cards: 10,
-      title: "Celtic Cross สำหรับ 30 วัน",
-      summary: "อ่านภาพรวมเดือนด้วยไพ่ 10 ใบ เพื่อดูแกนเรื่อง อุปสรรค แนวโน้ม และผลลัพธ์",
-      positions: ["แกนสถานการณ์", "สิ่งที่ท้าทาย", "รากของเรื่อง", "อดีตใกล้", "เป้าหมาย", "แนวโน้มถัดไป", "ตัวคุณ", "สิ่งรอบตัว", "ความหวัง/ความกังวล", "ผลลัพธ์"],
-    },
-    celtic: {
-      label: "Celtic Cross",
-      cards: 10,
-      title: "Celtic Cross 10 ใบ",
-      summary: "อ่านคำถามแบบละเอียดจากสถานการณ์ปัจจุบัน รากของเรื่อง อิทธิพลรอบตัว และทิศทางผลลัพธ์",
-      positions: ["สถานการณ์ปัจจุบัน", "อุปสรรค/แรงต้าน", "รากของเรื่อง", "อดีตที่ส่งผล", "สิ่งที่มองเห็น/เป้าหมาย", "อนาคตใกล้", "ท่าทีของคุณ", "อิทธิพลรอบตัว", "ความหวัง/ความกลัว", "ผลลัพธ์โดยรวม"],
+      title: "ดวงเดือนนี้ 10 ใบ",
+      summary: "เลือกไพ่ 10 ใบ เพื่ออ่านสถานการณ์หลัก สิ่งท้าทาย รากของเรื่อง แนวโน้ม และผลลัพธ์โดยรวมของเดือนนี้",
+      positions: ["Career", "Finance", "Love", "Health", "Family", "Travel", "Learning", "Opportunity", "Challenge", "Advice"],
     },
   };
-  return spreads[spread] || spreads.day;
+  return spreads[spread] || null;
 }
 
 function tarotTopicText(topic) {
@@ -1051,6 +1065,33 @@ function tarotPositionReading(position, card, topic, reversed) {
   const orientation = reversed ? "พลังติดขัด/ต้องทบทวน" : "พลังเปิดทาง";
   const positionHint = {
     "พลังวันนี้": "เป็นบรรยากาศหลักของวันนี้",
+    "Current Energy": "คือพลังหลักที่ครอบวันนี้",
+    "Work": "บอกจังหวะด้านงานและการลงมือ",
+    "Money": "บอกจังหวะการเงินและการตัดสินใจเรื่องทรัพย์",
+    "Love": "สะท้อนความสัมพันธ์และการสื่อสารด้วยใจ",
+    "Advice": "คือคำแนะนำที่ควรถือไว้ก่อนตัดสินใจ",
+    "Monday": "คือจังหวะของวันจันทร์",
+    "Tuesday": "คือจังหวะของวันอังคาร",
+    "Wednesday": "คือจังหวะของวันพุธ",
+    "Thursday": "คือจังหวะของวันพฤหัสบดี",
+    "Friday": "คือจังหวะของวันศุกร์",
+    "Saturday": "คือจังหวะของวันเสาร์",
+    "Sunday": "คือจังหวะของวันอาทิตย์",
+    "Career": "คือทิศทางงานและเป้าหมายของเดือนนี้",
+    "Finance": "คือจังหวะการเงิน รายรับ รายจ่าย และความมั่นคง",
+    "Health": "คือสัญญาณด้านพลังใจ พลังงาน และการดูแลตัวเอง",
+    "Family": "คือเรื่องบ้าน ครอบครัว หรือคนใกล้ตัว",
+    "Travel": "คือจังหวะการเดินทาง การย้ายที่ หรือการเปลี่ยนสภาพแวดล้อม",
+    "Learning": "คือสิ่งที่ควรเรียนรู้ ปรับตัว หรือทบทวน",
+    "Opportunity": "คือโอกาสที่ควรมองเห็นและคว้าจังหวะ",
+    "Challenge": "คือข้อท้าทายที่ควรระวังในเดือนนี้",
+    "สถานการณ์หลักของเดือน": "คือแกนหลักที่เดือนนี้จะพาคุณเจอ",
+    "สิ่งที่ขวาง/ท้าทาย": "คือเงื่อนไขที่ทำให้เรื่องไม่ไหลง่าย",
+    "สิ่งที่เพิ่งผ่านมา": "สะท้อนเหตุการณ์หรืออารมณ์ที่เพิ่งส่งผลถึงตอนนี้",
+    "สิ่งที่ควรโฟกัส": "บอกเรื่องที่ควรใช้แรงและเวลาให้ชัด",
+    "แนวโน้มใกล้ ๆ": "คือทิศทางที่จะเริ่มเห็นในช่วงถัดไป",
+    "ตัวผู้ถาม": "สะท้อนท่าทีและพลังของคุณในเรื่องนี้",
+    "สิ่งแวดล้อม/คนรอบตัว": "บอกแรงจากคนรอบตัวหรือบริบทภายนอก",
     "สิ่งที่ควรทำ": "คือวิธีใช้พลังให้เกิดผล",
     "สิ่งที่ควรระวัง": "คือจุดที่ควรตรวจให้รอบคอบ",
     "แกนสถานการณ์": "บอกแกนของเรื่องในช่วงนี้",
@@ -1132,16 +1173,82 @@ function tarotActionSummary(cards, topic) {
   };
 }
 
+function tarotPositionLabel(position, index, spread = activeTarotSpread) {
+  const monthLabels = [
+    "สถานะของเจ้าชะตา",
+    "สถานการณ์ทั่วไปในช่วงนี้",
+    "สิ่งที่มุ่งหวัง",
+    "อดีตที่ผ่านมา",
+    "สิ่งที่เพิ่งเกิดขึ้น",
+    "อนาคตที่จะเกิดขึ้น",
+    "ปัญหาและแนวทางแก้ไข",
+    "อิทธิพลรอบข้าง",
+    "ความคิดภายในใจ",
+    "บทสรุป",
+  ];
+  const weekLabels = ["วันจันทร์", "วันอังคาร", "วันพุธ", "วันพฤหัสบดี", "วันศุกร์", "วันเสาร์", "วันอาทิตย์"];
+  if (spread === "month") return monthLabels[index] || position;
+  if (spread === "week") return weekLabels[index] || position;
+  return "พลังวันนี้";
+}
+
+function renderDailyReadingSections(cardItem) {
+  const card = cardItem.card;
+  const reversed = cardItem.reversed;
+  const sections = ["Current Energy", "Work", "Money", "Love", "Advice"];
+  return `
+    <div class="tarot-insight-grid daily-reading-grid">
+      ${sections.map((position) => `
+        <div>
+          <span>${position}</span>
+          <strong>${tarotPositionReading(position, card, "overall", reversed)}</strong>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function updateTarotStepper() {
+  const spread = tarotSpreadConfig();
+  const complete = spread && selectedTarotCards.length === spread.cards;
+  const currentStep = complete ? "reveal" : tarotHasShuffled ? "select" : "shuffle";
+  if (!document.querySelector("#tarotStepper")) return;
+  document.querySelectorAll("#tarotStepper .stepper-item").forEach((item) => {
+    item.classList.toggle("is-active", item.dataset.step === currentStep);
+    item.classList.toggle("is-done", item.dataset.step === "shuffle" && tarotHasShuffled);
+  });
+}
+
+function tarotCounterText(spread) {
+  return `เลือกแล้ว ${selectedTarotCards.length} / ${spread.cards} ใบ`;
+}
+
 function updateTarotSelectionState() {
   const spread = tarotSpreadConfig();
-  els.tarotSelectionTitle.textContent = `กรุณาเลือกไพ่ ${spread.cards} ใบ`;
-  els.tarotSelectionHelp.textContent = selectedTarotCards.length
-    ? `เลือกแล้ว ${selectedTarotCards.length}/${spread.cards} ใบ ${selectedTarotCards.length >= spread.cards ? "กดอ่านคำทำนายได้เลย" : "เลือกไพ่ต่อให้ครบ"}`
-    : spread.summary;
+  if (!spread) {
+    els.tarotSelectionTitle.textContent = "เลือกช่วงคำทำนายก่อน";
+    els.tarotSelectionHelp.textContent = "เลือกวันนี้ สัปดาห์นี้ หรือเดือนนี้ แล้วระบบจะสับไพ่ชุดใหม่ให้";
+    if (els.tarotPickProgress) els.tarotPickProgress.style.width = "0%";
+    els.tarotDeckGrid.innerHTML = `
+      <div class="tarot-start-hint">
+        <strong>ยังไม่ได้เลือกช่วงเวลา</strong>
+        <span>แตะปุ่มด้านบนเพื่อเริ่มเลือกไพ่</span>
+      </div>
+    `;
+    return;
+  }
+  const nextPick = Math.min(selectedTarotCards.length + 1, spread.cards);
+  els.tarotSelectionTitle.textContent = tarotHasShuffled
+    ? selectedTarotCards.length >= spread.cards
+      ? `เลือกครบ ${spread.cards} ใบแล้ว`
+      : `เลือกไพ่ ${nextPick} จาก ${spread.cards}`
+    : "กองไพ่ทาโรต์";
+  els.tarotSelectionHelp.textContent = tarotHasShuffled ? `${tarotCounterText(spread)} · ${spread.summary}` : "กดสับไพ่เพื่อสุ่มไพ่ 54 ใบสำหรับเลือก";
   if (els.tarotPickProgress) {
     els.tarotPickProgress.style.width = `${Math.min(100, (selectedTarotCards.length / spread.cards) * 100)}%`;
   }
-  els.drawTarotBtn.disabled = selectedTarotCards.length !== spread.cards;
+  els.shuffleTarotBtn.textContent = tarotHasShuffled ? "สับไพ่ใหม่" : "สับไพ่";
+  updateTarotStepper();
   document.querySelectorAll(".deck-select-card").forEach((button) => {
     const selectedIndex = selectedTarotCards.findIndex((item) => String(item.deckIndex) === button.dataset.deckIndex);
     button.classList.toggle("is-selected", selectedIndex >= 0);
@@ -1151,11 +1258,32 @@ function updateTarotSelectionState() {
 }
 
 function renderTarotDeck() {
-  if (!shuffledTarotDeck.length) {
-    shuffledTarotDeck = shuffleBySeed(tarotDeck, hashString(`${Date.now()}|${Math.random()}`));
+  if (!tarotSpreadConfig()) {
+    updateTarotSelectionState();
+    return;
   }
-  if (els.tarotDeckCount) els.tarotDeckCount.textContent = tarotDeck.length;
-  els.tarotDeckGrid.innerHTML = shuffledTarotDeck.map((card, deckIndex) => `
+  if (!tarotHasShuffled) {
+    els.tarotDeckGrid.classList.add("is-deck-ready");
+    els.tarotDeckGrid.classList.remove("is-card-selection");
+    els.tarotDeckGrid.innerHTML = `
+      <button class="tarot-deck-stack" type="button" id="tarotDeckStack" aria-label="กดเพื่อสับไพ่">
+        <span class="deck-card-layer layer-one"></span>
+        <span class="deck-card-layer layer-two"></span>
+        <span class="deck-card-layer layer-three"></span>
+        <span class="deck-card-label">กองไพ่ทาโรต์</span>
+      </button>
+    `;
+    document.querySelector("#tarotDeckStack")?.addEventListener("click", resetTarotDeck);
+    updateTarotSelectionState();
+    return;
+  }
+  if (!visibleTarotDeck.length) {
+    visibleTarotDeck = shuffledTarotDeck.slice(0, 54);
+  }
+  if (els.tarotDeckCount) els.tarotDeckCount.textContent = visibleTarotDeck.length;
+  els.tarotDeckGrid.classList.remove("is-deck-ready");
+  els.tarotDeckGrid.classList.add("is-card-selection");
+  els.tarotDeckGrid.innerHTML = visibleTarotDeck.map((card, deckIndex) => `
     <button class="deck-select-card" type="button" data-deck-index="${deckIndex}" style="--deck-i: ${deckIndex};" aria-label="เลือกไพ่ใบที่ ${deckIndex + 1}">
       <img src="${tarotCardBackImage(180)}" alt="" onerror="this.remove()" />
       <span class="card-back-fallback">✦</span>
@@ -1169,20 +1297,25 @@ function renderTarotDeck() {
       if (selectedIndex >= 0) {
         selectedTarotCards.splice(selectedIndex, 1);
       } else if (selectedTarotCards.length < tarotSpreadConfig().cards) {
-        const card = shuffledTarotDeck[deckIndex];
+        const card = visibleTarotDeck[deckIndex];
         selectedTarotCards.push({ deckIndex, card, reversed: mod(hashString(`${card.id}|${deckIndex}|${selectedTarotCards.length}`), 5) === 0 });
       }
       tarotReadingMade = false;
       updateTarotSelectionState();
+      if (selectedTarotCards.length === tarotSpreadConfig().cards) {
+        window.setTimeout(renderTarotReading, 220);
+      }
     });
   });
   updateTarotSelectionState();
 }
 
 function resetTarotDeck() {
-  const seed = hashString(`${Date.now()}|${activeTarotSpread}|${activeTarotTopic}|${els.tarotQuestion.value.trim()}`);
+  const seed = hashString(`${Date.now()}|${activeTarotSpread}|${Math.random()}`);
   shuffledTarotDeck = shuffleBySeed(tarotDeck, seed);
+  visibleTarotDeck = shuffledTarotDeck.slice(0, 54);
   selectedTarotCards = [];
+  tarotHasShuffled = true;
   tarotReadingMade = false;
   els.tarotWorkspace?.classList.remove("is-result-mode");
   renderTarotDeck();
@@ -1190,20 +1323,42 @@ function resetTarotDeck() {
 }
 
 function showTarotPicker() {
+  const currentSpread = activeTarotSpread || "day";
+  activeTarotSpread = currentSpread;
+  selectedTarotCards = [];
+  shuffledTarotDeck = [];
+  visibleTarotDeck = [];
+  tarotHasShuffled = false;
+  tarotReadingMade = false;
   els.tarotWorkspace?.classList.remove("is-result-mode");
-  els.tarotWorkspace?.scrollIntoView({ behavior: "smooth", block: "start" });
+  document.querySelectorAll("#tarotSpreadTabs button").forEach((item) => {
+    item.classList.toggle("is-active", item.dataset.spread === activeTarotSpread);
+  });
+  renderTarotDeck();
+  renderTarotEmpty();
+  els.tarotDeckGrid?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function renderTarotEmpty() {
   if (!els.tarotResult) return;
   const spread = tarotSpreadConfig();
-  els.tarotMeta.textContent = `รอเลือกไพ่ · ${spread.label}`;
+  els.tarotMeta.textContent = spread ? `รอเลือกไพ่ · ${spread.label}` : "รอเลือกช่วงคำทำนาย";
   if (els.tarotDeckCount) els.tarotDeckCount.textContent = tarotDeck.length;
+  if (!spread) {
+    els.tarotResult.innerHTML = `
+      <article class="tarot-empty">
+        <span>เริ่มใหม่</span>
+        <h3>เลือกช่วงคำทำนายก่อน</h3>
+        <p>ระบบจะไม่เลือกค่าเริ่มต้นให้ และจะสับไพ่ใหม่ทุกครั้งที่เข้าหน้าไพ่ยิปซี</p>
+      </article>
+    `;
+    return;
+  }
   els.tarotResult.innerHTML = `
     <article class="tarot-empty">
       <span>พร้อมเริ่มอ่านไพ่</span>
       <h3>${spread.title}</h3>
-      <p>${spread.summary} เลือกไพ่ให้ครบตามจำนวน แล้วกด “อ่านคำทำนาย” ระบบจะแสดงสรุปผลก่อน แล้วค่อยลงรายละเอียดรายใบ</p>
+      <p>${spread.summary} เลือกไพ่ให้ครบตามจำนวน ระบบจะเปิดผลทำนายให้อัตโนมัติ</p>
     </article>
   `;
 }
@@ -1211,8 +1366,12 @@ function renderTarotEmpty() {
 function renderTarotReading() {
   const spread = activeTarotSpread;
   const topic = activeTarotTopic;
-  const question = els.tarotQuestion.value.trim();
+  const question = "";
   const spreadInfo = tarotSpreadConfig(spread);
+  if (!spreadInfo) {
+    updateTarotSelectionState();
+    return;
+  }
   if (selectedTarotCards.length !== spreadInfo.cards) {
     updateTarotSelectionState();
     return;
@@ -1224,42 +1383,34 @@ function renderTarotReading() {
   }));
   tarotReadingMade = true;
   els.tarotWorkspace?.classList.add("is-result-mode");
-  els.tarotMeta.textContent = `${tarotTopicText(topic)} · ${spreadInfo.label}`;
+  els.tarotMeta.textContent = "";
   const questionLine = question ? `<p><strong>คำถาม:</strong> ${question}</p>` : "";
-  const action = tarotActionSummary(cards, topic);
-  const plainSummary = tarotPlainSummary(cards, topic);
   els.tarotResult.innerHTML = `
-    <article class="tarot-final-summary">
-      <span>สรุปผลทำนาย</span>
-      <h3>${plainSummary.headline}</h3>
-      <p>${plainSummary.body}</p>
-      <strong>${plainSummary.next}</strong>
-    </article>
-    <article class="tarot-summary">
-      <h3>${tarotTopicText(topic)} · ${spreadInfo.title}</h3>
+    <article class="tarot-spread-board tarot-spread-board-${spread}">
+      <h3>${spreadInfo.title}</h3>
       ${questionLine}
-      <p>${tarotSummary(cards, topic, spread)}</p>
-      <div class="tarot-insight-grid">
-        <div><span>ภาพรวมผลดวง</span><strong>${action.main}</strong></div>
-        <div><span>คำแนะนำ</span><strong>${action.action}</strong></div>
-        <div><span>ควรระวัง</span><strong>${action.caution}</strong></div>
-        <div><span>แนวโน้ม</span><strong>${action.outcome}</strong></div>
+      <div class="tarot-spread-map">
+        ${cards.map(({ position, card, reversed }, index) => `
+          <a class="tarot-map-card" href="#tarot-reading-${index + 1}">
+            <span>${index + 1}</span>
+            <img src="${tarotCardImage(card, 260) || tarotCardBackImage(260)}" alt="${card.th}" onerror="this.onerror=null;this.src='${tarotCardBackImage(260)}'" />
+            <strong>${tarotPositionLabel(position, index, spread)}</strong>
+            <small>${card.th}${reversed ? " · ไพ่กลับหัว" : ""}</small>
+          </a>
+        `).join("")}
       </div>
     </article>
-    <div class="tarot-cards">
-      ${cards.map(({ position, card, reversed }) => `
-        <article class="tarot-card ${reversed ? "is-reversed" : ""}">
-          <div class="tarot-card-face">
-            <img src="${tarotCardImage(card) || tarotCardBackImage(460)}" alt="${card.th}" onerror="this.onerror=null;this.src='${tarotCardBackImage(460)}'" />
+    <div class="tarot-reading-list">
+      ${cards.map(({ position, card, reversed }, index) => `
+        <article class="tarot-reading-item ${reversed ? "is-reversed" : ""}" id="tarot-reading-${index + 1}">
+          <div class="tarot-reading-thumb">
+            <img src="${tarotCardImage(card, 260) || tarotCardBackImage(260)}" alt="${card.th}" onerror="this.onerror=null;this.src='${tarotCardBackImage(260)}'" />
             ${reversed ? `<span class="reversed-badge">ไพ่กลับหัว</span>` : ""}
-            <div class="tarot-card-symbol">
-              <b>${card.arcana === "major" ? "✦" : "✧"} ${card.th}</b>
-              <small>${card.theme}</small>
-            </div>
           </div>
-          <div class="tarot-card-copy">
-            <span>${position}${reversed ? " · ไพ่กลับหัว" : ""}</span>
-            <h3>${card.th}</h3>
+          <div class="tarot-reading-copy">
+            <span>ตำแหน่งที่ ${index + 1} ${tarotPositionLabel(position, index, spread)}</span>
+            <h3>${card.th}${reversed ? " · ไพ่กลับหัว" : ""}</h3>
+            <p class="tarot-card-name">ไพ่ที่ได้คือ ${card.th}${reversed ? " ในรูปแบบไพ่กลับหัว" : ""}</p>
             <p>${tarotPositionReading(position, card, topic, reversed)}</p>
           </div>
         </article>
@@ -2048,16 +2199,26 @@ function setPredictionMethod(method) {
   }
   if (method === "tarot") {
     els.appTitle.textContent = "ไพ่ยิปซี Tarot";
-    if (!tarotReadingMade) {
-      if (!shuffledTarotDeck.length) resetTarotDeck();
-      else {
-        renderTarotDeck();
-        renderTarotEmpty();
-      }
-    }
+    resetTarotFlow();
     return;
   }
   els.appTitle.textContent = "หน้าหลัก";
+}
+
+function resetTarotFlow() {
+  activeTarotSpread = "day";
+  activeTarotTopic = "overall";
+  selectedTarotCards = [];
+  shuffledTarotDeck = [];
+  visibleTarotDeck = [];
+  tarotHasShuffled = false;
+  tarotReadingMade = false;
+  els.tarotWorkspace?.classList.remove("is-result-mode");
+  document.querySelectorAll("#tarotSpreadTabs button").forEach((item) => {
+    item.classList.toggle("is-active", item.dataset.spread === activeTarotSpread);
+  });
+  renderTarotEmpty();
+  renderTarotDeck();
 }
 
 document.querySelectorAll(".method-card").forEach((button) => {
@@ -2132,7 +2293,14 @@ document.querySelectorAll("#tarotSpreadTabs button").forEach((button) => {
   button.addEventListener("click", () => {
     activeTarotSpread = button.dataset.spread;
     document.querySelectorAll("#tarotSpreadTabs button").forEach((item) => item.classList.toggle("is-active", item === button));
-    resetTarotDeck();
+    selectedTarotCards = [];
+    shuffledTarotDeck = [];
+    visibleTarotDeck = [];
+    tarotHasShuffled = false;
+    tarotReadingMade = false;
+    els.tarotWorkspace?.classList.remove("is-result-mode");
+    renderTarotDeck();
+    renderTarotEmpty();
   });
 });
 
@@ -2146,9 +2314,8 @@ document.querySelectorAll("#tarotTopicTabs button").forEach((button) => {
 });
 
 els.shuffleTarotBtn.addEventListener("click", resetTarotDeck);
-els.drawTarotBtn.addEventListener("click", renderTarotReading);
 els.tarotBackBtn.addEventListener("click", showTarotPicker);
-els.tarotQuestion.addEventListener("keydown", (event) => {
+els.tarotQuestion?.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     event.preventDefault();
     if (selectedTarotCards.length === tarotSpreadConfig().cards) renderTarotReading();

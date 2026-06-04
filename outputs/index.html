@@ -53,7 +53,7 @@
         <div class="method-heading">
           <p class="eyebrow">Likhitfa Services</p>
           <h2>เลือกบริการดูดวง</h2>
-          <p>หน้าหลักนี้เตรียมไว้สำหรับเพิ่มบริการอื่นในอนาคต เลือกประเภทที่ต้องการ แล้วระบบจะพาเข้าไปหน้าใช้งานของบริการนั้นโดยตรง</p>
+          <p>เลือกประเภทคำทำนายที่ต้องการ ระบบจะพาเข้าไปยังหน้าดูดวงของบริการนั้นโดยตรง</p>
         </div>
         <div class="method-grid">
           <button class="method-card" type="button" data-method="bazi">
@@ -73,7 +73,7 @@
             <div class="method-copy">
               <span>ไพ่ยิปซี</span>
               <strong>Tarot Reading</strong>
-              <small>เลือกช่วงเวลา 1 วัน 7 วัน หรือ 30 วัน แล้วเปิดไพ่ตามเรื่องที่อยากรู้</small>
+              <small>เลือกดูวันนี้ สัปดาห์นี้ หรือเดือนนี้ แล้วเปิดไพ่เพื่ออ่านแนวโน้ม</small>
             </div>
           </button>
           <article class="method-card is-coming">
@@ -309,42 +309,23 @@
             <div>
               <h3>เลือกช่วงคำทำนาย</h3>
               <div class="tarot-tabs" id="tarotSpreadTabs" aria-label="เลือกรูปแบบคำทำนาย">
-                <button class="is-active" type="button" data-spread="day">1 วัน</button>
-                <button type="button" data-spread="week">7 วัน</button>
-                <button type="button" data-spread="month">30 วัน</button>
-                <button type="button" data-spread="celtic">Celtic Cross</button>
-              </div>
-            </div>
-          </div>
-          <div class="tarot-step-card">
-            <div class="step-label">2</div>
-            <div>
-              <h3>เลือกเรื่องที่อยากดู</h3>
-              <div class="tarot-tabs secondary" id="tarotTopicTabs" aria-label="เลือกเรื่องที่อยากดู">
-                <button class="is-active" type="button" data-topic="overall">ภาพรวม</button>
-                <button type="button" data-topic="work">งาน</button>
-                <button type="button" data-topic="money">เงิน</button>
-                <button type="button" data-topic="love">ความรัก</button>
-                <button type="button" data-topic="mind">สุขภาพใจ</button>
-              </div>
-              <div class="field tarot-question-field">
-                <label for="tarotQuestion">คำถามเพิ่มเติม</label>
-                <input id="tarotQuestion" type="text" placeholder="เช่น 7 วันนี้ควรโฟกัสเรื่องอะไร" />
+                <button type="button" data-spread="day">วันนี้</button>
+                <button type="button" data-spread="week">สัปดาห์นี้</button>
+                <button type="button" data-spread="month">เดือนนี้</button>
               </div>
             </div>
           </div>
           <div class="tarot-deck-panel">
             <div class="tarot-deck-head">
               <div>
-                <strong id="tarotSelectionTitle">กรุณาเลือกไพ่ 3 ใบ</strong>
-                <span id="tarotSelectionHelp">แตะไพ่จากสำรับด้านล่าง เลือกครบแล้วกดอ่านคำทำนาย</span>
+                <strong id="tarotSelectionTitle">เลือกช่วงคำทำนายก่อน</strong>
+                <span id="tarotSelectionHelp">ระบบจะสับไพ่ชุดใหม่ให้ทันทีหลังเลือกช่วงเวลา</span>
                 <div class="tarot-progress" aria-hidden="true"><span id="tarotPickProgress"></span></div>
               </div>
             </div>
             <div class="tarot-deck-grid" id="tarotDeckGrid" aria-label="สำรับไพ่ให้เลือก"></div>
             <div class="tarot-actions tarot-deck-actions">
-              <button class="ghost-btn" id="shuffleTarotBtn" type="button">สับไพ่ใหม่</button>
-              <button class="predict-btn" id="drawTarotBtn" type="button" disabled>อ่านคำทำนาย</button>
+              <button class="ghost-btn" id="shuffleTarotBtn" type="button">สับไพ่</button>
             </div>
             <p class="tarot-warning">คำทำนายไพ่เป็นแนวทางเพื่อการทบทวนตนเอง ไม่ควรใช้แทนคำแนะนำด้านการแพทย์ การเงิน หรือกฎหมาย</p>
           </div>
@@ -364,6 +345,43 @@
 
     </div>
 
+    <script>
+      (function () {
+        const allowedHosts = new Set([
+          "likhitfa.online",
+          "www.likhitfa.online",
+          "https-sesheta-app-ttclid-e-c.vercel.app",
+          "localhost",
+          "127.0.0.1",
+          "::1"
+        ]);
+        const isFilePreview = window.location.protocol === "file:";
+        const isAllowedHost = isFilePreview || allowedHosts.has(window.location.hostname);
+        window.__LIKHITFA_DOMAIN_ALLOWED__ = isAllowedHost;
+        document.documentElement.dataset.domainAllowed = isAllowedHost ? "true" : "false";
+
+        function showDomainLock() {
+          document.body.innerHTML = [
+            '<main class="copy-guard-screen">',
+            '<section>',
+            '<strong>LIKHITFA</strong>',
+            '<h1>ไม่สามารถเปิดใช้งานบนโดเมนนี้ได้</h1>',
+            '<p>ระบบนี้อนุญาตให้ใช้งานผ่านเว็บไซต์ทางการของ Likhitfa เท่านั้น</p>',
+            '<a href="https://www.likhitfa.online/">ไปยังเว็บไซต์ทางการ</a>',
+            '</section>',
+            '</main>'
+          ].join("");
+        }
+
+        if (!isAllowedHost) {
+          if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", showDomainLock, { once: true });
+          } else {
+            showDomainLock();
+          }
+        }
+      })();
+    </script>
     <script src="./app.js"></script>
   </body>
 </html>
