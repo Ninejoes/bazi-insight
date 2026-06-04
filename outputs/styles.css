@@ -307,6 +307,80 @@ h1 span {
   display: none;
 }
 
+.app-shell[data-method="choose"] {
+  width: min(calc(100% - 48px), 1320px);
+  min-height: 100svh;
+  padding: 28px clamp(18px, 3vw, 40px) 42px;
+  color: #24312d;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.84) 30%, rgba(250, 244, 236, 0.9) 100%),
+    linear-gradient(180deg, #fffdfa, #f7efe6);
+  box-shadow: none;
+}
+
+.app-shell[data-method="choose"]::before {
+  background:
+    radial-gradient(circle at 50% 5%, rgba(200, 150, 69, 0.12), transparent 28%),
+    radial-gradient(circle at 12% 78%, rgba(142, 78, 48, 0.08), transparent 28%),
+    radial-gradient(circle at 88% 74%, rgba(99, 64, 135, 0.08), transparent 28%);
+  backdrop-filter: none;
+}
+
+.app-shell[data-method="choose"] .topbar {
+  display: flex;
+  justify-content: center;
+  color: #3d2b21;
+}
+
+.app-shell[data-method="choose"] .brand-lockup {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.app-shell[data-method="choose"] .brand-mark {
+  width: 52px;
+  height: 52px;
+  box-shadow: 0 8px 22px rgba(87, 57, 35, 0.12), 0 0 0 1px rgba(103, 68, 44, 0.18);
+}
+
+.app-shell[data-method="choose"] .brand-mark svg {
+  width: 42px;
+  height: 42px;
+}
+
+.app-shell[data-method="choose"] .brand {
+  margin: 0;
+  color: #4a3024;
+  font-size: 18px;
+  letter-spacing: 0.08em;
+}
+
+.app-shell[data-method="choose"] h1 {
+  margin: 0;
+  color: #241a15;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-shadow: none;
+}
+
+.app-shell[data-method="choose"] h1 span {
+  display: block;
+  margin-top: 2px;
+  color: #241a15;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.app-shell[data-method="choose"] .module-title {
+  display: none;
+}
+
 .home-screen {
   margin-top: 26px;
   border: 1px solid rgba(255, 255, 255, 0.62);
@@ -320,14 +394,41 @@ h1 span {
   backdrop-filter: blur(18px);
 }
 
+.app-shell[data-method="choose"] .home-screen {
+  margin: 36px auto 0;
+  max-width: 1220px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
 .method-heading {
   max-width: 960px;
+}
+
+.app-shell[data-method="choose"] .method-heading {
+  max-width: 100%;
+  text-align: center;
+}
+
+.app-shell[data-method="choose"] .method-heading .eyebrow {
+  display: none;
 }
 
 .method-heading h2 {
   margin-bottom: 10px;
   font-size: clamp(34px, 4vw, 52px);
   line-height: 1.18;
+}
+
+.app-shell[data-method="choose"] .method-heading h2 {
+  margin-bottom: 0;
+  color: #2d3333;
+  font-size: clamp(34px, 4vw, 48px);
+  font-weight: 800;
+  letter-spacing: 0;
 }
 
 .method-heading p {
@@ -337,11 +438,22 @@ h1 span {
   line-height: 1.55;
 }
 
+.app-shell[data-method="choose"] .method-heading p {
+  display: none;
+}
+
 .method-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: clamp(18px, 2vw, 28px);
   margin-top: clamp(24px, 3vw, 38px);
+}
+
+.app-shell[data-method="choose"] .method-grid {
+  grid-template-columns: repeat(3, minmax(0, 380px));
+  justify-content: center;
+  gap: 24px;
+  margin-top: 34px;
 }
 
 .method-card {
@@ -361,11 +473,30 @@ h1 span {
   transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
 
+.app-shell[data-method="choose"] .method-card {
+  display: block;
+  min-height: 520px;
+  overflow: hidden;
+  color: #1e2a25;
+  text-align: center;
+  border: 1px solid rgba(190, 154, 95, 0.22);
+  border-radius: 14px;
+  background: #fffaf3;
+  box-shadow: 0 22px 54px rgba(63, 44, 30, 0.1);
+}
+
 .method-card:hover,
 .method-card.is-active {
   transform: translateY(-6px);
   border-color: rgba(247, 210, 139, 0.9);
   box-shadow: 0 32px 72px rgba(4, 18, 15, 0.26), 0 0 0 3px rgba(217, 178, 111, 0.14);
+}
+
+.app-shell[data-method="choose"] .method-card:hover,
+.app-shell[data-method="choose"] .method-card.is-active {
+  transform: translateY(-5px);
+  border-color: rgba(217, 178, 111, 0.54);
+  box-shadow: 0 30px 74px rgba(63, 44, 30, 0.16), 0 0 0 4px rgba(217, 178, 111, 0.08);
 }
 
 .method-media {
@@ -377,6 +508,13 @@ h1 span {
     linear-gradient(145deg, #102f2c, #061916);
 }
 
+.app-shell[data-method="choose"] .method-media {
+  position: absolute;
+  inset: 0;
+  aspect-ratio: auto;
+  background: #f7efe8;
+}
+
 .method-media::after {
   position: absolute;
   inset: 0;
@@ -384,6 +522,12 @@ h1 span {
   background:
     linear-gradient(180deg, rgba(4, 18, 15, 0.08) 0%, rgba(4, 18, 15, 0.14) 38%, rgba(4, 18, 15, 0.72) 100%),
     radial-gradient(circle at 78% 15%, rgba(255, 232, 170, 0.16), transparent 24%);
+}
+
+.app-shell[data-method="choose"] .method-media::after {
+  background:
+    linear-gradient(180deg, rgba(255, 250, 244, 0) 0%, rgba(255, 247, 236, 0.04) 36%, rgba(255, 247, 236, 0.7) 70%, rgba(255, 250, 244, 0.97) 100%),
+    radial-gradient(circle at 50% 18%, rgba(255, 235, 190, 0.2), transparent 30%);
 }
 
 .method-media img {
@@ -394,13 +538,30 @@ h1 span {
   transition: transform 220ms ease;
 }
 
+.app-shell[data-method="choose"] .method-media img {
+  transform: none;
+  filter: saturate(1.08) brightness(1.02);
+}
+
 .method-card:hover .method-media img {
   transform: scale(1.06);
+}
+
+.app-shell[data-method="choose"] .method-card:hover .method-media img {
+  transform: scale(1.025);
 }
 
 .method-media.is-placeholder {
   display: grid;
   place-items: center;
+}
+
+.app-shell[data-method="choose"] .method-media.is-placeholder {
+  background:
+    radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.94), transparent 22%),
+    radial-gradient(circle at 50% 34%, rgba(217, 178, 111, 0.26), transparent 36%),
+    radial-gradient(circle at 20% 18%, rgba(255, 233, 201, 0.66), transparent 30%),
+    linear-gradient(145deg, #fff9ee, #e6dccd);
 }
 
 .method-media.is-placeholder span {
@@ -416,6 +577,15 @@ h1 span {
   background: rgba(255, 255, 255, 0.08);
 }
 
+.app-shell[data-method="choose"] .method-media.is-placeholder span {
+  width: 76px;
+  height: 76px;
+  color: rgba(180, 135, 58, 0.82);
+  border-color: rgba(217, 178, 111, 0.34);
+  background: rgba(255, 255, 255, 0.66);
+  box-shadow: 0 18px 48px rgba(110, 82, 45, 0.12), inset 0 0 0 10px rgba(255, 255, 255, 0.24);
+}
+
 .method-copy {
   position: absolute;
   inset: auto 0 0;
@@ -423,6 +593,18 @@ h1 span {
   padding: clamp(24px, 3vw, 42px);
   background:
     linear-gradient(180deg, transparent, rgba(4, 18, 15, 0.28) 12%, rgba(4, 18, 15, 0.72));
+}
+
+.app-shell[data-method="choose"] .method-copy {
+  position: absolute;
+  inset: auto 0 0;
+  display: grid;
+  min-height: 224px;
+  align-content: start;
+  padding: 30px 24px 24px;
+  color: #1e2a25;
+  border-top: 1px solid rgba(255, 255, 255, 0.52);
+  background: linear-gradient(180deg, rgba(255, 250, 244, 0) 0%, rgba(255, 248, 238, 0.84) 16%, rgba(255, 250, 244, 0.98) 100%);
 }
 
 .method-card span {
@@ -434,6 +616,30 @@ h1 span {
   text-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
+.app-shell[data-method="choose"] .method-card span {
+  margin-bottom: 4px;
+  color: #b98734;
+  font-size: 18px;
+  text-shadow: none;
+}
+
+.app-shell[data-method="choose"] .method-card[data-method="bazi"] .method-copy span {
+  color: #b52630;
+}
+
+.app-shell[data-method="choose"] .method-card[data-method="tarot"] .method-copy span {
+  color: #6f42aa;
+  text-shadow: none;
+}
+
+.app-shell[data-method="choose"] .method-card[data-method="bazi"] strong {
+  color: #8d101a;
+}
+
+.app-shell[data-method="choose"] .method-card[data-method="tarot"] strong {
+  color: #5b3091;
+}
+
 .method-card.is-coming {
   display: grid;
   min-height: 220px;
@@ -441,6 +647,17 @@ h1 span {
   opacity: 0.72;
   color: var(--ink);
   background: rgba(255, 255, 255, 0.76);
+}
+
+.app-shell[data-method="choose"] .method-card.is-coming {
+  min-height: 520px;
+  opacity: 1;
+  color: #594d43;
+  border-color: rgba(190, 154, 95, 0.22);
+  background:
+    radial-gradient(circle at 50% 8%, rgba(255, 255, 255, 0.92), transparent 34%),
+    linear-gradient(145deg, #fffaf3, #eee4d6);
+  box-shadow: 0 22px 54px rgba(99, 70, 45, 0.1);
 }
 
 .method-card.is-coming:hover {
@@ -456,11 +673,21 @@ h1 span {
     grid-column: 1 / -1;
     min-height: 220px;
   }
+
+  .app-shell[data-method="choose"] .method-card.is-coming {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    grid-column: auto;
+  }
 }
 
 .method-card.is-coming .method-media {
   position: relative;
   min-height: 220px;
+}
+
+.app-shell[data-method="choose"] .method-card.is-coming .method-media {
+  min-height: 0;
 }
 
 .method-card.is-coming .method-copy {
@@ -469,9 +696,22 @@ h1 span {
   background: rgba(255, 255, 255, 0.88);
 }
 
+.app-shell[data-method="choose"] .method-card.is-coming .method-copy {
+  position: absolute;
+  inset: auto 0 0;
+  min-height: 0;
+  color: #594d43;
+  background: linear-gradient(180deg, rgba(255, 250, 244, 0) 0%, rgba(255, 250, 244, 0.86) 14%, rgba(255, 250, 244, 0.99) 100%);
+}
+
 .method-card.is-coming span {
   color: var(--gold);
   text-shadow: none;
+}
+
+.app-shell[data-method="choose"] .method-card.is-coming span,
+.app-shell[data-method="choose"] .method-card.is-coming strong {
+  color: #8d7b68;
 }
 
 .method-card strong {
@@ -483,6 +723,14 @@ h1 span {
   text-shadow: 0 8px 26px rgba(0, 0, 0, 0.48);
 }
 
+.app-shell[data-method="choose"] .method-card strong {
+  margin-bottom: 12px;
+  color: #1e2a25;
+  font-size: clamp(32px, 2.7vw, 40px);
+  line-height: 1.1;
+  text-shadow: none;
+}
+
 .method-card small {
   display: block;
   color: rgba(255, 255, 255, 0.9);
@@ -491,13 +739,62 @@ h1 span {
   text-shadow: 0 6px 22px rgba(0, 0, 0, 0.42);
 }
 
+.app-shell[data-method="choose"] .method-card small {
+  min-height: 58px;
+  color: #40514b;
+  font-size: 15px;
+  line-height: 1.48;
+  text-shadow: none;
+}
+
+.method-cta {
+  display: none;
+}
+
+.app-shell[data-method="choose"] .method-cta {
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: auto;
+  border-radius: 7px;
+  color: #fff;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 800;
+  background: linear-gradient(135deg, #8d101a, #6f0711);
+  box-shadow: 0 12px 24px rgba(128, 18, 28, 0.16);
+}
+
+.app-shell[data-method="choose"] .method-cta::after {
+  content: "›";
+  font-size: 34px;
+  line-height: 1;
+}
+
+.app-shell[data-method="choose"] .method-card[data-method="tarot"] .method-cta {
+  background: linear-gradient(135deg, #6f42aa, #432077);
+  box-shadow: 0 12px 24px rgba(83, 48, 137, 0.16);
+}
+
+.app-shell[data-method="choose"] .method-card.is-coming .method-cta {
+  color: #8b7d6f;
+  background: linear-gradient(135deg, rgba(219, 207, 192, 0.48), rgba(196, 183, 168, 0.38));
+  box-shadow: none;
+}
+
+.app-shell[data-method="choose"] .method-card.is-coming .method-cta::after {
+  content: "";
+}
+
 .method-card.is-coming strong {
-  color: #50605a;
+  color: #6a5f55;
   text-shadow: none;
 }
 
 .method-card.is-coming small {
-  color: #6e7a75;
+  color: #70685f;
   text-shadow: none;
 }
 
@@ -2992,5 +3289,126 @@ blockquote {
 
   .today-hero h2 {
     font-size: 28px;
+  }
+}
+
+/* Home service chooser final layout. Keep this after global responsive rules. */
+.app-shell[data-method="choose"] {
+  width: min(calc(100% - 48px), 1320px);
+}
+
+.app-shell[data-method="choose"] .method-grid {
+  grid-template-columns: repeat(3, minmax(0, 380px));
+  justify-content: center;
+}
+
+.app-shell[data-method="choose"] .method-card,
+.app-shell[data-method="choose"] .method-card.is-coming {
+  min-height: clamp(420px, 48svh, 520px);
+}
+
+.app-shell[data-method="choose"] .method-card strong,
+.app-shell[data-method="choose"] .method-card.is-coming strong {
+  font-size: clamp(32px, 2.7vw, 40px);
+}
+
+.app-shell[data-method="choose"] .method-card small,
+.app-shell[data-method="choose"] .method-card.is-coming small {
+  font-size: 15px;
+}
+
+@media (max-width: 980px) {
+  .app-shell[data-method="choose"] {
+    width: min(calc(100% - 28px), 760px);
+    padding: 24px 14px 48px;
+  }
+
+  .app-shell[data-method="choose"] .home-screen {
+    margin-top: 34px;
+  }
+
+  .app-shell[data-method="choose"] .method-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    margin-top: 32px;
+  }
+
+  .app-shell[data-method="choose"] .method-card {
+    display: block;
+    min-height: 360px;
+    text-align: center;
+  }
+
+  .app-shell[data-method="choose"] .method-card.is-coming {
+    display: block;
+    min-height: 360px;
+  }
+
+  .app-shell[data-method="choose"] .method-media {
+    height: auto;
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+
+  .app-shell[data-method="choose"] .method-copy {
+    min-height: 0;
+    padding: 28px 22px 22px;
+  }
+}
+
+@media (max-width: 560px) {
+  .app-shell[data-method="choose"] .brand-mark {
+    width: 52px;
+    height: 52px;
+  }
+
+  .app-shell[data-method="choose"] .brand-mark svg {
+    width: 42px;
+    height: 42px;
+  }
+
+  .app-shell[data-method="choose"] .brand {
+    font-size: 16px;
+  }
+
+  .app-shell[data-method="choose"] h1 {
+    font-size: 22px;
+  }
+
+  .app-shell[data-method="choose"] .method-heading h2 {
+    font-size: 34px;
+  }
+
+  .app-shell[data-method="choose"] .method-card,
+  .app-shell[data-method="choose"] .method-card.is-coming {
+    min-height: 340px;
+    text-align: center;
+  }
+
+  .app-shell[data-method="choose"] .method-media {
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+
+  .app-shell[data-method="choose"] .method-copy {
+    min-height: 0;
+    padding: 26px 18px 20px;
+  }
+
+  .app-shell[data-method="choose"] .method-card strong,
+  .app-shell[data-method="choose"] .method-card.is-coming strong {
+    font-size: 34px;
+  }
+
+  .app-shell[data-method="choose"] .method-card small,
+  .app-shell[data-method="choose"] .method-card.is-coming small {
+    min-height: 0;
+    font-size: 16px;
+  }
+
+  .app-shell[data-method="choose"] .method-cta {
+    min-height: 50px;
+    margin-top: 22px;
+    font-size: 19px;
   }
 }

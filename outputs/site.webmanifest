@@ -1,0 +1,19 @@
+{
+  "name": "Likhitfa ลิขิตฟ้า",
+  "short_name": "Likhitfa",
+  "description": "ดูดวงจีนปาจื้อและไพ่ยิปซีออนไลน์",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#061426",
+  "theme_color": "#061426",
+  "lang": "th-TH",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

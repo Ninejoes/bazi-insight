@@ -16,6 +16,8 @@ const mime = {
   ".js": "text/javascript; charset=utf-8",
   ".mjs": "text/javascript; charset=utf-8",
   ".png": "image/png",
+  ".svg": "image/svg+xml; charset=utf-8",
+  ".webmanifest": "application/manifest+json; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".xml": "application/xml; charset=utf-8",
   ".txt": "text/plain; charset=utf-8",
@@ -111,9 +113,14 @@ createServer(async (req, res) => {
       return;
     }
 
-    const requested = url.pathname === "/" ? "/index.html" : decodeURIComponent(url.pathname);
+    const cleanPath = decodeURIComponent(url.pathname);
+    const requested = cleanPath === "/" ? "/index.html" : cleanPath;
     const file = join(root, requested);
     if (!file.startsWith(root) || !existsSync(file)) {
+      if (!extname(cleanPath)) {
+        send(res, 200, await readFile(join(root, "index.html")), mime[".html"]);
+        return;
+      }
       send(res, 404, "Not found", "text/plain; charset=utf-8");
       return;
     }

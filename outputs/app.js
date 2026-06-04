@@ -2189,6 +2189,10 @@ function topicMapLabel(topic) {
 
 function setPredictionMethod(method) {
   els.appShell.dataset.method = method;
+  const methodPath = { choose: "/", bazi: "/bazi", tarot: "/tarot" }[method];
+  if (methodPath && window.location.protocol !== "file:" && window.location.pathname !== methodPath) {
+    window.history.pushState({}, "", methodPath);
+  }
   document.querySelectorAll(".method-card").forEach((button) => {
     button.classList.toggle("is-active", button.dataset.method === method);
   });
@@ -2286,6 +2290,16 @@ document.querySelector("#resetBtn").addEventListener("click", () => {
 
 els.homeBtn.addEventListener("click", () => setPredictionMethod("choose"));
 els.brandHomeBtn.addEventListener("click", () => setPredictionMethod("choose"));
+window.addEventListener("popstate", () => {
+  const path = window.location.pathname.replace(/\/+$/, "");
+  if (path === "/bazi") {
+    setPredictionMethod("bazi");
+  } else if (path === "/tarot") {
+    setPredictionMethod("tarot");
+  } else {
+    setPredictionMethod("choose");
+  }
+});
 
 els.predictBtn.addEventListener("click", () => requestPrediction("prediction-button"));
 
@@ -2343,4 +2357,11 @@ els.oracleQuestion.addEventListener("input", () => {
 loadCustomBackgrounds();
 lockResults();
 renderTarotEmpty();
-setPredictionMethod("choose");
+const initialPath = window.location.pathname.replace(/\/+$/, "");
+if (initialPath === "/bazi") {
+  setPredictionMethod("bazi");
+} else if (initialPath === "/tarot") {
+  setPredictionMethod("tarot");
+} else {
+  setPredictionMethod("choose");
+}

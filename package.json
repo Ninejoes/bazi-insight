@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "node outputs/server.mjs",
+    "sitemap": "node scripts/generate-sitemap.mjs",
+    "build": "node scripts/generate-sitemap.mjs",
     "check": "node --check outputs/app.js && node --check outputs/server.mjs && node --check api/leads.js"
   },
   "engines": {
