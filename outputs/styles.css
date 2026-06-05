@@ -3347,14 +3347,15 @@ blockquote {
 
 .app-shell[data-method="choose"] .method-media::after {
   background:
-    linear-gradient(180deg, rgba(255, 250, 244, 0.04) 0%, rgba(255, 250, 244, 0) 28%, rgba(12, 18, 15, 0.2) 52%, rgba(8, 13, 11, 0.72) 100%),
-    radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.16), transparent 32%);
+    linear-gradient(180deg, rgba(255, 250, 244, 0) 0%, rgba(255, 250, 244, 0) 34%, rgba(12, 18, 15, 0.08) 52%, rgba(8, 11, 10, 0.72) 100%),
+    radial-gradient(circle at 50% 16%, rgba(255, 255, 255, 0.08), transparent 30%);
 }
 
 .app-shell[data-method="choose"] .method-media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  filter: saturate(1.16) contrast(1.04) brightness(0.98);
 }
 
 .app-shell[data-method="choose"] .method-copy,
@@ -3373,18 +3374,7 @@ blockquote {
 }
 
 .app-shell[data-method="choose"] .method-copy::before {
-  position: absolute;
-  right: clamp(14px, 2svh, 22px);
-  bottom: clamp(14px, 2svh, 22px);
-  left: clamp(14px, 2svh, 22px);
-  z-index: -1;
-  height: min(44%, 190px);
-  border: 1px solid rgba(255, 246, 232, 0.2);
-  border-radius: 14px;
-  content: "";
-  background: linear-gradient(180deg, rgba(22, 18, 15, 0.34), rgba(15, 12, 10, 0.58));
-  box-shadow: 0 18px 42px rgba(10, 8, 7, 0.18);
-  backdrop-filter: blur(7px);
+  content: none;
 }
 
 .app-shell[data-method="choose"] .method-card span,
@@ -3395,12 +3385,12 @@ blockquote {
   margin: 0;
   padding: 6px 12px;
   color: #fff7ea;
-  border: 1px solid rgba(255, 244, 225, 0.42);
+  border: 1px solid rgba(255, 244, 225, 0.28);
   border-radius: 999px;
   font-size: clamp(13px, 1.55svh, 15px);
   line-height: 1;
-  background: rgba(39, 27, 19, 0.42);
-  box-shadow: 0 10px 26px rgba(15, 13, 11, 0.18);
+  background: rgba(64, 42, 32, 0.58);
+  box-shadow: 0 10px 24px rgba(15, 13, 11, 0.14);
   backdrop-filter: blur(12px);
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
 }
@@ -3414,9 +3404,9 @@ blockquote {
 .app-shell[data-method="choose"] .method-card.is-coming strong {
   margin-bottom: 8px;
   color: #fff;
-  font-size: clamp(26px, 3.6svh, 38px);
+  font-size: clamp(27px, 3.8svh, 40px);
   line-height: 1.06;
-  text-shadow: 0 7px 20px rgba(0, 0, 0, 0.58);
+  text-shadow: 0 4px 14px rgba(0, 0, 0, 0.66), 0 12px 28px rgba(0, 0, 0, 0.38);
 }
 
 .app-shell[data-method="choose"] .method-card small,
@@ -3427,7 +3417,7 @@ blockquote {
   color: rgba(255, 250, 244, 0.9);
   font-size: clamp(12px, 1.5svh, 15px);
   line-height: 1.35;
-  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.55);
+  text-shadow: 0 3px 12px rgba(0, 0, 0, 0.68);
 }
 
 .app-shell[data-method="choose"] .method-cta {
@@ -3448,8 +3438,9 @@ blockquote {
 
 .app-shell[data-method="choose"] .method-card.is-coming .method-media::after {
   background:
-    radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.76), transparent 28%),
-    linear-gradient(180deg, rgba(255, 250, 244, 0.04), rgba(255, 250, 244, 0.38) 58%, rgba(255, 250, 244, 0.78));
+    radial-gradient(circle at 50% 24%, rgba(255, 255, 255, 0.82), transparent 21%),
+    radial-gradient(circle at 50% 24%, rgba(196, 169, 132, 0.18), transparent 33%),
+    linear-gradient(180deg, rgba(255, 250, 244, 0.06), rgba(255, 250, 244, 0.42) 56%, rgba(255, 250, 244, 0.84));
 }
 
 .app-shell[data-method="choose"] .method-card.is-coming .method-copy {
@@ -3458,10 +3449,7 @@ blockquote {
 }
 
 .app-shell[data-method="choose"] .method-card.is-coming .method-copy::before {
-  height: min(46%, 188px);
-  border-color: rgba(177, 151, 116, 0.18);
-  background: rgba(255, 250, 244, 0.62);
-  box-shadow: 0 18px 44px rgba(99, 70, 45, 0.08);
+  content: none;
 }
 
 .app-shell[data-method="choose"] .method-card.is-coming span,
@@ -3470,10 +3458,11 @@ blockquote {
 }
 
 .app-shell[data-method="choose"] .method-card.is-coming span {
+  top: clamp(18px, 3.2svh, 34px);
   left: 50%;
   transform: translateX(-50%);
   color: #8a7b6b;
-  background: rgba(255, 255, 255, 0.58);
+  background: rgba(255, 255, 255, 0.68);
   text-shadow: none;
 }
 
