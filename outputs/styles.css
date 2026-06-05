@@ -3639,3 +3639,1648 @@ blockquote {
     font-size: 19px;
   }
 }
+
+/* Unified Likhitfa theme. Keep this last so every app mode shares one palette. */
+:root {
+  --theme-ink: #14251f;
+  --theme-muted: #5e6b64;
+  --theme-deep: #071a16;
+  --theme-deep-2: #0b2c20;
+  --theme-green: #103d27;
+  --theme-green-soft: rgba(16, 61, 39, 0.12);
+  --theme-gold: #c89645;
+  --theme-gold-light: #f1c66a;
+  --theme-paper: rgba(255, 250, 240, 0.92);
+  --theme-paper-strong: rgba(255, 252, 246, 0.96);
+  --theme-line: rgba(200, 150, 69, 0.34);
+  --theme-shadow: rgba(4, 18, 15, 0.24);
+}
+
+body {
+  color: var(--theme-ink);
+  background: var(--theme-deep);
+}
+
+body::before {
+  background:
+    linear-gradient(180deg, rgba(4, 18, 20, 0.18), rgba(4, 18, 20, 0.78)),
+    radial-gradient(circle at 50% 16%, rgba(200, 150, 69, 0.2), transparent 34%),
+    var(--celestial-bg);
+}
+
+body::after {
+  background:
+    radial-gradient(circle at 18% 16%, rgba(200, 150, 69, 0.18), transparent 26%),
+    radial-gradient(circle at 82% 18%, rgba(47, 140, 91, 0.18), transparent 26%),
+    linear-gradient(90deg, rgba(3, 13, 12, 0.5), transparent 20%, transparent 80%, rgba(3, 13, 12, 0.5));
+}
+
+.app-shell,
+.app-shell[data-method="choose"],
+.app-shell[data-method="tarot"] {
+  color: var(--theme-ink);
+  background:
+    linear-gradient(180deg, rgba(5, 25, 19, 0.52) 0, rgba(5, 25, 19, 0.56) 220px, rgba(244, 241, 234, 0.86) 220px),
+    radial-gradient(circle at 50% 4%, rgba(200, 150, 69, 0.22), transparent 34%),
+    var(--celestial-bg);
+  background-position: center top;
+  background-size: cover;
+}
+
+.app-shell::before,
+.app-shell[data-method="choose"]::before,
+.app-shell[data-method="tarot"]::before {
+  background:
+    linear-gradient(180deg, rgba(2, 13, 12, 0.18) 0, rgba(2, 13, 12, 0.48) 180px, rgba(245, 240, 229, 0.78) 360px, rgba(245, 240, 229, 0.9) 100%),
+    radial-gradient(circle at 52% 8%, rgba(200, 150, 69, 0.2), transparent 30%);
+  backdrop-filter: blur(2px);
+}
+
+.topbar,
+.app-shell[data-method="choose"] .topbar {
+  color: #fff7df;
+}
+
+.app-shell[data-method="choose"] .brand,
+.brand {
+  color: rgba(255, 233, 184, 0.9);
+}
+
+.app-shell[data-method="choose"] h1,
+.app-shell[data-method="choose"] h1 span,
+h1 span {
+  color: #fffaf0;
+}
+
+.app-shell[data-method="choose"] h1 {
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.34);
+}
+
+.app-shell[data-method="choose"] .method-heading h2 {
+  color: #fffaf0;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.42);
+}
+
+.birth-panel,
+.tabs,
+.profile-status,
+.chart-card,
+.today-card,
+.identity,
+.matrix,
+.insight-panel,
+.calendar-item,
+.oracle-reading,
+.oracle-card,
+.tarot-reader,
+.tarot-step-card,
+.tarot-deck-panel,
+.tarot-result-card,
+.lead-card,
+.app-shell[data-method="tarot"] .tarot-reader,
+.app-shell[data-method="tarot"] .tarot-result-card,
+.app-shell[data-method="tarot"] .tarot-step-card,
+.app-shell[data-method="tarot"] .tarot-deck-panel {
+  border-color: var(--theme-line);
+  color: var(--theme-ink);
+  background:
+    radial-gradient(circle at 92% 0%, rgba(200, 150, 69, 0.16), transparent 30%),
+    linear-gradient(135deg, var(--theme-paper-strong), var(--theme-paper));
+  box-shadow: 0 18px 42px var(--theme-shadow);
+}
+
+.profile-status,
+.card-title,
+.today-hero,
+.qimen-note,
+.app-shell[data-method="tarot"] .tarot-spread-board {
+  color: #fff7df;
+  background:
+    radial-gradient(circle at 76% 12%, rgba(241, 198, 106, 0.2), transparent 30%),
+    linear-gradient(135deg, var(--theme-green), var(--theme-deep));
+}
+
+.method-card,
+.app-shell[data-method="choose"] .method-card,
+.app-shell[data-method="choose"] .method-card.is-coming {
+  border-color: var(--theme-line);
+  background:
+    radial-gradient(circle at 75% 10%, rgba(241, 198, 106, 0.18), transparent 30%),
+    linear-gradient(145deg, var(--theme-green), var(--theme-deep));
+  box-shadow: 0 26px 58px var(--theme-shadow);
+}
+
+.method-card:hover,
+.method-card.is-active,
+.app-shell[data-method="choose"] .method-card:hover,
+.app-shell[data-method="choose"] .method-card.is-active {
+  border-color: rgba(241, 198, 106, 0.82);
+  box-shadow: 0 30px 74px rgba(4, 18, 15, 0.3), 0 0 0 3px rgba(200, 150, 69, 0.16);
+}
+
+.app-shell[data-method="choose"] .method-card span,
+.app-shell[data-method="choose"] .method-card[data-method="bazi"] .method-copy span,
+.app-shell[data-method="choose"] .method-card[data-method="tarot"] .method-copy span,
+.app-shell[data-method="choose"] .method-card.is-coming span {
+  color: #fff7df;
+  border-color: rgba(241, 198, 106, 0.34);
+  background: rgba(7, 31, 23, 0.62);
+}
+
+.app-shell[data-method="choose"] .method-card strong,
+.app-shell[data-method="choose"] .method-card.is-coming strong {
+  color: #fff;
+}
+
+.app-shell[data-method="choose"] .method-card small,
+.app-shell[data-method="choose"] .method-card.is-coming small {
+  color: rgba(255, 250, 244, 0.9);
+}
+
+.method-cta,
+.app-shell[data-method="choose"] .method-cta,
+.app-shell[data-method="choose"] .method-card[data-method="tarot"] .method-cta,
+.app-shell[data-method="choose"] .method-card.is-coming .method-cta,
+.predict-btn,
+.oracle-chip.is-active,
+.tarot-tabs button.is-active,
+.app-shell[data-method="tarot"] .tarot-tabs button.is-active,
+.bottom-nav button.is-active,
+.reset-btn:hover,
+.home-btn:hover {
+  color: #fff7df;
+  border-color: rgba(241, 198, 106, 0.46);
+  background:
+    radial-gradient(circle at 24% 20%, rgba(255, 255, 255, 0.18), transparent 24%),
+    linear-gradient(135deg, var(--theme-green), var(--theme-deep-2));
+  box-shadow: 0 12px 28px rgba(7, 31, 23, 0.22);
+}
+
+.tab.is-active,
+.calendar-tags small,
+.fortune-strip div,
+.tarot-progress span {
+  color: var(--theme-green);
+  background: var(--theme-green-soft);
+}
+
+.app-shell[data-method="tarot"] {
+  background:
+    linear-gradient(180deg, rgba(5, 25, 19, 0.84), rgba(7, 26, 22, 0.94)),
+    radial-gradient(circle at 50% 16%, rgba(200, 150, 69, 0.18), transparent 34%),
+    var(--celestial-bg);
+}
+
+.app-shell[data-method="tarot"]::before {
+  background:
+    radial-gradient(circle at 50% 18%, rgba(241, 198, 106, 0.13), transparent 28%),
+    linear-gradient(180deg, rgba(7, 26, 22, 0.2), rgba(7, 26, 22, 0.78));
+}
+
+.app-shell[data-method="tarot"] .tarot-workspace {
+  color: var(--theme-ink);
+}
+
+.app-shell[data-method="tarot"] .tarot-step-card h3,
+.app-shell[data-method="tarot"] .tarot-deck-head strong,
+.app-shell[data-method="tarot"] .tarot-final-summary strong,
+.app-shell[data-method="tarot"] .tarot-insight-grid strong,
+.app-shell[data-method="tarot"] .tarot-card-copy h3,
+.app-shell[data-method="tarot"] .tarot-reading-copy h3 {
+  color: var(--theme-green);
+}
+
+.app-shell[data-method="tarot"] .tarot-spread-board h3 {
+  color: var(--theme-gold-light);
+}
+
+.app-shell[data-method="tarot"] .tarot-tabs button,
+.app-shell[data-method="tarot"] .tarot-deck-head span,
+.app-shell[data-method="tarot"] .tarot-progress,
+.app-shell[data-method="tarot"] .tarot-warning {
+  color: var(--theme-muted);
+}
+
+.app-shell[data-method="tarot"] .deck-card-label,
+.app-shell[data-method="tarot"] .tarot-deck-stack + .deck-card-label {
+  color: var(--theme-green);
+  text-shadow: none;
+}
+
+.app-shell[data-method="tarot"] .tarot-empty,
+.app-shell[data-method="tarot"] .tarot-final-summary,
+.app-shell[data-method="tarot"] .tarot-summary,
+.app-shell[data-method="tarot"] .tarot-card,
+.app-shell[data-method="tarot"] .tarot-insight-grid div,
+.app-shell[data-method="tarot"] .tarot-reading-item {
+  border-color: var(--theme-line);
+  color: var(--theme-ink);
+  background: rgba(255, 250, 240, 0.92);
+}
+
+.app-shell[data-method="tarot"] .tarot-empty p,
+.app-shell[data-method="tarot"] .tarot-final-summary p,
+.app-shell[data-method="tarot"] .tarot-summary p,
+.app-shell[data-method="tarot"] .tarot-card-copy p,
+.app-shell[data-method="tarot"] .tarot-reading-copy p {
+  color: var(--theme-muted);
+}
+
+.app-shell[data-method="tarot"] .tarot-final-summary span,
+.app-shell[data-method="tarot"] .tarot-empty span,
+.app-shell[data-method="tarot"] .tarot-insight-grid span,
+.app-shell[data-method="tarot"] .tarot-card-copy span,
+.app-shell[data-method="tarot"] .tarot-reading-copy span,
+.app-shell[data-method="tarot"] .tarot-reading-copy .tarot-card-name {
+  color: var(--theme-green);
+}
+
+.app-shell[data-method="tarot"] #shuffleTarotBtn,
+.deck-select-card.is-selected .pick-order,
+.app-shell[data-method="tarot"] .tarot-map-card span {
+  color: var(--theme-deep);
+  background: linear-gradient(135deg, var(--theme-gold-light), var(--theme-gold));
+}
+
+.app-shell[data-method="tarot"] .deck-select-card:hover,
+.app-shell[data-method="tarot"] .deck-select-card.is-selected,
+.app-shell[data-method="tarot"] .tarot-deck-grid.is-card-selection .deck-select-card:hover,
+.app-shell[data-method="tarot"] .tarot-deck-grid.is-card-selection .deck-select-card.is-selected {
+  border-color: var(--theme-gold-light);
+  box-shadow:
+    0 22px 34px rgba(0, 0, 0, 0.42),
+    0 0 0 3px rgba(241, 198, 106, 0.86),
+    0 0 34px rgba(200, 150, 69, 0.5);
+}
+
+.app-shell[data-method="choose"] .method-card[data-method="bazi"] strong,
+.app-shell[data-method="choose"] .method-card[data-method="tarot"] strong,
+.app-shell[data-method="choose"] .method-card.is-coming strong {
+  color: #fff;
+  text-shadow: 0 4px 14px rgba(0, 0, 0, 0.66), 0 12px 28px rgba(0, 0, 0, 0.38);
+}
+
+.app-shell[data-method="choose"] .method-card.is-coming .method-media,
+.app-shell[data-method="choose"] .method-card.is-coming .method-media.is-placeholder {
+  background:
+    radial-gradient(circle at 50% 28%, rgba(241, 198, 106, 0.24), transparent 34%),
+    linear-gradient(145deg, var(--theme-green), var(--theme-deep));
+}
+
+.app-shell[data-method="choose"] .method-card.is-coming .method-media::after {
+  background:
+    linear-gradient(180deg, rgba(4, 18, 15, 0.04) 0%, rgba(4, 18, 15, 0.16) 34%, rgba(4, 18, 15, 0.72) 100%),
+    radial-gradient(circle at 50% 18%, rgba(241, 198, 106, 0.16), transparent 30%);
+}
+
+.app-shell[data-method="choose"] .method-card.is-coming span {
+  color: #fff7df;
+  background: rgba(7, 31, 23, 0.62);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+}
+
+.app-shell[data-method="choose"] .method-card.is-coming small {
+  color: rgba(255, 250, 244, 0.9);
+  text-shadow: 0 3px 12px rgba(0, 0, 0, 0.68);
+}
+
+/* White premium refresh. Keep this after the shared theme overrides. */
+:root {
+  --white-ink: #17231f;
+  --white-muted: #69736e;
+  --white-page: #fbfaf6;
+  --white-surface: rgba(255, 255, 255, 0.94);
+  --white-surface-strong: #ffffff;
+  --white-wash: rgba(255, 255, 255, 0.78);
+  --white-line: rgba(42, 59, 50, 0.12);
+  --white-gold-line: rgba(200, 150, 69, 0.3);
+  --white-green: #0f3d2b;
+  --white-green-2: #082b20;
+  --white-gold: #b9842f;
+  --white-gold-soft: #f0d7a4;
+  --white-shadow: rgba(37, 45, 40, 0.12);
+  --white-shadow-strong: rgba(37, 45, 40, 0.18);
+}
+
+body {
+  color: var(--white-ink);
+  background: var(--white-page);
+}
+
+body::before {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(251, 250, 246, 0.96)),
+    radial-gradient(circle at 50% 0%, rgba(240, 215, 164, 0.42), transparent 34%),
+    var(--celestial-bg);
+  filter: saturate(0.8) contrast(0.95) brightness(1.12);
+}
+
+body::after {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.46), rgba(255, 255, 255, 0.82)),
+    radial-gradient(circle at 14% 12%, rgba(200, 150, 69, 0.12), transparent 25%),
+    radial-gradient(circle at 86% 10%, rgba(15, 61, 43, 0.09), transparent 24%);
+  mix-blend-mode: normal;
+  opacity: 1;
+}
+
+.app-shell,
+.app-shell[data-method="choose"],
+.app-shell[data-method="tarot"] {
+  color: var(--white-ink);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0, rgba(255, 255, 255, 0.94) 180px, rgba(251, 250, 246, 0.98) 360px),
+    radial-gradient(circle at 50% 0%, rgba(240, 215, 164, 0.34), transparent 34%),
+    var(--celestial-bg);
+  background-position: center top;
+  background-size: cover;
+  box-shadow: 0 0 80px rgba(37, 45, 40, 0.14);
+}
+
+.app-shell::before,
+.app-shell[data-method="choose"]::before,
+.app-shell[data-method="tarot"]::before {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0, rgba(255, 255, 255, 0.76) 240px, rgba(251, 250, 246, 0.96) 100%),
+    radial-gradient(circle at 50% 4%, rgba(200, 150, 69, 0.16), transparent 28%);
+  backdrop-filter: blur(8px);
+}
+
+.topbar,
+.app-shell[data-method="choose"] .topbar {
+  color: var(--white-ink);
+}
+
+.brand-lockup {
+  padding: 6px;
+  border-radius: 12px;
+}
+
+.brand-mark,
+.app-shell[data-method="choose"] .brand-mark {
+  background:
+    radial-gradient(circle at 50% 40%, #fff, rgba(255, 250, 240, 0.92)),
+    #fff;
+  box-shadow: 0 10px 24px var(--white-shadow), 0 0 0 1px var(--white-gold-line);
+}
+
+.brand,
+.app-shell[data-method="choose"] .brand {
+  color: var(--white-gold);
+  text-shadow: none;
+}
+
+h1,
+.app-shell[data-method="choose"] h1 {
+  color: var(--white-ink);
+  text-shadow: none;
+}
+
+h1 span,
+.app-shell[data-method="choose"] h1 span,
+.module-title {
+  color: var(--white-muted);
+  text-shadow: none;
+}
+
+.reset-btn,
+.home-btn {
+  color: var(--white-ink);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: inset 0 0 0 1px var(--white-line), 0 8px 20px var(--white-shadow);
+}
+
+.app-shell[data-method="choose"] .method-heading h2 {
+  color: var(--white-ink);
+  text-shadow: none;
+}
+
+.home-screen {
+  border-color: var(--white-line);
+  background: var(--white-surface);
+  box-shadow: 0 24px 64px var(--white-shadow);
+}
+
+.birth-panel,
+.tabs,
+.profile-status,
+.chart-card,
+.today-card,
+.identity,
+.matrix,
+.insight-panel,
+.calendar-item,
+.qimen-cell,
+.use-card,
+.oracle-reading,
+.oracle-card,
+.tarot-reader,
+.tarot-step-card,
+.tarot-deck-panel,
+.tarot-result-card,
+.lead-card,
+.app-shell[data-method="tarot"] .tarot-reader,
+.app-shell[data-method="tarot"] .tarot-result-card,
+.app-shell[data-method="tarot"] .tarot-step-card,
+.app-shell[data-method="tarot"] .tarot-deck-panel {
+  border-color: var(--white-line);
+  color: var(--white-ink);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(240, 215, 164, 0.2), transparent 28%),
+    linear-gradient(135deg, var(--white-surface-strong), var(--white-surface));
+  box-shadow: 0 16px 42px var(--white-shadow);
+}
+
+.profile-status,
+.card-title,
+.today-hero,
+.qimen-note,
+.app-shell[data-method="tarot"] .tarot-spread-board {
+  color: var(--white-ink);
+  background:
+    radial-gradient(circle at 88% 0%, rgba(240, 215, 164, 0.32), transparent 28%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(250, 246, 238, 0.94));
+  box-shadow: 0 16px 42px var(--white-shadow);
+}
+
+.card-title span,
+.profile-status,
+.today-hero p,
+.today-hero small,
+.qimen-note,
+.card-title span {
+  color: var(--white-muted);
+}
+
+.method-card,
+.app-shell[data-method="choose"] .method-card,
+.app-shell[data-method="choose"] .method-card.is-coming {
+  border-color: var(--white-line);
+  color: var(--white-ink);
+  background: #fff;
+  box-shadow: 0 18px 42px var(--white-shadow);
+}
+
+.app-shell[data-method="choose"] .method-media::after {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.1) 40%, rgba(255, 255, 255, 0.88) 78%, rgba(255, 255, 255, 0.98) 100%),
+    radial-gradient(circle at 50% 16%, rgba(255, 255, 255, 0.1), transparent 26%);
+}
+
+.method-card:hover,
+.method-card.is-active,
+.app-shell[data-method="choose"] .method-card:hover,
+.app-shell[data-method="choose"] .method-card.is-active {
+  border-color: var(--white-gold-line);
+  box-shadow: 0 24px 58px var(--white-shadow-strong), 0 0 0 3px rgba(200, 150, 69, 0.1);
+}
+
+.app-shell[data-method="choose"] .method-copy,
+.app-shell[data-method="choose"] .method-card.is-coming .method-copy {
+  color: var(--white-ink);
+  background: transparent;
+}
+
+.app-shell[data-method="choose"] .method-card span,
+.app-shell[data-method="choose"] .method-card[data-method="bazi"] .method-copy span,
+.app-shell[data-method="choose"] .method-card[data-method="tarot"] .method-copy span,
+.app-shell[data-method="choose"] .method-card.is-coming span {
+  color: var(--white-green);
+  border-color: var(--white-gold-line);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 10px 22px var(--white-shadow);
+  text-shadow: none;
+}
+
+.app-shell[data-method="choose"] .method-card strong,
+.app-shell[data-method="choose"] .method-card[data-method="bazi"] strong,
+.app-shell[data-method="choose"] .method-card[data-method="tarot"] strong,
+.app-shell[data-method="choose"] .method-card.is-coming strong {
+  color: var(--white-ink);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85), 0 10px 24px rgba(255, 255, 255, 0.72);
+}
+
+.app-shell[data-method="choose"] .method-card small,
+.app-shell[data-method="choose"] .method-card.is-coming small {
+  color: #3f4c47;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.82);
+}
+
+.app-shell[data-method="choose"] .method-card.is-coming .method-media,
+.app-shell[data-method="choose"] .method-card.is-coming .method-media.is-placeholder {
+  background:
+    radial-gradient(circle at 50% 28%, rgba(240, 215, 164, 0.38), transparent 34%),
+    linear-gradient(145deg, #fff, #f6f0e4);
+}
+
+.app-shell[data-method="choose"] .method-card.is-coming .method-media::after {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.24) 36%, rgba(255, 255, 255, 0.9) 100%),
+    radial-gradient(circle at 50% 18%, rgba(200, 150, 69, 0.18), transparent 30%);
+}
+
+.method-cta,
+.app-shell[data-method="choose"] .method-cta,
+.app-shell[data-method="choose"] .method-card[data-method="tarot"] .method-cta,
+.app-shell[data-method="choose"] .method-card.is-coming .method-cta,
+.predict-btn,
+.oracle-chip.is-active,
+.tarot-tabs button.is-active,
+.app-shell[data-method="tarot"] .tarot-tabs button.is-active,
+.bottom-nav button.is-active,
+.reset-btn:hover,
+.home-btn:hover {
+  color: #fff;
+  border-color: transparent;
+  background:
+    radial-gradient(circle at 22% 18%, rgba(255, 255, 255, 0.16), transparent 24%),
+    linear-gradient(135deg, var(--white-green), var(--white-green-2));
+  box-shadow: 0 12px 28px rgba(15, 61, 43, 0.2);
+}
+
+.tab,
+.oracle-chip,
+.tarot-tabs button,
+.bottom-nav button,
+.app-shell[data-method="tarot"] .tarot-tabs button {
+  color: var(--white-muted);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.tab.is-active,
+.calendar-tags small,
+.fortune-strip div,
+.tarot-progress span {
+  color: var(--white-green);
+  background: rgba(15, 61, 43, 0.08);
+}
+
+input,
+select,
+.oracle-question textarea,
+.tarot-question-field textarea {
+  color: var(--white-ink);
+  border-color: var(--white-line);
+  background: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86);
+}
+
+.app-shell[data-method="tarot"] .tarot-workspace,
+.app-shell[data-method="tarot"] .tarot-step-card h3,
+.app-shell[data-method="tarot"] .tarot-deck-head strong,
+.app-shell[data-method="tarot"] .tarot-final-summary strong,
+.app-shell[data-method="tarot"] .tarot-insight-grid strong,
+.app-shell[data-method="tarot"] .tarot-card-copy h3,
+.app-shell[data-method="tarot"] .tarot-reading-copy h3,
+.app-shell[data-method="tarot"] .tarot-spread-board h3 {
+  color: var(--white-ink);
+}
+
+.app-shell[data-method="tarot"] .tarot-empty,
+.app-shell[data-method="tarot"] .tarot-final-summary,
+.app-shell[data-method="tarot"] .tarot-summary,
+.app-shell[data-method="tarot"] .tarot-card,
+.app-shell[data-method="tarot"] .tarot-insight-grid div,
+.app-shell[data-method="tarot"] .tarot-reading-item {
+  border-color: var(--white-line);
+  color: var(--white-ink);
+  background: var(--white-surface-strong);
+  box-shadow: 0 12px 30px var(--white-shadow);
+}
+
+.app-shell[data-method="tarot"] .tarot-final-summary span,
+.app-shell[data-method="tarot"] .tarot-empty span,
+.app-shell[data-method="tarot"] .tarot-insight-grid span,
+.app-shell[data-method="tarot"] .tarot-card-copy span,
+.app-shell[data-method="tarot"] .tarot-reading-copy span,
+.app-shell[data-method="tarot"] .tarot-reading-copy .tarot-card-name,
+.app-shell[data-method="tarot"] .deck-card-label {
+  color: var(--white-gold);
+}
+
+.app-shell[data-method="tarot"] #shuffleTarotBtn,
+.deck-select-card.is-selected .pick-order,
+.app-shell[data-method="tarot"] .tarot-map-card span {
+  color: var(--white-ink);
+  background: linear-gradient(135deg, #f3d996, var(--white-gold));
+}
+
+.bottom-nav {
+  border-color: var(--white-line);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 16px 36px var(--white-shadow);
+  backdrop-filter: blur(18px);
+}
+
+/* Premium white polish and readable status messaging. */
+.prediction-status,
+.profile-status,
+.app-shell.is-locked .profile-status,
+.save-status {
+  color: #17231f;
+  border: 1px solid rgba(185, 132, 47, 0.26);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-weight: 700;
+  letter-spacing: 0;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(250, 245, 234, 0.9)),
+    #fff;
+  box-shadow: 0 10px 26px rgba(37, 45, 40, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+.prediction-status {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  align-items: center;
+  min-height: 40px;
+}
+
+.birth-panel {
+  gap: 14px;
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.field label {
+  margin-bottom: 7px;
+  color: #56645e;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.field input,
+.field select,
+input,
+select,
+.oracle-question textarea,
+.tarot-question-field textarea {
+  min-height: 44px;
+  border: 1px solid rgba(42, 59, 50, 0.16);
+  border-radius: 10px;
+  color: #17231f;
+  background:
+    linear-gradient(180deg, #fff, rgba(253, 251, 247, 0.96)),
+    #fff;
+  box-shadow: 0 8px 18px rgba(37, 45, 40, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.94);
+}
+
+.field input:focus,
+.field select:focus,
+input:focus,
+select:focus,
+.oracle-question textarea:focus,
+.tarot-question-field textarea:focus {
+  outline: 0;
+  border-color: rgba(185, 132, 47, 0.52);
+  box-shadow: 0 0 0 4px rgba(185, 132, 47, 0.12), 0 10px 24px rgba(37, 45, 40, 0.08);
+}
+
+.predict-btn,
+.method-cta,
+.app-shell[data-method="choose"] .method-cta,
+.app-shell[data-method="choose"] .method-card[data-method="tarot"] .method-cta,
+.app-shell[data-method="choose"] .method-card.is-coming .method-cta,
+.oracle-chip.is-active,
+.tarot-tabs button.is-active,
+.app-shell[data-method="tarot"] .tarot-tabs button.is-active,
+.bottom-nav button.is-active {
+  border-radius: 10px;
+  font-weight: 900;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0)),
+    linear-gradient(135deg, #113f2d, #05271d);
+  box-shadow: 0 14px 30px rgba(15, 61, 43, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.predict-btn:hover,
+.method-card:hover .method-cta,
+.oracle-chip.is-active:hover,
+.tarot-tabs button.is-active:hover,
+.bottom-nav button.is-active:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 38px rgba(15, 61, 43, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.chart-card,
+.today-card,
+.identity,
+.matrix,
+.insight-panel,
+.birth-panel,
+.tabs,
+.tarot-reader,
+.tarot-step-card,
+.tarot-deck-panel,
+.tarot-result-card,
+.calendar-item,
+.qimen-cell,
+.use-card,
+.oracle-reading,
+.oracle-card {
+  border-radius: 16px;
+  border-color: rgba(42, 59, 50, 0.1);
+  box-shadow:
+    0 18px 42px rgba(37, 45, 40, 0.1),
+    0 1px 0 rgba(255, 255, 255, 0.86) inset;
+}
+
+.today-hero,
+.card-title,
+.qimen-note {
+  border: 1px solid rgba(42, 59, 50, 0.1);
+  border-radius: 14px;
+}
+
+.today-hero h2,
+.chart-card h2,
+.matrix h2,
+.card-title strong,
+.insight-panel strong,
+.calendar-item strong,
+.qimen-cell strong,
+.use-card strong,
+.oracle-main h3,
+.tarot-step-card h3 {
+  color: #17231f;
+  letter-spacing: 0;
+}
+
+.today-hero p,
+.today-summary,
+.calendar-summary,
+.qimen-summary,
+.oracle-summary,
+.insight-panel span,
+.insight-panel small,
+.calendar-item span,
+.qimen-cell span,
+.use-card span,
+.tarot-deck-head span,
+.tarot-warning {
+  color: #56645e;
+}
+
+.tabs,
+.tarot-tabs {
+  border-radius: 14px;
+  padding: 5px;
+}
+
+.tab,
+.oracle-chip,
+.tarot-tabs button,
+.bottom-nav button {
+  border-radius: 10px;
+  color: #5f6b66;
+  font-weight: 800;
+}
+
+.tab.is-active {
+  color: #17231f;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(250, 245, 234, 0.94)),
+    #fff;
+  box-shadow: 0 8px 18px rgba(37, 45, 40, 0.08);
+}
+
+.fortune-score,
+.score {
+  border: 1px solid rgba(185, 132, 47, 0.18);
+  background:
+    radial-gradient(circle at 34% 22%, rgba(255, 255, 255, 0.58), transparent 30%),
+    linear-gradient(145deg, #f8f1df, #ffffff);
+  box-shadow: 0 14px 34px rgba(37, 45, 40, 0.1);
+}
+
+.fortune-score span,
+.fortune-score small,
+.score b,
+.score small {
+  color: #17231f;
+}
+
+/* Desktop page layout cleanup: remove the app-frame feel and align content. */
+body {
+  min-width: 0;
+  overflow-x: clip;
+  background:
+    linear-gradient(180deg, #fff 0%, #fbfaf6 42%, #f7f4ed 100%);
+}
+
+.app-shell,
+.app-shell[data-method="bazi"],
+.app-shell[data-method="tarot"] {
+  width: 100%;
+  max-width: none;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 30px clamp(18px, 4vw, 56px) 72px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(240, 215, 164, 0.24), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(251, 250, 246, 0.98));
+  box-shadow: none;
+}
+
+.app-shell::before,
+.app-shell[data-method="bazi"]::before,
+.app-shell[data-method="tarot"]::before {
+  display: none;
+}
+
+.topbar,
+.birth-panel,
+.profile-status,
+.prediction-status,
+.tabs,
+main,
+.tarot-workspace {
+  width: min(100%, 1180px);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.topbar {
+  margin-bottom: 26px;
+}
+
+.birth-panel {
+  margin-top: 0;
+}
+
+.profile-status,
+.prediction-status {
+  display: flex;
+  width: min(100%, 1180px);
+  margin-top: 14px;
+}
+
+.tabs {
+  margin-top: 18px;
+  margin-bottom: 18px;
+}
+
+.bottom-nav {
+  width: min(100%, 720px);
+}
+
+.chart-card,
+.today-card,
+.identity,
+.matrix,
+.insight-panel,
+.oracle-reading,
+.oracle-card,
+.calendar-item,
+.qimen-cell,
+.use-card,
+.tarot-reader,
+.tarot-step-card,
+.tarot-deck-panel,
+.tarot-result-card {
+  overflow: hidden;
+}
+
+@media (min-width: 980px) {
+  .app-shell,
+  .app-shell[data-method="bazi"],
+  .app-shell[data-method="tarot"] {
+    padding-top: 34px;
+    padding-bottom: 80px;
+  }
+
+  .birth-panel {
+    grid-template-columns: minmax(180px, 1.15fr) minmax(150px, 0.86fr) minmax(170px, 1fr) minmax(150px, 0.86fr) minmax(170px, 0.92fr);
+    gap: 14px;
+    align-items: end;
+  }
+
+  .prediction-status {
+    grid-column: 1 / -1;
+  }
+
+  #overview.tab-panel.is-active,
+  #module-calendar.module.is-active,
+  #module-qimen.module.is-active,
+  #module-oracle.module.is-active {
+    gap: 18px;
+  }
+
+  .tabs {
+    position: sticky;
+    top: 14px;
+  }
+
+  .bottom-nav {
+    top: 14px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .topbar,
+  .birth-panel,
+  .profile-status,
+  .prediction-status,
+  .tabs,
+  main,
+  .tarot-workspace {
+    width: min(100%, 1240px);
+  }
+
+  .app-shell[data-method="tarot"] .tarot-workspace {
+    width: min(100%, 1320px);
+  }
+}
+
+@media (max-width: 760px) {
+  .app-shell,
+  .app-shell[data-method="bazi"],
+  .app-shell[data-method="tarot"] {
+    padding: 18px 14px 86px;
+  }
+
+  .topbar {
+    margin-bottom: 18px;
+  }
+}
+
+/* Likhitfa midnight premium theme inspired by the tarot reference. */
+:root {
+  --midnight-ink: #f8ecd2;
+  --midnight-soft: rgba(248, 236, 210, 0.74);
+  --midnight-muted: rgba(248, 236, 210, 0.58);
+  --midnight-deep: #04131d;
+  --midnight-deep-2: #071f2c;
+  --midnight-panel: rgba(6, 26, 38, 0.78);
+  --midnight-panel-strong: rgba(7, 31, 44, 0.92);
+  --midnight-line: rgba(240, 194, 112, 0.22);
+  --midnight-line-strong: rgba(240, 194, 112, 0.45);
+  --midnight-gold: #f3c56d;
+  --midnight-gold-2: #d89b3e;
+  --midnight-green: #174c40;
+  --midnight-shadow: rgba(0, 0, 0, 0.42);
+}
+
+body {
+  color: var(--midnight-ink);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(31, 88, 104, 0.26), transparent 32%),
+    linear-gradient(180deg, #03101a 0%, #061826 46%, #020b12 100%);
+}
+
+body::before {
+  background:
+    radial-gradient(circle at 50% 18%, rgba(243, 197, 109, 0.12), transparent 32%),
+    radial-gradient(circle at 18% 10%, rgba(45, 118, 120, 0.18), transparent 28%),
+    linear-gradient(180deg, rgba(3, 16, 26, 0.72), rgba(2, 11, 18, 0.96)),
+    var(--celestial-bg);
+  filter: saturate(0.88) contrast(1.08) brightness(0.48);
+}
+
+body::after {
+  background:
+    radial-gradient(circle at 48% 18%, rgba(243, 197, 109, 0.14), transparent 28%),
+    linear-gradient(90deg, rgba(1, 8, 13, 0.64), transparent 24%, transparent 76%, rgba(1, 8, 13, 0.64));
+  opacity: 1;
+}
+
+.app-shell,
+.app-shell[data-method="choose"],
+.app-shell[data-method="bazi"],
+.app-shell[data-method="tarot"] {
+  color: var(--midnight-ink);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(243, 197, 109, 0.1), transparent 34%),
+    radial-gradient(circle at 50% 36%, rgba(24, 85, 89, 0.18), transparent 38%),
+    linear-gradient(180deg, rgba(4, 19, 29, 0.98), rgba(2, 11, 18, 0.98));
+  box-shadow: none;
+}
+
+.app-shell::before,
+.app-shell[data-method="choose"]::before,
+.app-shell[data-method="bazi"]::before,
+.app-shell[data-method="tarot"]::before {
+  display: none;
+}
+
+.topbar,
+.app-shell[data-method="choose"] .topbar {
+  color: var(--midnight-ink);
+}
+
+.brand,
+.app-shell[data-method="choose"] .brand {
+  color: var(--midnight-gold);
+}
+
+h1,
+.app-shell[data-method="choose"] h1,
+h1 span,
+.app-shell[data-method="choose"] h1 span {
+  color: #fff7e6;
+  text-shadow: 0 8px 28px rgba(0, 0, 0, 0.38);
+}
+
+.module-title,
+.field label,
+.today-hero p,
+.today-hero small,
+.card-title span,
+.insight-panel span,
+.insight-panel small,
+.calendar-item span,
+.qimen-cell span,
+.use-card span,
+.tarot-deck-head span,
+.tarot-warning,
+.prediction-status,
+.profile-status,
+.app-shell.is-locked .profile-status,
+.save-status {
+  color: var(--midnight-soft);
+}
+
+.brand-mark,
+.app-shell[data-method="choose"] .brand-mark {
+  background:
+    radial-gradient(circle at 50% 42%, #fff7df, #f1c66a 58%, #4c3213 100%);
+  box-shadow:
+    0 16px 32px rgba(0, 0, 0, 0.38),
+    0 0 0 1px rgba(243, 197, 109, 0.46),
+    0 0 30px rgba(243, 197, 109, 0.12);
+}
+
+.reset-btn,
+.home-btn,
+.tab,
+.oracle-chip,
+.tarot-tabs button,
+.bottom-nav button {
+  color: var(--midnight-soft);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.055);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+}
+
+.home-btn:hover,
+.reset-btn:hover {
+  color: #fff7e6;
+  border-color: var(--midnight-line);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.birth-panel,
+.tabs,
+.profile-status,
+.prediction-status,
+.chart-card,
+.today-card,
+.identity,
+.matrix,
+.insight-panel,
+.calendar-item,
+.qimen-cell,
+.use-card,
+.oracle-reading,
+.oracle-card,
+.tarot-reader,
+.tarot-step-card,
+.tarot-deck-panel,
+.tarot-result-card,
+.lead-card,
+.app-shell[data-method="tarot"] .tarot-reader,
+.app-shell[data-method="tarot"] .tarot-result-card,
+.app-shell[data-method="tarot"] .tarot-step-card,
+.app-shell[data-method="tarot"] .tarot-deck-panel {
+  border-color: var(--midnight-line);
+  color: var(--midnight-ink);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(243, 197, 109, 0.08), transparent 34%),
+    linear-gradient(180deg, var(--midnight-panel), rgba(4, 18, 28, 0.88));
+  box-shadow:
+    0 24px 70px var(--midnight-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.today-hero,
+.card-title,
+.qimen-note,
+.app-shell[data-method="tarot"] .tarot-spread-board {
+  color: var(--midnight-ink);
+  border-color: var(--midnight-line);
+  background:
+    radial-gradient(circle at 80% 10%, rgba(243, 197, 109, 0.14), transparent 34%),
+    linear-gradient(135deg, rgba(8, 36, 50, 0.92), rgba(3, 15, 24, 0.92));
+}
+
+.method-card,
+.app-shell[data-method="choose"] .method-card,
+.app-shell[data-method="choose"] .method-card.is-coming {
+  border-color: var(--midnight-line);
+  color: var(--midnight-ink);
+  background:
+    radial-gradient(circle at 50% 38%, rgba(243, 197, 109, 0.08), transparent 36%),
+    linear-gradient(180deg, rgba(8, 38, 54, 0.82), rgba(3, 15, 24, 0.94));
+  box-shadow: 0 28px 80px var(--midnight-shadow);
+}
+
+.app-shell[data-method="choose"] .method-media::after {
+  background:
+    linear-gradient(180deg, rgba(3, 15, 24, 0.04) 0%, rgba(3, 15, 24, 0.22) 44%, rgba(3, 15, 24, 0.84) 100%),
+    radial-gradient(circle at 50% 18%, rgba(243, 197, 109, 0.12), transparent 28%);
+}
+
+.app-shell[data-method="choose"] .method-card span,
+.app-shell[data-method="choose"] .method-card[data-method="bazi"] .method-copy span,
+.app-shell[data-method="choose"] .method-card[data-method="tarot"] .method-copy span,
+.app-shell[data-method="choose"] .method-card.is-coming span {
+  color: #ffe5a6;
+  border-color: var(--midnight-line);
+  background: rgba(5, 22, 34, 0.76);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+
+.app-shell[data-method="choose"] .method-card strong,
+.app-shell[data-method="choose"] .method-card[data-method="bazi"] strong,
+.app-shell[data-method="choose"] .method-card[data-method="tarot"] strong,
+.app-shell[data-method="choose"] .method-card.is-coming strong {
+  color: #fff7e6;
+  text-shadow: 0 12px 32px rgba(0, 0, 0, 0.64);
+}
+
+.app-shell[data-method="choose"] .method-card small,
+.app-shell[data-method="choose"] .method-card.is-coming small {
+  color: rgba(255, 247, 230, 0.86);
+  text-shadow: 0 8px 24px rgba(0, 0, 0, 0.62);
+}
+
+.app-shell[data-method="choose"] .method-card.is-coming .method-media,
+.app-shell[data-method="choose"] .method-card.is-coming .method-media.is-placeholder {
+  background:
+    radial-gradient(circle at 50% 30%, rgba(243, 197, 109, 0.18), transparent 34%),
+    linear-gradient(145deg, rgba(9, 42, 57, 0.9), rgba(3, 15, 24, 0.96));
+}
+
+.method-card:hover,
+.method-card.is-active,
+.app-shell[data-method="choose"] .method-card:hover,
+.app-shell[data-method="choose"] .method-card.is-active {
+  border-color: var(--midnight-line-strong);
+  box-shadow:
+    0 34px 90px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(243, 197, 109, 0.22),
+    0 0 42px rgba(243, 197, 109, 0.14);
+}
+
+.predict-btn,
+.method-cta,
+.app-shell[data-method="choose"] .method-cta,
+.app-shell[data-method="choose"] .method-card[data-method="tarot"] .method-cta,
+.app-shell[data-method="choose"] .method-card.is-coming .method-cta,
+.oracle-chip.is-active,
+.tarot-tabs button.is-active,
+.app-shell[data-method="tarot"] .tarot-tabs button.is-active,
+.bottom-nav button.is-active,
+.deck-select-card.is-selected .pick-order,
+.app-shell[data-method="tarot"] #shuffleTarotBtn,
+.app-shell[data-method="tarot"] .tarot-map-card span {
+  color: #1d1408;
+  border-color: rgba(255, 232, 174, 0.58);
+  background:
+    linear-gradient(180deg, #ffe0a0, var(--midnight-gold) 58%, var(--midnight-gold-2));
+  box-shadow:
+    0 18px 42px rgba(216, 155, 62, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.42);
+}
+
+.tab.is-active {
+  color: #ffe7ab;
+  border-color: rgba(243, 197, 109, 0.3);
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.12), transparent 28%),
+    linear-gradient(135deg, rgba(29, 88, 73, 0.9), rgba(8, 48, 48, 0.86));
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.26);
+}
+
+.tabs,
+.bottom-nav,
+.tarot-tabs {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.055);
+  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.32);
+}
+
+.field input,
+.field select,
+input,
+select,
+.oracle-question textarea,
+.tarot-question-field textarea {
+  color: #fff7e6;
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.075);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+.field input::placeholder,
+.oracle-question textarea::placeholder,
+.tarot-question-field textarea::placeholder {
+  color: rgba(255, 247, 230, 0.44);
+}
+
+.field input:focus,
+.field select:focus,
+input:focus,
+select:focus,
+.oracle-question textarea:focus,
+.tarot-question-field textarea:focus {
+  border-color: var(--midnight-line-strong);
+  box-shadow:
+    0 0 0 4px rgba(243, 197, 109, 0.12),
+    0 18px 38px rgba(0, 0, 0, 0.24);
+}
+
+.prediction-status,
+.profile-status,
+.app-shell.is-locked .profile-status,
+.save-status {
+  color: rgba(255, 247, 230, 0.82);
+  border-color: rgba(243, 197, 109, 0.24);
+  background:
+    linear-gradient(135deg, rgba(10, 41, 55, 0.82), rgba(4, 18, 28, 0.86));
+}
+
+.today-hero h2,
+.chart-card h2,
+.matrix h2,
+.card-title strong,
+.insight-panel strong,
+.calendar-item strong,
+.qimen-cell strong,
+.use-card strong,
+.oracle-main h3,
+.tarot-step-card h3,
+.app-shell[data-method="tarot"] .tarot-step-card h3,
+.app-shell[data-method="tarot"] .tarot-deck-head strong,
+.app-shell[data-method="tarot"] .tarot-final-summary strong,
+.app-shell[data-method="tarot"] .tarot-insight-grid strong,
+.app-shell[data-method="tarot"] .tarot-card-copy h3,
+.app-shell[data-method="tarot"] .tarot-reading-copy h3,
+.app-shell[data-method="tarot"] .tarot-spread-board h3 {
+  color: #fff7e6;
+}
+
+.today-hero p,
+.today-summary,
+.calendar-summary,
+.qimen-summary,
+.oracle-summary,
+.app-shell[data-method="tarot"] .tarot-empty p,
+.app-shell[data-method="tarot"] .tarot-final-summary p,
+.app-shell[data-method="tarot"] .tarot-summary p,
+.app-shell[data-method="tarot"] .tarot-card-copy p,
+.app-shell[data-method="tarot"] .tarot-reading-copy p {
+  color: var(--midnight-soft);
+}
+
+.app-shell[data-method="tarot"] .tarot-empty,
+.app-shell[data-method="tarot"] .tarot-final-summary,
+.app-shell[data-method="tarot"] .tarot-summary,
+.app-shell[data-method="tarot"] .tarot-card,
+.app-shell[data-method="tarot"] .tarot-insight-grid div,
+.app-shell[data-method="tarot"] .tarot-reading-item {
+  border-color: var(--midnight-line);
+  color: var(--midnight-ink);
+  background:
+    radial-gradient(circle at 80% 0%, rgba(243, 197, 109, 0.08), transparent 28%),
+    linear-gradient(180deg, rgba(8, 36, 50, 0.9), rgba(4, 18, 28, 0.9));
+}
+
+.app-shell[data-method="tarot"] .tarot-final-summary span,
+.app-shell[data-method="tarot"] .tarot-empty span,
+.app-shell[data-method="tarot"] .tarot-insight-grid span,
+.app-shell[data-method="tarot"] .tarot-card-copy span,
+.app-shell[data-method="tarot"] .tarot-reading-copy span,
+.app-shell[data-method="tarot"] .tarot-reading-copy .tarot-card-name,
+.app-shell[data-method="tarot"] .deck-card-label,
+.deck-card-label {
+  color: var(--midnight-gold);
+}
+
+.fortune-score,
+.score {
+  border-color: rgba(243, 197, 109, 0.18);
+  background:
+    radial-gradient(circle at 32% 20%, rgba(243, 197, 109, 0.16), transparent 30%),
+    linear-gradient(145deg, rgba(19, 65, 59, 0.86), rgba(4, 18, 28, 0.9));
+}
+
+.fortune-score span,
+.fortune-score small,
+.score b,
+.score small {
+  color: #fff7e6;
+}
+
+.app-shell[data-method="choose"] .method-heading h2 {
+  color: #fff7e6;
+  text-shadow: 0 14px 38px rgba(0, 0, 0, 0.72);
+}
+
+.app-shell[data-method="choose"] .method-heading {
+  margin-bottom: 8px;
+}
+
+.app-shell.is-locked .today-card::after,
+.app-shell.is-locked .chart-card::after,
+.app-shell.is-locked .identity::after,
+.app-shell.is-locked .matrix::after {
+  display: none;
+}
+
+.advice-card,
+.fortune-strip div,
+.pillar,
+.matrix-grid > *,
+.placeholder-card,
+.tarot-empty,
+.tarot-summary,
+.tarot-final-summary,
+.tarot-insight-grid div,
+.tarot-card,
+.calendar-tags small,
+.calendar-item,
+.qimen-cell,
+.use-card,
+.oracle-card {
+  border-color: rgba(240, 194, 112, 0.18);
+  color: var(--midnight-ink);
+  background:
+    radial-gradient(circle at 90% 0%, rgba(243, 197, 109, 0.08), transparent 28%),
+    linear-gradient(180deg, rgba(9, 38, 52, 0.84), rgba(4, 18, 28, 0.9));
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.advice-card span,
+.fortune-strip span,
+.pillar-label,
+.matrix-grid span,
+.placeholder-card span,
+.tarot-empty span,
+.tarot-summary span,
+.tarot-final-summary span,
+.tarot-insight-grid span,
+.tarot-card-copy span,
+.calendar-tags small,
+.calendar-item span,
+.qimen-cell span,
+.use-card span,
+.oracle-card span {
+  color: rgba(255, 231, 171, 0.72);
+}
+
+.advice-card strong,
+.fortune-strip strong,
+.pillar strong,
+.matrix-grid strong,
+.placeholder-card strong,
+.tarot-empty strong,
+.tarot-summary strong,
+.tarot-final-summary strong,
+.tarot-insight-grid strong,
+.tarot-card-copy h3,
+.calendar-item strong,
+.qimen-cell strong,
+.use-card strong,
+.oracle-card strong {
+  color: #fff7e6;
+}
+
+.placeholder-card,
+.app-shell.is-locked .fortune-score,
+.app-shell.is-locked .score {
+  opacity: 1;
+}
+
+.pillar-grid {
+  border-color: rgba(240, 194, 112, 0.24);
+}
+
+.pillar {
+  border-color: rgba(240, 194, 112, 0.24);
+}
+
+.pillar .stem,
+.pillar .branch {
+  color: #fff7e6;
+}
+
+.pillar .stem small,
+.pillar .branch small {
+  color: rgba(255, 231, 171, 0.72);
+}
+
+.bottom-nav {
+  background: rgba(5, 20, 31, 0.82);
+  border-color: rgba(240, 194, 112, 0.18);
+}
+
+.bottom-nav button {
+  color: rgba(255, 247, 230, 0.7);
+}
+
+@media (min-width: 761px) {
+  .profile-status,
+  .prediction-status {
+    display: flex;
+  }
+
+  .prediction-status {
+    width: 100%;
+  }
+
+  .birth-panel .prediction-status {
+    width: 100%;
+  }
+}
+
+/* Final midnight leak fixes: remove leftover ivory cards and dim text. */
+.today-card p,
+.chart-card p,
+.matrix p,
+.identity p,
+.oracle-main p,
+.oracle-reading p,
+.oracle-card p,
+.timeline-item p,
+.calendar-item p,
+.qimen-cell p,
+.use-card p,
+.placeholder-card p,
+.tarot-step-card p,
+.tarot-deck-panel p,
+.tarot-result-card p,
+.analysis-state {
+  color: rgba(255, 247, 230, 0.78);
+}
+
+.today-hero p,
+.today-hero .muted,
+.oracle-summary,
+.calendar-summary,
+.qimen-summary,
+#todaySummary,
+#oracleSummary,
+#calendarSummary,
+#qimenSummary,
+#qimenNote,
+#analysisState {
+  color: rgba(255, 247, 230, 0.7);
+}
+
+.oracle-main,
+.oracle-card,
+.timeline-item,
+.filter-chip,
+.oracle-chip,
+.calendar-tags small,
+.calendar-item,
+.qimen-cell,
+.use-card,
+.placeholder-card,
+.advice-card,
+.fortune-strip div,
+.matrix-grid > *,
+.tarot-empty,
+.tarot-summary,
+.tarot-final-summary,
+.tarot-insight-grid div,
+.tarot-card {
+  border-color: rgba(240, 194, 112, 0.2);
+  color: var(--midnight-ink);
+  background:
+    radial-gradient(circle at 90% 0%, rgba(243, 197, 109, 0.08), transparent 28%),
+    linear-gradient(180deg, rgba(9, 38, 52, 0.88), rgba(4, 18, 28, 0.94));
+  box-shadow:
+    0 14px 32px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.filter-chip,
+.oracle-chip {
+  color: rgba(255, 247, 230, 0.76);
+  border-radius: 999px;
+}
+
+.filter-chip.is-active,
+.oracle-chip.is-active,
+.analyze-btn {
+  color: #1d1408;
+  border-color: rgba(255, 232, 174, 0.58);
+  background:
+    linear-gradient(180deg, #ffe0a0, var(--midnight-gold) 58%, var(--midnight-gold-2));
+  box-shadow:
+    0 14px 30px rgba(216, 155, 62, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.42);
+}
+
+.oracle-main h3,
+.oracle-card strong,
+.timeline-item strong,
+.calendar-item strong,
+.qimen-cell strong,
+.use-card strong,
+.placeholder-card strong,
+.advice-card strong,
+.fortune-strip strong,
+.matrix-grid strong,
+.tarot-empty strong,
+.tarot-summary strong,
+.tarot-final-summary strong,
+.tarot-insight-grid strong,
+.tarot-card-copy h3 {
+  color: #fff7e6;
+}
+
+.oracle-card span,
+.timeline-item span,
+.calendar-item span,
+.qimen-cell span,
+.use-card span,
+.placeholder-card span,
+.advice-card span,
+.fortune-strip span,
+.matrix-grid span,
+.tarot-empty span,
+.tarot-summary span,
+.tarot-final-summary span,
+.tarot-insight-grid span,
+.tarot-card-copy span {
+  color: rgba(255, 231, 171, 0.74);
+}
+
+.today-hero {
+  overflow: hidden;
+}
+
+.today-hero::before,
+.card-title::before,
+.oracle-main::before {
+  opacity: 0.18;
+}
+
+.score,
+.fortune-score {
+  color: #fff7e6;
+}
+
+.score b,
+.score small,
+.fortune-score span,
+.fortune-score small {
+  color: #fff7e6;
+}
+
+.calendar-filters,
+.oracle-controls {
+  align-items: stretch;
+}
+
+.app-shell[data-method="tarot"] .tarot-tabs button,
+.tarot-tabs button,
+.filter-chip:not(.is-active),
+.oracle-chip:not(.is-active) {
+  color: rgba(255, 247, 230, 0.76);
+  border: 1px solid rgba(240, 194, 112, 0.16);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(243, 197, 109, 0.06), transparent 28%),
+    linear-gradient(180deg, rgba(12, 43, 56, 0.82), rgba(5, 22, 34, 0.9));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
+.app-shell[data-method="tarot"] .tarot-tabs button.is-active,
+.tarot-tabs button.is-active,
+.filter-chip.is-active,
+.oracle-chip.is-active {
+  color: #1d1408;
+  border-color: rgba(255, 232, 174, 0.58);
+  background:
+    linear-gradient(180deg, #ffe0a0, var(--midnight-gold) 58%, var(--midnight-gold-2));
+}
+
+.app-shell[data-method="tarot"] .tarot-warning,
+.tarot-warning,
+.analysis-state,
+.tarot-start-hint {
+  color: rgba(255, 247, 230, 0.72);
+}
+
+.app-shell[data-method="tarot"] .tarot-progress {
+  background: rgba(255, 255, 255, 0.08);
+}
