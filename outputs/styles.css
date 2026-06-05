@@ -5284,3 +5284,81 @@ select:focus,
 .app-shell[data-method="tarot"] .tarot-progress {
   background: rgba(255, 255, 255, 0.08);
 }
+
+/* Final theme containment: prevent native controls and highlighted cards from leaking light UI. */
+.app-shell {
+  color-scheme: dark;
+}
+
+.field select,
+select {
+  color: #fff7e6;
+  color-scheme: dark;
+  accent-color: var(--midnight-gold);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.055)),
+    #102432;
+}
+
+.field select option,
+select option,
+.field select optgroup,
+select optgroup {
+  color: #fff7e6;
+  background: #102432;
+}
+
+.field select option:checked,
+select option:checked,
+.field select option:hover,
+select option:hover {
+  color: #1d1408;
+  background:
+    linear-gradient(180deg, #ffe0a0, var(--midnight-gold) 58%, var(--midnight-gold-2)),
+    #f3c56d;
+}
+
+.field input[type="date"],
+.field input[type="time"],
+input[type="date"],
+input[type="time"] {
+  color-scheme: dark;
+}
+
+.calendar-item.is-top,
+.qimen-cell.is-best {
+  border-color: rgba(255, 232, 174, 0.52);
+  color: #fff7e6;
+  background:
+    radial-gradient(circle at 82% 10%, rgba(243, 197, 109, 0.18), transparent 34%),
+    linear-gradient(180deg, rgba(15, 62, 70, 0.94), rgba(5, 22, 34, 0.96));
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.32),
+    0 0 0 1px rgba(243, 197, 109, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.calendar-item.is-top strong,
+.calendar-item.is-top p,
+.calendar-item.is-top div,
+.qimen-cell.is-best strong,
+.qimen-cell.is-best p,
+.qimen-cell.is-best small,
+.qimen-cell.is-best div {
+  color: #fff7e6;
+}
+
+.calendar-item.is-top span,
+.calendar-item.is-top .calendar-tags small,
+.qimen-cell.is-best span,
+.qimen-cell.is-best small {
+  color: rgba(255, 231, 171, 0.78);
+}
+
+.calendar-item.is-top .score,
+.qimen-cell.is-best .score {
+  color: #fff7e6;
+  background:
+    radial-gradient(circle at 32% 20%, rgba(243, 197, 109, 0.2), transparent 30%),
+    linear-gradient(145deg, rgba(19, 65, 59, 0.92), rgba(4, 18, 28, 0.94));
+}
