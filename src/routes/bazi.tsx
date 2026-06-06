@@ -112,7 +112,7 @@ function BaziPage() {
 
         {/* Content */}
         <div className="mt-8 space-y-6">
-          {!analysis && <BaziGuidePanel />}
+          {!analysis && <BaziGuidePanel tab={tab} sub={sub} />}
           {analysis && sub === "ปาจื้อ" && tab === "ภาพรวม" && (
             <OverviewPanel analysis={analysis} />
           )}
@@ -123,9 +123,9 @@ function BaziPage() {
           )}
           {analysis && sub === "ปาจื้อ" && tab === "ดาว" && <TenGodsPanel analysis={analysis} />}
           {sub === "ปาจื้อ" && tab === "หลักการ" && <PrinciplesPanel />}
-          {analysis && sub === "พยากรณ์" && <ForecastPanel analysis={analysis} />}
-          {analysis && sub === "ปฏิทินมงคล" && <CalendarPanel analysis={analysis} />}
-          {analysis && sub === "ฉีเหมิน" && <QimenPanel analysis={analysis} />}
+          {analysis && sub === "พยากรณ์" && <ForecastPanel analysis={analysis} tab={tab} />}
+          {analysis && sub === "ปฏิทินมงคล" && <CalendarPanel analysis={analysis} tab={tab} />}
+          {analysis && sub === "ฉีเหมิน" && <QimenPanel analysis={analysis} tab={tab} />}
         </div>
       </main>
 
@@ -272,7 +272,13 @@ function BaziEmptyState() {
   );
 }
 
-function BaziGuidePanel() {
+function BaziGuidePanel({
+  tab,
+  sub,
+}: {
+  tab: (typeof mainTabs)[number];
+  sub: (typeof subTabs)[number];
+}) {
   return (
     <section className="glass-strong rounded-3xl p-8 text-center shadow-elegant">
       <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-gold/30 bg-gradient-gold-soft font-cn text-4xl text-gold">
@@ -283,6 +289,9 @@ function BaziGuidePanel() {
         หน้านี้จะไม่แสดงผลลัพธ์ตัวอย่างก่อนกรอกข้อมูล ระบบจะอ่านจากวันเกิด เวลาเกิด และเพศที่ใส่
         แล้วแปลงเป็น 4 เสาเพื่อสร้างคำทำนายเฉพาะบุคคล
       </p>
+      <div className="mx-auto mt-4 inline-flex rounded-full border border-gold/20 bg-gold/5 px-4 py-2 text-xs text-gold">
+        เมนูที่เลือก: {sub} · {tab}
+      </div>
       <div className="mt-6 grid gap-3 md:grid-cols-3">
         <MiniStat label="ขั้นที่ 1" value="กรอกข้อมูลเกิด" />
         <MiniStat label="ขั้นที่ 2" value="กดทำนายดวง" />
@@ -715,20 +724,22 @@ function PrinciplesPanel() {
   );
 }
 
-function ForecastPanel({ analysis }: { analysis: BaziAnalysis }) {
-  const focus = ["ภาพรวม", "งาน", "เงิน", "ความรัก", "สุขภาพใจ"];
+function ForecastPanel({
+  analysis,
+  tab,
+}: {
+  analysis: BaziAnalysis;
+  tab: (typeof mainTabs)[number];
+}) {
+  const focus = analysis.forecast.map((item) => item.label);
   const [active, setActive] = useState("ภาพรวม");
+  const activeForecast =
+    analysis.forecast.find((item) => item.label === active) || analysis.forecast[0];
   const forecastDate = new Date().toLocaleDateString("th-TH", {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
-  const scores = [
-    { label: "งาน", score: Math.min(99, analysis.today.dayScore + 6) },
-    { label: "เงิน", score: Math.max(28, analysis.today.dayScore - 2) },
-    { label: "ความรัก", score: Math.min(99, analysis.today.dayScore + 1) },
-    { label: "สุขภาพใจ", score: Math.max(28, analysis.today.dayScore - 6) },
-  ];
   return (
     <section className="grid gap-6 lg:grid-cols-[380px_1fr]">
       <div className="glass-strong rounded-3xl p-6 shadow-elegant">
@@ -736,11 +747,14 @@ function ForecastPanel({ analysis }: { analysis: BaziAnalysis }) {
           คำพยากรณ์ส่วนตัว
         </div>
         <h4 className="mt-2 font-display text-2xl leading-tight text-foreground">
-          คำพยากรณ์ตั้งต้น · งาน เงิน ความรัก สุขภาพใจ
+          {tab === "ภาพรวม" ? "คำพยากรณ์ตั้งต้น" : `คำพยากรณ์ · ${tab}`}
         </h4>
         <div className="my-5 flex items-center justify-between rounded-2xl border border-gold/20 bg-gradient-gold-soft p-4">
-          <div className="text-xs text-muted-foreground">พลังเรื่องนี้</div>
-          <div className="font-display text-4xl text-gold">{analysis.today.dayScore}</div>
+          <div>
+            <div className="text-xs text-muted-foreground">พลังเรื่องนี้</div>
+            <div className="mt-1 text-sm text-foreground">{activeForecast.label}</div>
+          </div>
+          <div className="font-display text-4xl text-gold">{activeForecast.score}</div>
         </div>
         <p className="text-xs leading-relaxed text-muted-foreground">
           ระบบอ่านตั้งต้นจากดวงเกิด Day Master{" "}
@@ -767,6 +781,9 @@ function ForecastPanel({ analysis }: { analysis: BaziAnalysis }) {
           <button className="mt-2 w-full rounded-xl bg-gradient-gold py-3 text-sm font-semibold text-primary-foreground shadow-gold">
             วิเคราะห์คำถาม
           </button>
+          <p className="mt-2 text-[10px] leading-relaxed text-muted-foreground">
+            ช่องถามนี้ยังไม่เรียก AI; ผลด้านขวาคำนวณจากปาจื้อและจังหวะวันจริงแบบ deterministic
+          </p>
         </div>
       </div>
 
@@ -777,7 +794,7 @@ function ForecastPanel({ analysis }: { analysis: BaziAnalysis }) {
               ผลคำพยากรณ์
             </div>
             <h4 className="mt-1 font-display text-2xl text-foreground">
-              คำพยากรณ์ <span className="font-cn text-gold">占斷</span>
+              {activeForecast.title} <span className="font-cn text-gold">占斷</span>
             </h4>
           </div>
           <div className="text-right text-[10px] text-muted-foreground">
@@ -786,24 +803,27 @@ function ForecastPanel({ analysis }: { analysis: BaziAnalysis }) {
         </div>
 
         <div className="mt-4 rounded-2xl border border-gold/15 bg-card/30 p-5">
-          <div className="font-display text-lg text-gold">คำพยากรณ์ตั้งต้น</div>
+          <div className="font-display text-lg text-gold">{activeForecast.label}</div>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            {analysis.today.summary}
+            {activeForecast.body}
           </p>
+          <div className="mt-3 rounded-xl border border-gold/10 bg-gold/5 px-3 py-2 text-xs text-foreground/80">
+            คำแนะนำ: {activeForecast.action}
+          </div>
         </div>
 
         <div className="mt-4 grid gap-3 md:grid-cols-2">
-          {scores.map((s) => (
-            <div key={s.label} className="rounded-2xl border border-border bg-card/40 p-4">
-              <div className="flex items-baseline justify-between">
-                <div className="text-xs text-muted-foreground">{s.label}</div>
-                <div className="font-display text-lg text-gold">{s.score}/100</div>
+          {analysis.forecast
+            .filter((item) => item.label !== "ภาพรวม")
+            .map((s) => (
+              <div key={s.label} className="rounded-2xl border border-border bg-card/40 p-4">
+                <div className="flex items-baseline justify-between">
+                  <div className="text-xs text-muted-foreground">{s.label}</div>
+                  <div className="font-display text-lg text-gold">{s.score}/100</div>
+                </div>
+                <p className="mt-2 text-xs leading-relaxed text-foreground/80">{s.body}</p>
               </div>
-              <p className="mt-2 text-xs leading-relaxed text-foreground/80">
-                แนวโน้มควรประคองและเลือกจังหวะตัดสินใจให้ชัดเจน ใช้ข้อมูลและสัญญาเป็นเครื่องตรวจสอบ
-              </p>
-            </div>
-          ))}
+            ))}
         </div>
 
         <div className="mt-4 grid gap-3 md:grid-cols-3">
@@ -825,7 +845,13 @@ function SmallNote({ label, body }: { label: string; body: string }) {
   );
 }
 
-function CalendarPanel({ analysis }: { analysis: BaziAnalysis }) {
+function CalendarPanel({
+  analysis,
+  tab,
+}: {
+  analysis: BaziAnalysis;
+  tab: (typeof mainTabs)[number];
+}) {
   const days = analysis.calendar;
 
   const scoreColor = (s: number) =>
@@ -846,7 +872,7 @@ function CalendarPanel({ analysis }: { analysis: BaziAnalysis }) {
         <h4 className="mt-2 font-display text-3xl text-foreground">14 วันถัดไป</h4>
         <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
           {analysis.input.name || "ไม่ระบุชื่อ"} เกิด {analysis.input.birthDate} ระบบใช้ธาตุให้คุณ{" "}
-          {analysis.context.useful.join(" / ")} เพื่อจัดอันดับวัน
+          {analysis.context.useful.join(" / ")} เพื่อจัดอันดับวัน · มุมมอง {tab}
         </p>
         <div className="mt-5 flex flex-wrap gap-2">
           {["ทั้งหมด", "งาน/เงิน", "รัก/เจรจา", "พัก/แก้เคล็ด"].map((t, i) => (
@@ -896,7 +922,7 @@ function CalendarPanel({ analysis }: { analysis: BaziAnalysis }) {
   );
 }
 
-function QimenPanel({ analysis }: { analysis: BaziAnalysis }) {
+function QimenPanel({ analysis, tab }: { analysis: BaziAnalysis; tab: (typeof mainTabs)[number] }) {
   const { best, directions } = analysis.qimen;
   const remedyColor =
     {
@@ -920,8 +946,8 @@ function QimenPanel({ analysis }: { analysis: BaziAnalysis }) {
           <div className="font-display text-4xl text-gold">{best.score}</div>
         </div>
         <p className="text-xs leading-relaxed text-muted-foreground">
-          โหมดนี้เป็นฉีเหมินเบื้องต้น/จำลองจากเวลา ธาตุให้คุณ และทิศ
-          ไม่ใช่การตั้งกระดานฉีเหมินเต็มสูตรแบบจีนแส
+          โหมดนี้คำนวณทิศรายยามจากวันเกิด เวลาเกิด เสาวัน ธาตุให้คุณ และทิศแบบ deterministic ·
+          มุมมอง {tab}
         </p>
       </div>
 
@@ -956,11 +982,11 @@ function QimenPanel({ analysis }: { analysis: BaziAnalysis }) {
         </div>
 
         <div className="mt-5 rounded-2xl border border-gold/15 bg-card/30 p-4">
-          <div className="text-sm font-semibold text-foreground">ทิศแนะนำแบบจำลอง: {best.dir}</div>
+          <div className="text-sm font-semibold text-foreground">ทิศแนะนำ: {best.dir}</div>
           <p className="mt-1 text-xs text-muted-foreground">
             ระบบให้คะแนนจากธาตุ <span className="font-cn">{elementSymbol(best.elem)}</span>{" "}
             {best.elem}, เวลาเกิด และธาตุให้คุณ {analysis.context.useful.join(" / ")}{" "}
-            หากต้องการความแม่นระดับจีนแสต้องใช้การตั้งกระดานฉีเหมินเต็มสูตร
+            โดยคำนวณซ้ำได้จากข้อมูลเดิมและไม่ใช้การสุ่ม
           </p>
           <div className="mt-3 grid gap-3 md:grid-cols-2">
             <NoteCard

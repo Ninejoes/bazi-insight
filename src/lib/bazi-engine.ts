@@ -60,6 +60,13 @@ export type BaziAnalysis = {
     advice: [string, string][];
     components: { label: string; points: number; detail: string }[];
   };
+  forecast: {
+    label: string;
+    score: number;
+    title: string;
+    body: string;
+    action: string;
+  }[];
   calendar: {
     d: string;
     w: string;
@@ -210,6 +217,53 @@ const relationProfiles: Record<string, string> = {
   ระเบียบ: "เหมาะทำเรื่องทางการ เอกสาร กติกา และสิ่งที่ต้องการความน่าเชื่อถือ",
   "ญาณ/กลยุทธ์": "เหมาะศึกษา วางแผน อ่านสัญญาณ และใช้ข้อมูลเงียบ ๆ ก่อนขยับ",
   ผู้สนับสนุน: "มีพลังผู้ช่วย ความรู้ และคำแนะนำจากคนมีประสบการณ์",
+};
+
+const forecastCatalog: Record<
+  string,
+  {
+    base: string;
+    good: string;
+    medium: string;
+    low: string;
+    action: string;
+  }
+> = {
+  ภาพรวม: {
+    base: "อ่านจาก Day Master, ธาตุให้คุณ, แรงปะทะ/合 ของกิ่งดิน และสิบเทพรายวัน",
+    good: "ภาพรวมเปิดทาง เหมาะเริ่มเรื่องที่มีกรอบชัดและมีข้อมูลพร้อม",
+    medium: "ภาพรวมพอขยับได้ แต่ควรแบ่งงานเป็นช่วงและตรวจรายละเอียดก่อนสรุป",
+    low: "ภาพรวมควรประคอง ลดเรื่องเสี่ยง และอย่าเร่งตัดสินใจจากอารมณ์",
+    action: "เลือกเรื่องสำคัญเพียงหนึ่งเรื่อง แล้วปิดให้จบก่อนเพิ่มงานใหม่",
+  },
+  งาน: {
+    base: "อ่านจาก 官煞, 印, กิ่งเดือน และแรงหนุนของธาตุให้คุณ",
+    good: "งานมีแรงส่ง เหมาะคุยกับผู้ใหญ่ ทำเอกสาร วางมาตรฐาน หรือปิดดีลที่ค้าง",
+    medium: "งานเดินได้ถ้าแยกหน้าที่ให้ชัด ระวังประชุมยาวหรือรับปากเกินกำลัง",
+    low: "งานมีแรงกด ควรเลี่ยงการชนตรงและใช้หลักฐานช่วยพูดแทนความรู้สึก",
+    action: "เขียนเป้าหมาย งานที่ต้องส่ง และเงื่อนไขการตัดสินใจให้เห็นบนกระดาษ",
+  },
+  เงิน: {
+    base: "อ่านจาก 財星, output ที่ก่อให้เกิด wealth, และ clash/harm กับเสาวัน",
+    good: "เงินมีจังหวะเห็นโอกาส เหมาะจัดราคา เจรจา หรือแยกแหล่งรายรับให้ชัด",
+    medium: "เงินควรเดินแบบระวัง ตรวจตัวเลขและเงื่อนไขก่อนตกลง",
+    low: "เงินไม่เหมาะเสี่ยงหรือเร่งลงทุน ควรรักษาสภาพคล่องมากกว่าขยาย",
+    action: "ตรวจรายรับ รายจ่าย สัญญา และวันที่ครบกำหนดก่อนตัดสินใจ",
+  },
+  ความรัก: {
+    base: "อ่านจากดาวคู่สัมพันธ์ตามเพศ, กิ่งวัน, 合/冲/害 และธาตุสื่อสาร",
+    good: "ความสัมพันธ์เปิดพื้นที่คุยดี เหมาะปรับความเข้าใจหรือเริ่มบทสนทนาที่ค้าง",
+    medium: "ความสัมพันธ์ต้องใช้จังหวะ ฟังให้จบก่อนตอบ และไม่สรุปแทนอีกฝ่าย",
+    low: "ความสัมพันธ์ไวต่อคำพูด ควรเลี่ยงการกดดันหรือคุยตอนเหนื่อย",
+    action: "ถามให้ชัดหนึ่งคำถาม แล้วฟังคำตอบจริงโดยไม่รีบป้องกันตัว",
+  },
+  สุขภาพใจ: {
+    base: "อ่านจากความแรงของ Day Master, ธาตุที่มาก/พร่อง และกิ่งที่เกิด冲刑害",
+    good: "ใจมีแรงพอจัดระบบชีวิต เหมาะออกกำลังเบา ๆ และทำสิ่งที่ให้ความรู้สึกคุมได้",
+    medium: "ใจต้องการจังหวะพักเป็นช่วง อย่ารับข้อมูลมากเกินไป",
+    low: "ใจล้าง่าย ควรลดสิ่งเร้าและเลื่อนเรื่องที่ไม่จำเป็นออกไปก่อน",
+    action: "นอนให้พอ ดื่มน้ำ และตัดหนึ่งสิ่งที่ทำให้ใจรบกวนออกจากวันนี้",
+  },
 };
 
 const branchClashes: Record<string, string[]> = {
@@ -711,6 +765,100 @@ function todayReading(
   };
 }
 
+function clampScore(score: number) {
+  return Math.max(28, Math.min(99, Math.round(score)));
+}
+
+function forecastText(label: string, score: number) {
+  const catalog = forecastCatalog[label] || forecastCatalog["ภาพรวม"];
+  const trend = score >= 78 ? catalog.good : score >= 56 ? catalog.medium : catalog.low;
+  return {
+    title: `${label} · ${score >= 78 ? "เปิดทาง" : score >= 56 ? "ประคองได้" : "ต้องระวัง"}`,
+    body: `${trend} (${catalog.base})`,
+    action: catalog.action,
+  };
+}
+
+function buildForecast(chart: BaziAnalysis["chart"], score: number, input: BaziInput, today: Date) {
+  const ctx = chartContext(chart, score);
+  const daily = dailyScore(chart, score, today);
+  const relationCounts = ctx.relationCounts;
+  const relationBoost = (names: string[]) =>
+    names.reduce((sum, name) => sum + (relationCounts[name] || 0) * 4, 0);
+  const dailyPenalty =
+    daily.clashMatches.length * 7 +
+    daily.harmMatches.length * 4 +
+    daily.punishmentMatches.length * 4;
+  const supportBonus = daily.combinationMatches.length * 5;
+  const usefulBonus = ctx.useful.includes(daily.todayPillar.stem.element) ? 6 : 0;
+  const spouseElement = input.gender === "หญิง" ? ctx.roles.officer : ctx.roles.wealth;
+  const spouseWeight = ctx.dominant.find(([element]) => element === spouseElement)?.[1] || 0;
+  const wealthBranch =
+    daily.todayPillar.stem.element === ctx.roles.wealth ||
+    daily.todayPillar.branch.element === ctx.roles.wealth
+      ? 8
+      : 0;
+  const officerBranch =
+    daily.todayPillar.stem.element === ctx.roles.officer ||
+    daily.todayPillar.branch.element === ctx.roles.officer
+      ? 8
+      : 0;
+  const resourceBranch =
+    daily.todayPillar.stem.element === ctx.roles.resource ||
+    daily.todayPillar.branch.element === ctx.roles.resource
+      ? 7
+      : 0;
+
+  const raw = [
+    {
+      label: "ภาพรวม",
+      score: daily.value,
+    },
+    {
+      label: "งาน",
+      score:
+        48 +
+        relationBoost(["ระเบียบ", "แรงกดดัน", "ผู้สนับสนุน", "ญาณ/กลยุทธ์"]) +
+        officerBranch +
+        supportBonus -
+        dailyPenalty * 0.45,
+    },
+    {
+      label: "เงิน",
+      score:
+        44 +
+        relationBoost(["ทรัพย์หลัก", "รายได้เสริม", "พรสวรรค์", "นักแสดงออก"]) +
+        wealthBranch +
+        supportBonus -
+        dailyPenalty * 0.55,
+    },
+    {
+      label: "ความรัก",
+      score:
+        46 +
+        spouseWeight * 7 +
+        (daily.combinationMatches.some((item) => item.label === "วัน") ? 12 : 0) -
+        (daily.clashMatches.some((item) => item.label === "วัน") ? 16 : 0) -
+        daily.harmMatches.length * 5,
+    },
+    {
+      label: "สุขภาพใจ",
+      score:
+        52 +
+        resourceBranch +
+        usefulBonus +
+        (score >= 70 ? -5 : 6) -
+        dailyPenalty +
+        (ctx.unfavorable.includes(daily.todayPillar.branch.element) ? -5 : 0),
+    },
+  ];
+
+  return raw.map((item) => {
+    const finalScore = clampScore(item.score);
+    return { label: item.label, score: finalScore, ...forecastText(item.label, finalScore) };
+  });
+}
+
 export function analyzeBazi(input: BaziInput, today = new Date()): BaziAnalysis {
   const birth = new Date(`${input.birthDate}T${input.birthTime || "12:00"}:00`);
   const hour = Number((input.birthTime || "12:00").split(":")[0] || 12);
@@ -723,6 +871,7 @@ export function analyzeBazi(input: BaziInput, today = new Date()): BaziAnalysis 
     context: ctx,
     strength: score,
     today: todayReading(chart, score, input, today),
+    forecast: buildForecast(chart, score, input, today),
     calendar: buildCalendar(chart, score, today),
     luckCycles: buildLuckCycles(chart, input),
     tenGods: buildTenGods(chart),
