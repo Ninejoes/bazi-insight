@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/admin/help")({
   head: () => ({ meta: [{ title: "ปรับแต่งศูนย์ช่วยเหลือ — Admin" }] }),
@@ -29,6 +29,18 @@ const initial: FAQ[] = [
 function AdminHelp() {
   const [faqs, setFaqs] = useState(initial);
   const [adding, setAdding] = useState(false);
+  const [notice, setNotice] = useState("");
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("likhitfa-admin-faqs");
+    if (saved) setFaqs(JSON.parse(saved));
+  }, []);
+
+  const persist = (next: FAQ[], message: string) => {
+    setFaqs(next);
+    window.localStorage.setItem("likhitfa-admin-faqs", JSON.stringify(next));
+    setNotice(message);
+  };
 
   return (
     <div className="space-y-6">
@@ -45,16 +57,47 @@ function AdminHelp() {
         </button>
       </div>
 
+      {notice ? (
+        <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-200">
+          {notice}
+        </div>
+      ) : null}
+
       <section className="space-y-3">
         {faqs.map((f) => (
           <div key={f.id} className="glass-strong rounded-2xl p-5">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <input className="input-styled mb-3" defaultValue={f.q} />
-                <textarea className="input-styled !h-24 py-3" defaultValue={f.a} />
+                <input
+                  className="input-styled mb-3"
+                  value={f.q}
+                  onChange={(e) =>
+                    setFaqs((items) =>
+                      items.map((item) =>
+                        item.id === f.id ? { ...item, q: e.target.value } : item,
+                      ),
+                    )
+                  }
+                />
+                <textarea
+                  className="input-styled !h-24 py-3"
+                  value={f.a}
+                  onChange={(e) =>
+                    setFaqs((items) =>
+                      items.map((item) =>
+                        item.id === f.id ? { ...item, a: e.target.value } : item,
+                      ),
+                    )
+                  }
+                />
               </div>
               <button
-                onClick={() => setFaqs((s) => s.filter((x) => x.id !== f.id))}
+                onClick={() =>
+                  persist(
+                    faqs.filter((x) => x.id !== f.id),
+                    "ลบคำถามแล้ว",
+                  )
+                }
                 className="rounded-md border border-rose-400/30 px-3 py-1.5 text-xs text-rose-300 hover:bg-rose-400/10"
               >
                 ลบ
@@ -65,7 +108,10 @@ function AdminHelp() {
       </section>
 
       <div className="flex justify-end">
-        <button className="rounded-xl bg-gradient-gold px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-gold">
+        <button
+          onClick={() => persist(faqs, "บันทึกคำถามทั้งหมดแล้ว")}
+          className="rounded-xl bg-gradient-gold px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-gold"
+        >
           บันทึกทั้งหมด
         </button>
       </div>
@@ -84,11 +130,23 @@ function AdminHelp() {
               className="mt-5 space-y-3"
               onSubmit={(e) => {
                 e.preventDefault();
+                const form = new FormData(e.currentTarget);
+                persist(
+                  [
+                    ...faqs,
+                    {
+                      id: String(Date.now()),
+                      q: String(form.get("q") || ""),
+                      a: String(form.get("a") || ""),
+                    },
+                  ],
+                  "เพิ่มคำถามแล้ว",
+                );
                 setAdding(false);
               }}
             >
-              <input className="input-styled" placeholder="คำถาม" />
-              <textarea className="input-styled !h-32 py-3" placeholder="คำตอบ" />
+              <input name="q" className="input-styled" placeholder="คำถาม" required />
+              <textarea name="a" className="input-styled !h-32 py-3" placeholder="คำตอบ" required />
               <div className="flex justify-end gap-2">
                 <button
                   type="button"

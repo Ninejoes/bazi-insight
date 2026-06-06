@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/admin/dreams")({
   head: () => ({ meta: [{ title: "จัดการทำนายฝัน — Admin" }] }),
@@ -64,6 +64,19 @@ function AdminDreams() {
   const [items, setItems] = useState(seed);
   const [filterLetter, setFilterLetter] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState<Dream | null>(null);
+  const [notice, setNotice] = useState("");
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("likhitfa-admin-dreams");
+    if (saved) setItems(JSON.parse(saved));
+  }, []);
+
+  const persist = (next: Dream[], message: string) => {
+    setItems(next);
+    window.localStorage.setItem("likhitfa-admin-dreams", JSON.stringify(next));
+    setNotice(message);
+  };
 
   const shown = filterLetter ? items.filter((i) => i.letter === filterLetter) : items;
 
@@ -103,8 +116,14 @@ function AdminDreams() {
         </div>
       </section>
 
-      <section className="glass-strong overflow-hidden rounded-3xl">
-        <table className="w-full text-sm">
+      {notice ? (
+        <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-200">
+          {notice}
+        </div>
+      ) : null}
+
+      <section className="glass-strong overflow-x-auto rounded-3xl">
+        <table className="w-full min-w-[860px] text-sm">
           <thead className="text-left text-[11px] uppercase tracking-wider text-muted-foreground">
             <tr className="border-b border-gold/10">
               <th className="px-4 py-3">คำฝัน</th>
@@ -124,11 +143,19 @@ function AdminDreams() {
                 <td className="px-4 py-3 text-xs text-muted-foreground">{d.meaning}</td>
                 <td className="px-4 py-3 text-xs font-mono text-gold">{d.numbers}</td>
                 <td className="px-4 py-3 text-right">
-                  <button className="mr-2 rounded-md border border-gold/30 px-2 py-1 text-xs text-gold hover:bg-gold/10">
+                  <button
+                    onClick={() => setEditing(d)}
+                    className="mr-2 rounded-md border border-gold/30 px-2 py-1 text-xs text-gold hover:bg-gold/10"
+                  >
                     แก้ไข
                   </button>
                   <button
-                    onClick={() => setItems((s) => s.filter((x) => x.id !== d.id))}
+                    onClick={() =>
+                      persist(
+                        items.filter((x) => x.id !== d.id),
+                        "ลบคำฝันแล้ว",
+                      )
+                    }
                     className="rounded-md border border-rose-400/30 px-2 py-1 text-xs text-rose-300 hover:bg-rose-400/10"
                   >
                     ลบ
@@ -141,52 +168,123 @@ function AdminDreams() {
       </section>
 
       {adding && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur"
-          onClick={() => setAdding(false)}
-        >
-          <div
-            className="glass-strong w-full max-w-xl rounded-3xl p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="font-display text-2xl text-foreground">เพิ่มคำฝัน</h2>
-            <form
-              className="mt-5 space-y-3"
-              onSubmit={(e) => {
-                e.preventDefault();
-                setAdding(false);
-              }}
-            >
-              <div className="grid grid-cols-2 gap-3">
-                <input className="input-styled" placeholder="คำที่ค้นหา (เช่น งู)" />
-                <input className="input-styled" placeholder="อักษรนำ (ก-ฮ)" maxLength={1} />
-              </div>
-              <select className="input-styled">
-                <option>สัตว์</option>
-                <option>คน</option>
-                <option>สิ่งของ</option>
-                <option>สถานที่</option>
-                <option>ธรรมชาติ</option>
-                <option>ร่างกาย</option>
-              </select>
-              <textarea className="input-styled !h-24 py-3" placeholder="คำทำนาย" />
-              <input className="input-styled" placeholder="เลขเด็ด (คั่นด้วย ,)" />
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setAdding(false)}
-                  className="rounded-xl border border-gold/20 px-5 py-2 text-sm"
-                >
-                  ยกเลิก
-                </button>
-                <button className="rounded-xl bg-gradient-gold px-6 py-2 text-sm font-semibold text-primary-foreground shadow-gold">
-                  บันทึก
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <DreamEditor
+          title="เพิ่มคำฝัน"
+          onClose={() => setAdding(false)}
+          onSave={(dream) => {
+            persist([{ ...dream, id: String(Date.now()) }, ...items], "เพิ่มคำฝันแล้ว");
+            setAdding(false);
+          }}
+        />
       )}
+
+      {editing && (
+        <DreamEditor
+          title={`แก้ไข: ${editing.keyword}`}
+          initial={editing}
+          onClose={() => setEditing(null)}
+          onSave={(dream) => {
+            persist(
+              items.map((item) => (item.id === editing.id ? { ...dream, id: editing.id } : item)),
+              "บันทึกคำฝันแล้ว",
+            );
+            setEditing(null);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function DreamEditor({
+  title,
+  initial,
+  onClose,
+  onSave,
+}: {
+  title: string;
+  initial?: Dream;
+  onClose: () => void;
+  onSave: (dream: Dream) => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur"
+      onClick={onClose}
+    >
+      <div
+        className="glass-strong w-full max-w-xl rounded-3xl p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 className="font-display text-2xl text-foreground">{title}</h2>
+        <form
+          className="mt-5 space-y-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const form = new FormData(e.currentTarget);
+            const keyword = String(form.get("keyword") || "").trim();
+            onSave({
+              id: initial?.id || "",
+              keyword,
+              letter: String(form.get("letter") || keyword.charAt(0)).slice(0, 1),
+              category: String(form.get("category") || "สิ่งของ"),
+              meaning: String(form.get("meaning") || ""),
+              numbers: String(form.get("numbers") || ""),
+            });
+          }}
+        >
+          <div className="grid grid-cols-2 gap-3">
+            <input
+              name="keyword"
+              className="input-styled"
+              placeholder="คำที่ค้นหา (เช่น งู)"
+              defaultValue={initial?.keyword}
+              required
+            />
+            <input
+              name="letter"
+              className="input-styled"
+              placeholder="อักษรนำ (ก-ฮ)"
+              maxLength={1}
+              defaultValue={initial?.letter}
+              required
+            />
+          </div>
+          <select name="category" className="input-styled" defaultValue={initial?.category}>
+            <option>สัตว์</option>
+            <option>คน</option>
+            <option>สิ่งของ</option>
+            <option>สถานที่</option>
+            <option>ธรรมชาติ</option>
+            <option>ร่างกาย</option>
+          </select>
+          <textarea
+            name="meaning"
+            className="input-styled !h-24 py-3"
+            placeholder="คำทำนาย"
+            defaultValue={initial?.meaning}
+            required
+          />
+          <input
+            name="numbers"
+            className="input-styled"
+            placeholder="เลขเด็ด (คั่นด้วย ,)"
+            defaultValue={initial?.numbers}
+          />
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl border border-gold/20 px-5 py-2 text-sm"
+            >
+              ยกเลิก
+            </button>
+            <button className="rounded-xl bg-gradient-gold px-6 py-2 text-sm font-semibold text-primary-foreground shadow-gold">
+              บันทึก
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
