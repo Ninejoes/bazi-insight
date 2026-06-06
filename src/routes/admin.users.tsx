@@ -25,6 +25,7 @@ type U = {
 
 const roleFilters = ["ทั้งหมด", "Admin", "User"] as const;
 type RoleFilter = (typeof roleFilters)[number];
+const ADMIN_SESSION_KEY = "likhitfa-admin-session-v2";
 
 function AdminUsers() {
   const [items, setItems] = useState<U[]>([]);
@@ -41,7 +42,7 @@ function AdminUsers() {
       setError("");
 
       try {
-        const rawSession = window.localStorage.getItem("likhitfa-admin-session");
+        const rawSession = window.localStorage.getItem(ADMIN_SESSION_KEY);
         const session = rawSession ? JSON.parse(rawSession) : null;
         const response = await fetch("/api/admin-users", {
           headers: session?.accessToken

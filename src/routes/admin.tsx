@@ -15,15 +15,19 @@ const nav = [
   { to: "/admin/help", label: "ศูนย์ช่วยเหลือ", icon: "?" },
 ] as const;
 
+const ADMIN_SESSION_KEY = "likhitfa-admin-session-v2";
+
 type AdminSession = {
+  accessToken?: string;
   email?: string;
+  mode?: string;
   name?: string;
   role?: string;
   expiresAt?: string;
 };
 
 function readAdminSession() {
-  const raw = window.localStorage.getItem("likhitfa-admin-session");
+  const raw = window.localStorage.getItem(ADMIN_SESSION_KEY);
   if (!raw) return null;
 
   try {
@@ -32,14 +36,20 @@ function readAdminSession() {
       ? new Date(session.expiresAt).getTime() <= Date.now()
       : false;
     if (isExpired || session.email !== "admin@gmail.com" || session.role !== "Admin") {
-      window.localStorage.removeItem("likhitfa-admin-session");
+      window.localStorage.removeItem(ADMIN_SESSION_KEY);
       return null;
     }
     return session;
   } catch {
-    window.localStorage.removeItem("likhitfa-admin-session");
+    window.localStorage.removeItem(ADMIN_SESSION_KEY);
     return null;
   }
+}
+
+function clearAdminSession() {
+  window.localStorage.removeItem(ADMIN_SESSION_KEY);
+  window.localStorage.removeItem("likhitfa-admin-session");
+  window.localStorage.removeItem("likhitfa-admin-auth");
 }
 
 function AdminLayout() {
@@ -49,14 +59,49 @@ function AdminLayout() {
   const [session, setSession] = useState<AdminSession | null>(null);
 
   useEffect(() => {
-    const adminSession = readAdminSession();
-    if (!adminSession) {
-      void navigate({ to: "/admin-login" });
-      return;
+    let mounted = true;
+
+    async function verifyAdminSession() {
+      const adminSession = readAdminSession();
+      if (!adminSession) {
+        clearAdminSession();
+        void navigate({ to: "/admin-login" });
+        return;
+      }
+
+      const response = await fetch("/api/admin-session", {
+        headers: adminSession.accessToken
+          ? {
+              Authorization: `Bearer ${adminSession.accessToken}`,
+            }
+          : {},
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) {
+        clearAdminSession();
+        void navigate({ to: "/admin-login" });
+        return;
+      }
+
+      if (!mounted) return;
+      setSession({ ...adminSession, ...data.session });
+      setAuthorized(true);
     }
-    setSession(adminSession);
-    setAuthorized(true);
+
+    setAuthorized(false);
+    void verifyAdminSession();
+
+    return () => {
+      mounted = false;
+    };
   }, [navigate, path]);
+
+  const logout = () => {
+    clearAdminSession();
+    setAuthorized(false);
+    setSession(null);
+    void navigate({ to: "/admin-login" });
+  };
 
   if (!authorized) {
     return (
@@ -109,6 +154,12 @@ function AdminLayout() {
           >
             ← กลับสู่หน้าเว็บ
           </Link>
+          <button
+            onClick={logout}
+            className="mt-2 rounded-xl border border-rose-400/25 px-3 py-2 text-center text-xs text-rose-200 hover:bg-rose-400/10"
+          >
+            ออกจากระบบ
+          </button>
         </aside>
 
         <div className="flex-1">
@@ -127,6 +178,12 @@ function AdminLayout() {
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-gold font-bold text-primary-foreground">
                 A
               </div>
+              <button
+                onClick={logout}
+                className="hidden rounded-xl border border-rose-400/25 px-3 py-2 text-xs text-rose-200 hover:bg-rose-400/10 sm:block"
+              >
+                ออกจากระบบ
+              </button>
             </div>
           </header>
 
@@ -156,6 +213,12 @@ function AdminLayout() {
             >
               ← กลับสู่หน้าเว็บ
             </Link>
+            <button
+              onClick={logout}
+              className="mt-2 w-full rounded-xl border border-rose-400/25 px-3 py-2 text-center text-xs text-rose-200"
+            >
+              ออกจากระบบ
+            </button>
           </nav>
 
           <main className="p-4 sm:p-6">

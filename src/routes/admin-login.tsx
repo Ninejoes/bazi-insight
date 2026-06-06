@@ -3,6 +3,8 @@ import { SiteHeader } from "@/components/site-header";
 import { seo } from "@/lib/seo";
 import { useState } from "react";
 
+const ADMIN_SESSION_KEY = "likhitfa-admin-session-v2";
+
 export const Route = createFileRoute("/admin-login")({
   head: () =>
     seo({
@@ -41,7 +43,8 @@ function AdminLoginPage() {
         return;
       }
 
-      window.localStorage.setItem("likhitfa-admin-session", JSON.stringify(data.session));
+      window.localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(data.session));
+      window.localStorage.removeItem("likhitfa-admin-session");
       window.localStorage.removeItem("likhitfa-admin-auth");
       void navigate({ to: "/admin" });
     } catch {
