@@ -3,19 +3,22 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { articles, getArticle, type Article } from "@/lib/articles";
 import { seo } from "@/lib/seo";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 export const Route = createFileRoute("/articles/$slug")({
   head: ({ params }) => {
     const a = getArticle(params.slug);
     return seo({
-      title: a?.title ?? "บทความ",
-      description: a?.excerpt ?? "บทความดูดวงจาก Likhitfa",
+      title: a?.seoTitle || a?.title || "บทความ",
+      description: a?.seoDescription || a?.excerpt || "บทความดูดวงจาก Likhitfa",
       path: `/articles/${params.slug}`,
       image: a?.cover,
       type: "article",
-      keywords: ["บทความดูดวง", a?.category ?? "ดูดวง", a?.title ?? "Likhitfa"],
+      keywords: a?.keywords?.length
+        ? a.keywords
+        : ["บทความดูดวง", a?.category ?? "ดูดวง", a?.title ?? "Likhitfa"],
       publishedTime: a?.date,
+      canonicalUrl: a?.canonicalUrl,
     });
   },
   loader: ({ params }) => ({ slug: params.slug }),
@@ -53,6 +56,11 @@ function ArticleDetail() {
       mounted = false;
     };
   }, [slug]);
+
+  useEffect(() => {
+    if (!article) return;
+    applyClientArticleSeo(article);
+  }, [article]);
 
   if (loading && !article) {
     return (
@@ -102,12 +110,12 @@ function ArticleDetail() {
             <span>{a.readMin} นาที</span>
           </div>
           <div className="mt-8 aspect-[16/9] overflow-hidden rounded-2xl">
-            <img src={a.cover} alt={a.title} className="h-full w-full object-cover" />
+            <img src={a.cover} alt={a.coverAlt || a.title} className="h-full w-full object-cover" />
           </div>
           <div className="prose prose-invert mt-8 max-w-none space-y-4 text-[15px] leading-relaxed text-foreground/90">
             <p className="text-lg italic text-muted-foreground">{a.excerpt}</p>
             {a.content.map((p: string, i: number) => (
-              <p key={i}>{p}</p>
+              <ArticleBlock key={i} text={p} />
             ))}
           </div>
         </article>
@@ -122,7 +130,7 @@ function ArticleDetail() {
                   <div className="aspect-[16/10] overflow-hidden rounded-xl">
                     <img
                       src={r.cover}
-                      alt={r.title}
+                      alt={r.coverAlt || r.title}
                       className="h-full w-full object-cover transition group-hover:scale-105"
                     />
                   </div>
@@ -138,4 +146,111 @@ function ArticleDetail() {
       <SiteFooter />
     </div>
   );
+}
+
+function applyClientArticleSeo(article: Article) {
+  const title = article.seoTitle || article.title;
+  const fullTitle = title.includes("Likhitfa") ? title : `${title} — Likhitfa ลิขิตฟ้า`;
+  const description = article.seoDescription || article.excerpt;
+  const canonical = article.canonicalUrl || `${window.location.origin}/articles/${article.slug}`;
+  document.title = fullTitle;
+  setMeta("description", description);
+  setMeta(
+    "keywords",
+    (article.keywords || ["บทความดูดวง", article.category, article.title]).join(", "),
+  );
+  setMeta("twitter:title", fullTitle);
+  setMeta("twitter:description", description);
+  setMeta("twitter:image", article.cover);
+  setProperty("og:title", fullTitle);
+  setProperty("og:description", description);
+  setProperty("og:image", article.cover);
+  setProperty("og:url", canonical);
+  setCanonical(canonical);
+}
+
+function setMeta(name: string, content: string) {
+  const selector = `meta[name="${name}"]`;
+  let element = document.querySelector<HTMLMetaElement>(selector);
+  if (!element) {
+    element = document.createElement("meta");
+    element.setAttribute("name", name);
+    document.head.appendChild(element);
+  }
+  element.setAttribute("content", content);
+}
+
+function setProperty(property: string, content: string) {
+  const selector = `meta[property="${property}"]`;
+  let element = document.querySelector<HTMLMetaElement>(selector);
+  if (!element) {
+    element = document.createElement("meta");
+    element.setAttribute("property", property);
+    document.head.appendChild(element);
+  }
+  element.setAttribute("content", content);
+}
+
+function setCanonical(href: string) {
+  let element = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+  if (!element) {
+    element = document.createElement("link");
+    element.setAttribute("rel", "canonical");
+    document.head.appendChild(element);
+  }
+  element.setAttribute("href", href);
+}
+
+function ArticleBlock({ text }: { text: string }) {
+  if (text.startsWith("## ")) {
+    return (
+      <h2 className="pt-4 font-display text-2xl text-foreground">{renderInline(text.slice(3))}</h2>
+    );
+  }
+  if (text.startsWith("> ")) {
+    return (
+      <blockquote className="rounded-2xl border-l-4 border-gold bg-gold/5 px-5 py-4 text-gold/90">
+        {renderInline(text.slice(2))}
+      </blockquote>
+    );
+  }
+  if (text.startsWith("- ")) {
+    return (
+      <ul className="list-disc space-y-2 pl-6">
+        {text
+          .split("\n")
+          .filter((line) => line.trim().startsWith("- "))
+          .map((line, index) => (
+            <li key={index}>{renderInline(line.replace(/^- /, ""))}</li>
+          ))}
+      </ul>
+    );
+  }
+  return <p>{renderInline(text)}</p>;
+}
+
+function renderInline(text: string) {
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|\[[^\]]+\]\([^)]+\))/g).filter(Boolean);
+  return parts.map((part, index) => {
+    const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (link) {
+      const href = safeHref(link[2]);
+      return (
+        <a key={index} href={href} className="text-gold underline" rel="noreferrer" target="_blank">
+          {link[1]}
+        </a>
+      );
+    }
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={index}>{part.slice(2, -2)}</strong>;
+    }
+    if (part.startsWith("*") && part.endsWith("*")) {
+      return <em key={index}>{part.slice(1, -1)}</em>;
+    }
+    return <Fragment key={index}>{part}</Fragment>;
+  });
+}
+
+function safeHref(href: string) {
+  return /^https?:\/\//i.test(href) ? href : "#";
 }

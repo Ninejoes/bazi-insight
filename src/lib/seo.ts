@@ -12,6 +12,7 @@ type SeoInput = {
   keywords?: string[];
   publishedTime?: string;
   modifiedTime?: string;
+  canonicalUrl?: string;
 };
 
 export function seo({
@@ -24,8 +25,9 @@ export function seo({
   keywords = [],
   publishedTime,
   modifiedTime,
+  canonicalUrl,
 }: SeoInput) {
-  const canonical = `${SITE_URL}${path}`;
+  const canonical = canonicalUrl || `${SITE_URL}${path}`;
   const fullTitle = title.includes("Likhitfa") ? title : `${title} — ${SITE_NAME}`;
   const meta = [
     { title: fullTitle },

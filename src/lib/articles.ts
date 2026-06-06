@@ -7,6 +7,11 @@ export type Article = {
   date: string;
   readMin: number;
   cover: string;
+  coverAlt?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  keywords?: string[];
+  canonicalUrl?: string;
   content: string[];
 };
 

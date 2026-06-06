@@ -11,6 +11,15 @@ type ArticleRow = {
   read_min?: number;
   readMin?: number;
   cover: string;
+  cover_alt?: string;
+  coverAlt?: string;
+  seo_title?: string;
+  seoTitle?: string;
+  seo_description?: string;
+  seoDescription?: string;
+  keywords?: string[] | string;
+  canonical_url?: string;
+  canonicalUrl?: string;
   content: string[] | string;
 };
 
@@ -46,6 +55,12 @@ function normalizeArticle(row: ArticleRow): Article {
         .split(/\n\s*\n/)
         .map((part) => part.trim())
         .filter(Boolean);
+  const keywords = Array.isArray(row.keywords)
+    ? row.keywords
+    : String(row.keywords || "")
+        .split(",")
+        .map((part) => part.trim())
+        .filter(Boolean);
 
   return {
     slug: row.slug,
@@ -56,6 +71,11 @@ function normalizeArticle(row: ArticleRow): Article {
     date: row.date,
     readMin: Number(row.readMin || row.read_min || 3),
     cover: row.cover,
+    coverAlt: row.coverAlt || row.cover_alt || "",
+    seoTitle: row.seoTitle || row.seo_title || "",
+    seoDescription: row.seoDescription || row.seo_description || "",
+    keywords,
+    canonicalUrl: row.canonicalUrl || row.canonical_url || "",
     content,
   };
 }
@@ -70,6 +90,11 @@ function toSupabaseRow(article: Article) {
     date: article.date,
     read_min: article.readMin,
     cover: article.cover,
+    cover_alt: article.coverAlt || "",
+    seo_title: article.seoTitle || "",
+    seo_description: article.seoDescription || "",
+    keywords: article.keywords || [],
+    canonical_url: article.canonicalUrl || "",
     content: article.content,
     updated_at: new Date().toISOString(),
   };
