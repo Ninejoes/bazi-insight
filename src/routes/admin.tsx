@@ -115,8 +115,8 @@ function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-[oklch(0.12_0.018_260)]">
-      <div className="flex min-h-screen">
+    <div className="min-h-screen overflow-x-hidden bg-[oklch(0.12_0.018_260)]">
+      <div className="flex min-h-screen min-w-0">
         <aside className="hidden w-64 shrink-0 border-r border-gold/10 bg-[oklch(0.10_0.018_260)] p-5 md:flex md:flex-col">
           <Link to="/admin" className="flex items-center gap-3">
             <BrandMark size={36} />
@@ -162,13 +162,13 @@ function AdminLayout() {
           </button>
         </aside>
 
-        <div className="flex-1">
-          <header className="flex items-center justify-between border-b border-gold/10 bg-[oklch(0.10_0.018_260)]/80 px-6 py-4 backdrop-blur">
-            <div>
+        <div className="min-w-0 flex-1">
+          <header className="flex min-w-0 items-center justify-between gap-4 border-b border-gold/10 bg-[oklch(0.10_0.018_260)]/80 px-4 py-4 backdrop-blur sm:px-6">
+            <div className="min-w-0">
               <div className="text-[10px] uppercase tracking-[0.25em] text-gold/70">ADMIN</div>
-              <div className="font-display text-lg text-foreground">ระบบหลังบ้าน</div>
+              <div className="truncate font-display text-lg text-foreground">ระบบหลังบ้าน</div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-3">
               <div className="hidden text-right md:block">
                 <div className="text-sm text-foreground">{session?.name || "Admin"}</div>
                 <div className="text-[11px] text-muted-foreground">
@@ -221,7 +221,7 @@ function AdminLayout() {
             </button>
           </nav>
 
-          <main className="p-4 sm:p-6">
+          <main className="min-w-0 overflow-x-hidden p-4 sm:p-6">
             <Outlet />
           </main>
         </div>

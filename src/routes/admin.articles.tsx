@@ -85,15 +85,15 @@ function AdminArticles() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="font-display text-3xl text-foreground">จัดการบทความ</h1>
+    <div className="min-w-0 space-y-6">
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="truncate font-display text-3xl text-foreground">จัดการบทความ</h1>
           <p className="text-sm text-muted-foreground">เพิ่ม แก้ไข และเผยแพร่บทความ</p>
         </div>
         <button
           onClick={() => setCreating(true)}
-          className="rounded-xl bg-gradient-gold px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-gold"
+          className="shrink-0 rounded-xl bg-gradient-gold px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-gold"
         >
           + เพิ่มบทความ
         </button>
@@ -116,7 +116,7 @@ function AdminArticles() {
         />
       )}
 
-      <section className="glass-strong overflow-x-auto rounded-3xl">
+      <section className="glass-strong max-w-full overflow-x-auto rounded-3xl">
         {loading ? (
           <div className="px-4 py-8 text-center text-sm text-muted-foreground">
             กำลังโหลดบทความจากระบบกลาง...
