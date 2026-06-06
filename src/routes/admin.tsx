@@ -130,7 +130,35 @@ function AdminLayout() {
             </div>
           </header>
 
-          <main className="p-6">
+          <nav className="border-b border-gold/10 bg-[oklch(0.10_0.018_260)]/95 px-4 py-3 md:hidden">
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {nav.map((n) => {
+                const active = n.to === "/admin" ? path === "/admin" : path.startsWith(n.to);
+                return (
+                  <Link
+                    key={n.to}
+                    to={n.to}
+                    className={`flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm transition ${
+                      active
+                        ? "bg-gradient-gold text-primary-foreground shadow-gold"
+                        : "border border-gold/20 text-muted-foreground"
+                    }`}
+                  >
+                    <span>{n.icon}</span>
+                    {n.label}
+                  </Link>
+                );
+              })}
+            </div>
+            <Link
+              to="/"
+              className="mt-2 block rounded-xl border border-gold/20 px-3 py-2 text-center text-xs text-gold/80"
+            >
+              ← กลับสู่หน้าเว็บ
+            </Link>
+          </nav>
+
+          <main className="p-4 sm:p-6">
             <Outlet />
           </main>
         </div>
