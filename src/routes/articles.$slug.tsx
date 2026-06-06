@@ -1,8 +1,9 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { articles, getArticle, type Article } from "@/lib/articles";
 import { seo } from "@/lib/seo";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/articles/$slug")({
   head: ({ params }) => {
@@ -17,11 +18,7 @@ export const Route = createFileRoute("/articles/$slug")({
       publishedTime: a?.date,
     });
   },
-  loader: ({ params }) => {
-    const a = getArticle(params.slug);
-    if (!a) throw notFound();
-    return a;
-  },
+  loader: ({ params }) => ({ slug: params.slug }),
   notFoundComponent: () => (
     <div className="min-h-screen flex items-center justify-center text-center">
       <div>
@@ -36,7 +33,53 @@ export const Route = createFileRoute("/articles/$slug")({
 });
 
 function ArticleDetail() {
-  const a = Route.useLoaderData() as Article;
+  const { slug } = Route.useLoaderData() as { slug: string };
+  const [article, setArticle] = useState<Article | null>(getArticle(slug) || null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadArticle() {
+      const response = await fetch(`/api/articles?slug=${encodeURIComponent(slug)}`);
+      const data = await response.json().catch(() => ({}));
+      if (mounted && data.ok) setArticle(data.articles?.[0] || null);
+      if (mounted) setLoading(false);
+    }
+
+    void loadArticle();
+
+    return () => {
+      mounted = false;
+    };
+  }, [slug]);
+
+  if (loading && !article) {
+    return (
+      <div className="min-h-screen">
+        <SiteHeader subtitle="บทความ" subtitleCn="文章" />
+        <main className="mx-auto max-w-3xl px-6 pt-10 pb-12 text-sm text-muted-foreground">
+          กำลังโหลดบทความ...
+        </main>
+        <SiteFooter />
+      </div>
+    );
+  }
+
+  if (!article) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-center">
+        <div>
+          <h1 className="font-display text-4xl text-gold">ไม่พบบทความ</h1>
+          <Link to="/articles" className="mt-3 inline-block text-sm text-gold underline">
+            ดูบทความทั้งหมด
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const a = article;
   const related = articles
     .filter((x) => x.slug !== a.slug && x.category === a.category)
     .slice(0, 3);

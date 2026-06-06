@@ -19,16 +19,69 @@ function AdminArticles() {
   const [editing, setEditing] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [notice, setNotice] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const saved = window.localStorage.getItem("likhitfa-admin-articles");
-    if (saved) setItems(JSON.parse(saved));
+    let mounted = true;
+
+    async function loadArticles() {
+      const response = await fetch("/api/articles");
+      const data = await response.json().catch(() => ({}));
+      if (mounted && data.ok) {
+        setItems(data.articles || []);
+        setNotice(
+          data.error
+            ? `เชื่อมต่อ Supabase สำหรับบทความไม่ได้: ${data.error}`
+            : data.source === "supabase"
+              ? "เชื่อมต่อบทความจาก Supabase แล้ว"
+              : "",
+        );
+      }
+      if (mounted) setLoading(false);
+    }
+
+    void loadArticles();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  const persist = (next: Article[], message: string) => {
-    setItems(next);
-    window.localStorage.setItem("likhitfa-admin-articles", JSON.stringify(next));
+  const reload = async () => {
+    const response = await fetch("/api/articles");
+    const data = await response.json().catch(() => ({}));
+    if (data.ok) {
+      setItems(data.articles || []);
+      if (data.error) setNotice(`เชื่อมต่อ Supabase สำหรับบทความไม่ได้: ${data.error}`);
+    }
+  };
+
+  const saveArticle = async (article: Article, message: string) => {
+    const response = await fetch("/api/articles", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(article),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) {
+      setNotice(data.error || "บันทึกบทความไม่สำเร็จ");
+      return;
+    }
+    await reload();
     setNotice(message);
+  };
+
+  const removeArticle = async (slug: string) => {
+    const response = await fetch(`/api/articles?slug=${encodeURIComponent(slug)}`, {
+      method: "DELETE",
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) {
+      setNotice(data.error || "ลบบทความไม่สำเร็จ");
+      return;
+    }
+    await reload();
+    setNotice("ลบบทความแล้ว");
   };
 
   return (
@@ -56,14 +109,19 @@ function AdminArticles() {
         <Editor
           onClose={() => setCreating(false)}
           title="เพิ่มบทความใหม่"
-          onSave={(article) => {
-            persist([article, ...items], "เพิ่มบทความแล้ว");
+          onSave={async (article) => {
+            await saveArticle(article, "เพิ่มบทความแล้ว และซิงก์ไปหน้า public แล้ว");
             setCreating(false);
           }}
         />
       )}
 
       <section className="glass-strong overflow-x-auto rounded-3xl">
+        {loading ? (
+          <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+            กำลังโหลดบทความจากระบบกลาง...
+          </div>
+        ) : null}
         <table className="w-full min-w-[760px] text-sm">
           <thead className="text-left text-[11px] uppercase tracking-wider text-muted-foreground">
             <tr className="border-b border-gold/10">
@@ -93,12 +151,7 @@ function AdminArticles() {
                     แก้ไข
                   </button>
                   <button
-                    onClick={() =>
-                      persist(
-                        items.filter((x) => x.slug !== a.slug),
-                        "ลบบทความแล้ว",
-                      )
-                    }
+                    onClick={() => void removeArticle(a.slug)}
                     className="rounded-md border border-rose-400/30 px-2 py-1 text-xs text-rose-300 hover:bg-rose-400/10"
                   >
                     ลบ
@@ -115,11 +168,8 @@ function AdminArticles() {
           onClose={() => setEditing(null)}
           title={`แก้ไข: ${items.find((x) => x.slug === editing)?.title}`}
           initial={items.find((x) => x.slug === editing)}
-          onSave={(article) => {
-            persist(
-              items.map((item) => (item.slug === editing ? article : item)),
-              "บันทึกบทความแล้ว",
-            );
+          onSave={async (article) => {
+            await saveArticle(article, "บันทึกบทความแล้ว และซิงก์ไปหน้า public แล้ว");
             setEditing(null);
           }}
         />
@@ -137,7 +187,7 @@ function Editor({
   onClose: () => void;
   title: string;
   initial?: Article;
-  onSave: (article: Article) => void;
+  onSave: (article: Article) => void | Promise<void>;
 }) {
   const makeSlug = (titleValue: string) =>
     titleValue
