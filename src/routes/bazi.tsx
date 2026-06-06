@@ -53,6 +53,7 @@ function BaziPage() {
   });
   const [analysis, setAnalysis] = useState<BaziAnalysis | null>(null);
   const [formError, setFormError] = useState("");
+  const showsSubTabs = tab === "ภาพรวม";
 
   const runAnalysis = (nextInput: BaziInput) => {
     if (!nextInput.birthDate || !nextInput.birthTime) {
@@ -82,7 +83,12 @@ function BaziPage() {
           {mainTabs.map((t) => (
             <button
               key={t}
-              onClick={() => setTab(t)}
+              onClick={() => {
+                setTab(t);
+                if (t === "ภาพรวม") {
+                  setSub("ปาจื้อ");
+                }
+              }}
               className={`relative rounded-xl px-4 py-3 text-sm transition-all ${
                 tab === t
                   ? "bg-jade/15 text-foreground shadow-[inset_0_0_0_1px_oklch(0.62_0.10_165/0.4)]"
@@ -94,38 +100,44 @@ function BaziPage() {
           ))}
         </div>
 
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          {subTabs.map((s) => (
-            <button
-              key={s}
-              onClick={() => setSub(s)}
-              className={`rounded-full px-6 py-2.5 text-sm transition-all ${
-                sub === s
-                  ? "bg-gradient-gold text-primary-foreground shadow-gold"
-                  : "border border-border bg-card/40 text-muted-foreground hover:border-gold/30 hover:text-gold"
-              }`}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
+        {showsSubTabs && (
+          <div className="mt-6 flex flex-wrap justify-center gap-2">
+            {subTabs.map((s) => (
+              <button
+                key={s}
+                onClick={() => setSub(s)}
+                className={`rounded-full px-6 py-2.5 text-sm transition-all ${
+                  sub === s
+                    ? "bg-gradient-gold text-primary-foreground shadow-gold"
+                    : "border border-border bg-card/40 text-muted-foreground hover:border-gold/30 hover:text-gold"
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Content */}
         <div className="mt-8 space-y-6">
-          {!analysis && <BaziGuidePanel tab={tab} sub={sub} />}
-          {analysis && sub === "ปาจื้อ" && tab === "ภาพรวม" && (
+          {!analysis && <BaziGuidePanel tab={tab} sub={showsSubTabs ? sub : null} />}
+          {analysis && tab === "ภาพรวม" && sub === "ปาจื้อ" && (
             <OverviewPanel analysis={analysis} />
           )}
-          {analysis && sub === "ปาจื้อ" && tab === "ภาพรวม" && <ChartCard analysis={analysis} />}
-          {analysis && sub === "ปาจื้อ" && tab === "ภาพรวม" && <MetricsGrid analysis={analysis} />}
-          {analysis && sub === "ปาจื้อ" && tab === "โชควัยจร" && (
-            <LuckCyclesPanel analysis={analysis} />
+          {analysis && tab === "ภาพรวม" && sub === "ปาจื้อ" && <ChartCard analysis={analysis} />}
+          {analysis && tab === "ภาพรวม" && sub === "ปาจื้อ" && <MetricsGrid analysis={analysis} />}
+          {analysis && tab === "โชควัยจร" && <LuckCyclesPanel analysis={analysis} />}
+          {analysis && tab === "ดาว" && <TenGodsPanel analysis={analysis} />}
+          {tab === "หลักการ" && <PrinciplesPanel />}
+          {analysis && tab === "ภาพรวม" && sub === "พยากรณ์" && (
+            <ForecastPanel analysis={analysis} tab={tab} />
           )}
-          {analysis && sub === "ปาจื้อ" && tab === "ดาว" && <TenGodsPanel analysis={analysis} />}
-          {sub === "ปาจื้อ" && tab === "หลักการ" && <PrinciplesPanel />}
-          {analysis && sub === "พยากรณ์" && <ForecastPanel analysis={analysis} tab={tab} />}
-          {analysis && sub === "ปฏิทินมงคล" && <CalendarPanel analysis={analysis} tab={tab} />}
-          {analysis && sub === "ฉีเหมิน" && <QimenPanel analysis={analysis} tab={tab} />}
+          {analysis && tab === "ภาพรวม" && sub === "ปฏิทินมงคล" && (
+            <CalendarPanel analysis={analysis} tab={tab} />
+          )}
+          {analysis && tab === "ภาพรวม" && sub === "ฉีเหมิน" && (
+            <QimenPanel analysis={analysis} tab={tab} />
+          )}
         </div>
       </main>
 
@@ -277,8 +289,9 @@ function BaziGuidePanel({
   sub,
 }: {
   tab: (typeof mainTabs)[number];
-  sub: (typeof subTabs)[number];
+  sub: (typeof subTabs)[number] | null;
 }) {
+  const selectedMenu = sub ? `${sub} · ${tab}` : tab;
   return (
     <section className="glass-strong rounded-3xl p-8 text-center shadow-elegant">
       <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-gold/30 bg-gradient-gold-soft font-cn text-4xl text-gold">
@@ -290,7 +303,7 @@ function BaziGuidePanel({
         แล้วแปลงเป็น 4 เสาเพื่อสร้างคำทำนายเฉพาะบุคคล
       </p>
       <div className="mx-auto mt-4 inline-flex rounded-full border border-gold/20 bg-gold/5 px-4 py-2 text-xs text-gold">
-        เมนูที่เลือก: {sub} · {tab}
+        เมนูที่เลือก: {selectedMenu}
       </div>
       <div className="mt-6 grid gap-3 md:grid-cols-3">
         <MiniStat label="ขั้นที่ 1" value="กรอกข้อมูลเกิด" />
