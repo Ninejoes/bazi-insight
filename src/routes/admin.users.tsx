@@ -16,45 +16,13 @@ type U = {
   status: "Active" | "Suspended";
 };
 
-const seed: U[] = [
+const initialUsers: U[] = [
   {
-    id: "1",
-    name: "Admin Likhitfa",
-    email: "admin@likhitfa.com",
+    id: "admin",
+    name: "Admin",
+    email: "admin@gmail.com",
     role: "Admin",
-    joined: "2025-01-01",
-    status: "Active",
-  },
-  {
-    id: "2",
-    name: "มณีจันทร์ ลิขิตฟ้า",
-    email: "manee@example.com",
-    role: "User",
-    joined: "2025-09-12",
-    status: "Active",
-  },
-  {
-    id: "3",
-    name: "สมชาย ใจดี",
-    email: "somchai@example.com",
-    role: "User",
-    joined: "2025-10-04",
-    status: "Active",
-  },
-  {
-    id: "4",
-    name: "ปิยะวรรณ สว่าง",
-    email: "piya@example.com",
-    role: "User",
-    joined: "2025-10-22",
-    status: "Suspended",
-  },
-  {
-    id: "5",
-    name: "Editor Tarot",
-    email: "editor@likhitfa.com",
-    role: "Admin",
-    joined: "2025-08-19",
+    joined: "2026-06-06",
     status: "Active",
   },
 ];
@@ -63,25 +31,21 @@ const roleFilters = ["ทั้งหมด", "Admin", "User"] as const;
 type RoleFilter = (typeof roleFilters)[number];
 
 function AdminUsers() {
-  const [items, setItems] = useState(seed);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("ทั้งหมด");
 
-  const filtered = items.filter(
+  const filtered = initialUsers.filter(
     (u) =>
       (roleFilter === "ทั้งหมด" || u.role === roleFilter) &&
       (u.name.includes(search) || u.email.includes(search)),
   );
-
-  const setRole = (id: string, role: Role) =>
-    setItems((s) => s.map((u) => (u.id === id ? { ...u, role } : u)));
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-3xl text-foreground">จัดการผู้ใช้งาน</h1>
         <p className="text-sm text-muted-foreground">
-          แยกสิทธิ์ Admin และ User ระงับหรือคืนสิทธิ์การใช้งาน
+          แสดงบัญชีจริงที่ใช้เข้าสู่ระบบหลังบ้านผ่าน Supabase Auth
         </p>
       </div>
 
@@ -101,8 +65,11 @@ function AdminUsers() {
             <option key={role}>{role}</option>
           ))}
         </select>
-        <button className="rounded-xl bg-gradient-gold px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-gold">
-          + เพิ่มผู้ใช้
+        <button
+          disabled
+          className="rounded-xl border border-gold/20 px-5 py-2.5 text-sm font-semibold text-gold/70"
+        >
+          Supabase Auth
         </button>
       </section>
 
@@ -134,7 +101,7 @@ function AdminUsers() {
                 <td className="px-4 py-3">
                   <select
                     value={u.role}
-                    onChange={(e) => setRole(u.id, e.target.value as Role)}
+                    disabled
                     className={`rounded-full border bg-transparent px-2 py-1 text-xs ${u.role === "Admin" ? "border-gold text-gold" : "border-gold/20 text-muted-foreground"}`}
                   >
                     <option>Admin</option>
@@ -154,8 +121,8 @@ function AdminUsers() {
                     แก้ไข
                   </button>
                   <button
-                    onClick={() => setItems((s) => s.filter((x) => x.id !== u.id))}
-                    className="rounded-md border border-rose-400/30 px-2 py-1 text-xs text-rose-300 hover:bg-rose-400/10"
+                    disabled
+                    className="rounded-md border border-rose-400/20 px-2 py-1 text-xs text-rose-300/50"
                   >
                     ลบ
                   </button>

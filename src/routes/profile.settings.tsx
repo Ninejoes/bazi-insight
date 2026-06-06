@@ -15,13 +15,13 @@ function SettingsPage() {
         <h2 className="font-display text-2xl text-foreground">ข้อมูลส่วนตัว</h2>
         <form className="mt-6 grid gap-4 md:grid-cols-2" onSubmit={(e) => e.preventDefault()}>
           <Field label="ชื่อ">
-            <input className="input-styled" defaultValue="มณีจันทร์" />
+            <input className="input-styled" defaultValue="Admin" />
           </Field>
           <Field label="นามสกุล">
-            <input className="input-styled" defaultValue="ลิขิตฟ้า" />
+            <input className="input-styled" defaultValue="" />
           </Field>
           <Field label="อีเมล">
-            <input className="input-styled" defaultValue="manee@example.com" />
+            <input className="input-styled" defaultValue="admin@gmail.com" />
           </Field>
           <Field label="เบอร์โทรศัพท์">
             <input className="input-styled" placeholder="08x-xxx-xxxx" />

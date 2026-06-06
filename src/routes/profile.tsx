@@ -22,13 +22,13 @@ function ProfileLayout() {
         <header className="glass-strong rounded-3xl p-6 shadow-elegant md:p-8">
           <div className="flex flex-col items-start gap-5 md:flex-row md:items-center">
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-gold text-3xl font-bold text-primary-foreground shadow-gold">
-              ม
+              A
             </div>
             <div className="flex-1">
               <div className="text-[11px] uppercase tracking-[0.25em] text-gold/70">MEMBER</div>
-              <h1 className="font-display text-3xl text-foreground">มณีจันทร์ ลิขิตฟ้า</h1>
+              <h1 className="font-display text-3xl text-foreground">Admin</h1>
               <p className="text-sm text-muted-foreground">
-                manee@example.com · สมาชิกตั้งแต่ ก.ย. 2025
+                admin@gmail.com · สมาชิกตั้งแต่ มิ.ย. 2026
               </p>
             </div>
             <div className="flex gap-2">

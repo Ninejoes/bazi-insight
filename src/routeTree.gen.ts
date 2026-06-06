@@ -31,6 +31,7 @@ import { Route as ProfileSettingsRouteImport } from './routes/profile.settings'
 import { Route as ProfileHistoryRouteImport } from './routes/profile.history'
 import { Route as ArticlesSlugRouteImport } from './routes/articles.$slug'
 import { Route as ApiLeadsRouteImport } from './routes/api.leads'
+import { Route as ApiAdminLoginRouteImport } from './routes/api.admin-login'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminHelpRouteImport } from './routes/admin.help'
 import { Route as AdminDreamsRouteImport } from './routes/admin.dreams'
@@ -147,6 +148,11 @@ const ApiLeadsRoute = ApiLeadsRouteImport.update({
   path: '/api/leads',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminLoginRoute = ApiAdminLoginRouteImport.update({
+  id: '/api/admin-login',
+  path: '/api/admin-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/admin/dreams': typeof AdminDreamsRoute
   '/admin/help': typeof AdminHelpRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/admin-login': typeof ApiAdminLoginRoute
   '/api/leads': typeof ApiLeadsRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/profile/history': typeof ProfileHistoryRoute
@@ -217,6 +224,7 @@ export interface FileRoutesByTo {
   '/admin/dreams': typeof AdminDreamsRoute
   '/admin/help': typeof AdminHelpRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/admin-login': typeof ApiAdminLoginRoute
   '/api/leads': typeof ApiLeadsRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/profile/history': typeof ProfileHistoryRoute
@@ -247,6 +255,7 @@ export interface FileRoutesById {
   '/admin/dreams': typeof AdminDreamsRoute
   '/admin/help': typeof AdminHelpRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/admin-login': typeof ApiAdminLoginRoute
   '/api/leads': typeof ApiLeadsRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/profile/history': typeof ProfileHistoryRoute
@@ -278,6 +287,7 @@ export interface FileRouteTypes {
     | '/admin/dreams'
     | '/admin/help'
     | '/admin/users'
+    | '/api/admin-login'
     | '/api/leads'
     | '/articles/$slug'
     | '/profile/history'
@@ -303,6 +313,7 @@ export interface FileRouteTypes {
     | '/admin/dreams'
     | '/admin/help'
     | '/admin/users'
+    | '/api/admin-login'
     | '/api/leads'
     | '/articles/$slug'
     | '/profile/history'
@@ -332,6 +343,7 @@ export interface FileRouteTypes {
     | '/admin/dreams'
     | '/admin/help'
     | '/admin/users'
+    | '/api/admin-login'
     | '/api/leads'
     | '/articles/$slug'
     | '/profile/history'
@@ -357,6 +369,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRouteWithChildren
   RegisterRoute: typeof RegisterRoute
   TarotRoute: typeof TarotRouteWithChildren
+  ApiAdminLoginRoute: typeof ApiAdminLoginRoute
   ApiLeadsRoute: typeof ApiLeadsRoute
 }
 
@@ -516,6 +529,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiLeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin-login': {
+      id: '/api/admin-login'
+      path: '/api/admin-login'
+      fullPath: '/api/admin-login'
+      preLoaderRoute: typeof ApiAdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/users': {
       id: '/admin/users'
       path: '/users'
@@ -629,6 +649,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRouteWithChildren,
   RegisterRoute: RegisterRoute,
   TarotRoute: TarotRouteWithChildren,
+  ApiAdminLoginRoute: ApiAdminLoginRoute,
   ApiLeadsRoute: ApiLeadsRoute,
 }
 export const routeTree = rootRouteImport

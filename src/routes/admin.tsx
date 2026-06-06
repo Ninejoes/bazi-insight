@@ -15,17 +15,46 @@ const nav = [
   { to: "/admin/help", label: "ศูนย์ช่วยเหลือ", icon: "?" },
 ] as const;
 
+type AdminSession = {
+  email?: string;
+  name?: string;
+  role?: string;
+  expiresAt?: string;
+};
+
+function readAdminSession() {
+  const raw = window.localStorage.getItem("likhitfa-admin-session");
+  if (!raw) return null;
+
+  try {
+    const session = JSON.parse(raw) as AdminSession;
+    const isExpired = session.expiresAt
+      ? new Date(session.expiresAt).getTime() <= Date.now()
+      : false;
+    if (isExpired || session.email !== "admin@gmail.com" || session.role !== "Admin") {
+      window.localStorage.removeItem("likhitfa-admin-session");
+      return null;
+    }
+    return session;
+  } catch {
+    window.localStorage.removeItem("likhitfa-admin-session");
+    return null;
+  }
+}
+
 function AdminLayout() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const [authorized, setAuthorized] = useState(false);
+  const [session, setSession] = useState<AdminSession | null>(null);
 
   useEffect(() => {
-    const isAdmin = window.localStorage.getItem("likhitfa-admin-auth") === "true";
-    if (!isAdmin) {
+    const adminSession = readAdminSession();
+    if (!adminSession) {
       void navigate({ to: "/admin-login" });
       return;
     }
+    setSession(adminSession);
     setAuthorized(true);
   }, [navigate, path]);
 
@@ -90,8 +119,10 @@ function AdminLayout() {
             </div>
             <div className="flex items-center gap-3">
               <div className="hidden text-right md:block">
-                <div className="text-sm text-foreground">Admin User</div>
-                <div className="text-[11px] text-muted-foreground">admin@likhitfa.com</div>
+                <div className="text-sm text-foreground">{session?.name || "Admin"}</div>
+                <div className="text-[11px] text-muted-foreground">
+                  {session?.email || "admin@gmail.com"}
+                </div>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-gold font-bold text-primary-foreground">
                 A
