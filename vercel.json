@@ -1,23 +1,6 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "api/**/*.js", "use": "@vercel/node" },
-    { "src": "outputs/**", "use": "@vercel/static" }
-  ],
-  "routes": [
-    { "src": "/api/leads", "dest": "/api/leads.js" },
-    { "src": "/assets/(.*)", "dest": "/outputs/assets/$1" },
-    { "src": "/app.js", "dest": "/outputs/app.js" },
-    { "src": "/styles.css", "dest": "/outputs/styles.css" },
-    { "src": "/favicon.svg", "dest": "/outputs/favicon.svg" },
-    { "src": "/site.webmanifest", "dest": "/outputs/site.webmanifest" },
-    { "src": "/sitemap.xml", "dest": "/outputs/sitemap.xml" },
-    { "src": "/robots.txt", "dest": "/outputs/robots.txt" },
-    { "src": "/bazi/?", "dest": "/outputs/index.html" },
-    { "src": "/tarot/?", "dest": "/outputs/index.html" },
-    { "src": "/", "dest": "/outputs/index.html" },
-    { "src": "/(.*)", "dest": "/outputs/$1" }
-  ],
+  "buildCommand": "npm run build",
   "headers": [
     {
       "source": "/(.*)",
