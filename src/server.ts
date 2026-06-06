@@ -33,7 +33,26 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   console.error(consumeLastCapturedError() ?? new Error(`h3 swallowed SSR error: ${body}`));
   return new Response(renderErrorPage(), {
     status: 500,
-    headers: { "content-type": "text/html; charset=utf-8" },
+    headers: noStoreHeaders({ "content-type": "text/html; charset=utf-8" }),
+  });
+}
+
+function noStoreHeaders(headers?: HeadersInit) {
+  const next = new Headers(headers);
+  next.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+  next.set("Pragma", "no-cache");
+  next.set("Expires", "0");
+  return next;
+}
+
+function withHtmlNoStore(response: Response) {
+  const contentType = response.headers.get("content-type") || "";
+  if (!contentType.includes("text/html")) return response;
+
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: noStoreHeaders(response.headers),
   });
 }
 
@@ -42,12 +61,12 @@ export default {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      return withHtmlNoStore(await normalizeCatastrophicSsrResponse(response));
     } catch (error) {
       console.error(error);
       return new Response(renderErrorPage(), {
         status: 500,
-        headers: { "content-type": "text/html; charset=utf-8" },
+        headers: noStoreHeaders({ "content-type": "text/html; charset=utf-8" }),
       });
     }
   },
