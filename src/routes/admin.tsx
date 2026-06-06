@@ -1,5 +1,6 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { BrandMark } from "@/components/site-header";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/admin")({
   component: AdminLayout,
@@ -16,6 +17,28 @@ const nav = [
 
 function AdminLayout() {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
+  const [authorized, setAuthorized] = useState(false);
+
+  useEffect(() => {
+    const isAdmin = window.localStorage.getItem("likhitfa-admin-auth") === "true";
+    if (!isAdmin) {
+      void navigate({ to: "/admin-login" });
+      return;
+    }
+    setAuthorized(true);
+  }, [navigate, path]);
+
+  if (!authorized) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[oklch(0.12_0.018_260)] px-6 text-center">
+        <div>
+          <div className="font-display text-2xl text-foreground">กำลังตรวจสอบสิทธิ์</div>
+          <p className="mt-2 text-sm text-muted-foreground">กรุณาเข้าสู่ระบบแอดมินก่อนใช้งาน</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[oklch(0.12_0.018_260)]">

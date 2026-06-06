@@ -18,6 +18,7 @@ import { Route as DreamRouteImport } from './routes/dream'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BaziRouteImport } from './routes/bazi'
 import { Route as ArticlesRouteImport } from './routes/articles'
+import { Route as AdminLoginRouteImport } from './routes/admin-login'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
@@ -79,6 +80,11 @@ const BaziRoute = BaziRouteImport.update({
 const ArticlesRoute = ArticlesRouteImport.update({
   id: '/articles',
   path: '/articles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin-login',
+  path: '/admin-login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -171,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
+  '/admin-login': typeof AdminLoginRoute
   '/articles': typeof ArticlesRouteWithChildren
   '/bazi': typeof BaziRoute
   '/contact': typeof ContactRoute
@@ -198,6 +205,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin-login': typeof AdminLoginRoute
   '/bazi': typeof BaziRoute
   '/contact': typeof ContactRoute
   '/dream': typeof DreamRoute
@@ -224,6 +232,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
+  '/admin-login': typeof AdminLoginRoute
   '/articles': typeof ArticlesRouteWithChildren
   '/bazi': typeof BaziRoute
   '/contact': typeof ContactRoute
@@ -254,6 +263,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/admin-login'
     | '/articles'
     | '/bazi'
     | '/contact'
@@ -281,6 +291,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/admin-login'
     | '/bazi'
     | '/contact'
     | '/dream'
@@ -306,6 +317,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/admin-login'
     | '/articles'
     | '/bazi'
     | '/contact'
@@ -335,6 +347,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
+  AdminLoginRoute: typeof AdminLoginRoute
   ArticlesRoute: typeof ArticlesRouteWithChildren
   BaziRoute: typeof BaziRoute
   ContactRoute: typeof ContactRoute
@@ -410,6 +423,13 @@ declare module '@tanstack/react-router' {
       path: '/articles'
       fullPath: '/articles'
       preLoaderRoute: typeof ArticlesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-login': {
+      id: '/admin-login'
+      path: '/admin-login'
+      fullPath: '/admin-login'
+      preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -599,6 +619,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
+  AdminLoginRoute: AdminLoginRoute,
   ArticlesRoute: ArticlesRouteWithChildren,
   BaziRoute: BaziRoute,
   ContactRoute: ContactRoute,
