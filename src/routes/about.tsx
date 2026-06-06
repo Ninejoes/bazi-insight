@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo } from "@/lib/seo";
+import { siteContentSeed, type AboutContent } from "@/lib/admin-content";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/about")({
   head: () =>
@@ -16,18 +18,33 @@ export const Route = createFileRoute("/about")({
 });
 
 function AboutPage() {
+  const [about, setAbout] = useState<AboutContent>(siteContentSeed.about);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadAbout() {
+      const response = await fetch("/api/site-content");
+      const data = await response.json().catch(() => ({}));
+      if (mounted && data.ok) setAbout(data.content?.about || siteContentSeed.about);
+    }
+
+    void loadAbout();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   return (
     <div className="min-h-screen">
       <SiteHeader subtitle="เกี่ยวกับเรา" subtitleCn="关于" />
       <main className="mx-auto max-w-5xl px-6 pt-12 pb-12">
         <section className="text-center">
           <div className="text-[11px] uppercase tracking-[0.3em] text-gold/70">ABOUT</div>
-          <h1 className="mt-2 font-display text-5xl text-foreground md:text-6xl">
-            ลิขิตฟ้า · <span className="text-gradient-gold italic">ศาสตร์โบราณในมือคุณ</span>
-          </h1>
+          <h1 className="mt-2 font-display text-5xl text-foreground md:text-6xl">{about.title}</h1>
           <p className="mx-auto mt-6 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
-            Likhitfa เกิดจากความตั้งใจที่จะนำศาสตร์ดูดวงตะวันออกอันลึกซึ้ง — ปาจื้อ ไพ่ทาโรต์
-            และทำนายฝัน — มาถ่ายทอดในรูปแบบที่เข้าใจง่ายและสวยงามสำหรับคนยุคใหม่
+            {about.description}
           </p>
         </section>
 
@@ -61,14 +78,9 @@ function AboutPage() {
           <h2 className="font-display text-3xl text-foreground">เรื่องราวของเรา</h2>
           <div className="gold-divider my-5 w-32" />
           <div className="space-y-4 text-sm leading-relaxed text-muted-foreground md:text-base">
-            <p>
-              จุดเริ่มต้นของลิขิตฟ้ามาจากบทสนทนาเล็กๆ ระหว่างนักออกแบบ นักพัฒนา
-              และอาจารย์ดูดวงจีนรุ่นใหม่ ที่เชื่อว่าศาสตร์การดูดวงไม่ควรน่ากลัวหรือยากเกินไป
-            </p>
-            <p>
-              เราจึงสร้างประสบการณ์ที่ผสานความสวยงาม ความแม่นยำ และการเข้าถึงได้ของยุคดิจิทัล
-              เพื่อให้ทุกคนสามารถทำความรู้จักตัวเองผ่านสายตาของศาสตร์ที่สืบทอดมานานหลายพันปี
-            </p>
+            {about.story.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
           </div>
         </section>
 
@@ -76,16 +88,12 @@ function AboutPage() {
           <div className="glass rounded-3xl p-7">
             <div className="text-[11px] uppercase tracking-[0.25em] text-gold">VISION</div>
             <h3 className="mt-2 font-display text-2xl text-foreground">วิสัยทัศน์</h3>
-            <p className="mt-3 text-sm text-muted-foreground">
-              ทำให้ศาสตร์การดูดวงเป็นเครื่องมือที่ใช้ทบทวนตัวเองได้ทุกวัน เข้าถึงง่ายและใช้งานสนุก
-            </p>
+            <p className="mt-3 text-sm text-muted-foreground">{about.vision}</p>
           </div>
           <div className="glass rounded-3xl p-7">
             <div className="text-[11px] uppercase tracking-[0.25em] text-gold">MISSION</div>
             <h3 className="mt-2 font-display text-2xl text-foreground">พันธกิจ</h3>
-            <p className="mt-3 text-sm text-muted-foreground">
-              ส่งมอบประสบการณ์ดูดวงที่งดงาม น่าเชื่อถือ และมีจริยธรรมในทุกการตีความ
-            </p>
+            <p className="mt-3 text-sm text-muted-foreground">{about.mission}</p>
           </div>
         </section>
 

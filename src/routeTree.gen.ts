@@ -30,7 +30,12 @@ import { Route as TarotTypeRouteImport } from './routes/tarot.$type'
 import { Route as ProfileSettingsRouteImport } from './routes/profile.settings'
 import { Route as ProfileHistoryRouteImport } from './routes/profile.history'
 import { Route as ArticlesSlugRouteImport } from './routes/articles.$slug'
+import { Route as ApiSiteContentRouteImport } from './routes/api.site-content'
 import { Route as ApiLeadsRouteImport } from './routes/api.leads'
+import { Route as ApiFaqsRouteImport } from './routes/api.faqs'
+import { Route as ApiDreamsRouteImport } from './routes/api.dreams'
+import { Route as ApiDashboardRouteImport } from './routes/api.dashboard'
+import { Route as ApiContactMessagesRouteImport } from './routes/api.contact-messages'
 import { Route as ApiArticlesRouteImport } from './routes/api.articles'
 import { Route as ApiAdminUsersRouteImport } from './routes/api.admin-users'
 import { Route as ApiAdminSessionRouteImport } from './routes/api.admin-session'
@@ -146,9 +151,34 @@ const ArticlesSlugRoute = ArticlesSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => ArticlesRoute,
 } as any)
+const ApiSiteContentRoute = ApiSiteContentRouteImport.update({
+  id: '/api/site-content',
+  path: '/api/site-content',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiLeadsRoute = ApiLeadsRouteImport.update({
   id: '/api/leads',
   path: '/api/leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiFaqsRoute = ApiFaqsRouteImport.update({
+  id: '/api/faqs',
+  path: '/api/faqs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDreamsRoute = ApiDreamsRouteImport.update({
+  id: '/api/dreams',
+  path: '/api/dreams',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDashboardRoute = ApiDashboardRouteImport.update({
+  id: '/api/dashboard',
+  path: '/api/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiContactMessagesRoute = ApiContactMessagesRouteImport.update({
+  id: '/api/contact-messages',
+  path: '/api/contact-messages',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiArticlesRoute = ApiArticlesRouteImport.update({
@@ -220,7 +250,12 @@ export interface FileRoutesByFullPath {
   '/api/admin-session': typeof ApiAdminSessionRoute
   '/api/admin-users': typeof ApiAdminUsersRoute
   '/api/articles': typeof ApiArticlesRoute
+  '/api/contact-messages': typeof ApiContactMessagesRoute
+  '/api/dashboard': typeof ApiDashboardRoute
+  '/api/dreams': typeof ApiDreamsRoute
+  '/api/faqs': typeof ApiFaqsRoute
   '/api/leads': typeof ApiLeadsRoute
+  '/api/site-content': typeof ApiSiteContentRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/profile/history': typeof ProfileHistoryRoute
   '/profile/settings': typeof ProfileSettingsRoute
@@ -249,7 +284,12 @@ export interface FileRoutesByTo {
   '/api/admin-session': typeof ApiAdminSessionRoute
   '/api/admin-users': typeof ApiAdminUsersRoute
   '/api/articles': typeof ApiArticlesRoute
+  '/api/contact-messages': typeof ApiContactMessagesRoute
+  '/api/dashboard': typeof ApiDashboardRoute
+  '/api/dreams': typeof ApiDreamsRoute
+  '/api/faqs': typeof ApiFaqsRoute
   '/api/leads': typeof ApiLeadsRoute
+  '/api/site-content': typeof ApiSiteContentRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/profile/history': typeof ProfileHistoryRoute
   '/profile/settings': typeof ProfileSettingsRoute
@@ -283,7 +323,12 @@ export interface FileRoutesById {
   '/api/admin-session': typeof ApiAdminSessionRoute
   '/api/admin-users': typeof ApiAdminUsersRoute
   '/api/articles': typeof ApiArticlesRoute
+  '/api/contact-messages': typeof ApiContactMessagesRoute
+  '/api/dashboard': typeof ApiDashboardRoute
+  '/api/dreams': typeof ApiDreamsRoute
+  '/api/faqs': typeof ApiFaqsRoute
   '/api/leads': typeof ApiLeadsRoute
+  '/api/site-content': typeof ApiSiteContentRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/profile/history': typeof ProfileHistoryRoute
   '/profile/settings': typeof ProfileSettingsRoute
@@ -318,7 +363,12 @@ export interface FileRouteTypes {
     | '/api/admin-session'
     | '/api/admin-users'
     | '/api/articles'
+    | '/api/contact-messages'
+    | '/api/dashboard'
+    | '/api/dreams'
+    | '/api/faqs'
     | '/api/leads'
+    | '/api/site-content'
     | '/articles/$slug'
     | '/profile/history'
     | '/profile/settings'
@@ -347,7 +397,12 @@ export interface FileRouteTypes {
     | '/api/admin-session'
     | '/api/admin-users'
     | '/api/articles'
+    | '/api/contact-messages'
+    | '/api/dashboard'
+    | '/api/dreams'
+    | '/api/faqs'
     | '/api/leads'
+    | '/api/site-content'
     | '/articles/$slug'
     | '/profile/history'
     | '/profile/settings'
@@ -380,7 +435,12 @@ export interface FileRouteTypes {
     | '/api/admin-session'
     | '/api/admin-users'
     | '/api/articles'
+    | '/api/contact-messages'
+    | '/api/dashboard'
+    | '/api/dreams'
+    | '/api/faqs'
     | '/api/leads'
+    | '/api/site-content'
     | '/articles/$slug'
     | '/profile/history'
     | '/profile/settings'
@@ -409,7 +469,12 @@ export interface RootRouteChildren {
   ApiAdminSessionRoute: typeof ApiAdminSessionRoute
   ApiAdminUsersRoute: typeof ApiAdminUsersRoute
   ApiArticlesRoute: typeof ApiArticlesRoute
+  ApiContactMessagesRoute: typeof ApiContactMessagesRoute
+  ApiDashboardRoute: typeof ApiDashboardRoute
+  ApiDreamsRoute: typeof ApiDreamsRoute
+  ApiFaqsRoute: typeof ApiFaqsRoute
   ApiLeadsRoute: typeof ApiLeadsRoute
+  ApiSiteContentRoute: typeof ApiSiteContentRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -561,11 +626,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArticlesSlugRouteImport
       parentRoute: typeof ArticlesRoute
     }
+    '/api/site-content': {
+      id: '/api/site-content'
+      path: '/api/site-content'
+      fullPath: '/api/site-content'
+      preLoaderRoute: typeof ApiSiteContentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/leads': {
       id: '/api/leads'
       path: '/api/leads'
       fullPath: '/api/leads'
       preLoaderRoute: typeof ApiLeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/faqs': {
+      id: '/api/faqs'
+      path: '/api/faqs'
+      fullPath: '/api/faqs'
+      preLoaderRoute: typeof ApiFaqsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/dreams': {
+      id: '/api/dreams'
+      path: '/api/dreams'
+      fullPath: '/api/dreams'
+      preLoaderRoute: typeof ApiDreamsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/dashboard': {
+      id: '/api/dashboard'
+      path: '/api/dashboard'
+      fullPath: '/api/dashboard'
+      preLoaderRoute: typeof ApiDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/contact-messages': {
+      id: '/api/contact-messages'
+      path: '/api/contact-messages'
+      fullPath: '/api/contact-messages'
+      preLoaderRoute: typeof ApiContactMessagesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/articles': {
@@ -713,7 +813,12 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminSessionRoute: ApiAdminSessionRoute,
   ApiAdminUsersRoute: ApiAdminUsersRoute,
   ApiArticlesRoute: ApiArticlesRoute,
+  ApiContactMessagesRoute: ApiContactMessagesRoute,
+  ApiDashboardRoute: ApiDashboardRoute,
+  ApiDreamsRoute: ApiDreamsRoute,
+  ApiFaqsRoute: ApiFaqsRoute,
   ApiLeadsRoute: ApiLeadsRoute,
+  ApiSiteContentRoute: ApiSiteContentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

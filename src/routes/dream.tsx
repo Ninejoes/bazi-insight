@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo } from "@/lib/seo";
-import { useState } from "react";
+import { dreamSeed, type DreamRecord } from "@/lib/admin-content";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/dream")({
   head: () =>
@@ -15,41 +16,37 @@ export const Route = createFileRoute("/dream")({
   component: DreamPage,
 });
 
-const popular = [
-  "งู",
-  "น้ำ",
-  "ฟัน",
-  "บิน",
-  "ตก",
-  "ไฟ",
-  "ผี",
-  "พระ",
-  "ทอง",
-  "ทะเล",
-  "เด็ก",
-  "งานแต่ง",
-];
-
-const sampleResults = [
-  {
-    word: "งู",
-    meaning: "ฝันเห็นงูใหญ่เลื้อยเข้าหา หมายถึงเนื้อคู่หรือผู้สนับสนุนใหม่กำลังเข้ามาในชีวิต",
-    luck: [7, 14, 47, 71],
-    time: "เช้ามืด",
-    advice: "ทำบุญ ปล่อยปลา หรือถวายผลไม้สีเหลือง",
-  },
-  {
-    word: "น้ำใส",
-    meaning: "แสดงถึงโชคลาภและสุขภาพดี ความสะอาดของจิตใจ",
-    luck: [2, 9, 25, 92],
-    time: "กลางคืน",
-    advice: "ดื่มน้ำสะอาดถวายพระ",
-  },
-];
-
 function DreamPage() {
   const [q, setQ] = useState("");
   const [show, setShow] = useState(false);
+  const [dreams, setDreams] = useState<DreamRecord[]>(dreamSeed);
+  const [results, setResults] = useState<DreamRecord[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadDreams() {
+      const response = await fetch("/api/dreams");
+      const data = await response.json().catch(() => ({}));
+      if (mounted && data.ok) setDreams(data.dreams || dreamSeed);
+    }
+
+    void loadDreams();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const popular = dreams.slice(0, 12).map((dream) => dream.keyword);
+  const searchDreams = (query: string) => {
+    const keyword = query.trim().toLowerCase();
+    const matched = keyword
+      ? dreams.filter((dream) => dream.keyword.toLowerCase().includes(keyword))
+      : dreams.slice(0, 2);
+    setResults(matched.length ? matched : dreams.slice(0, 2));
+    setShow(true);
+  };
 
   return (
     <div className="relative min-h-screen">
@@ -74,7 +71,7 @@ function DreamPage() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                setShow(true);
+                searchDreams(q);
               }}
               className="mt-8 flex flex-col gap-3 md:flex-row"
             >
@@ -99,7 +96,7 @@ function DreamPage() {
                     key={p}
                     onClick={() => {
                       setQ(p);
-                      setShow(true);
+                      searchDreams(p);
                     }}
                     className="rounded-full border border-border bg-card/40 px-4 py-1.5 text-xs text-muted-foreground transition-all hover:border-gold/40 hover:text-gold"
                   >
@@ -113,7 +110,7 @@ function DreamPage() {
 
         {show && (
           <section className="mt-6 space-y-4">
-            {sampleResults.map((r, i) => (
+            {results.map((r, i) => (
               <article
                 key={i}
                 className="glass-strong rounded-3xl p-6 shadow-elegant animate-fade-up"
@@ -123,17 +120,22 @@ function DreamPage() {
                     <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
                       ฝันถึง
                     </div>
-                    <h3 className="mt-1 font-display text-3xl text-foreground">{r.word}</h3>
+                    <h3 className="mt-1 font-display text-3xl text-foreground">{r.keyword}</h3>
                   </div>
                   <div className="flex items-center gap-2">
-                    {r.luck.map((n) => (
-                      <span
-                        key={n}
-                        className="flex h-12 w-12 items-center justify-center rounded-full border border-gold/30 bg-gradient-gold-soft font-display text-lg text-gold"
-                      >
-                        {n}
-                      </span>
-                    ))}
+                    {r.numbers
+                      .split(",")
+                      .map((n) => n.trim())
+                      .filter(Boolean)
+                      .slice(0, 4)
+                      .map((n) => (
+                        <span
+                          key={n}
+                          className="flex h-12 w-12 items-center justify-center rounded-full border border-gold/30 bg-gradient-gold-soft font-display text-lg text-gold"
+                        >
+                          {n}
+                        </span>
+                      ))}
                   </div>
                 </div>
                 <div className="gold-divider my-5" />

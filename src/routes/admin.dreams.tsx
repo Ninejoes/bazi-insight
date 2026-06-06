@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { seo } from "@/lib/seo";
 import { useEffect, useState } from "react";
+import { dreamSeed as seed, type DreamRecord as Dream } from "@/lib/admin-content";
 
 export const Route = createFileRoute("/admin/dreams")({
   head: () =>
@@ -13,58 +14,6 @@ export const Route = createFileRoute("/admin/dreams")({
   component: AdminDreams,
 });
 
-type Dream = {
-  id: string;
-  keyword: string;
-  letter: string;
-  category: string;
-  meaning: string;
-  numbers: string;
-};
-
-const seed: Dream[] = [
-  {
-    id: "1",
-    keyword: "งู",
-    letter: "ง",
-    category: "สัตว์",
-    meaning: "เนื้อคู่/คนรัก สิ่งศักดิ์สิทธิ์",
-    numbers: "06, 56, 89",
-  },
-  {
-    id: "2",
-    keyword: "น้ำใส",
-    letter: "น",
-    category: "สิ่งของ/ธรรมชาติ",
-    meaning: "โชคลาภและความสำเร็จ",
-    numbers: "12, 21",
-  },
-  {
-    id: "3",
-    keyword: "พระสงฆ์",
-    letter: "พ",
-    category: "คน",
-    meaning: "ได้รับการคุ้มครอง สิริมงคล",
-    numbers: "09, 99",
-  },
-  {
-    id: "4",
-    keyword: "ฟันหัก",
-    letter: "ฟ",
-    category: "ร่างกาย",
-    meaning: "ระวังการสูญเสีย",
-    numbers: "13, 31",
-  },
-  {
-    id: "5",
-    keyword: "ทอง",
-    letter: "ท",
-    category: "สิ่งของ",
-    meaning: "การเงินดี โชคลาภเข้า",
-    numbers: "27, 72",
-  },
-];
-
 const letters = "กขคงจฉชซญดตถทนบปผฝพฟภมยรลวศษสหฬอฮ".split("");
 
 function AdminDreams() {
@@ -73,16 +22,67 @@ function AdminDreams() {
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<Dream | null>(null);
   const [notice, setNotice] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const saved = window.localStorage.getItem("likhitfa-admin-dreams");
-    if (saved) setItems(JSON.parse(saved));
+    let mounted = true;
+
+    async function loadDreams() {
+      const response = await fetch("/api/dreams");
+      const data = await response.json().catch(() => ({}));
+      if (mounted && data.ok) {
+        setItems(data.dreams || seed);
+        setNotice(
+          data.error
+            ? `เชื่อมต่อ Supabase สำหรับทำนายฝันไม่ได้: ${data.error}`
+            : data.source === "supabase"
+              ? "เชื่อมต่อข้อมูลทำนายฝันจาก Supabase แล้ว"
+              : "",
+        );
+      }
+      if (mounted) setLoading(false);
+    }
+
+    void loadDreams();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  const persist = (next: Dream[], message: string) => {
-    setItems(next);
-    window.localStorage.setItem("likhitfa-admin-dreams", JSON.stringify(next));
+  const reload = async () => {
+    const response = await fetch("/api/dreams");
+    const data = await response.json().catch(() => ({}));
+    if (data.ok) setItems(data.dreams || seed);
+    if (data.error) setNotice(`เชื่อมต่อ Supabase สำหรับทำนายฝันไม่ได้: ${data.error}`);
+  };
+
+  const saveDream = async (dream: Dream, message: string) => {
+    const response = await fetch("/api/dreams", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(dream),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) {
+      setNotice(data.error || "บันทึกคำฝันไม่สำเร็จ");
+      return;
+    }
+    await reload();
     setNotice(message);
+  };
+
+  const removeDream = async (id: string) => {
+    const response = await fetch(`/api/dreams?id=${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) {
+      setNotice(data.error || "ลบคำฝันไม่สำเร็จ");
+      return;
+    }
+    await reload();
+    setNotice("ลบคำฝันแล้ว");
   };
 
   const shown = filterLetter ? items.filter((i) => i.letter === filterLetter) : items;
@@ -129,7 +129,12 @@ function AdminDreams() {
         </div>
       ) : null}
 
-      <section className="glass-strong overflow-x-auto rounded-3xl">
+      <section className="glass-strong max-w-full overflow-x-auto rounded-3xl">
+        {loading ? (
+          <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+            กำลังโหลดข้อมูลทำนายฝันจากระบบกลาง...
+          </div>
+        ) : null}
         <table className="w-full min-w-[860px] text-sm">
           <thead className="text-left text-[11px] uppercase tracking-wider text-muted-foreground">
             <tr className="border-b border-gold/10">
@@ -157,12 +162,7 @@ function AdminDreams() {
                     แก้ไข
                   </button>
                   <button
-                    onClick={() =>
-                      persist(
-                        items.filter((x) => x.id !== d.id),
-                        "ลบคำฝันแล้ว",
-                      )
-                    }
+                    onClick={() => void removeDream(d.id)}
                     className="rounded-md border border-rose-400/30 px-2 py-1 text-xs text-rose-300 hover:bg-rose-400/10"
                   >
                     ลบ
@@ -178,8 +178,8 @@ function AdminDreams() {
         <DreamEditor
           title="เพิ่มคำฝัน"
           onClose={() => setAdding(false)}
-          onSave={(dream) => {
-            persist([{ ...dream, id: String(Date.now()) }, ...items], "เพิ่มคำฝันแล้ว");
+          onSave={async (dream) => {
+            await saveDream({ ...dream, id: String(Date.now()) }, "เพิ่มคำฝันแล้ว");
             setAdding(false);
           }}
         />
@@ -190,11 +190,8 @@ function AdminDreams() {
           title={`แก้ไข: ${editing.keyword}`}
           initial={editing}
           onClose={() => setEditing(null)}
-          onSave={(dream) => {
-            persist(
-              items.map((item) => (item.id === editing.id ? { ...dream, id: editing.id } : item)),
-              "บันทึกคำฝันแล้ว",
-            );
+          onSave={async (dream) => {
+            await saveDream({ ...dream, id: editing.id }, "บันทึกคำฝันแล้ว");
             setEditing(null);
           }}
         />
@@ -212,7 +209,7 @@ function DreamEditor({
   title: string;
   initial?: Dream;
   onClose: () => void;
-  onSave: (dream: Dream) => void;
+  onSave: (dream: Dream) => void | Promise<void>;
 }) {
   return (
     <div
@@ -237,6 +234,8 @@ function DreamEditor({
               category: String(form.get("category") || "สิ่งของ"),
               meaning: String(form.get("meaning") || ""),
               numbers: String(form.get("numbers") || ""),
+              time: String(form.get("time") || "ไม่ระบุ"),
+              advice: String(form.get("advice") || ""),
             });
           }}
         >
@@ -277,6 +276,18 @@ function DreamEditor({
             className="input-styled"
             placeholder="เลขเด็ด (คั่นด้วย ,)"
             defaultValue={initial?.numbers}
+          />
+          <input
+            name="time"
+            className="input-styled"
+            placeholder="ช่วงเวลาฝัน"
+            defaultValue={initial?.time}
+          />
+          <textarea
+            name="advice"
+            className="input-styled !h-24 py-3"
+            placeholder="วิธีแก้เคล็ด / คำแนะนำ"
+            defaultValue={initial?.advice}
           />
           <div className="flex justify-end gap-2">
             <button

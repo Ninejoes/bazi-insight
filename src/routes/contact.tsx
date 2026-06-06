@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo } from "@/lib/seo";
+import { siteContentSeed, type ContactContent } from "@/lib/admin-content";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/contact")({
   head: () =>
@@ -15,14 +17,33 @@ export const Route = createFileRoute("/contact")({
   component: ContactPage,
 });
 
-const channels = [
-  { icon: "✉", label: "อีเมล", value: "hello@likhitfa.com", link: "mailto:hello@likhitfa.com" },
-  { icon: "☎", label: "โทรศัพท์", value: "02-123-4567", link: "tel:021234567" },
-  { icon: "✦", label: "Line Official", value: "@likhitfa", link: "#" },
-  { icon: "✉", label: "ที่อยู่", value: "ชั้น 12 อาคารฟ้าลิขิต ถ.สุขุมวิท กรุงเทพฯ 10110" },
-];
-
 function ContactPage() {
+  const [contact, setContact] = useState<ContactContent>(siteContentSeed.contact);
+  const [notice, setNotice] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadContact() {
+      const response = await fetch("/api/site-content");
+      const data = await response.json().catch(() => ({}));
+      if (mounted && data.ok) setContact(data.content?.contact || siteContentSeed.contact);
+    }
+
+    void loadContact();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const channels = [
+    { icon: "✉", label: "อีเมล", value: contact.email, link: `mailto:${contact.email}` },
+    { icon: "☎", label: "โทรศัพท์", value: contact.phone, link: `tel:${contact.phone}` },
+    { icon: "✦", label: "Line Official", value: contact.line, link: "#" },
+    { icon: "✉", label: "ที่อยู่", value: contact.address },
+  ];
+
   return (
     <div className="min-h-screen">
       <SiteHeader subtitle="ติดต่อเรา" subtitleCn="联络" />
@@ -38,13 +59,48 @@ function ContactPage() {
         <section className="mt-12 grid gap-8 md:grid-cols-2">
           <div className="glass-strong rounded-3xl p-7">
             <h2 className="font-display text-2xl text-foreground">ส่งข้อความถึงเรา</h2>
-            <form onSubmit={(e) => e.preventDefault()} className="mt-5 space-y-4">
+            {notice ? <div className="mt-3 text-sm text-emerald-200">{notice}</div> : null}
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const form = new FormData(e.currentTarget);
+                const response = await fetch("/api/contact-messages", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    name: form.get("name"),
+                    email: form.get("email"),
+                    subject: form.get("subject"),
+                    message: form.get("message"),
+                  }),
+                });
+                const data = await response.json().catch(() => ({}));
+                setNotice(
+                  data.ok
+                    ? "ส่งข้อความแล้ว ทีมงานจะติดต่อกลับ"
+                    : data.error || "ส่งข้อความไม่สำเร็จ",
+                );
+                if (data.ok) e.currentTarget.reset();
+              }}
+              className="mt-5 space-y-4"
+            >
               <div className="grid gap-3 sm:grid-cols-2">
-                <input className="input-styled" placeholder="ชื่อ" />
-                <input className="input-styled" placeholder="อีเมล" type="email" />
+                <input name="name" className="input-styled" placeholder="ชื่อ" required />
+                <input
+                  name="email"
+                  className="input-styled"
+                  placeholder="อีเมล"
+                  type="email"
+                  required
+                />
               </div>
-              <input className="input-styled" placeholder="หัวข้อ" />
-              <textarea className="input-styled !h-36 py-3" placeholder="ข้อความ" />
+              <input name="subject" className="input-styled" placeholder="หัวข้อ" required />
+              <textarea
+                name="message"
+                className="input-styled !h-36 py-3"
+                placeholder="ข้อความ"
+                required
+              />
               <button className="w-full rounded-xl bg-gradient-gold py-3 text-sm font-semibold text-primary-foreground shadow-gold">
                 ส่งข้อความ
               </button>
@@ -69,8 +125,8 @@ function ContactPage() {
             ))}
             <div className="glass rounded-2xl p-5">
               <div className="text-xs uppercase tracking-wider text-gold/80">เวลาทำการ</div>
-              <div className="mt-2 text-sm text-foreground">จันทร์ - ศุกร์ · 09:00 - 18:00</div>
-              <div className="text-sm text-muted-foreground">เสาร์ · 10:00 - 16:00</div>
+              <div className="mt-2 text-sm text-foreground">{contact.hoursWeekday}</div>
+              <div className="text-sm text-muted-foreground">{contact.hoursSaturday}</div>
             </div>
           </div>
         </section>

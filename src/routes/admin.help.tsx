@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { seo } from "@/lib/seo";
 import { useEffect, useState } from "react";
+import { faqSeed as initial, type FAQRecord as FAQ } from "@/lib/admin-content";
 
 export const Route = createFileRoute("/admin/help")({
   head: () =>
@@ -13,40 +14,65 @@ export const Route = createFileRoute("/admin/help")({
   component: AdminHelp,
 });
 
-type FAQ = { id: string; q: string; a: string };
-
-const initial: FAQ[] = [
-  {
-    id: "1",
-    q: "การดูดวงในเว็บไซต์มีค่าใช้จ่ายหรือไม่?",
-    a: "ฟีเจอร์หลักเปิดให้ใช้ฟรี ฟีเจอร์พรีเมียมจะแจ้งราคาก่อนใช้งาน",
-  },
-  {
-    id: "2",
-    q: "ข้อมูลส่วนตัวของฉันปลอดภัยหรือไม่?",
-    a: "เราเก็บข้อมูลทั้งหมดด้วยการเข้ารหัส และปฏิบัติตาม PDPA",
-  },
-  {
-    id: "3",
-    q: "ฉันสามารถลบบัญชีของฉันได้หรือไม่?",
-    a: "ได้ จากหน้า โปรไฟล์ → ตั้งค่าและความเป็นส่วนตัว",
-  },
-];
-
 function AdminHelp() {
   const [faqs, setFaqs] = useState(initial);
   const [adding, setAdding] = useState(false);
   const [notice, setNotice] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const saved = window.localStorage.getItem("likhitfa-admin-faqs");
-    if (saved) setFaqs(JSON.parse(saved));
+    let mounted = true;
+
+    async function loadFaqs() {
+      const response = await fetch("/api/faqs");
+      const data = await response.json().catch(() => ({}));
+      if (mounted && data.ok) {
+        setFaqs(data.faqs || initial);
+        setNotice(
+          data.error
+            ? `เชื่อมต่อ Supabase สำหรับศูนย์ช่วยเหลือไม่ได้: ${data.error}`
+            : data.source === "supabase"
+              ? "เชื่อมต่อ FAQ จาก Supabase แล้ว"
+              : "",
+        );
+      }
+      if (mounted) setLoading(false);
+    }
+
+    void loadFaqs();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  const persist = (next: FAQ[], message: string) => {
-    setFaqs(next);
-    window.localStorage.setItem("likhitfa-admin-faqs", JSON.stringify(next));
+  const persist = async (next: FAQ[], message: string) => {
+    const normalized = next.map((faq, index) => ({ ...faq, sortOrder: index + 1 }));
+    const response = await fetch("/api/faqs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ faqs: normalized }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) {
+      setNotice(data.error || "บันทึก FAQ ไม่สำเร็จ");
+      return;
+    }
+    setFaqs(data.faqs || normalized);
     setNotice(message);
+  };
+
+  const removeFaq = async (id: string) => {
+    const response = await fetch(`/api/faqs?id=${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) {
+      setNotice(data.error || "ลบ FAQ ไม่สำเร็จ");
+      return;
+    }
+    setFaqs((items) => items.filter((item) => item.id !== id));
+    setNotice("ลบคำถามแล้ว");
   };
 
   return (
@@ -67,6 +93,12 @@ function AdminHelp() {
       {notice ? (
         <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-200">
           {notice}
+        </div>
+      ) : null}
+
+      {loading ? (
+        <div className="rounded-2xl border border-gold/10 bg-gold/5 px-4 py-3 text-sm text-muted-foreground">
+          กำลังโหลด FAQ จากระบบกลาง...
         </div>
       ) : null}
 
@@ -99,12 +131,7 @@ function AdminHelp() {
                 />
               </div>
               <button
-                onClick={() =>
-                  persist(
-                    faqs.filter((x) => x.id !== f.id),
-                    "ลบคำถามแล้ว",
-                  )
-                }
+                onClick={() => void removeFaq(f.id)}
                 className="rounded-md border border-rose-400/30 px-3 py-1.5 text-xs text-rose-300 hover:bg-rose-400/10"
               >
                 ลบ
@@ -116,7 +143,7 @@ function AdminHelp() {
 
       <div className="flex justify-end">
         <button
-          onClick={() => persist(faqs, "บันทึกคำถามทั้งหมดแล้ว")}
+          onClick={() => void persist(faqs, "บันทึกคำถามทั้งหมดแล้ว และซิงก์ไปหน้า public แล้ว")}
           className="rounded-xl bg-gradient-gold px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-gold"
         >
           บันทึกทั้งหมด
@@ -138,16 +165,17 @@ function AdminHelp() {
               onSubmit={(e) => {
                 e.preventDefault();
                 const form = new FormData(e.currentTarget);
-                persist(
+                void persist(
                   [
                     ...faqs,
                     {
                       id: String(Date.now()),
                       q: String(form.get("q") || ""),
                       a: String(form.get("a") || ""),
+                      sortOrder: faqs.length + 1,
                     },
                   ],
-                  "เพิ่มคำถามแล้ว",
+                  "เพิ่มคำถามแล้ว และซิงก์ไปหน้า public แล้ว",
                 );
                 setAdding(false);
               }}

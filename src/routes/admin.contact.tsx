@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { seo } from "@/lib/seo";
 import { useEffect, useState } from "react";
+import { siteContentSeed, type SiteContent } from "@/lib/admin-content";
 
 export const Route = createFileRoute("/admin/contact")({
   head: () =>
@@ -15,55 +16,92 @@ export const Route = createFileRoute("/admin/contact")({
 
 function AdminContact() {
   const [notice, setNotice] = useState("");
-  const [about, setAbout] = useState({
-    title: "ลิขิตฟ้า · ศาสตร์โบราณในมือคุณ",
-    description: "Likhitfa เกิดจากความตั้งใจที่จะนำศาสตร์ดูดวงตะวันออก...",
-    vision: "ทำให้ศาสตร์การดูดวงเป็นเครื่องมือที่ใช้ทบทวนตัวเองได้ทุกวัน",
-    mission: "ส่งมอบประสบการณ์ดูดวงที่งดงาม น่าเชื่อถือ และมีจริยธรรม",
-  });
-  const [contact, setContact] = useState({
-    email: "hello@likhitfa.com",
-    phone: "02-123-4567",
-    line: "@likhitfa",
-    facebook: "facebook.com/likhitfa",
-    address: "ชั้น 12 อาคารฟ้าลิขิต ถ.สุขุมวิท กรุงเทพฯ 10110",
-  });
+  const [content, setContent] = useState<SiteContent>(siteContentSeed);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedAbout = window.localStorage.getItem("likhitfa-admin-about");
-    const savedContact = window.localStorage.getItem("likhitfa-admin-contact");
-    if (savedAbout) setAbout(JSON.parse(savedAbout));
-    if (savedContact) setContact(JSON.parse(savedContact));
+    let mounted = true;
+
+    async function loadContent() {
+      const response = await fetch("/api/site-content");
+      const data = await response.json().catch(() => ({}));
+      if (mounted && data.ok) {
+        setContent(data.content || siteContentSeed);
+        setNotice(
+          data.error
+            ? `เชื่อมต่อ Supabase สำหรับข้อมูลเว็บไซต์ไม่ได้: ${data.error}`
+            : data.source === "supabase"
+              ? "เชื่อมต่อข้อมูลเว็บไซต์จาก Supabase แล้ว"
+              : "",
+        );
+      }
+      if (mounted) setLoading(false);
+    }
+
+    void loadContent();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
+
+  const saveContent = async (next: SiteContent, message: string) => {
+    const response = await fetch("/api/site-content", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(next),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) {
+      setNotice(data.error || "บันทึกข้อมูลเว็บไซต์ไม่สำเร็จ");
+      return;
+    }
+    setContent(data.content || next);
+    setNotice(message);
+  };
 
   const saveAbout = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const next = {
-      title: String(form.get("title") || ""),
-      description: String(form.get("description") || ""),
-      vision: String(form.get("vision") || ""),
-      mission: String(form.get("mission") || ""),
-    };
-    setAbout(next);
-    window.localStorage.setItem("likhitfa-admin-about", JSON.stringify(next));
-    setNotice("บันทึกหน้าเกี่ยวกับเราแล้ว");
+    void saveContent(
+      {
+        ...content,
+        about: {
+          title: String(form.get("title") || ""),
+          description: String(form.get("description") || ""),
+          story: String(form.get("story") || "")
+            .split(/\n\s*\n/)
+            .map((part) => part.trim())
+            .filter(Boolean),
+          vision: String(form.get("vision") || ""),
+          mission: String(form.get("mission") || ""),
+        },
+      },
+      "บันทึกหน้าเกี่ยวกับเราแล้ว และซิงก์ไปหน้า public แล้ว",
+    );
   };
 
   const saveContact = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const next = {
-      email: String(form.get("email") || ""),
-      phone: String(form.get("phone") || ""),
-      line: String(form.get("line") || ""),
-      facebook: String(form.get("facebook") || ""),
-      address: String(form.get("address") || ""),
-    };
-    setContact(next);
-    window.localStorage.setItem("likhitfa-admin-contact", JSON.stringify(next));
-    setNotice("บันทึกช่องทางติดต่อแล้ว");
+    void saveContent(
+      {
+        ...content,
+        contact: {
+          email: String(form.get("email") || ""),
+          phone: String(form.get("phone") || ""),
+          line: String(form.get("line") || ""),
+          facebook: String(form.get("facebook") || ""),
+          address: String(form.get("address") || ""),
+          hoursWeekday: String(form.get("hoursWeekday") || ""),
+          hoursSaturday: String(form.get("hoursSaturday") || ""),
+        },
+      },
+      "บันทึกช่องทางติดต่อแล้ว และซิงก์ไปหน้า public แล้ว",
+    );
   };
+
+  const { about, contact } = content;
 
   return (
     <div className="space-y-6">
@@ -80,6 +118,12 @@ function AdminContact() {
         </div>
       ) : null}
 
+      {loading ? (
+        <div className="rounded-2xl border border-gold/10 bg-gold/5 px-4 py-3 text-sm text-muted-foreground">
+          กำลังโหลดข้อมูลเว็บไซต์จากระบบกลาง...
+        </div>
+      ) : null}
+
       <section className="glass-strong rounded-3xl p-6">
         <h2 className="font-display text-xl text-foreground">หน้าเกี่ยวกับเรา</h2>
         <form className="mt-5 space-y-4" onSubmit={saveAbout}>
@@ -91,6 +135,13 @@ function AdminContact() {
               name="description"
               className="input-styled !h-24 py-3"
               defaultValue={about.description}
+            />
+          </Field>
+          <Field label="เรื่องราวของเรา (เว้นบรรทัดว่างเพื่อแยกย่อหน้า)">
+            <textarea
+              name="story"
+              className="input-styled !h-32 py-3"
+              defaultValue={about.story.join("\n\n")}
             />
           </Field>
           <Field label="วิสัยทัศน์">
@@ -127,6 +178,20 @@ function AdminContact() {
           </Field>
           <Field label="Facebook">
             <input name="facebook" className="input-styled" defaultValue={contact.facebook} />
+          </Field>
+          <Field label="เวลาทำการวันธรรมดา">
+            <input
+              name="hoursWeekday"
+              className="input-styled"
+              defaultValue={contact.hoursWeekday}
+            />
+          </Field>
+          <Field label="เวลาทำการวันเสาร์">
+            <input
+              name="hoursSaturday"
+              className="input-styled"
+              defaultValue={contact.hoursSaturday}
+            />
           </Field>
           <div className="md:col-span-2">
             <Field label="ที่อยู่">
