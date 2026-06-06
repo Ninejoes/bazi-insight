@@ -1,15 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { seo } from "@/lib/seo";
 import { useState } from "react";
 
 export const Route = createFileRoute("/register")({
-  head: () => ({
-    meta: [
-      { title: "สมัครสมาชิก — Likhitfa" },
-      { name: "description", content: "สมัครสมาชิก Likhitfa เพื่อบันทึกประวัติการดูดวง" },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "สมัครสมาชิก",
+      description:
+        "สมัครสมาชิก Likhitfa เพื่อบันทึกประวัติการดูดวง ตั้งค่าโปรไฟล์ และใช้งานฟีเจอร์ส่วนตัว",
+      path: "/register",
+      noindex: true,
+    }),
   component: RegisterPage,
 });
 

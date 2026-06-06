@@ -1,14 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { seo } from "@/lib/seo";
 
 export const Route = createFileRoute("/contact")({
-  head: () => ({
-    meta: [
-      { title: "ติดต่อเรา — Likhitfa" },
-      { name: "description", content: "ช่องทางติดต่อทีม Likhitfa" },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "ติดต่อเรา",
+      description:
+        "ติดต่อทีม Likhitfa สำหรับคำถาม ข้อเสนอแนะ การใช้งานระบบดูดวง หรือเรื่องข้อมูลส่วนบุคคล",
+      path: "/contact",
+      keywords: ["ติดต่อ Likhitfa", "ติดต่อดูดวง", "ลิขิตฟ้า"],
+    }),
   component: ContactPage,
 });
 

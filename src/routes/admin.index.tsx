@@ -1,7 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 
 export const Route = createFileRoute("/admin/")({
-  head: () => ({ meta: [{ title: "Admin Dashboard — Likhitfa" }] }),
+  head: () =>
+    seo({
+      title: "Admin Dashboard",
+      description: "แดชบอร์ดระบบหลังบ้าน Likhitfa",
+      path: "/admin",
+      noindex: true,
+    }),
   component: AdminDashboard,
 });
 

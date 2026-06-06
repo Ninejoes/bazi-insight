@@ -1,8 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/admin/help")({
-  head: () => ({ meta: [{ title: "ปรับแต่งศูนย์ช่วยเหลือ — Admin" }] }),
+  head: () =>
+    seo({
+      title: "ปรับแต่งศูนย์ช่วยเหลือ — Admin",
+      description: "จัดการคำถามที่พบบ่อยและเนื้อหาศูนย์ช่วยเหลือ",
+      path: "/admin/help",
+      noindex: true,
+    }),
   component: AdminHelp,
 });
 

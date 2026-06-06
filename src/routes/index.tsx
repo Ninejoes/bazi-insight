@@ -1,17 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { seo } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Likhitfa ลิขิตฟ้า — ศาสตร์ดูดวงระดับพรีเมียม" },
-      {
-        name: "description",
-        content: "ปาจื้อ ไพ่ยิปซี ทำนายฝัน — อ่านดวงแบบมืออาชีพ เข้าใจง่าย ใช้งานสะดวก",
-      },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "Likhitfa ลิขิตฟ้า — ศาสตร์ดูดวงระดับพรีเมียม",
+      description: "ดูดวงปาจื้อ ไพ่ยิปซี และทำนายฝันในเว็บเดียว พร้อมผลอ่านที่เข้าใจง่าย",
+      path: "/",
+      keywords: ["ดูดวงออนไลน์", "ปาจื้อ", "ไพ่ยิปซี", "ทำนายฝัน", "Likhitfa"],
+    }),
   component: Index,
 });
 

@@ -1,14 +1,16 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
+import { seo } from "@/lib/seo";
 import { useState } from "react";
 
 export const Route = createFileRoute("/admin-login")({
-  head: () => ({
-    meta: [
-      { title: "เข้าสู่ระบบแอดมิน — Likhitfa" },
-      { name: "description", content: "เข้าสู่ระบบสำหรับผู้ดูแล Likhitfa" },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "เข้าสู่ระบบแอดมิน",
+      description: "เข้าสู่ระบบสำหรับผู้ดูแล Likhitfa",
+      path: "/admin-login",
+      noindex: true,
+    }),
   component: AdminLoginPage,
 });
 

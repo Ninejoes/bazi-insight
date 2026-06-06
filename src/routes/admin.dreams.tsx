@@ -1,8 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/admin/dreams")({
-  head: () => ({ meta: [{ title: "จัดการทำนายฝัน — Admin" }] }),
+  head: () =>
+    seo({
+      title: "จัดการทำนายฝัน — Admin",
+      description: "เพิ่ม แก้ไข และลบคำฝัน เลขนำโชค และคำทำนายในระบบหลังบ้าน",
+      path: "/admin/dreams",
+      noindex: true,
+    }),
   component: AdminDreams,
 });
 

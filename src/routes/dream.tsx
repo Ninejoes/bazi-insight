@@ -1,15 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { seo } from "@/lib/seo";
 import { useState } from "react";
 
 export const Route = createFileRoute("/dream")({
-  head: () => ({
-    meta: [
-      { title: "ทำนายฝัน 解梦 — Likhitfa" },
-      { name: "description", content: "ค้นหาคำฝัน อ่านความหมาย เลขนำโชค และวิธีแก้เคล็ดฝันร้าย" },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "ทำนายฝัน 解梦",
+      description: "ค้นหาความหมายของความฝัน เลขนำโชค ช่วงเวลาฝันบอกเหตุ และวิธีแก้เคล็ดฝันร้าย",
+      path: "/dream",
+      keywords: ["ทำนายฝัน", "ฝันเห็น", "เลขเด็ด", "解梦", "ความหมายความฝัน"],
+    }),
   component: DreamPage,
 });
 

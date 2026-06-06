@@ -1,9 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { useEffect, useState } from "react";
 import { articles as seed, type Article } from "@/lib/articles";
 
 export const Route = createFileRoute("/admin/articles")({
-  head: () => ({ meta: [{ title: "จัดการบทความ — Admin" }] }),
+  head: () =>
+    seo({
+      title: "จัดการบทความ — Admin",
+      description: "เพิ่ม แก้ไข ลบ และจัดการบทความในระบบหลังบ้าน",
+      path: "/admin/articles",
+      noindex: true,
+    }),
   component: AdminArticles,
 });
 

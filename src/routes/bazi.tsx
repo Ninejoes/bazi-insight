@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { seo } from "@/lib/seo";
 import { useState } from "react";
 import {
   analyzeBazi,
@@ -12,12 +13,14 @@ import {
 } from "@/lib/bazi-engine";
 
 export const Route = createFileRoute("/bazi")({
-  head: () => ({
-    meta: [
-      { title: "ปาจื้อ 八字 — Likhitfa" },
-      { name: "description", content: "อ่านดวงปาจื้อจาก 4 เสา ธาตุ และวัยจร" },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "ดูดวงปาจื้อ 八字",
+      description:
+        "กรอกวันเกิด เวลาเกิด และเพศ เพื่อวิเคราะห์ดวงปาจื้อ 4 เสา ธาตุ วัยจร และคำแนะนำเฉพาะบุคคล",
+      path: "/bazi",
+      keywords: ["ปาจื้อ", "ดูดวงจีน", "八字", "4 เสา", "ธาตุ", "วัยจร"],
+    }),
   component: BaziPage,
 });
 

@@ -1,14 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { seo } from "@/lib/seo";
 
 export const Route = createFileRoute("/about")({
-  head: () => ({
-    meta: [
-      { title: "เกี่ยวกับเรา — Likhitfa" },
-      { name: "description", content: "ทำความรู้จัก Likhitfa ผู้ให้บริการดูดวงระดับพรีเมียม" },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "เกี่ยวกับเรา",
+      description:
+        "ทำความรู้จัก Likhitfa แพลตฟอร์มดูดวงปาจื้อ ไพ่ยิปซี และทำนายฝันที่ออกแบบให้อ่านง่ายและน่าเชื่อถือ",
+      path: "/about",
+      keywords: ["เกี่ยวกับ Likhitfa", "ลิขิตฟ้า", "ดูดวงพรีเมียม"],
+    }),
   component: AboutPage,
 });
 

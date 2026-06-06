@@ -2,17 +2,20 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { articles, getArticle, type Article } from "@/lib/articles";
+import { seo } from "@/lib/seo";
 
 export const Route = createFileRoute("/articles/$slug")({
   head: ({ params }) => {
     const a = getArticle(params.slug);
-    return {
-      meta: [
-        { title: `${a?.title ?? "บทความ"} — Likhitfa` },
-        { name: "description", content: a?.excerpt ?? "" },
-        { property: "og:image", content: a?.cover ?? "" },
-      ],
-    };
+    return seo({
+      title: a?.title ?? "บทความ",
+      description: a?.excerpt ?? "บทความดูดวงจาก Likhitfa",
+      path: `/articles/${params.slug}`,
+      image: a?.cover,
+      type: "article",
+      keywords: ["บทความดูดวง", a?.category ?? "ดูดวง", a?.title ?? "Likhitfa"],
+      publishedTime: a?.date,
+    });
   },
   loader: ({ params }) => {
     const a = getArticle(params.slug);

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://bazi-insight.vercel.app/</loc><priority>1.0</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/bazi</loc><priority>0.9</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/tarot</loc><priority>0.9</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/tarot/daily</loc><priority>0.8</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/tarot/weekly</loc><priority>0.8</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/tarot/monthly</loc><priority>0.8</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/tarot/career</loc><priority>0.8</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/tarot/finance</loc><priority>0.8</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/tarot/love</loc><priority>0.8</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/tarot/health</loc><priority>0.7</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/tarot/family</loc><priority>0.7</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/tarot/study</loc><priority>0.7</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/tarot/luck</loc><priority>0.7</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/dream</loc><priority>0.9</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/articles</loc><priority>0.8</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/articles/bazi-101</loc><priority>0.7</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/articles/tarot-spread-beginner</loc><priority>0.7</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/articles/dream-numbers</loc><priority>0.7</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/articles/monthly-energy-guide</loc><priority>0.7</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/articles/luck-rituals</loc><priority>0.7</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/articles/love-tarot-guide</loc><priority>0.7</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/about</loc><priority>0.6</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/contact</loc><priority>0.6</priority></url>
+  <url><loc>https://bazi-insight.vercel.app/help</loc><priority>0.6</priority></url>
+</urlset>

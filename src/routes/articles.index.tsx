@@ -2,15 +2,18 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { articles } from "@/lib/articles";
+import { seo } from "@/lib/seo";
 import { useState } from "react";
 
 export const Route = createFileRoute("/articles/")({
-  head: () => ({
-    meta: [
-      { title: "บทความ — Likhitfa" },
-      { name: "description", content: "บทความและความรู้เรื่องดูดวง ไพ่ทาโรต์ ปาจื้อ และทำนายฝัน" },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "บทความดูดวง",
+      description:
+        "รวมบทความและความรู้เรื่องปาจื้อ ไพ่ทาโรต์ ทำนายฝัน พิธีกรรมเสริมโชค และแนวทางอ่านดวงอย่างมีสติ",
+      path: "/articles",
+      keywords: ["บทความดูดวง", "ความรู้ปาจื้อ", "ไพ่ทาโรต์", "ทำนายฝัน", "เสริมโชค"],
+    }),
   component: ArticlesIndex,
 });
 

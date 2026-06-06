@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { seo } from "@/lib/seo";
 import { useMemo, useState } from "react";
 import { getCategory, tarotCards, type TarotCard, type TarotCategory } from "@/lib/tarot-cards";
 import {
@@ -13,12 +14,12 @@ import {
 export const Route = createFileRoute("/tarot/$type")({
   head: ({ params }) => {
     const c = getCategory(params.type);
-    return {
-      meta: [
-        { title: `${c?.title ?? "ไพ่ยิปซี"} — Likhitfa` },
-        { name: "description", content: c?.tagline ?? "ดูดวงไพ่ยิปซี" },
-      ],
-    };
+    return seo({
+      title: `${c?.title ?? "ไพ่ยิปซี"} Tarot Reading`,
+      description: c?.tagline ?? "ดูดวงไพ่ยิปซีพร้อมคำแปลและคำแนะนำเฉพาะหมวด",
+      path: `/tarot/${params.type}`,
+      keywords: ["ไพ่ยิปซี", "Tarot", c?.title ?? "ดูดวงไพ่", c?.titleEn ?? "tarot reading"],
+    });
   },
   loader: ({ params }) => {
     const c = getCategory(params.type);

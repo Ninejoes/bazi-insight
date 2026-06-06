@@ -1,14 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { seo } from "@/lib/seo";
 
 export const Route = createFileRoute("/login")({
-  head: () => ({
-    meta: [
-      { title: "เข้าสู่ระบบ — Likhitfa" },
-      { name: "description", content: "เข้าสู่ระบบ Likhitfa" },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "เข้าสู่ระบบ",
+      description: "เข้าสู่ระบบ Likhitfa เพื่อบันทึกประวัติการดูดวงและจัดการข้อมูลส่วนตัว",
+      path: "/login",
+      noindex: true,
+    }),
   component: LoginPage,
 });
 

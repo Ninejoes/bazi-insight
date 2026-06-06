@@ -2,18 +2,17 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { tarotCategories } from "@/lib/tarot-cards";
+import { seo } from "@/lib/seo";
 
 export const Route = createFileRoute("/tarot/")({
-  head: () => ({
-    meta: [
-      { title: "ไพ่ยิปซี Tarot — เลือกหมวด — Likhitfa" },
-      {
-        name: "description",
-        content:
-          "เลือกหมวดดูดวงไพ่ยิปซี รายวัน การงาน การเงิน ความรัก สุขภาพ ครอบครัว การเรียน โชคลาภ และรายเดือน",
-      },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "ดูดวงไพ่ยิปซี Tarot",
+      description:
+        "เลือกหมวดดูดวงไพ่ยิปซี รายวัน รายสัปดาห์ รายเดือน ความรัก การงาน การเงิน สุขภาพ และโชคลาภ",
+      path: "/tarot",
+      keywords: ["ไพ่ยิปซี", "ไพ่ทาโรต์", "Tarot", "ดูดวงรายวัน", "ดูดวงความรัก"],
+    }),
   component: TarotHub,
 });
 

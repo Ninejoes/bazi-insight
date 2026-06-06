@@ -1,8 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/admin/contact")({
-  head: () => ({ meta: [{ title: "ปรับแต่งข้อมูลติดต่อ — Admin" }] }),
+  head: () =>
+    seo({
+      title: "ปรับแต่งข้อมูลติดต่อ — Admin",
+      description: "จัดการข้อมูลติดต่อและหน้าเกี่ยวกับเราในระบบหลังบ้าน",
+      path: "/admin/contact",
+      noindex: true,
+    }),
   component: AdminContact,
 });
 

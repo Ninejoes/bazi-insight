@@ -1,15 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { seo } from "@/lib/seo";
 import { useState } from "react";
 
 export const Route = createFileRoute("/help")({
-  head: () => ({
-    meta: [
-      { title: "ศูนย์ช่วยเหลือ — Likhitfa" },
-      { name: "description", content: "คำถามที่พบบ่อยและคู่มือการใช้งาน" },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "ศูนย์ช่วยเหลือ",
+      description:
+        "คำถามที่พบบ่อย คู่มือการใช้งานปาจื้อ ไพ่ยิปซี ทำนายฝัน บัญชีผู้ใช้ และความเป็นส่วนตัว",
+      path: "/help",
+      keywords: ["ศูนย์ช่วยเหลือ", "วิธีดูดวง", "คำถามที่พบบ่อย", "Likhitfa"],
+    }),
   component: HelpPage,
 });
 

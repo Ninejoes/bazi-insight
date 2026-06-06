@@ -1,8 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/admin/users")({
-  head: () => ({ meta: [{ title: "จัดการผู้ใช้งาน — Admin" }] }),
+  head: () =>
+    seo({
+      title: "จัดการผู้ใช้งาน — Admin",
+      description: "จัดการผู้ใช้งานจริงจาก Supabase Auth",
+      path: "/admin/users",
+      noindex: true,
+    }),
   component: AdminUsers,
 });
 

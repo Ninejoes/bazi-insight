@@ -1,8 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { useState } from "react";
 
 export const Route = createFileRoute("/profile/settings")({
-  head: () => ({ meta: [{ title: "ตั้งค่าโปรไฟล์ — Likhitfa" }] }),
+  head: () =>
+    seo({
+      title: "ตั้งค่าโปรไฟล์",
+      description: "ตั้งค่าโปรไฟล์ ความเป็นส่วนตัว และข้อมูลบัญชีผู้ใช้งาน Likhitfa",
+      path: "/profile/settings",
+      noindex: true,
+    }),
   component: SettingsPage,
 });
 
