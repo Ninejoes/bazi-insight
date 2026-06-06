@@ -46,22 +46,6 @@ function LoginPage() {
           <button className="w-full rounded-xl bg-gradient-gold py-3 text-sm font-semibold text-primary-foreground shadow-gold hover:scale-[1.01] transition">
             เข้าสู่ระบบ
           </button>
-
-          <div className="relative my-2">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gold/15" />
-            </div>
-            <div className="relative flex justify-center">
-              <span className="bg-card px-3 text-[11px] text-muted-foreground">หรือ</span>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            className="w-full rounded-xl border border-gold/20 bg-background/40 py-3 text-sm text-foreground hover:bg-gold/10"
-          >
-            ดำเนินการต่อด้วย Google
-          </button>
         </form>
         <p className="mt-6 text-center text-sm text-muted-foreground">
           ยังไม่มีบัญชี?{" "}
