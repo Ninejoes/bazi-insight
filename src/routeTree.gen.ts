@@ -31,6 +31,7 @@ import { Route as ProfileSettingsRouteImport } from './routes/profile.settings'
 import { Route as ProfileHistoryRouteImport } from './routes/profile.history'
 import { Route as ArticlesSlugRouteImport } from './routes/articles.$slug'
 import { Route as ApiLeadsRouteImport } from './routes/api.leads'
+import { Route as ApiAdminUsersRouteImport } from './routes/api.admin-users'
 import { Route as ApiAdminLoginRouteImport } from './routes/api.admin-login'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminHelpRouteImport } from './routes/admin.help'
@@ -148,6 +149,11 @@ const ApiLeadsRoute = ApiLeadsRouteImport.update({
   path: '/api/leads',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminUsersRoute = ApiAdminUsersRouteImport.update({
+  id: '/api/admin-users',
+  path: '/api/admin-users',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminLoginRoute = ApiAdminLoginRouteImport.update({
   id: '/api/admin-login',
   path: '/api/admin-login',
@@ -199,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/admin/help': typeof AdminHelpRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/admin-login': typeof ApiAdminLoginRoute
+  '/api/admin-users': typeof ApiAdminUsersRoute
   '/api/leads': typeof ApiLeadsRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/profile/history': typeof ProfileHistoryRoute
@@ -225,6 +232,7 @@ export interface FileRoutesByTo {
   '/admin/help': typeof AdminHelpRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/admin-login': typeof ApiAdminLoginRoute
+  '/api/admin-users': typeof ApiAdminUsersRoute
   '/api/leads': typeof ApiLeadsRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/profile/history': typeof ProfileHistoryRoute
@@ -256,6 +264,7 @@ export interface FileRoutesById {
   '/admin/help': typeof AdminHelpRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/admin-login': typeof ApiAdminLoginRoute
+  '/api/admin-users': typeof ApiAdminUsersRoute
   '/api/leads': typeof ApiLeadsRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/profile/history': typeof ProfileHistoryRoute
@@ -288,6 +297,7 @@ export interface FileRouteTypes {
     | '/admin/help'
     | '/admin/users'
     | '/api/admin-login'
+    | '/api/admin-users'
     | '/api/leads'
     | '/articles/$slug'
     | '/profile/history'
@@ -314,6 +324,7 @@ export interface FileRouteTypes {
     | '/admin/help'
     | '/admin/users'
     | '/api/admin-login'
+    | '/api/admin-users'
     | '/api/leads'
     | '/articles/$slug'
     | '/profile/history'
@@ -344,6 +355,7 @@ export interface FileRouteTypes {
     | '/admin/help'
     | '/admin/users'
     | '/api/admin-login'
+    | '/api/admin-users'
     | '/api/leads'
     | '/articles/$slug'
     | '/profile/history'
@@ -370,6 +382,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   TarotRoute: typeof TarotRouteWithChildren
   ApiAdminLoginRoute: typeof ApiAdminLoginRoute
+  ApiAdminUsersRoute: typeof ApiAdminUsersRoute
   ApiLeadsRoute: typeof ApiLeadsRoute
 }
 
@@ -529,6 +542,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiLeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin-users': {
+      id: '/api/admin-users'
+      path: '/api/admin-users'
+      fullPath: '/api/admin-users'
+      preLoaderRoute: typeof ApiAdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin-login': {
       id: '/api/admin-login'
       path: '/api/admin-login'
@@ -650,6 +670,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   TarotRoute: TarotRouteWithChildren,
   ApiAdminLoginRoute: ApiAdminLoginRoute,
+  ApiAdminUsersRoute: ApiAdminUsersRoute,
   ApiLeadsRoute: ApiLeadsRoute,
 }
 export const routeTree = rootRouteImport
