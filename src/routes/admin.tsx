@@ -19,6 +19,7 @@ const nav = [
   { to: "/admin/articles", label: "บทความ", icon: "✎" },
   { to: "/admin/dreams", label: "ทำนายฝัน", icon: "☾" },
   { to: "/admin/users", label: "ผู้ใช้งาน", icon: "♟" },
+  { to: "/admin/messages", label: "ข้อความ", icon: "✉" },
   { to: "/admin/contact", label: "ติดต่อ / เกี่ยวกับเรา", icon: "✉" },
   { to: "/admin/help", label: "ศูนย์ช่วยเหลือ", icon: "?" },
 ] as const;

@@ -44,6 +44,7 @@ import { Route as ApiAdminUsersRouteImport } from './routes/api.admin-users'
 import { Route as ApiAdminSessionRouteImport } from './routes/api.admin-session'
 import { Route as ApiAdminLoginRouteImport } from './routes/api.admin-login'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminMessagesRouteImport } from './routes/admin.messages'
 import { Route as AdminHelpRouteImport } from './routes/admin.help'
 import { Route as AdminDreamsRouteImport } from './routes/admin.dreams'
 import { Route as AdminContactRouteImport } from './routes/admin.contact'
@@ -224,6 +225,11 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminMessagesRoute = AdminMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminHelpRoute = AdminHelpRouteImport.update({
   id: '/help',
   path: '/help',
@@ -263,6 +269,7 @@ export interface FileRoutesByFullPath {
   '/admin/contact': typeof AdminContactRoute
   '/admin/dreams': typeof AdminDreamsRoute
   '/admin/help': typeof AdminHelpRoute
+  '/admin/messages': typeof AdminMessagesRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/admin-login': typeof ApiAdminLoginRoute
   '/api/admin-session': typeof ApiAdminSessionRoute
@@ -300,6 +307,7 @@ export interface FileRoutesByTo {
   '/admin/contact': typeof AdminContactRoute
   '/admin/dreams': typeof AdminDreamsRoute
   '/admin/help': typeof AdminHelpRoute
+  '/admin/messages': typeof AdminMessagesRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/admin-login': typeof ApiAdminLoginRoute
   '/api/admin-session': typeof ApiAdminSessionRoute
@@ -342,6 +350,7 @@ export interface FileRoutesById {
   '/admin/contact': typeof AdminContactRoute
   '/admin/dreams': typeof AdminDreamsRoute
   '/admin/help': typeof AdminHelpRoute
+  '/admin/messages': typeof AdminMessagesRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/admin-login': typeof ApiAdminLoginRoute
   '/api/admin-session': typeof ApiAdminSessionRoute
@@ -385,6 +394,7 @@ export interface FileRouteTypes {
     | '/admin/contact'
     | '/admin/dreams'
     | '/admin/help'
+    | '/admin/messages'
     | '/admin/users'
     | '/api/admin-login'
     | '/api/admin-session'
@@ -422,6 +432,7 @@ export interface FileRouteTypes {
     | '/admin/contact'
     | '/admin/dreams'
     | '/admin/help'
+    | '/admin/messages'
     | '/admin/users'
     | '/api/admin-login'
     | '/api/admin-session'
@@ -463,6 +474,7 @@ export interface FileRouteTypes {
     | '/admin/contact'
     | '/admin/dreams'
     | '/admin/help'
+    | '/admin/messages'
     | '/admin/users'
     | '/api/admin-login'
     | '/api/admin-session'
@@ -763,6 +775,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/messages': {
+      id: '/admin/messages'
+      path: '/messages'
+      fullPath: '/admin/messages'
+      preLoaderRoute: typeof AdminMessagesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/help': {
       id: '/admin/help'
       path: '/help'
@@ -799,6 +818,7 @@ interface AdminRouteChildren {
   AdminContactRoute: typeof AdminContactRoute
   AdminDreamsRoute: typeof AdminDreamsRoute
   AdminHelpRoute: typeof AdminHelpRoute
+  AdminMessagesRoute: typeof AdminMessagesRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -808,6 +828,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminContactRoute: AdminContactRoute,
   AdminDreamsRoute: AdminDreamsRoute,
   AdminHelpRoute: AdminHelpRoute,
+  AdminMessagesRoute: AdminMessagesRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
