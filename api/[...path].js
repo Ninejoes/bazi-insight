@@ -20,10 +20,53 @@ import {
   roleOf,
   send,
   signIn,
-  supabaseRequest,
   toSession,
   verifyUser,
 } from "./_supabase.js";
+
+async function rest(path, init = {}) {
+  try {
+    const { url, serviceKey } = requireConfig();
+    const response = await fetch(`${url}/rest/v1/${path}`, {
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
+        ...(init.headers || {}),
+      },
+    });
+    const text = await response.text().catch(() => "");
+    let data = null;
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch {
+      data = text;
+    }
+    if (!response.ok) {
+      return {
+        ok: false,
+        status: response.status,
+        error: `Supabase failed ${response.status}: ${text}`,
+        data,
+        headers: response.headers,
+      };
+    }
+    return { ok: true, status: response.status, data, headers: response.headers };
+  } catch (error) {
+    return {
+      ok: false,
+      status: 502,
+      error: error instanceof Error ? error.message : "Supabase request failed",
+      data: null,
+      headers: new Headers(),
+    };
+  }
+}
+
+function sendRestError(res, result) {
+  return send(res, 502, { ok: false, error: result.error || "Supabase request failed" });
+}
 
 function pathName(req) {
   const url = new URL(req.url || "/", "https://likhitfa.local");
@@ -197,19 +240,21 @@ async function userSession(req, res) {
 async function articles(req, res) {
   if (req.method === "GET") {
     const slug = new URL(req.url, "https://likhitfa.local").searchParams.get("slug");
-    const response = await supabaseRequest("articles?select=*&order=date.desc");
-    const rows = await response.json().catch(() => []);
+    const result = await rest("articles?select=*&order=date.desc");
+    if (!result.ok) return sendRestError(res, result);
+    const rows = Array.isArray(result.data) ? result.data : [];
     const articles = rows.map(normalizeArticle).filter((article) => !slug || article.slug === slug);
     return send(res, 200, { ok: true, source: "supabase", articles });
   }
   if (req.method === "POST") {
     const article = normalizeArticle(await readBody(req));
-    const response = await supabaseRequest("articles?on_conflict=slug", {
+    const result = await rest("articles?on_conflict=slug", {
       method: "POST",
       headers: { Prefer: "resolution=merge-duplicates,return=representation" },
       body: JSON.stringify(articleToRow(article)),
     });
-    const rows = await response.json().catch(() => []);
+    if (!result.ok) return sendRestError(res, result);
+    const rows = Array.isArray(result.data) ? result.data : [];
     return send(res, 200, {
       ok: true,
       source: "supabase",
@@ -219,7 +264,8 @@ async function articles(req, res) {
   if (req.method === "DELETE") {
     const slug = new URL(req.url, "https://likhitfa.local").searchParams.get("slug");
     if (!slug) return send(res, 400, { ok: false, error: "Missing slug" });
-    await supabaseRequest(`articles?slug=eq.${encodeURIComponent(slug)}`, { method: "DELETE" });
+    const result = await rest(`articles?slug=eq.${encodeURIComponent(slug)}`, { method: "DELETE" });
+    if (!result.ok) return sendRestError(res, result);
     return send(res, 200, { ok: true, source: "supabase" });
   }
   return send(res, 405, { ok: false, error: "Method not allowed" });
@@ -228,8 +274,9 @@ async function articles(req, res) {
 async function dreams(req, res) {
   if (req.method === "GET") {
     const q = new URL(req.url, "https://likhitfa.local").searchParams.get("q")?.toLowerCase() || "";
-    const response = await supabaseRequest("dreams?select=*&order=keyword.asc");
-    const rows = await response.json().catch(() => []);
+    const result = await rest("dreams?select=*&order=keyword.asc");
+    if (!result.ok) return sendRestError(res, result);
+    const rows = Array.isArray(result.data) ? result.data : [];
     const dreams = rows
       .map(normalizeDream)
       .filter((dream) => !q || dream.keyword.toLowerCase().includes(q));
@@ -237,12 +284,13 @@ async function dreams(req, res) {
   }
   if (req.method === "POST") {
     const dream = normalizeDream(await readBody(req));
-    const response = await supabaseRequest("dreams?on_conflict=id", {
+    const result = await rest("dreams?on_conflict=id", {
       method: "POST",
       headers: { Prefer: "resolution=merge-duplicates,return=representation" },
       body: JSON.stringify(dreamToRow(dream)),
     });
-    const rows = await response.json().catch(() => []);
+    if (!result.ok) return sendRestError(res, result);
+    const rows = Array.isArray(result.data) ? result.data : [];
     return send(res, 200, {
       ok: true,
       source: "supabase",
@@ -252,7 +300,8 @@ async function dreams(req, res) {
   if (req.method === "DELETE") {
     const id = new URL(req.url, "https://likhitfa.local").searchParams.get("id");
     if (!id) return send(res, 400, { ok: false, error: "Missing id" });
-    await supabaseRequest(`dreams?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+    const result = await rest(`dreams?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+    if (!result.ok) return sendRestError(res, result);
     return send(res, 200, { ok: true, source: "supabase" });
   }
   return send(res, 405, { ok: false, error: "Method not allowed" });
@@ -260,25 +309,28 @@ async function dreams(req, res) {
 
 async function faqs(req, res) {
   if (req.method === "GET") {
-    const response = await supabaseRequest("faqs?select=*&order=sort_order.asc");
-    const rows = await response.json().catch(() => []);
+    const result = await rest("faqs?select=*&order=sort_order.asc");
+    if (!result.ok) return sendRestError(res, result);
+    const rows = Array.isArray(result.data) ? result.data : [];
     return send(res, 200, { ok: true, source: "supabase", faqs: rows.map(normalizeFaq) });
   }
   if (req.method === "POST") {
     const body = await readBody(req);
     const rows = (Array.isArray(body) ? body : body.faqs || []).map(faqToRow);
-    const response = await supabaseRequest("faqs?on_conflict=id", {
+    const result = await rest("faqs?on_conflict=id", {
       method: "POST",
       headers: { Prefer: "resolution=merge-duplicates,return=representation" },
       body: JSON.stringify(rows),
     });
-    const saved = await response.json().catch(() => []);
+    if (!result.ok) return sendRestError(res, result);
+    const saved = Array.isArray(result.data) ? result.data : [];
     return send(res, 200, { ok: true, source: "supabase", faqs: saved.map(normalizeFaq) });
   }
   if (req.method === "DELETE") {
     const id = new URL(req.url, "https://likhitfa.local").searchParams.get("id");
     if (!id) return send(res, 400, { ok: false, error: "Missing id" });
-    await supabaseRequest(`faqs?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+    const result = await rest(`faqs?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+    if (!result.ok) return sendRestError(res, result);
     return send(res, 200, { ok: true, source: "supabase" });
   }
   return send(res, 405, { ok: false, error: "Method not allowed" });
@@ -293,19 +345,21 @@ function normalizeContent(row = {}) {
 
 async function siteContent(req, res) {
   if (req.method === "GET") {
-    const response = await supabaseRequest("site_content?id=eq.main&select=*&limit=1");
-    const rows = await response.json().catch(() => []);
+    const result = await rest("site_content?id=eq.main&select=*&limit=1");
+    if (!result.ok) return sendRestError(res, result);
+    const rows = Array.isArray(result.data) ? result.data : [];
     if (!rows[0]) throw new Error("ไม่พบข้อมูล site_content id=main ใน Supabase");
     return send(res, 200, { ok: true, source: "supabase", content: normalizeContent(rows[0]) });
   }
   if (req.method === "POST") {
     const content = normalizeContent(await readBody(req));
-    const response = await supabaseRequest("site_content?on_conflict=id", {
+    const result = await rest("site_content?on_conflict=id", {
       method: "POST",
       headers: { Prefer: "resolution=merge-duplicates,return=representation" },
       body: JSON.stringify({ id: "main", ...content, updated_at: new Date().toISOString() }),
     });
-    const rows = await response.json().catch(() => []);
+    if (!result.ok) return sendRestError(res, result);
+    const rows = Array.isArray(result.data) ? result.data : [];
     return send(res, 200, {
       ok: true,
       source: "supabase",
@@ -343,10 +397,9 @@ function normalizeMessage(row = {}) {
 async function contactMessages(req, res) {
   if (req.method === "GET") {
     await requireAdmin(req);
-    const response = await supabaseRequest(
-      "contact_messages?select=*&order=created_at.desc&limit=200",
-    );
-    const rows = await response.json().catch(() => []);
+    const result = await rest("contact_messages?select=*&order=created_at.desc&limit=200");
+    if (!result.ok) return sendRestError(res, result);
+    const rows = Array.isArray(result.data) ? result.data : [];
     return send(res, 200, { ok: true, source: "supabase", messages: rows.map(normalizeMessage) });
   }
   if (req.method === "POST") {
@@ -354,12 +407,13 @@ async function contactMessages(req, res) {
     if (!message.name || !message.email.includes("@") || !message.subject || !message.message) {
       return send(res, 400, { ok: false, error: "กรุณากรอกข้อมูลติดต่อให้ครบ" });
     }
-    const response = await supabaseRequest("contact_messages", {
+    const result = await rest("contact_messages", {
       method: "POST",
       headers: { Prefer: "return=representation" },
       body: JSON.stringify(message),
     });
-    const rows = await response.json().catch(() => []);
+    if (!result.ok) return sendRestError(res, result);
+    const rows = Array.isArray(result.data) ? result.data : [];
     return send(res, 200, {
       ok: true,
       source: "supabase",
@@ -374,12 +428,13 @@ async function contactMessages(req, res) {
     if (!id || !["new", "read", "replied", "archived"].includes(status)) {
       return send(res, 400, { ok: false, error: "สถานะข้อความไม่ถูกต้อง" });
     }
-    const response = await supabaseRequest(`contact_messages?id=eq.${encodeURIComponent(id)}`, {
+    const result = await rest(`contact_messages?id=eq.${encodeURIComponent(id)}`, {
       method: "PATCH",
       headers: { Prefer: "return=representation" },
       body: JSON.stringify({ status, updated_at: new Date().toISOString() }),
     });
-    const rows = await response.json().catch(() => []);
+    if (!result.ok) return sendRestError(res, result);
+    const rows = Array.isArray(result.data) ? result.data : [];
     return send(res, 200, {
       ok: true,
       source: "supabase",
@@ -391,11 +446,12 @@ async function contactMessages(req, res) {
 
 async function dashboard(res) {
   const countTable = async (table) => {
-    const response = await supabaseRequest(`${table}?select=*`, {
+    const result = await rest(`${table}?select=*`, {
       method: "HEAD",
       headers: { Prefer: "count=exact" },
     });
-    const range = response.headers.get("content-range") || "";
+    if (!result.ok) throw new Error(result.error);
+    const range = result.headers.get("content-range") || "";
     return Number(range.split("/")[1] || 0);
   };
   const { url, serviceKey } = requireConfig();
