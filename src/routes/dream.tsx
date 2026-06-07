@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo } from "@/lib/seo";
-import { dreamSeed, type DreamRecord } from "@/lib/admin-content";
+import { type DreamRecord } from "@/lib/admin-content";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/dream")({
@@ -19,8 +19,9 @@ export const Route = createFileRoute("/dream")({
 function DreamPage() {
   const [q, setQ] = useState("");
   const [show, setShow] = useState(false);
-  const [dreams, setDreams] = useState<DreamRecord[]>(dreamSeed);
+  const [dreams, setDreams] = useState<DreamRecord[]>([]);
   const [results, setResults] = useState<DreamRecord[]>([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -28,7 +29,12 @@ function DreamPage() {
     async function loadDreams() {
       const response = await fetch("/api/dreams");
       const data = await response.json().catch(() => ({}));
-      if (mounted && data.ok) setDreams(data.dreams || dreamSeed);
+      if (!mounted) return;
+      if (!response.ok || !data.ok) {
+        setError(data.error || "โหลดข้อมูลทำนายฝันจาก Supabase ไม่สำเร็จ");
+        return;
+      }
+      setDreams(data.dreams || []);
     }
 
     void loadDreams();
@@ -44,7 +50,7 @@ function DreamPage() {
     const matched = keyword
       ? dreams.filter((dream) => dream.keyword.toLowerCase().includes(keyword))
       : dreams.slice(0, 2);
-    setResults(matched.length ? matched : dreams.slice(0, 2));
+    setResults(matched);
     setShow(true);
   };
 
@@ -65,7 +71,8 @@ function DreamPage() {
               ฝันบอกอะไร <span className="text-gradient-gold italic">ลิขิตฟ้ามีคำตอบ</span>
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-              ค้นหาคำฝัน อ่านความหมาย เลขนำโชค ช่วงเวลาฝันบอกเหตุ และวิธีแก้เคล็ดฝันร้าย
+              {error ||
+                "ค้นหาคำฝัน อ่านความหมาย เลขนำโชค ช่วงเวลาฝันบอกเหตุ และวิธีแก้เคล็ดฝันร้าย"}
             </p>
 
             <form
@@ -90,6 +97,11 @@ function DreamPage() {
               <div className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">
                 คำฝันยอดนิยม
               </div>
+              {error ? (
+                <div className="rounded-2xl border border-rose-400/20 bg-rose-400/10 px-4 py-3 text-sm text-rose-200">
+                  {error}
+                </div>
+              ) : null}
               <div className="flex flex-wrap gap-2">
                 {popular.map((p) => (
                   <button
@@ -110,6 +122,11 @@ function DreamPage() {
 
         {show && (
           <section className="mt-6 space-y-4">
+            {results.length === 0 ? (
+              <div className="glass-strong rounded-3xl p-6 text-sm text-muted-foreground">
+                ไม่พบข้อมูลคำฝันจาก Supabase
+              </div>
+            ) : null}
             {results.map((r, i) => (
               <article
                 key={i}

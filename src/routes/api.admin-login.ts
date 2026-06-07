@@ -134,10 +134,7 @@ async function ensureSupabaseAdmin(
 async function signInWithSupabase(email: string, password: string) {
   const config = getSupabaseConfig();
   if (!config) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
-    }
-    return null;
+    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
 
   const userId = await ensureSupabaseAdmin(config.url, config.serviceKey, email, password);
@@ -188,13 +185,7 @@ export const Route = createFileRoute("/api/admin-login")({
           const supabaseSession = await signInWithSupabase(email, password);
           return json({
             ok: true,
-            session: supabaseSession || {
-              id: "local-admin",
-              email: ADMIN_EMAIL,
-              name: ADMIN_NAME,
-              role: ADMIN_ROLE,
-              mode: "local-dev",
-            },
+            session: supabaseSession,
           });
         } catch (error) {
           return json(

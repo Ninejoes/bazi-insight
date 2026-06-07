@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
-import { dreamSeed, type DreamRecord } from "@/lib/admin-content";
+import { type DreamRecord } from "@/lib/admin-content";
 import { getSupabaseConfig, json, supabaseRequest } from "@/lib/supabase-rest";
 
 type DreamRow = {
@@ -13,8 +13,6 @@ type DreamRow = {
   time?: string;
   advice?: string;
 };
-
-let memoryDreams: DreamRecord[] = [...dreamSeed];
 
 function normalizeDream(row: DreamRow): DreamRecord {
   const keyword = String(row.keyword || "").trim();
@@ -45,55 +43,49 @@ function toRow(dream: DreamRecord) {
 }
 
 async function listDreams() {
-  const configured = Boolean(getSupabaseConfig());
-  try {
-    const response = await supabaseRequest("dreams?select=*&order=keyword.asc");
-    if (!response) return { source: "memory", dreams: memoryDreams };
-    const rows = (await response.json().catch(() => [])) as DreamRow[];
-    return { source: "supabase", dreams: rows.map(normalizeDream) };
-  } catch (error) {
-    return {
-      source: "memory",
-      dreams: memoryDreams,
-      error: configured && error instanceof Error ? error.message : undefined,
-    };
+  if (!getSupabaseConfig()) {
+    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
+
+  const response = await supabaseRequest("dreams?select=*&order=keyword.asc");
+  if (!response) {
+    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
+  }
+  const rows = (await response.json().catch(() => [])) as DreamRow[];
+  return { source: "supabase", dreams: rows.map(normalizeDream) };
 }
 
 async function saveDream(payload: DreamRow) {
-  const configured = Boolean(getSupabaseConfig());
-  const dream = normalizeDream(payload);
-  memoryDreams = [dream, ...memoryDreams.filter((item) => item.id !== dream.id)];
-
-  try {
-    const response = await supabaseRequest("dreams?on_conflict=id", {
-      method: "POST",
-      headers: { Prefer: "resolution=merge-duplicates,return=representation" },
-      body: JSON.stringify(toRow(dream)),
-    });
-    if (!response) return { source: "memory", dream };
-    const rows = (await response.json().catch(() => [])) as DreamRow[];
-    return { source: "supabase", dream: normalizeDream(rows[0] || dream) };
-  } catch (error) {
-    if (configured) throw error;
-    return { source: "memory", dream };
+  if (!getSupabaseConfig()) {
+    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
+
+  const dream = normalizeDream(payload);
+
+  const response = await supabaseRequest("dreams?on_conflict=id", {
+    method: "POST",
+    headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+    body: JSON.stringify(toRow(dream)),
+  });
+  if (!response) {
+    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
+  }
+  const rows = (await response.json().catch(() => [])) as DreamRow[];
+  return { source: "supabase", dream: normalizeDream(rows[0] || dream) };
 }
 
 async function deleteDream(id: string) {
-  const configured = Boolean(getSupabaseConfig());
-  memoryDreams = memoryDreams.filter((item) => item.id !== id);
-
-  try {
-    const response = await supabaseRequest(`dreams?id=eq.${encodeURIComponent(id)}`, {
-      method: "DELETE",
-    });
-    if (!response) return { source: "memory" };
-    return { source: "supabase" };
-  } catch (error) {
-    if (configured) throw error;
-    return { source: "memory" };
+  if (!getSupabaseConfig()) {
+    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
+
+  const response = await supabaseRequest(`dreams?id=eq.${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
+  if (!response) {
+    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
+  }
+  return { source: "supabase" };
 }
 
 export const Route = createFileRoute("/api/dreams")({
@@ -101,13 +93,23 @@ export const Route = createFileRoute("/api/dreams")({
     handlers: {
       OPTIONS: async () => json(null, { status: 204 }),
       GET: async ({ request }) => {
-        const url = new URL(request.url);
-        const q = (url.searchParams.get("q") || "").trim().toLowerCase();
-        const result = await listDreams();
-        const dreams = q
-          ? result.dreams.filter((dream) => dream.keyword.toLowerCase().includes(q))
-          : result.dreams;
-        return json({ ok: true, ...result, dreams });
+        try {
+          const url = new URL(request.url);
+          const q = (url.searchParams.get("q") || "").trim().toLowerCase();
+          const result = await listDreams();
+          const dreams = q
+            ? result.dreams.filter((dream) => dream.keyword.toLowerCase().includes(q))
+            : result.dreams;
+          return json({ ok: true, ...result, dreams });
+        } catch (error) {
+          return json(
+            {
+              ok: false,
+              error: error instanceof Error ? error.message : "โหลดข้อมูลทำนายฝันไม่สำเร็จ",
+            },
+            { status: 502 },
+          );
+        }
       },
       POST: async ({ request }) => {
         try {

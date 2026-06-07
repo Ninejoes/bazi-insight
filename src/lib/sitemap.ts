@@ -1,4 +1,4 @@
-import { articles as seedArticles, type Article } from "./articles";
+import { type Article } from "./articles";
 import { siteUrl } from "./seo";
 import { tarotCategories } from "./tarot-cards";
 
@@ -49,7 +49,7 @@ function dedupeEntries(entries: SitemapEntry[]) {
   });
 }
 
-export function publicSitemapEntries(articles: Article[] = seedArticles) {
+export function publicSitemapEntries(articles: Article[] = []) {
   const today = new Date().toISOString().slice(0, 10);
   const tarotRoutes = tarotCategories.map((category) => ({
     loc: `/tarot/${category.slug}`,
@@ -71,7 +71,7 @@ export function publicSitemapEntries(articles: Article[] = seedArticles) {
   ]);
 }
 
-export function buildSitemapXml(articles: Article[] = seedArticles, url = siteUrl) {
+export function buildSitemapXml(articles: Article[] = [], url = siteUrl) {
   const origin = normalizeSiteUrl(url);
   const entries = publicSitemapEntries(articles);
   const body = entries

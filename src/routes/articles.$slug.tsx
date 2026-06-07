@@ -1,24 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { articles, getArticle, type Article } from "@/lib/articles";
+import { type Article } from "@/lib/articles";
 import { seo } from "@/lib/seo";
 import { Fragment, useEffect, useState } from "react";
 
 export const Route = createFileRoute("/articles/$slug")({
   head: ({ params }) => {
-    const a = getArticle(params.slug);
     return seo({
-      title: a?.seoTitle || a?.title || "บทความ",
-      description: a?.seoDescription || a?.excerpt || "บทความดูดวงจาก Likhitfa",
+      title: "บทความ",
+      description: "บทความดูดวงจาก Likhitfa",
       path: `/articles/${params.slug}`,
-      image: a?.cover,
       type: "article",
-      keywords: a?.keywords?.length
-        ? a.keywords
-        : ["บทความดูดวง", a?.category ?? "ดูดวง", a?.title ?? "Likhitfa"],
-      publishedTime: a?.date,
-      canonicalUrl: a?.canonicalUrl,
+      keywords: ["บทความดูดวง", "Likhitfa"],
     });
   },
   loader: ({ params }) => ({ slug: params.slug }),
@@ -37,8 +31,10 @@ export const Route = createFileRoute("/articles/$slug")({
 
 function ArticleDetail() {
   const { slug } = Route.useLoaderData() as { slug: string };
-  const [article, setArticle] = useState<Article | null>(getArticle(slug) || null);
+  const [article, setArticle] = useState<Article | null>(null);
+  const [related, setRelated] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -46,7 +42,13 @@ function ArticleDetail() {
     async function loadArticle() {
       const response = await fetch(`/api/articles?slug=${encodeURIComponent(slug)}`);
       const data = await response.json().catch(() => ({}));
-      if (mounted && data.ok) setArticle(data.articles?.[0] || null);
+      if (!mounted) return;
+      if (!response.ok || !data.ok) {
+        setError(data.error || "โหลดบทความจาก Supabase ไม่สำเร็จ");
+        setLoading(false);
+        return;
+      }
+      setArticle(data.articles?.[0] || null);
       if (mounted) setLoading(false);
     }
 
@@ -60,6 +62,28 @@ function ArticleDetail() {
   useEffect(() => {
     if (!article) return;
     applyClientArticleSeo(article);
+    const currentArticle = article;
+    let mounted = true;
+
+    async function loadRelated() {
+      const response = await fetch("/api/articles");
+      const data = await response.json().catch(() => ({}));
+      if (!mounted || !response.ok || !data.ok) return;
+      const all = (data.articles || []) as Article[];
+      setRelated(
+        all
+          .filter(
+            (item) =>
+              item.slug !== currentArticle.slug && item.category === currentArticle.category,
+          )
+          .slice(0, 3),
+      );
+    }
+
+    void loadRelated();
+    return () => {
+      mounted = false;
+    };
   }, [article]);
 
   if (loading && !article) {
@@ -78,7 +102,7 @@ function ArticleDetail() {
     return (
       <div className="min-h-screen flex items-center justify-center text-center">
         <div>
-          <h1 className="font-display text-4xl text-gold">ไม่พบบทความ</h1>
+          <h1 className="font-display text-4xl text-gold">{error || "ไม่พบบทความ"}</h1>
           <Link to="/articles" className="mt-3 inline-block text-sm text-gold underline">
             ดูบทความทั้งหมด
           </Link>
@@ -88,9 +112,6 @@ function ArticleDetail() {
   }
 
   const a = article;
-  const related = articles
-    .filter((x) => x.slug !== a.slug && x.category === a.category)
-    .slice(0, 3);
 
   return (
     <div className="min-h-screen">

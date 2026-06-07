@@ -31,7 +31,7 @@ async function saveToSupabase(lead: ReturnType<typeof sanitizeLead>) {
   const url = process.env.SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !serviceKey) {
-    return { configured: false };
+    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
 
   const endpoint = `${url.replace(/\/$/, "")}/rest/v1/leads?on_conflict=id`;
@@ -51,7 +51,7 @@ async function saveToSupabase(lead: ReturnType<typeof sanitizeLead>) {
     throw new Error(`Supabase error ${response.status}: ${detail}`);
   }
 
-  return { configured: true, rows: await response.json().catch(() => []) };
+  return { rows: await response.json().catch(() => []) };
 }
 
 function json(body: unknown, init?: ResponseInit) {
@@ -73,10 +73,10 @@ export const Route = createFileRoute("/api/leads")({
       POST: async ({ request }) => {
         try {
           const lead = sanitizeLead(await request.json().catch(() => ({})));
-          const result = await saveToSupabase(lead);
+          await saveToSupabase(lead);
           return json({
             ok: true,
-            stored: result.configured ? "supabase" : "browser-fallback",
+            stored: "supabase",
             lead,
           });
         } catch (error) {

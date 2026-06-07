@@ -76,15 +76,9 @@ export const Route = createFileRoute("/api/admin-session")({
         try {
           const config = getSupabaseConfig();
           if (!config) {
-            if (process.env.NODE_ENV === "production") {
-              throw new Error(
-                "ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server",
-              );
-            }
-            return json({
-              ok: true,
-              session: { email: ADMIN_EMAIL, name: "Admin", role: "Admin", mode: "local-dev" },
-            });
+            throw new Error(
+              "ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server",
+            );
           }
 
           return json({

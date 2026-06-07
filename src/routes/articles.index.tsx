@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { articles as seed, type Article } from "@/lib/articles";
+import { type Article } from "@/lib/articles";
 import { seo } from "@/lib/seo";
 import { useEffect, useState } from "react";
 
@@ -21,8 +21,9 @@ const categories = ["ทั้งหมด", "ปาจื้อ", "ไพ่ย
 
 function ArticlesIndex() {
   const [active, setActive] = useState("ทั้งหมด");
-  const [items, setItems] = useState<Article[]>(seed);
+  const [items, setItems] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -30,7 +31,13 @@ function ArticlesIndex() {
     async function loadArticles() {
       const response = await fetch("/api/articles");
       const data = await response.json().catch(() => ({}));
-      if (mounted && data.ok) setItems(data.articles || seed);
+      if (!mounted) return;
+      if (!response.ok || !data.ok) {
+        setError(data.error || "โหลดบทความจาก Supabase ไม่สำเร็จ");
+        setLoading(false);
+        return;
+      }
+      setItems(data.articles || []);
       if (mounted) setLoading(false);
     }
 
@@ -78,6 +85,16 @@ function ArticlesIndex() {
         {loading ? (
           <div className="mt-8 text-center text-sm text-muted-foreground">
             กำลังโหลดบทความล่าสุด...
+          </div>
+        ) : null}
+        {error ? (
+          <div className="mx-auto mt-8 max-w-2xl rounded-2xl border border-rose-400/20 bg-rose-400/10 px-4 py-3 text-center text-sm text-rose-200">
+            {error}
+          </div>
+        ) : null}
+        {!loading && !error && items.length === 0 ? (
+          <div className="mx-auto mt-8 max-w-2xl rounded-2xl border border-gold/10 bg-gold/5 px-4 py-3 text-center text-sm text-muted-foreground">
+            ยังไม่มีบทความจาก Supabase
           </div>
         ) : null}
 

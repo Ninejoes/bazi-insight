@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { articles as seed, type Article } from "@/lib/articles";
+import { type Article } from "@/lib/articles";
 
 type ArticleRow = {
   slug: string;
@@ -22,8 +22,6 @@ type ArticleRow = {
   canonicalUrl?: string;
   content: string[] | string;
 };
-
-let memoryArticles: Article[] = [...seed];
 
 function json(body: unknown, init?: ResponseInit) {
   return Response.json(body, {
@@ -123,58 +121,47 @@ async function supabaseRequest(path: string, init?: RequestInit) {
 }
 
 async function listArticles() {
-  const configured = Boolean(getSupabaseConfig());
-
-  try {
-    const response = await supabaseRequest("articles?select=*&order=date.desc");
-    if (!response) return { source: "memory", articles: memoryArticles };
-    const rows = (await response.json().catch(() => [])) as ArticleRow[];
-    return { source: "supabase", articles: rows.map(normalizeArticle) };
-  } catch (error) {
-    if (configured) {
-      return {
-        source: "memory",
-        articles: memoryArticles,
-        error: error instanceof Error ? error.message : "Supabase articles failed",
-      };
-    }
-    return { source: "memory", articles: memoryArticles };
+  if (!getSupabaseConfig()) {
+    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
+
+  const response = await supabaseRequest("articles?select=*&order=date.desc");
+  if (!response) {
+    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
+  }
+  const rows = (await response.json().catch(() => [])) as ArticleRow[];
+  return { source: "supabase", articles: rows.map(normalizeArticle) };
 }
 
 async function saveArticle(article: Article) {
-  const configured = Boolean(getSupabaseConfig());
-  memoryArticles = [article, ...memoryArticles.filter((item) => item.slug !== article.slug)];
-
-  try {
-    const response = await supabaseRequest("articles?on_conflict=slug", {
-      method: "POST",
-      headers: { Prefer: "resolution=merge-duplicates,return=representation" },
-      body: JSON.stringify(toSupabaseRow(article)),
-    });
-    if (!response) return { source: "memory", article };
-    const rows = (await response.json().catch(() => [])) as ArticleRow[];
-    return { source: "supabase", article: normalizeArticle(rows[0] || article) };
-  } catch (error) {
-    if (configured) throw error;
-    return { source: "memory", article };
+  if (!getSupabaseConfig()) {
+    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
+
+  const response = await supabaseRequest("articles?on_conflict=slug", {
+    method: "POST",
+    headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+    body: JSON.stringify(toSupabaseRow(article)),
+  });
+  if (!response) {
+    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
+  }
+  const rows = (await response.json().catch(() => [])) as ArticleRow[];
+  return { source: "supabase", article: normalizeArticle(rows[0] || article) };
 }
 
 async function deleteArticle(slug: string) {
-  const configured = Boolean(getSupabaseConfig());
-  memoryArticles = memoryArticles.filter((item) => item.slug !== slug);
-
-  try {
-    const response = await supabaseRequest(`articles?slug=eq.${encodeURIComponent(slug)}`, {
-      method: "DELETE",
-    });
-    if (!response) return { source: "memory" };
-    return { source: "supabase" };
-  } catch (error) {
-    if (configured) throw error;
-    return { source: "memory" };
+  if (!getSupabaseConfig()) {
+    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
+
+  const response = await supabaseRequest(`articles?slug=eq.${encodeURIComponent(slug)}`, {
+    method: "DELETE",
+  });
+  if (!response) {
+    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
+  }
+  return { source: "supabase" };
 }
 
 export const Route = createFileRoute("/api/articles")({
@@ -182,13 +169,23 @@ export const Route = createFileRoute("/api/articles")({
     handlers: {
       OPTIONS: async () => json(null, { status: 204 }),
       GET: async ({ request }) => {
-        const url = new URL(request.url);
-        const slug = url.searchParams.get("slug");
-        const result = await listArticles();
-        const articles = slug
-          ? result.articles.filter((article) => article.slug === slug)
-          : result.articles;
-        return json({ ok: true, source: result.source, articles, error: result.error });
+        try {
+          const url = new URL(request.url);
+          const slug = url.searchParams.get("slug");
+          const result = await listArticles();
+          const articles = slug
+            ? result.articles.filter((article) => article.slug === slug)
+            : result.articles;
+          return json({ ok: true, source: result.source, articles });
+        } catch (error) {
+          return json(
+            {
+              ok: false,
+              error: error instanceof Error ? error.message : "โหลดบทความไม่สำเร็จ",
+            },
+            { status: 502 },
+          );
+        }
       },
       POST: async ({ request }) => {
         try {
