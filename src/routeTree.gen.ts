@@ -30,6 +30,9 @@ import { Route as TarotTypeRouteImport } from './routes/tarot.$type'
 import { Route as ProfileSettingsRouteImport } from './routes/profile.settings'
 import { Route as ProfileHistoryRouteImport } from './routes/profile.history'
 import { Route as ArticlesSlugRouteImport } from './routes/articles.$slug'
+import { Route as ApiUserSessionRouteImport } from './routes/api.user-session'
+import { Route as ApiUserRegisterRouteImport } from './routes/api.user-register'
+import { Route as ApiUserLoginRouteImport } from './routes/api.user-login'
 import { Route as ApiSiteContentRouteImport } from './routes/api.site-content'
 import { Route as ApiLeadsRouteImport } from './routes/api.leads'
 import { Route as ApiFaqsRouteImport } from './routes/api.faqs'
@@ -151,6 +154,21 @@ const ArticlesSlugRoute = ArticlesSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => ArticlesRoute,
 } as any)
+const ApiUserSessionRoute = ApiUserSessionRouteImport.update({
+  id: '/api/user-session',
+  path: '/api/user-session',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUserRegisterRoute = ApiUserRegisterRouteImport.update({
+  id: '/api/user-register',
+  path: '/api/user-register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUserLoginRoute = ApiUserLoginRouteImport.update({
+  id: '/api/user-login',
+  path: '/api/user-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiSiteContentRoute = ApiSiteContentRouteImport.update({
   id: '/api/site-content',
   path: '/api/site-content',
@@ -256,6 +274,9 @@ export interface FileRoutesByFullPath {
   '/api/faqs': typeof ApiFaqsRoute
   '/api/leads': typeof ApiLeadsRoute
   '/api/site-content': typeof ApiSiteContentRoute
+  '/api/user-login': typeof ApiUserLoginRoute
+  '/api/user-register': typeof ApiUserRegisterRoute
+  '/api/user-session': typeof ApiUserSessionRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/profile/history': typeof ProfileHistoryRoute
   '/profile/settings': typeof ProfileSettingsRoute
@@ -290,6 +311,9 @@ export interface FileRoutesByTo {
   '/api/faqs': typeof ApiFaqsRoute
   '/api/leads': typeof ApiLeadsRoute
   '/api/site-content': typeof ApiSiteContentRoute
+  '/api/user-login': typeof ApiUserLoginRoute
+  '/api/user-register': typeof ApiUserRegisterRoute
+  '/api/user-session': typeof ApiUserSessionRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/profile/history': typeof ProfileHistoryRoute
   '/profile/settings': typeof ProfileSettingsRoute
@@ -329,6 +353,9 @@ export interface FileRoutesById {
   '/api/faqs': typeof ApiFaqsRoute
   '/api/leads': typeof ApiLeadsRoute
   '/api/site-content': typeof ApiSiteContentRoute
+  '/api/user-login': typeof ApiUserLoginRoute
+  '/api/user-register': typeof ApiUserRegisterRoute
+  '/api/user-session': typeof ApiUserSessionRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/profile/history': typeof ProfileHistoryRoute
   '/profile/settings': typeof ProfileSettingsRoute
@@ -369,6 +396,9 @@ export interface FileRouteTypes {
     | '/api/faqs'
     | '/api/leads'
     | '/api/site-content'
+    | '/api/user-login'
+    | '/api/user-register'
+    | '/api/user-session'
     | '/articles/$slug'
     | '/profile/history'
     | '/profile/settings'
@@ -403,6 +433,9 @@ export interface FileRouteTypes {
     | '/api/faqs'
     | '/api/leads'
     | '/api/site-content'
+    | '/api/user-login'
+    | '/api/user-register'
+    | '/api/user-session'
     | '/articles/$slug'
     | '/profile/history'
     | '/profile/settings'
@@ -441,6 +474,9 @@ export interface FileRouteTypes {
     | '/api/faqs'
     | '/api/leads'
     | '/api/site-content'
+    | '/api/user-login'
+    | '/api/user-register'
+    | '/api/user-session'
     | '/articles/$slug'
     | '/profile/history'
     | '/profile/settings'
@@ -475,6 +511,9 @@ export interface RootRouteChildren {
   ApiFaqsRoute: typeof ApiFaqsRoute
   ApiLeadsRoute: typeof ApiLeadsRoute
   ApiSiteContentRoute: typeof ApiSiteContentRoute
+  ApiUserLoginRoute: typeof ApiUserLoginRoute
+  ApiUserRegisterRoute: typeof ApiUserRegisterRoute
+  ApiUserSessionRoute: typeof ApiUserSessionRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -625,6 +664,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/articles/$slug'
       preLoaderRoute: typeof ArticlesSlugRouteImport
       parentRoute: typeof ArticlesRoute
+    }
+    '/api/user-session': {
+      id: '/api/user-session'
+      path: '/api/user-session'
+      fullPath: '/api/user-session'
+      preLoaderRoute: typeof ApiUserSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/user-register': {
+      id: '/api/user-register'
+      path: '/api/user-register'
+      fullPath: '/api/user-register'
+      preLoaderRoute: typeof ApiUserRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/user-login': {
+      id: '/api/user-login'
+      path: '/api/user-login'
+      fullPath: '/api/user-login'
+      preLoaderRoute: typeof ApiUserLoginRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/site-content': {
       id: '/api/site-content'
@@ -819,6 +879,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiFaqsRoute: ApiFaqsRoute,
   ApiLeadsRoute: ApiLeadsRoute,
   ApiSiteContentRoute: ApiSiteContentRoute,
+  ApiUserLoginRoute: ApiUserLoginRoute,
+  ApiUserRegisterRoute: ApiUserRegisterRoute,
+  ApiUserSessionRoute: ApiUserSessionRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
