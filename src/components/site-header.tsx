@@ -1,6 +1,7 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useEffect, useState, type ReactNode } from "react";
 import { tarotCategories } from "@/lib/tarot-cards";
+import { clearUserSession, readStoredUserSession, type UserSession } from "@/lib/user-session";
 
 interface SiteHeaderProps {
   subtitle?: string;
@@ -33,10 +34,30 @@ export function BrandMark({ size = 44 }: { size?: number }) {
 
 export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderProps) {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
   const [openMobile, setOpenMobile] = useState(false);
   const [tarotOpen, setTarotOpen] = useState(false);
+  const [userSession, setUserSession] = useState<UserSession | null>(null);
 
   const isActive = (prefix: string) => (prefix === "/" ? path === "/" : path.startsWith(prefix));
+  const closeMobile = () => setOpenMobile(false);
+  const logout = () => {
+    clearUserSession();
+    setUserSession(null);
+    setOpenMobile(false);
+    void navigate({ to: "/" });
+  };
+
+  useEffect(() => {
+    const syncSession = () => setUserSession(readStoredUserSession());
+    syncSession();
+    window.addEventListener("storage", syncSession);
+    window.addEventListener("focus", syncSession);
+    return () => {
+      window.removeEventListener("storage", syncSession);
+      window.removeEventListener("focus", syncSession);
+    };
+  }, [path]);
 
   return (
     <header className="relative z-30 border-b border-gold/10 backdrop-blur-md">
@@ -118,18 +139,38 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
 
         {showNav && (
           <div className="hidden items-center gap-2 lg:flex">
-            <Link
-              to="/login"
-              className="rounded-full px-4 py-2 text-sm text-muted-foreground hover:text-gold"
-            >
-              เข้าสู่ระบบ
-            </Link>
-            <Link
-              to="/register"
-              className="rounded-full bg-gradient-gold px-4 py-2 text-sm font-semibold text-primary-foreground shadow-gold hover:scale-[1.02] transition"
-            >
-              สมัครสมาชิก
-            </Link>
+            {userSession ? (
+              <>
+                <Link
+                  to="/profile"
+                  className="rounded-full bg-gradient-gold px-4 py-2 text-sm font-semibold text-primary-foreground shadow-gold hover:scale-[1.02] transition"
+                >
+                  โปรไฟล์
+                </Link>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="rounded-full border border-rose-400/30 px-4 py-2 text-sm text-rose-100 hover:bg-rose-400/10"
+                >
+                  ออกจากระบบ
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="rounded-full px-4 py-2 text-sm text-muted-foreground hover:text-gold"
+                >
+                  เข้าสู่ระบบ
+                </Link>
+                <Link
+                  to="/register"
+                  className="rounded-full bg-gradient-gold px-4 py-2 text-sm font-semibold text-primary-foreground shadow-gold hover:scale-[1.02] transition"
+                >
+                  สมัครสมาชิก
+                </Link>
+              </>
+            )}
           </div>
         )}
 
@@ -160,13 +201,13 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
       {showNav && openMobile && (
         <div className="lg:hidden">
           <div className="mx-4 mb-4 rounded-2xl border border-gold/15 bg-card/90 p-3 backdrop-blur">
-            <MobileLink to="/" onClick={() => setOpenMobile(false)}>
+            <MobileLink to="/" onClick={closeMobile}>
               หน้าหลัก
             </MobileLink>
-            <MobileLink to="/bazi" onClick={() => setOpenMobile(false)}>
+            <MobileLink to="/bazi" onClick={closeMobile}>
               ปาจื้อ
             </MobileLink>
-            <MobileLink to="/tarot" onClick={() => setOpenMobile(false)}>
+            <MobileLink to="/tarot" onClick={closeMobile}>
               ไพ่ยิปซี (ทุกหมวด)
             </MobileLink>
             <div className="ml-3 border-l border-gold/15 pl-3">
@@ -175,7 +216,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                   key={c.slug}
                   to="/tarot/$type"
                   params={{ type: c.slug }}
-                  onClick={() => setOpenMobile(false)}
+                  onClick={closeMobile}
                   className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-gold/10 hover:text-gold"
                 >
                   <span className="text-gold/70">{c.icon}</span>
@@ -183,38 +224,57 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                 </Link>
               ))}
             </div>
-            <MobileLink to="/dream" onClick={() => setOpenMobile(false)}>
+            <MobileLink to="/dream" onClick={closeMobile}>
               ทำนายฝัน
             </MobileLink>
-            <MobileLink to="/articles" onClick={() => setOpenMobile(false)}>
+            <MobileLink to="/articles" onClick={closeMobile}>
               บทความ
             </MobileLink>
-            <MobileLink to="/about" onClick={() => setOpenMobile(false)}>
+            <MobileLink to="/about" onClick={closeMobile}>
               เกี่ยวกับเรา
             </MobileLink>
-            <MobileLink to="/contact" onClick={() => setOpenMobile(false)}>
+            <MobileLink to="/contact" onClick={closeMobile}>
               ติดต่อ
             </MobileLink>
-            <MobileLink to="/help" onClick={() => setOpenMobile(false)}>
+            <MobileLink to="/help" onClick={closeMobile}>
               ช่วยเหลือ
             </MobileLink>
             <div className="my-2 h-px bg-gold/10" />
-            <div className="flex gap-2 p-1">
-              <Link
-                to="/login"
-                onClick={() => setOpenMobile(false)}
-                className="flex-1 rounded-xl border border-gold/30 px-3 py-2 text-center text-sm text-gold"
-              >
-                เข้าสู่ระบบ
-              </Link>
-              <Link
-                to="/register"
-                onClick={() => setOpenMobile(false)}
-                className="flex-1 rounded-xl bg-gradient-gold px-3 py-2 text-center text-sm font-semibold text-primary-foreground shadow-gold"
-              >
-                สมัคร
-              </Link>
-            </div>
+            {userSession ? (
+              <div className="grid gap-2 p-1">
+                <Link
+                  to="/profile"
+                  onClick={closeMobile}
+                  className="rounded-xl bg-gradient-gold px-3 py-2 text-center text-sm font-semibold text-primary-foreground shadow-gold"
+                >
+                  โปรไฟล์
+                </Link>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="rounded-xl border border-rose-400/30 px-3 py-2 text-center text-sm text-rose-100"
+                >
+                  ออกจากระบบ
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2 p-1">
+                <Link
+                  to="/login"
+                  onClick={closeMobile}
+                  className="flex-1 rounded-xl border border-gold/30 px-3 py-2 text-center text-sm text-gold"
+                >
+                  เข้าสู่ระบบ
+                </Link>
+                <Link
+                  to="/register"
+                  onClick={closeMobile}
+                  className="flex-1 rounded-xl bg-gradient-gold px-3 py-2 text-center text-sm font-semibold text-primary-foreground shadow-gold"
+                >
+                  สมัคร
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}
