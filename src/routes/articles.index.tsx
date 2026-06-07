@@ -1,16 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { articles } from "@/lib/articles";
-import { useState } from "react";
+import { articles as seed, type Article } from "@/lib/articles";
+import { seo } from "@/lib/seo";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/articles/")({
-  head: () => ({
-    meta: [
-      { title: "บทความ — Likhitfa" },
-      { name: "description", content: "บทความและความรู้เรื่องดูดวง ไพ่ทาโรต์ ปาจื้อ และทำนายฝัน" },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "บทความดูดวง",
+      description:
+        "รวมบทความและความรู้เรื่องปาจื้อ ไพ่ทาโรต์ ทำนายฝัน พิธีกรรมเสริมโชค และแนวทางอ่านดวงอย่างมีสติ",
+      path: "/articles",
+      keywords: ["บทความดูดวง", "ความรู้ปาจื้อ", "ไพ่ทาโรต์", "ทำนายฝัน", "เสริมโชค"],
+    }),
   component: ArticlesIndex,
 });
 
@@ -18,7 +21,27 @@ const categories = ["ทั้งหมด", "ปาจื้อ", "ไพ่ย
 
 function ArticlesIndex() {
   const [active, setActive] = useState("ทั้งหมด");
-  const filtered = active === "ทั้งหมด" ? articles : articles.filter((a) => a.category === active);
+  const [items, setItems] = useState<Article[]>(seed);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadArticles() {
+      const response = await fetch("/api/articles");
+      const data = await response.json().catch(() => ({}));
+      if (mounted && data.ok) setItems(data.articles || seed);
+      if (mounted) setLoading(false);
+    }
+
+    void loadArticles();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const filtered = active === "ทั้งหมด" ? items : items.filter((a) => a.category === active);
   const featured = filtered[0];
   const rest = filtered.slice(1);
 
@@ -51,6 +74,12 @@ function ArticlesIndex() {
             </button>
           ))}
         </div>
+
+        {loading ? (
+          <div className="mt-8 text-center text-sm text-muted-foreground">
+            กำลังโหลดบทความล่าสุด...
+          </div>
+        ) : null}
 
         {featured && (
           <Link to="/articles/$slug" params={{ slug: featured.slug }} className="mt-10 block">

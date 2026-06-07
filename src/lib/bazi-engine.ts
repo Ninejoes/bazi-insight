@@ -60,6 +60,13 @@ export type BaziAnalysis = {
     advice: [string, string][];
     components: { label: string; points: number; detail: string }[];
   };
+  forecast: {
+    label: string;
+    score: number;
+    title: string;
+    body: string;
+    action: string;
+  }[];
   calendar: {
     d: string;
     w: string;
@@ -210,6 +217,53 @@ const relationProfiles: Record<string, string> = {
   ระเบียบ: "เหมาะทำเรื่องทางการ เอกสาร กติกา และสิ่งที่ต้องการความน่าเชื่อถือ",
   "ญาณ/กลยุทธ์": "เหมาะศึกษา วางแผน อ่านสัญญาณ และใช้ข้อมูลเงียบ ๆ ก่อนขยับ",
   ผู้สนับสนุน: "มีพลังผู้ช่วย ความรู้ และคำแนะนำจากคนมีประสบการณ์",
+};
+
+const forecastCatalog: Record<
+  string,
+  {
+    base: string;
+    good: string;
+    medium: string;
+    low: string;
+    action: string;
+  }
+> = {
+  ภาพรวม: {
+    base: "อ่านจาก Day Master, ธาตุให้คุณ, แรงปะทะ/合 ของกิ่งดิน และสิบเทพรายวัน",
+    good: "ภาพรวมเปิดทาง เหมาะเริ่มเรื่องที่มีกรอบชัดและมีข้อมูลพร้อม",
+    medium: "ภาพรวมพอขยับได้ แต่ควรแบ่งงานเป็นช่วงและตรวจรายละเอียดก่อนสรุป",
+    low: "ภาพรวมควรประคอง ลดเรื่องเสี่ยง และอย่าเร่งตัดสินใจจากอารมณ์",
+    action: "เลือกเรื่องสำคัญเพียงหนึ่งเรื่อง แล้วปิดให้จบก่อนเพิ่มงานใหม่",
+  },
+  งาน: {
+    base: "อ่านจาก 官煞, 印, กิ่งเดือน และแรงหนุนของธาตุให้คุณ",
+    good: "งานมีแรงส่ง เหมาะคุยกับผู้ใหญ่ ทำเอกสาร วางมาตรฐาน หรือปิดดีลที่ค้าง",
+    medium: "งานเดินได้ถ้าแยกหน้าที่ให้ชัด ระวังประชุมยาวหรือรับปากเกินกำลัง",
+    low: "งานมีแรงกด ควรเลี่ยงการชนตรงและใช้หลักฐานช่วยพูดแทนความรู้สึก",
+    action: "เขียนเป้าหมาย งานที่ต้องส่ง และเงื่อนไขการตัดสินใจให้เห็นบนกระดาษ",
+  },
+  เงิน: {
+    base: "อ่านจาก 財星, output ที่ก่อให้เกิด wealth, และ clash/harm กับเสาวัน",
+    good: "เงินมีจังหวะเห็นโอกาส เหมาะจัดราคา เจรจา หรือแยกแหล่งรายรับให้ชัด",
+    medium: "เงินควรเดินแบบระวัง ตรวจตัวเลขและเงื่อนไขก่อนตกลง",
+    low: "เงินไม่เหมาะเสี่ยงหรือเร่งลงทุน ควรรักษาสภาพคล่องมากกว่าขยาย",
+    action: "ตรวจรายรับ รายจ่าย สัญญา และวันที่ครบกำหนดก่อนตัดสินใจ",
+  },
+  ความรัก: {
+    base: "อ่านจากดาวคู่สัมพันธ์ตามเพศ, กิ่งวัน, 合/冲/害 และธาตุสื่อสาร",
+    good: "ความสัมพันธ์เปิดพื้นที่คุยดี เหมาะปรับความเข้าใจหรือเริ่มบทสนทนาที่ค้าง",
+    medium: "ความสัมพันธ์ต้องใช้จังหวะ ฟังให้จบก่อนตอบ และไม่สรุปแทนอีกฝ่าย",
+    low: "ความสัมพันธ์ไวต่อคำพูด ควรเลี่ยงการกดดันหรือคุยตอนเหนื่อย",
+    action: "ถามให้ชัดหนึ่งคำถาม แล้วฟังคำตอบจริงโดยไม่รีบป้องกันตัว",
+  },
+  สุขภาพใจ: {
+    base: "อ่านจากความแรงของ Day Master, ธาตุที่มาก/พร่อง และกิ่งที่เกิด冲刑害",
+    good: "ใจมีแรงพอจัดระบบชีวิต เหมาะออกกำลังเบา ๆ และทำสิ่งที่ให้ความรู้สึกคุมได้",
+    medium: "ใจต้องการจังหวะพักเป็นช่วง อย่ารับข้อมูลมากเกินไป",
+    low: "ใจล้าง่าย ควรลดสิ่งเร้าและเลื่อนเรื่องที่ไม่จำเป็นออกไปก่อน",
+    action: "นอนให้พอ ดื่มน้ำ และตัดหนึ่งสิ่งที่ทำให้ใจรบกวนออกจากวันนี้",
+  },
 };
 
 const branchClashes: Record<string, string[]> = {
@@ -680,23 +734,132 @@ function todayReading(
     (ctx.relationCounts["ญาณ/กลยุทธ์"] || 0);
   const moneyScore =
     (ctx.relationCounts["ทรัพย์หลัก"] || 0) + (ctx.relationCounts["รายได้เสริม"] || 0);
+  const adviceSeed =
+    daysSinceBase(today) +
+    chart.year.index * 3 +
+    chart.month.index * 5 +
+    chart.day.index * 7 +
+    chart.hour.index * 11;
+  const dayElement = todayPillar.stem.element;
+  const branchElement = todayPillar.branch.element;
+  const hasWorkPush = ["ระเบียบ", "แรงกดดัน", "ผู้สนับสนุน", "ญาณ/กลยุทธ์"].includes(relationName);
+  const hasMoneyPush = ["ทรัพย์หลัก", "รายได้เสริม", "พรสวรรค์", "นักแสดงออก"].includes(
+    relationName,
+  );
+  const communicationPush = ["พรสวรรค์", "นักแสดงออก"].includes(relationName);
+  const relationTone =
+    daily.value >= 82
+      ? "วันนี้พลังเปิด"
+      : daily.value >= 68
+        ? "วันนี้เดินได้แต่ต้องคุมจังหวะ"
+        : "วันนี้ควรลดแรงปะทะและทำเท่าที่จำเป็น";
+  const relationHint = `${todayPillar.stem.han}${todayPillar.branch.han} กระตุ้น “${relationName}”`;
+  const supportHint = daily.combinationMatches.length
+    ? `มีแรง合กับ${daily.combinationMatches.map((item) => item.label).join(" / ")}`
+    : ctx.useful.includes(dayElement) || ctx.useful.includes(branchElement)
+      ? `ธาตุวันนี้แตะธาตุให้คุณ ${ctx.useful.join(" / ")}`
+      : `ธาตุวันนี้เป็น ${dayElement}/${branchElement} จึงควรใช้แบบพอดี`;
+  const riskHint = [
+    ...daily.clashMatches.map((item) => `冲กับ${item.label}`),
+    ...daily.harmMatches.map((item) => `害กับ${item.label}`),
+    ...daily.punishmentMatches.map((item) => `刑กับ${item.label}`),
+  ];
+  const pick = (items: string[], offset: number) => items[mod(adviceSeed + offset, items.length)];
+  const workAdvice = pick(
+    hasWorkPush
+      ? [
+          `${relationTone} งานเด่นที่กติกา ผู้ใหญ่ เอกสาร หรือการตัดสินใจเป็นระบบ เพราะ ${relationHint} และดวงเกิดมีแรงงาน/ผู้สนับสนุนรวม ${workScore} จุด`,
+          `เหมาะเอางานค้างมาจัดลำดับใหม่ เริ่มจากเรื่องที่มีเจ้าของชัดและวัดผลได้ ${supportHint}; อย่ารับโจทย์เพิ่มก่อนปิดของเดิม`,
+          `วันนี้ควรใช้ความนิ่งมากกว่าความเร็ว งานที่ต้องเจรจาหรือขออนุมัติพอเดินได้ เพราะดาวงานของดวงนี้ถูกกระตุ้น ${workScore} จุด`,
+        ]
+      : communicationPush
+        ? [
+            `${relationTone} งานเหมาะกับการอธิบาย ขายไอเดีย เขียนคอนเทนต์ หรือสรุปสิ่งซับซ้อนให้คนเข้าใจ เพราะ ${relationHint}`,
+            `ควรเลือกงานที่ใช้ผลงานพูดแทนตัวเองมากกว่าชนด้วยตำแหน่ง วันนี้พลังสื่อสารเด่นแต่ต้องระวังพูดเร็วเกินข้อเท็จจริง`,
+            `งานที่ต้องโชว์ทักษะมีจังหวะ แต่ถ้าเป็นงานเอกสารหนักให้แบ่งเป็นรอบสั้น ๆ เพราะแรงงานโดยตรงของดวงนี้มี ${workScore} จุด`,
+          ]
+        : [
+            `${relationTone} งานควรเน้นเก็บรายละเอียด ตรวจเงื่อนไข และกันเวลาพักสมอง เพราะ ${relationHint} ไม่ได้หนุนงานตรง ๆ มากนัก`,
+            `เหมาะทำงานหลังบ้าน เคลียร์ข้อมูล หรือวางแผนเงียบ ๆ มากกว่าประชุมยาว ${supportHint}; ถ้าต้องตัดสินใจให้ใช้หลักฐานนำ`,
+            `วันนี้ไม่ต้องเร่งพิสูจน์ตัวเอง งานจะเดินดีเมื่อแยกเรื่องของคนอื่นออกจากหน้าที่ของตัวเอง แรงงานในดวงมี ${workScore} จุด`,
+          ],
+    1,
+  );
+  const moneyAdvice = pick(
+    hasMoneyPush
+      ? [
+          `${relationTone} เงินมีสัญญาณให้จัดการราคา เงื่อนไข และช่องทางรายรับ เพราะ ${relationHint}; จุดทรัพย์ในดวงเกิดมี ${moneyScore} จุด`,
+          `เหมาะทบทวนต้นทุน กำไร และดีลที่ค้างไว้ ธาตุทรัพย์ของ ${ctx.dm.han} คือ ${ctx.roles.wealth} วันนี้ควรใช้ตัวเลขจริงก่อนขยาย`,
+          `ถ้ามีเรื่องซื้อขายหรือเจรจาค่าใช้จ่าย ให้เริ่มจากขอบเขตเล็ก ๆ แล้วค่อยเพิ่มน้ำหนัก ${supportHint}`,
+        ]
+      : ctx.useful.includes(ctx.roles.wealth)
+        ? [
+            `เงินไม่ได้พุ่งแรงแต่พอประคองได้ เพราะธาตุทรัพย์ ${ctx.roles.wealth} เป็นหนึ่งในธาตุที่ช่วยสมดุลดวงนี้ จุดสำคัญคืออย่ารีบตกลงก่อนเห็นเงื่อนไขครบ`,
+            `ควรใช้วันนี้ตรวจรายจ่ายซ้ำ สัญญา รอบบิล หรือราคาที่ตั้งไว้มากกว่าลงทุนเสี่ยงใหม่ ดวงทรัพย์ตั้งต้นมี ${moneyScore} จุด`,
+            `รายรับเดินแบบค่อยเป็นค่อยไป เหมาะเก็บเงินรั่วและปรับแพ็กเกจ/ราคาให้ชัดกว่าเดิม`,
+          ]
+        : [
+            `วันนี้เรื่องเงินควรตั้งการ์ดสูง ธาตุทรัพย์ของ ${ctx.dm.han} คือ ${ctx.roles.wealth} แต่พลังวันเด่นที่ ${dayElement}/${branchElement} จึงไม่ควรตัดสินใจจากความอยากทันที`,
+            `ไม่เหมาะเสี่ยงเงินก้อนหรือรับเงื่อนไขคลุมเครือ ให้แยกรายจ่ายจำเป็นกับรายจ่ายตามอารมณ์ก่อน`,
+            `เงินควรเน้นรักษาสภาพคล่องมากกว่าขยาย ถ้ามีดีลใหม่ให้ขอหลักฐาน ตัวเลข และระยะเวลาชัดเจน`,
+          ],
+    2,
+  );
+  const loveAdvice = pick(
+    daily.clashMatches.some((item) => item.label === "วัน") ||
+      daily.harmMatches.some((item) => item.label === "วัน")
+      ? [
+          `ความรักไวต่อคำพูดเป็นพิเศษ เพราะมีแรงกระทบกับเสาวันซึ่งแทนตัวตน/คู่สัมพันธ์ ควรคุยสั้น ชัด และไม่ลากเรื่องเก่ามาตัดสินกัน`,
+          `ถ้าต้องคุยเรื่องสำคัญ ให้เริ่มจากข้อเท็จจริงก่อนความรู้สึก วันนี้จังหวะสัมพันธ์มีแรงเสียดทานกับกิ่งวัน`,
+          `เหมาะพักอารมณ์ก่อนตอบข้อความหรือคุยประเด็นเปราะบาง จุดคู่สัมพันธ์อยู่ที่ธาตุ ${spouseElement} น้ำหนัก ${loveScore.toFixed(1)}`,
+        ]
+      : daily.combinationMatches.some((item) => item.label === "วัน")
+        ? [
+            `ความสัมพันธ์มีแรงเปิดใจ เพราะวันนี้มีแรง合กับเสาวัน เหมาะปรับความเข้าใจหรือเริ่มบทสนทนาที่ค้างไว้`,
+            `คนโสดเหมาะส่งสัญญาณแบบพอดี คนมีคู่เหมาะวางแผนร่วมกัน จุดคู่สัมพันธ์ธาตุ ${spouseElement} มีน้ำหนัก ${loveScore.toFixed(1)}`,
+            `วันนี้คำพูดนุ่ม ๆ ได้ผลกว่าการเร่งคำตอบ ความสัมพันธ์เดินดีเมื่อให้อีกฝ่ายมีพื้นที่เลือก`,
+          ]
+        : communicationPush
+          ? [
+              `ความรักเด่นที่การสื่อสาร เพราะ ${relationHint} ควรพูดตรงแต่ไม่ตัดสินแทนอีกฝ่าย`,
+              `เหมาะคุยเรื่องเบา ๆ เพื่อเปิดทางก่อนเข้าประเด็นจริง จุดคู่สัมพันธ์ธาตุ ${spouseElement} มีน้ำหนัก ${loveScore.toFixed(1)}`,
+              `ถ้ามีเรื่องค้างใจ ให้ถามทีละเรื่อง วันนี้พลังคำพูดเด่นแต่ถ้าพูดเร็วไปจะกลายเป็นกดดัน`,
+            ]
+          : [
+              `ความสัมพันธ์ควรเดินแบบนิ่งและสังเกตมากกว่าบังคับคำตอบ จุดคู่สัมพันธ์ของดวงนี้อยู่ที่ธาตุ ${spouseElement} น้ำหนัก ${loveScore.toFixed(1)}`,
+              `เหมาะดูแลความรู้สึกพื้นฐาน เช่น เวลา ความใส่ใจ และการรักษาคำพูด มากกว่าคุยเรื่องใหญ่หลายเรื่องพร้อมกัน`,
+              `คนโสดอย่ารีบอ่านใจใครจากสัญญาณเดียว คนมีคู่ควรให้พื้นที่กันก่อนค่อยสรุปประเด็น`,
+            ],
+    3,
+  );
+  const avoidAdvice = riskHint.length
+    ? pick(
+        [
+          `ควรเลี่ยงการตัดสินใจแบบชนตรง เพราะวันนี้มี ${riskHint.join(" / ")}; ถ้าจำเป็นต้องคุย ให้ใช้เอกสารและข้อตกลงเป็นตัวกลาง`,
+          `ระวังเรื่องที่เกี่ยวกับ${[
+            ...daily.clashMatches,
+            ...daily.harmMatches,
+            ...daily.punishmentMatches,
+          ]
+            .map((item) => item.label)
+            .join(" / ")} เป็นพิเศษ วันนี้ไม่เหมาะเร่งปิดด้วยอารมณ์`,
+          `ให้ลดความแข็ง ลดการตอบโต้เร็ว และเว้นระยะกับเรื่องที่กดดัน เพราะแรง ${riskHint.join(" / ")} ทำให้เรื่องเล็กขยายง่าย`,
+        ],
+        4,
+      )
+    : pick(
+        [
+          `ไม่พบแรง冲/刑/害เด่นกับดวงเกิด จุดที่ควรเลี่ยงคือความชะล่าใจจากคะแนนวันที่ดี ให้ตรวจรายละเอียดก่อนส่งงานหรือจ่ายเงิน`,
+          `วันนี้ไม่มีแรงปะทะใหญ่ แต่ควรเลี่ยงการรับปากเกินกำลัง เพราะพลัง ${relationName} อาจดึงให้โฟกัสเรื่องของคนอื่นมากไป`,
+          `ไม่เห็นจุดรบกวนหนักใน 4 เสาเดิมกับวันปัจจุบัน ควรเลี่ยงแค่การตัดสินใจเร็วจากความมั่นใจชั่ววูบ`,
+        ],
+        5,
+      );
   const advice: [string, string][] = [
-    [
-      "งาน",
-      `วันนี้เหมาะกับงานที่มีกรอบชัด ใช้ข้อมูลช่วยตัดสินใจ และค่อย ๆ ปิดทีละเรื่อง เพราะดวงมีแรงงาน/แรงกดดัน/ผู้สนับสนุนรวม ${workScore} จุด`,
-    ],
-    [
-      "เงิน",
-      `เรื่องเงินควรใช้ตัวเลขและเงื่อนไขที่ตรวจสอบได้ ดวงนี้มีจุดเกี่ยวกับรายรับ/ทรัพย์ ${moneyScore} จุด ธาตุทรัพย์ของ ${ctx.dm.han} คือ ${ctx.roles.wealth}`,
-    ],
-    [
-      "ความรัก",
-      `ความสัมพันธ์ควรคุยด้วยจังหวะที่เปิดพื้นที่ให้อีกฝ่ายตอบ จุดคู่สัมพันธ์ของดวงนี้อยู่ที่ธาตุ ${spouseElement} น้ำหนักประมาณ ${loveScore.toFixed(1)}`,
-    ],
-    [
-      "ควรเลี่ยง",
-      `${daily.clashMatches.length ? `มีแรงปะทะกับ${daily.clashMatches.map((item) => item.label).join(" / ")}` : "ไม่พบแรงปะทะเด่น"}; ${daily.harmMatches.length ? `มีจุดรบกวนกับ${daily.harmMatches.map((item) => item.label).join(" / ")}` : "ไม่พบจุดรบกวนเด่น"}; ${daily.punishmentMatches.length ? `มีแรงกดซ้ำกับ${daily.punishmentMatches.map((item) => item.label).join(" / ")}` : "ไม่พบแรงกดซ้ำเด่น"}`,
-    ],
+    ["งาน", workAdvice],
+    ["เงิน", moneyAdvice],
+    ["ความรัก", loveAdvice],
+    ["ควรเลี่ยง", avoidAdvice],
   ];
 
   return {
@@ -711,6 +874,100 @@ function todayReading(
   };
 }
 
+function clampScore(score: number) {
+  return Math.max(28, Math.min(99, Math.round(score)));
+}
+
+function forecastText(label: string, score: number) {
+  const catalog = forecastCatalog[label] || forecastCatalog["ภาพรวม"];
+  const trend = score >= 78 ? catalog.good : score >= 56 ? catalog.medium : catalog.low;
+  return {
+    title: `${label} · ${score >= 78 ? "เปิดทาง" : score >= 56 ? "ประคองได้" : "ต้องระวัง"}`,
+    body: `${trend} (${catalog.base})`,
+    action: catalog.action,
+  };
+}
+
+function buildForecast(chart: BaziAnalysis["chart"], score: number, input: BaziInput, today: Date) {
+  const ctx = chartContext(chart, score);
+  const daily = dailyScore(chart, score, today);
+  const relationCounts = ctx.relationCounts;
+  const relationBoost = (names: string[]) =>
+    names.reduce((sum, name) => sum + (relationCounts[name] || 0) * 4, 0);
+  const dailyPenalty =
+    daily.clashMatches.length * 7 +
+    daily.harmMatches.length * 4 +
+    daily.punishmentMatches.length * 4;
+  const supportBonus = daily.combinationMatches.length * 5;
+  const usefulBonus = ctx.useful.includes(daily.todayPillar.stem.element) ? 6 : 0;
+  const spouseElement = input.gender === "หญิง" ? ctx.roles.officer : ctx.roles.wealth;
+  const spouseWeight = ctx.dominant.find(([element]) => element === spouseElement)?.[1] || 0;
+  const wealthBranch =
+    daily.todayPillar.stem.element === ctx.roles.wealth ||
+    daily.todayPillar.branch.element === ctx.roles.wealth
+      ? 8
+      : 0;
+  const officerBranch =
+    daily.todayPillar.stem.element === ctx.roles.officer ||
+    daily.todayPillar.branch.element === ctx.roles.officer
+      ? 8
+      : 0;
+  const resourceBranch =
+    daily.todayPillar.stem.element === ctx.roles.resource ||
+    daily.todayPillar.branch.element === ctx.roles.resource
+      ? 7
+      : 0;
+
+  const raw = [
+    {
+      label: "ภาพรวม",
+      score: daily.value,
+    },
+    {
+      label: "งาน",
+      score:
+        48 +
+        relationBoost(["ระเบียบ", "แรงกดดัน", "ผู้สนับสนุน", "ญาณ/กลยุทธ์"]) +
+        officerBranch +
+        supportBonus -
+        dailyPenalty * 0.45,
+    },
+    {
+      label: "เงิน",
+      score:
+        44 +
+        relationBoost(["ทรัพย์หลัก", "รายได้เสริม", "พรสวรรค์", "นักแสดงออก"]) +
+        wealthBranch +
+        supportBonus -
+        dailyPenalty * 0.55,
+    },
+    {
+      label: "ความรัก",
+      score:
+        46 +
+        spouseWeight * 7 +
+        (daily.combinationMatches.some((item) => item.label === "วัน") ? 12 : 0) -
+        (daily.clashMatches.some((item) => item.label === "วัน") ? 16 : 0) -
+        daily.harmMatches.length * 5,
+    },
+    {
+      label: "สุขภาพใจ",
+      score:
+        52 +
+        resourceBranch +
+        usefulBonus +
+        (score >= 70 ? -5 : 6) -
+        dailyPenalty +
+        (ctx.unfavorable.includes(daily.todayPillar.branch.element) ? -5 : 0),
+    },
+  ];
+
+  return raw.map((item) => {
+    const finalScore = clampScore(item.score);
+    return { label: item.label, score: finalScore, ...forecastText(item.label, finalScore) };
+  });
+}
+
 export function analyzeBazi(input: BaziInput, today = new Date()): BaziAnalysis {
   const birth = new Date(`${input.birthDate}T${input.birthTime || "12:00"}:00`);
   const hour = Number((input.birthTime || "12:00").split(":")[0] || 12);
@@ -723,6 +980,7 @@ export function analyzeBazi(input: BaziInput, today = new Date()): BaziAnalysis 
     context: ctx,
     strength: score,
     today: todayReading(chart, score, input, today),
+    forecast: buildForecast(chart, score, input, today),
     calendar: buildCalendar(chart, score, today),
     luckCycles: buildLuckCycles(chart, input),
     tenGods: buildTenGods(chart),

@@ -1,7 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 
 export const Route = createFileRoute("/profile/")({
-  head: () => ({ meta: [{ title: "โปรไฟล์ — Likhitfa" }] }),
+  head: () =>
+    seo({
+      title: "โปรไฟล์",
+      description: "หน้าโปรไฟล์และข้อมูลส่วนตัวของผู้ใช้งาน Likhitfa",
+      path: "/profile",
+      noindex: true,
+    }),
   component: ProfileOverview,
 });
 

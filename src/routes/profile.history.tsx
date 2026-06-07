@@ -1,8 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { seo } from "@/lib/seo";
 import { useState } from "react";
 
 export const Route = createFileRoute("/profile/history")({
-  head: () => ({ meta: [{ title: "ประวัติการดูดวง — Likhitfa" }] }),
+  head: () =>
+    seo({
+      title: "ประวัติการดูดวง",
+      description: "ประวัติการดูดวงส่วนตัวของผู้ใช้งาน Likhitfa",
+      path: "/profile/history",
+      noindex: true,
+    }),
   component: HistoryPage,
 });
 

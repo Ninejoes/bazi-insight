@@ -1,13 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { seo } from "@/lib/seo";
+import { useMemo, useState } from "react";
+import { readStoredUserSession } from "@/lib/user-session";
 
 export const Route = createFileRoute("/profile/settings")({
-  head: () => ({ meta: [{ title: "ตั้งค่าโปรไฟล์ — Likhitfa" }] }),
+  head: () =>
+    seo({
+      title: "ตั้งค่าโปรไฟล์",
+      description: "ตั้งค่าโปรไฟล์ ความเป็นส่วนตัว และข้อมูลบัญชีผู้ใช้งาน Likhitfa",
+      path: "/profile/settings",
+      noindex: true,
+    }),
   component: SettingsPage,
 });
 
 function SettingsPage() {
   const [confirm, setConfirm] = useState(false);
+  const session = useMemo(
+    () => (typeof window === "undefined" ? null : readStoredUserSession()),
+    [],
+  );
+  const profile = session?.profile || {};
 
   return (
     <div className="space-y-6">
@@ -15,19 +28,22 @@ function SettingsPage() {
         <h2 className="font-display text-2xl text-foreground">ข้อมูลส่วนตัว</h2>
         <form className="mt-6 grid gap-4 md:grid-cols-2" onSubmit={(e) => e.preventDefault()}>
           <Field label="ชื่อ">
-            <input className="input-styled" defaultValue="มณีจันทร์" />
+            <input
+              className="input-styled"
+              defaultValue={profile.firstName || session?.name || ""}
+            />
           </Field>
           <Field label="นามสกุล">
-            <input className="input-styled" defaultValue="ลิขิตฟ้า" />
+            <input className="input-styled" defaultValue={profile.lastName || ""} />
           </Field>
           <Field label="อีเมล">
-            <input className="input-styled" defaultValue="manee@example.com" />
+            <input className="input-styled" defaultValue={session?.email || ""} />
           </Field>
           <Field label="เบอร์โทรศัพท์">
             <input className="input-styled" placeholder="08x-xxx-xxxx" />
           </Field>
           <Field label="วันเกิด">
-            <input type="date" className="input-styled" defaultValue="1995-08-12" />
+            <input type="date" className="input-styled" defaultValue={profile.birthDate || ""} />
           </Field>
           <Field label="เวลาเกิด">
             <input type="time" className="input-styled" defaultValue="07:30" />

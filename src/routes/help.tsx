@@ -1,15 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { useState } from "react";
+import { seo } from "@/lib/seo";
+import { faqSeed, type FAQRecord } from "@/lib/admin-content";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/help")({
-  head: () => ({
-    meta: [
-      { title: "ศูนย์ช่วยเหลือ — Likhitfa" },
-      { name: "description", content: "คำถามที่พบบ่อยและคู่มือการใช้งาน" },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "ศูนย์ช่วยเหลือ",
+      description:
+        "คำถามที่พบบ่อย คู่มือการใช้งานปาจื้อ ไพ่ยิปซี ทำนายฝัน บัญชีผู้ใช้ และความเป็นส่วนตัว",
+      path: "/help",
+      keywords: ["ศูนย์ช่วยเหลือ", "วิธีดูดวง", "คำถามที่พบบ่อย", "Likhitfa"],
+    }),
   component: HelpPage,
 });
 
@@ -20,31 +24,30 @@ const topics = [
   { icon: "♢", title: "ความเป็นส่วนตัว", desc: "PDPA, การลบข้อมูล และนโยบายความเป็นส่วนตัว" },
 ];
 
-const faqs = [
-  {
-    q: "การดูดวงในเว็บไซต์มีค่าใช้จ่ายหรือไม่?",
-    a: "ฟีเจอร์หลักทั้งหมดเปิดให้ใช้ฟรี ฟีเจอร์พรีเมียมบางส่วนจะมีการแจ้งราคาก่อนใช้งาน",
-  },
-  {
-    q: "ข้อมูลส่วนตัวของฉันปลอดภัยหรือไม่?",
-    a: "เราเก็บข้อมูลทั้งหมดด้วยการเข้ารหัสตามมาตรฐาน และปฏิบัติตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล (PDPA)",
-  },
-  {
-    q: "ฉันสามารถลบบัญชีของฉันได้หรือไม่?",
-    a: "ได้ สามารถลบบัญชีและข้อมูลส่วนตัวทั้งหมดได้ที่หน้า โปรไฟล์ → ตั้งค่าและความเป็นส่วนตัว",
-  },
-  {
-    q: "ผลทำนายแม่นยำแค่ไหน?",
-    a: "ผลทำนายเป็นแนวทางเพื่อช่วยทบทวนตนเอง ไม่ควรใช้แทนคำแนะนำด้านการแพทย์ การเงิน หรือกฎหมาย",
-  },
-  {
-    q: "ฉันลืมรหัสผ่าน ต้องทำอย่างไร?",
-    a: "คลิก ‘ลืมรหัสผ่าน?’ ที่หน้าเข้าสู่ระบบ ระบบจะส่งลิงก์รีเซ็ตไปยังอีเมลของคุณ",
-  },
-];
-
 function HelpPage() {
   const [open, setOpen] = useState<number | null>(0);
+  const [faqs, setFaqs] = useState<FAQRecord[]>(faqSeed);
+  const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadFaqs() {
+      const response = await fetch("/api/faqs");
+      const data = await response.json().catch(() => ({}));
+      if (mounted && data.ok) setFaqs(data.faqs || faqSeed);
+    }
+
+    void loadFaqs();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const filteredFaqs = query.trim()
+    ? faqs.filter((faq) => `${faq.q} ${faq.a}`.toLowerCase().includes(query.trim().toLowerCase()))
+    : faqs;
 
   return (
     <div className="min-h-screen">
@@ -57,7 +60,12 @@ function HelpPage() {
             ค้นหาคำตอบ หรือเลือกหมวดด้านล่าง
           </p>
           <div className="mx-auto mt-6 max-w-xl">
-            <input className="input-styled" placeholder="ค้นหา เช่น วิธีดูดวงไพ่ยิปซี" />
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              className="input-styled"
+              placeholder="ค้นหา เช่น วิธีดูดวงไพ่ยิปซี"
+            />
           </div>
         </section>
 
@@ -75,7 +83,7 @@ function HelpPage() {
           <h2 className="font-display text-3xl text-foreground">คำถามที่พบบ่อย</h2>
           <div className="gold-divider my-5 w-24" />
           <div className="space-y-3">
-            {faqs.map((f, i) => {
+            {filteredFaqs.map((f, i) => {
               const o = open === i;
               return (
                 <div key={i} className="glass rounded-2xl">

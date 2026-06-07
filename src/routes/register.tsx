@@ -1,21 +1,28 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { seo } from "@/lib/seo";
 import { useState } from "react";
+import { storeUserSession, type UserSession } from "@/lib/user-session";
 
 export const Route = createFileRoute("/register")({
-  head: () => ({
-    meta: [
-      { title: "สมัครสมาชิก — Likhitfa" },
-      { name: "description", content: "สมัครสมาชิก Likhitfa เพื่อบันทึกประวัติการดูดวง" },
-    ],
-  }),
+  head: () =>
+    seo({
+      title: "สมัครสมาชิก",
+      description:
+        "สมัครสมาชิก Likhitfa เพื่อบันทึกประวัติการดูดวง ตั้งค่าโปรไฟล์ และใช้งานฟีเจอร์ส่วนตัว",
+      path: "/register",
+      noindex: true,
+    }),
   component: RegisterPage,
 });
 
 function RegisterPage() {
+  const navigate = useNavigate();
   const [agree, setAgree] = useState(false);
   const [pdpa, setPdpa] = useState(false);
+  const [notice, setNotice] = useState("");
+  const [loading, setLoading] = useState(false);
 
   return (
     <div className="min-h-screen">
@@ -28,29 +35,76 @@ function RegisterPage() {
         </div>
 
         <form
-          onSubmit={(e) => e.preventDefault()}
+          onSubmit={async (e) => {
+            e.preventDefault();
+            setNotice("");
+            const form = new FormData(e.currentTarget);
+            const password = String(form.get("password") || "");
+            const confirmPassword = String(form.get("confirmPassword") || "");
+            if (password !== confirmPassword) {
+              setNotice("รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน");
+              return;
+            }
+            setLoading(true);
+            const response = await fetch("/api/user-register", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                firstName: form.get("firstName"),
+                lastName: form.get("lastName"),
+                displayName: form.get("displayName"),
+                email: form.get("email"),
+                birthDate: form.get("birthDate"),
+                gender: form.get("gender"),
+                password,
+              }),
+            });
+            const data = (await response.json().catch(() => ({}))) as {
+              ok?: boolean;
+              error?: string;
+              session?: UserSession;
+            };
+            setLoading(false);
+            if (!response.ok || !data.ok || !data.session) {
+              setNotice(data.error || "สมัครสมาชิกไม่สำเร็จ");
+              return;
+            }
+            storeUserSession(data.session);
+            void navigate({ to: "/profile" });
+          }}
           className="glass-strong mt-8 space-y-5 rounded-3xl p-7 shadow-elegant"
         >
+          {notice ? (
+            <div className="rounded-2xl border border-rose-400/25 bg-rose-400/10 px-4 py-3 text-sm text-rose-100">
+              {notice}
+            </div>
+          ) : null}
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="ชื่อ">
-              <input className="input-styled" placeholder="ชื่อจริง" />
+              <input name="firstName" className="input-styled" placeholder="ชื่อจริง" required />
             </Field>
             <Field label="นามสกุล">
-              <input className="input-styled" placeholder="นามสกุล" />
+              <input name="lastName" className="input-styled" placeholder="นามสกุล" />
             </Field>
           </div>
           <Field label="ชื่อแสดง (Display Name)">
-            <input className="input-styled" placeholder="เช่น Moonlight" />
+            <input name="displayName" className="input-styled" placeholder="เช่น Moonlight" />
           </Field>
           <Field label="อีเมล">
-            <input type="email" className="input-styled" placeholder="you@example.com" />
+            <input
+              name="email"
+              type="email"
+              className="input-styled"
+              placeholder="you@example.com"
+              required
+            />
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="วันเกิด">
-              <input type="date" className="input-styled" />
+              <input name="birthDate" type="date" className="input-styled" />
             </Field>
             <Field label="เพศ">
-              <select className="input-styled">
+              <select name="gender" className="input-styled">
                 <option>หญิง</option>
                 <option>ชาย</option>
                 <option>ไม่ระบุ</option>
@@ -59,10 +113,23 @@ function RegisterPage() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="รหัสผ่าน">
-              <input type="password" className="input-styled" placeholder="อย่างน้อย 8 ตัวอักษร" />
+              <input
+                name="password"
+                type="password"
+                className="input-styled"
+                placeholder="อย่างน้อย 8 ตัวอักษร"
+                minLength={8}
+                required
+              />
             </Field>
             <Field label="ยืนยันรหัสผ่าน">
-              <input type="password" className="input-styled" />
+              <input
+                name="confirmPassword"
+                type="password"
+                className="input-styled"
+                minLength={8}
+                required
+              />
             </Field>
           </div>
 
@@ -103,10 +170,10 @@ function RegisterPage() {
           </div>
 
           <button
-            disabled={!agree || !pdpa}
+            disabled={!agree || !pdpa || loading}
             className="w-full rounded-xl bg-gradient-gold py-3 text-sm font-semibold text-primary-foreground shadow-gold disabled:opacity-40 hover:scale-[1.01] transition"
           >
-            สร้างบัญชี
+            {loading ? "กำลังสร้างบัญชี..." : "สร้างบัญชี"}
           </button>
         </form>
 

@@ -77,16 +77,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Likhitfa ลิขิตฟ้า — ศาสตร์ดูดวงระดับพรีเมียม" },
-      {
-        name: "description",
-        content: "ปาจื้อ ไพ่ยิปซี ทำนายฝัน — อ่านดวงแบบมืออาชีพ เข้าใจง่าย ใช้งานสะดวก",
-      },
       { name: "author", content: "Likhitfa" },
-      { property: "og:title", content: "Likhitfa ลิขิตฟ้า" },
-      { property: "og:description", content: "ศาสตร์ดูดวงจีนโบราณ ไพ่ทาโรต์ และทำนายฝัน" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       {
@@ -103,7 +94,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="th">
       <head>
         <HeadContent />
       </head>

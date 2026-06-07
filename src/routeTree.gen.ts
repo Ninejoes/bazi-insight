@@ -18,6 +18,7 @@ import { Route as DreamRouteImport } from './routes/dream'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BaziRouteImport } from './routes/bazi'
 import { Route as ArticlesRouteImport } from './routes/articles'
+import { Route as AdminLoginRouteImport } from './routes/admin-login'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
@@ -29,8 +30,21 @@ import { Route as TarotTypeRouteImport } from './routes/tarot.$type'
 import { Route as ProfileSettingsRouteImport } from './routes/profile.settings'
 import { Route as ProfileHistoryRouteImport } from './routes/profile.history'
 import { Route as ArticlesSlugRouteImport } from './routes/articles.$slug'
+import { Route as ApiUserSessionRouteImport } from './routes/api.user-session'
+import { Route as ApiUserRegisterRouteImport } from './routes/api.user-register'
+import { Route as ApiUserLoginRouteImport } from './routes/api.user-login'
+import { Route as ApiSiteContentRouteImport } from './routes/api.site-content'
 import { Route as ApiLeadsRouteImport } from './routes/api.leads'
+import { Route as ApiFaqsRouteImport } from './routes/api.faqs'
+import { Route as ApiDreamsRouteImport } from './routes/api.dreams'
+import { Route as ApiDashboardRouteImport } from './routes/api.dashboard'
+import { Route as ApiContactMessagesRouteImport } from './routes/api.contact-messages'
+import { Route as ApiArticlesRouteImport } from './routes/api.articles'
+import { Route as ApiAdminUsersRouteImport } from './routes/api.admin-users'
+import { Route as ApiAdminSessionRouteImport } from './routes/api.admin-session'
+import { Route as ApiAdminLoginRouteImport } from './routes/api.admin-login'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminMessagesRouteImport } from './routes/admin.messages'
 import { Route as AdminHelpRouteImport } from './routes/admin.help'
 import { Route as AdminDreamsRouteImport } from './routes/admin.dreams'
 import { Route as AdminContactRouteImport } from './routes/admin.contact'
@@ -79,6 +93,11 @@ const BaziRoute = BaziRouteImport.update({
 const ArticlesRoute = ArticlesRouteImport.update({
   id: '/articles',
   path: '/articles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin-login',
+  path: '/admin-login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -136,14 +155,79 @@ const ArticlesSlugRoute = ArticlesSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => ArticlesRoute,
 } as any)
+const ApiUserSessionRoute = ApiUserSessionRouteImport.update({
+  id: '/api/user-session',
+  path: '/api/user-session',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUserRegisterRoute = ApiUserRegisterRouteImport.update({
+  id: '/api/user-register',
+  path: '/api/user-register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUserLoginRoute = ApiUserLoginRouteImport.update({
+  id: '/api/user-login',
+  path: '/api/user-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSiteContentRoute = ApiSiteContentRouteImport.update({
+  id: '/api/site-content',
+  path: '/api/site-content',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiLeadsRoute = ApiLeadsRouteImport.update({
   id: '/api/leads',
   path: '/api/leads',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiFaqsRoute = ApiFaqsRouteImport.update({
+  id: '/api/faqs',
+  path: '/api/faqs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDreamsRoute = ApiDreamsRouteImport.update({
+  id: '/api/dreams',
+  path: '/api/dreams',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDashboardRoute = ApiDashboardRouteImport.update({
+  id: '/api/dashboard',
+  path: '/api/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiContactMessagesRoute = ApiContactMessagesRouteImport.update({
+  id: '/api/contact-messages',
+  path: '/api/contact-messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiArticlesRoute = ApiArticlesRouteImport.update({
+  id: '/api/articles',
+  path: '/api/articles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminUsersRoute = ApiAdminUsersRouteImport.update({
+  id: '/api/admin-users',
+  path: '/api/admin-users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminSessionRoute = ApiAdminSessionRouteImport.update({
+  id: '/api/admin-session',
+  path: '/api/admin-session',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminLoginRoute = ApiAdminLoginRouteImport.update({
+  id: '/api/admin-login',
+  path: '/api/admin-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMessagesRoute = AdminMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminHelpRoute = AdminHelpRouteImport.update({
@@ -171,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
+  '/admin-login': typeof AdminLoginRoute
   '/articles': typeof ArticlesRouteWithChildren
   '/bazi': typeof BaziRoute
   '/contact': typeof ContactRoute
@@ -184,8 +269,21 @@ export interface FileRoutesByFullPath {
   '/admin/contact': typeof AdminContactRoute
   '/admin/dreams': typeof AdminDreamsRoute
   '/admin/help': typeof AdminHelpRoute
+  '/admin/messages': typeof AdminMessagesRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/admin-login': typeof ApiAdminLoginRoute
+  '/api/admin-session': typeof ApiAdminSessionRoute
+  '/api/admin-users': typeof ApiAdminUsersRoute
+  '/api/articles': typeof ApiArticlesRoute
+  '/api/contact-messages': typeof ApiContactMessagesRoute
+  '/api/dashboard': typeof ApiDashboardRoute
+  '/api/dreams': typeof ApiDreamsRoute
+  '/api/faqs': typeof ApiFaqsRoute
   '/api/leads': typeof ApiLeadsRoute
+  '/api/site-content': typeof ApiSiteContentRoute
+  '/api/user-login': typeof ApiUserLoginRoute
+  '/api/user-register': typeof ApiUserRegisterRoute
+  '/api/user-session': typeof ApiUserSessionRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/profile/history': typeof ProfileHistoryRoute
   '/profile/settings': typeof ProfileSettingsRoute
@@ -198,6 +296,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin-login': typeof AdminLoginRoute
   '/bazi': typeof BaziRoute
   '/contact': typeof ContactRoute
   '/dream': typeof DreamRoute
@@ -208,8 +307,21 @@ export interface FileRoutesByTo {
   '/admin/contact': typeof AdminContactRoute
   '/admin/dreams': typeof AdminDreamsRoute
   '/admin/help': typeof AdminHelpRoute
+  '/admin/messages': typeof AdminMessagesRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/admin-login': typeof ApiAdminLoginRoute
+  '/api/admin-session': typeof ApiAdminSessionRoute
+  '/api/admin-users': typeof ApiAdminUsersRoute
+  '/api/articles': typeof ApiArticlesRoute
+  '/api/contact-messages': typeof ApiContactMessagesRoute
+  '/api/dashboard': typeof ApiDashboardRoute
+  '/api/dreams': typeof ApiDreamsRoute
+  '/api/faqs': typeof ApiFaqsRoute
   '/api/leads': typeof ApiLeadsRoute
+  '/api/site-content': typeof ApiSiteContentRoute
+  '/api/user-login': typeof ApiUserLoginRoute
+  '/api/user-register': typeof ApiUserRegisterRoute
+  '/api/user-session': typeof ApiUserSessionRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/profile/history': typeof ProfileHistoryRoute
   '/profile/settings': typeof ProfileSettingsRoute
@@ -224,6 +336,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
+  '/admin-login': typeof AdminLoginRoute
   '/articles': typeof ArticlesRouteWithChildren
   '/bazi': typeof BaziRoute
   '/contact': typeof ContactRoute
@@ -237,8 +350,21 @@ export interface FileRoutesById {
   '/admin/contact': typeof AdminContactRoute
   '/admin/dreams': typeof AdminDreamsRoute
   '/admin/help': typeof AdminHelpRoute
+  '/admin/messages': typeof AdminMessagesRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/admin-login': typeof ApiAdminLoginRoute
+  '/api/admin-session': typeof ApiAdminSessionRoute
+  '/api/admin-users': typeof ApiAdminUsersRoute
+  '/api/articles': typeof ApiArticlesRoute
+  '/api/contact-messages': typeof ApiContactMessagesRoute
+  '/api/dashboard': typeof ApiDashboardRoute
+  '/api/dreams': typeof ApiDreamsRoute
+  '/api/faqs': typeof ApiFaqsRoute
   '/api/leads': typeof ApiLeadsRoute
+  '/api/site-content': typeof ApiSiteContentRoute
+  '/api/user-login': typeof ApiUserLoginRoute
+  '/api/user-register': typeof ApiUserRegisterRoute
+  '/api/user-session': typeof ApiUserSessionRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/profile/history': typeof ProfileHistoryRoute
   '/profile/settings': typeof ProfileSettingsRoute
@@ -254,6 +380,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/admin-login'
     | '/articles'
     | '/bazi'
     | '/contact'
@@ -267,8 +394,21 @@ export interface FileRouteTypes {
     | '/admin/contact'
     | '/admin/dreams'
     | '/admin/help'
+    | '/admin/messages'
     | '/admin/users'
+    | '/api/admin-login'
+    | '/api/admin-session'
+    | '/api/admin-users'
+    | '/api/articles'
+    | '/api/contact-messages'
+    | '/api/dashboard'
+    | '/api/dreams'
+    | '/api/faqs'
     | '/api/leads'
+    | '/api/site-content'
+    | '/api/user-login'
+    | '/api/user-register'
+    | '/api/user-session'
     | '/articles/$slug'
     | '/profile/history'
     | '/profile/settings'
@@ -281,6 +421,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/admin-login'
     | '/bazi'
     | '/contact'
     | '/dream'
@@ -291,8 +432,21 @@ export interface FileRouteTypes {
     | '/admin/contact'
     | '/admin/dreams'
     | '/admin/help'
+    | '/admin/messages'
     | '/admin/users'
+    | '/api/admin-login'
+    | '/api/admin-session'
+    | '/api/admin-users'
+    | '/api/articles'
+    | '/api/contact-messages'
+    | '/api/dashboard'
+    | '/api/dreams'
+    | '/api/faqs'
     | '/api/leads'
+    | '/api/site-content'
+    | '/api/user-login'
+    | '/api/user-register'
+    | '/api/user-session'
     | '/articles/$slug'
     | '/profile/history'
     | '/profile/settings'
@@ -306,6 +460,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/admin-login'
     | '/articles'
     | '/bazi'
     | '/contact'
@@ -319,8 +474,21 @@ export interface FileRouteTypes {
     | '/admin/contact'
     | '/admin/dreams'
     | '/admin/help'
+    | '/admin/messages'
     | '/admin/users'
+    | '/api/admin-login'
+    | '/api/admin-session'
+    | '/api/admin-users'
+    | '/api/articles'
+    | '/api/contact-messages'
+    | '/api/dashboard'
+    | '/api/dreams'
+    | '/api/faqs'
     | '/api/leads'
+    | '/api/site-content'
+    | '/api/user-login'
+    | '/api/user-register'
+    | '/api/user-session'
     | '/articles/$slug'
     | '/profile/history'
     | '/profile/settings'
@@ -335,6 +503,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
+  AdminLoginRoute: typeof AdminLoginRoute
   ArticlesRoute: typeof ArticlesRouteWithChildren
   BaziRoute: typeof BaziRoute
   ContactRoute: typeof ContactRoute
@@ -344,7 +513,19 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRouteWithChildren
   RegisterRoute: typeof RegisterRoute
   TarotRoute: typeof TarotRouteWithChildren
+  ApiAdminLoginRoute: typeof ApiAdminLoginRoute
+  ApiAdminSessionRoute: typeof ApiAdminSessionRoute
+  ApiAdminUsersRoute: typeof ApiAdminUsersRoute
+  ApiArticlesRoute: typeof ApiArticlesRoute
+  ApiContactMessagesRoute: typeof ApiContactMessagesRoute
+  ApiDashboardRoute: typeof ApiDashboardRoute
+  ApiDreamsRoute: typeof ApiDreamsRoute
+  ApiFaqsRoute: typeof ApiFaqsRoute
   ApiLeadsRoute: typeof ApiLeadsRoute
+  ApiSiteContentRoute: typeof ApiSiteContentRoute
+  ApiUserLoginRoute: typeof ApiUserLoginRoute
+  ApiUserRegisterRoute: typeof ApiUserRegisterRoute
+  ApiUserSessionRoute: typeof ApiUserSessionRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -410,6 +591,13 @@ declare module '@tanstack/react-router' {
       path: '/articles'
       fullPath: '/articles'
       preLoaderRoute: typeof ArticlesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-login': {
+      id: '/admin-login'
+      path: '/admin-login'
+      fullPath: '/admin-login'
+      preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -489,6 +677,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArticlesSlugRouteImport
       parentRoute: typeof ArticlesRoute
     }
+    '/api/user-session': {
+      id: '/api/user-session'
+      path: '/api/user-session'
+      fullPath: '/api/user-session'
+      preLoaderRoute: typeof ApiUserSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/user-register': {
+      id: '/api/user-register'
+      path: '/api/user-register'
+      fullPath: '/api/user-register'
+      preLoaderRoute: typeof ApiUserRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/user-login': {
+      id: '/api/user-login'
+      path: '/api/user-login'
+      fullPath: '/api/user-login'
+      preLoaderRoute: typeof ApiUserLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/site-content': {
+      id: '/api/site-content'
+      path: '/api/site-content'
+      fullPath: '/api/site-content'
+      preLoaderRoute: typeof ApiSiteContentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/leads': {
       id: '/api/leads'
       path: '/api/leads'
@@ -496,11 +712,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiLeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/faqs': {
+      id: '/api/faqs'
+      path: '/api/faqs'
+      fullPath: '/api/faqs'
+      preLoaderRoute: typeof ApiFaqsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/dreams': {
+      id: '/api/dreams'
+      path: '/api/dreams'
+      fullPath: '/api/dreams'
+      preLoaderRoute: typeof ApiDreamsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/dashboard': {
+      id: '/api/dashboard'
+      path: '/api/dashboard'
+      fullPath: '/api/dashboard'
+      preLoaderRoute: typeof ApiDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/contact-messages': {
+      id: '/api/contact-messages'
+      path: '/api/contact-messages'
+      fullPath: '/api/contact-messages'
+      preLoaderRoute: typeof ApiContactMessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/articles': {
+      id: '/api/articles'
+      path: '/api/articles'
+      fullPath: '/api/articles'
+      preLoaderRoute: typeof ApiArticlesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin-users': {
+      id: '/api/admin-users'
+      path: '/api/admin-users'
+      fullPath: '/api/admin-users'
+      preLoaderRoute: typeof ApiAdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin-session': {
+      id: '/api/admin-session'
+      path: '/api/admin-session'
+      fullPath: '/api/admin-session'
+      preLoaderRoute: typeof ApiAdminSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin-login': {
+      id: '/api/admin-login'
+      path: '/api/admin-login'
+      fullPath: '/api/admin-login'
+      preLoaderRoute: typeof ApiAdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/users': {
       id: '/admin/users'
       path: '/users'
       fullPath: '/admin/users'
       preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/messages': {
+      id: '/admin/messages'
+      path: '/messages'
+      fullPath: '/admin/messages'
+      preLoaderRoute: typeof AdminMessagesRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/help': {
@@ -539,6 +818,7 @@ interface AdminRouteChildren {
   AdminContactRoute: typeof AdminContactRoute
   AdminDreamsRoute: typeof AdminDreamsRoute
   AdminHelpRoute: typeof AdminHelpRoute
+  AdminMessagesRoute: typeof AdminMessagesRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -548,6 +828,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminContactRoute: AdminContactRoute,
   AdminDreamsRoute: AdminDreamsRoute,
   AdminHelpRoute: AdminHelpRoute,
+  AdminMessagesRoute: AdminMessagesRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
@@ -599,6 +880,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
+  AdminLoginRoute: AdminLoginRoute,
   ArticlesRoute: ArticlesRouteWithChildren,
   BaziRoute: BaziRoute,
   ContactRoute: ContactRoute,
@@ -608,7 +890,19 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRouteWithChildren,
   RegisterRoute: RegisterRoute,
   TarotRoute: TarotRouteWithChildren,
+  ApiAdminLoginRoute: ApiAdminLoginRoute,
+  ApiAdminSessionRoute: ApiAdminSessionRoute,
+  ApiAdminUsersRoute: ApiAdminUsersRoute,
+  ApiArticlesRoute: ApiArticlesRoute,
+  ApiContactMessagesRoute: ApiContactMessagesRoute,
+  ApiDashboardRoute: ApiDashboardRoute,
+  ApiDreamsRoute: ApiDreamsRoute,
+  ApiFaqsRoute: ApiFaqsRoute,
   ApiLeadsRoute: ApiLeadsRoute,
+  ApiSiteContentRoute: ApiSiteContentRoute,
+  ApiUserLoginRoute: ApiUserLoginRoute,
+  ApiUserRegisterRoute: ApiUserRegisterRoute,
+  ApiUserSessionRoute: ApiUserSessionRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,24 +1,27 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { articles, getArticle, type Article } from "@/lib/articles";
+import { seo } from "@/lib/seo";
+import { Fragment, useEffect, useState } from "react";
 
 export const Route = createFileRoute("/articles/$slug")({
   head: ({ params }) => {
     const a = getArticle(params.slug);
-    return {
-      meta: [
-        { title: `${a?.title ?? "บทความ"} — Likhitfa` },
-        { name: "description", content: a?.excerpt ?? "" },
-        { property: "og:image", content: a?.cover ?? "" },
-      ],
-    };
+    return seo({
+      title: a?.seoTitle || a?.title || "บทความ",
+      description: a?.seoDescription || a?.excerpt || "บทความดูดวงจาก Likhitfa",
+      path: `/articles/${params.slug}`,
+      image: a?.cover,
+      type: "article",
+      keywords: a?.keywords?.length
+        ? a.keywords
+        : ["บทความดูดวง", a?.category ?? "ดูดวง", a?.title ?? "Likhitfa"],
+      publishedTime: a?.date,
+      canonicalUrl: a?.canonicalUrl,
+    });
   },
-  loader: ({ params }) => {
-    const a = getArticle(params.slug);
-    if (!a) throw notFound();
-    return a;
-  },
+  loader: ({ params }) => ({ slug: params.slug }),
   notFoundComponent: () => (
     <div className="min-h-screen flex items-center justify-center text-center">
       <div>
@@ -33,7 +36,58 @@ export const Route = createFileRoute("/articles/$slug")({
 });
 
 function ArticleDetail() {
-  const a = Route.useLoaderData() as Article;
+  const { slug } = Route.useLoaderData() as { slug: string };
+  const [article, setArticle] = useState<Article | null>(getArticle(slug) || null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadArticle() {
+      const response = await fetch(`/api/articles?slug=${encodeURIComponent(slug)}`);
+      const data = await response.json().catch(() => ({}));
+      if (mounted && data.ok) setArticle(data.articles?.[0] || null);
+      if (mounted) setLoading(false);
+    }
+
+    void loadArticle();
+
+    return () => {
+      mounted = false;
+    };
+  }, [slug]);
+
+  useEffect(() => {
+    if (!article) return;
+    applyClientArticleSeo(article);
+  }, [article]);
+
+  if (loading && !article) {
+    return (
+      <div className="min-h-screen">
+        <SiteHeader subtitle="บทความ" subtitleCn="文章" />
+        <main className="mx-auto max-w-3xl px-6 pt-10 pb-12 text-sm text-muted-foreground">
+          กำลังโหลดบทความ...
+        </main>
+        <SiteFooter />
+      </div>
+    );
+  }
+
+  if (!article) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-center">
+        <div>
+          <h1 className="font-display text-4xl text-gold">ไม่พบบทความ</h1>
+          <Link to="/articles" className="mt-3 inline-block text-sm text-gold underline">
+            ดูบทความทั้งหมด
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const a = article;
   const related = articles
     .filter((x) => x.slug !== a.slug && x.category === a.category)
     .slice(0, 3);
@@ -56,12 +110,12 @@ function ArticleDetail() {
             <span>{a.readMin} นาที</span>
           </div>
           <div className="mt-8 aspect-[16/9] overflow-hidden rounded-2xl">
-            <img src={a.cover} alt={a.title} className="h-full w-full object-cover" />
+            <img src={a.cover} alt={a.coverAlt || a.title} className="h-full w-full object-cover" />
           </div>
           <div className="prose prose-invert mt-8 max-w-none space-y-4 text-[15px] leading-relaxed text-foreground/90">
             <p className="text-lg italic text-muted-foreground">{a.excerpt}</p>
             {a.content.map((p: string, i: number) => (
-              <p key={i}>{p}</p>
+              <ArticleBlock key={i} text={p} />
             ))}
           </div>
         </article>
@@ -76,7 +130,7 @@ function ArticleDetail() {
                   <div className="aspect-[16/10] overflow-hidden rounded-xl">
                     <img
                       src={r.cover}
-                      alt={r.title}
+                      alt={r.coverAlt || r.title}
                       className="h-full w-full object-cover transition group-hover:scale-105"
                     />
                   </div>
@@ -92,4 +146,111 @@ function ArticleDetail() {
       <SiteFooter />
     </div>
   );
+}
+
+function applyClientArticleSeo(article: Article) {
+  const title = article.seoTitle || article.title;
+  const fullTitle = title.includes("Likhitfa") ? title : `${title} — Likhitfa ลิขิตฟ้า`;
+  const description = article.seoDescription || article.excerpt;
+  const canonical = article.canonicalUrl || `${window.location.origin}/articles/${article.slug}`;
+  document.title = fullTitle;
+  setMeta("description", description);
+  setMeta(
+    "keywords",
+    (article.keywords || ["บทความดูดวง", article.category, article.title]).join(", "),
+  );
+  setMeta("twitter:title", fullTitle);
+  setMeta("twitter:description", description);
+  setMeta("twitter:image", article.cover);
+  setProperty("og:title", fullTitle);
+  setProperty("og:description", description);
+  setProperty("og:image", article.cover);
+  setProperty("og:url", canonical);
+  setCanonical(canonical);
+}
+
+function setMeta(name: string, content: string) {
+  const selector = `meta[name="${name}"]`;
+  let element = document.querySelector<HTMLMetaElement>(selector);
+  if (!element) {
+    element = document.createElement("meta");
+    element.setAttribute("name", name);
+    document.head.appendChild(element);
+  }
+  element.setAttribute("content", content);
+}
+
+function setProperty(property: string, content: string) {
+  const selector = `meta[property="${property}"]`;
+  let element = document.querySelector<HTMLMetaElement>(selector);
+  if (!element) {
+    element = document.createElement("meta");
+    element.setAttribute("property", property);
+    document.head.appendChild(element);
+  }
+  element.setAttribute("content", content);
+}
+
+function setCanonical(href: string) {
+  let element = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+  if (!element) {
+    element = document.createElement("link");
+    element.setAttribute("rel", "canonical");
+    document.head.appendChild(element);
+  }
+  element.setAttribute("href", href);
+}
+
+function ArticleBlock({ text }: { text: string }) {
+  if (text.startsWith("## ")) {
+    return (
+      <h2 className="pt-4 font-display text-2xl text-foreground">{renderInline(text.slice(3))}</h2>
+    );
+  }
+  if (text.startsWith("> ")) {
+    return (
+      <blockquote className="rounded-2xl border-l-4 border-gold bg-gold/5 px-5 py-4 text-gold/90">
+        {renderInline(text.slice(2))}
+      </blockquote>
+    );
+  }
+  if (text.startsWith("- ")) {
+    return (
+      <ul className="list-disc space-y-2 pl-6">
+        {text
+          .split("\n")
+          .filter((line) => line.trim().startsWith("- "))
+          .map((line, index) => (
+            <li key={index}>{renderInline(line.replace(/^- /, ""))}</li>
+          ))}
+      </ul>
+    );
+  }
+  return <p>{renderInline(text)}</p>;
+}
+
+function renderInline(text: string) {
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|\[[^\]]+\]\([^)]+\))/g).filter(Boolean);
+  return parts.map((part, index) => {
+    const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (link) {
+      const href = safeHref(link[2]);
+      return (
+        <a key={index} href={href} className="text-gold underline" rel="noreferrer" target="_blank">
+          {link[1]}
+        </a>
+      );
+    }
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={index}>{part.slice(2, -2)}</strong>;
+    }
+    if (part.startsWith("*") && part.endsWith("*")) {
+      return <em key={index}>{part.slice(1, -1)}</em>;
+    }
+    return <Fragment key={index}>{part}</Fragment>;
+  });
+}
+
+function safeHref(href: string) {
+  return /^https?:\/\//i.test(href) ? href : "#";
 }
