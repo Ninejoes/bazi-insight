@@ -6,4 +6,4 @@ Disallow: /login
 Disallow: /register
 Disallow: /profile
 
-Sitemap: https://bazi-insight.vercel.app/sitemap.xml
+Sitemap: https://www.likhitfa.online/sitemap.xml

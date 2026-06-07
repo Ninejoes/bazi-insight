@@ -1,8 +1,16 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { seo } from "@/lib/seo";
 
 export const Route = createFileRoute("/profile")({
+  head: () =>
+    seo({
+      title: "โปรไฟล์",
+      description: "หน้าโปรไฟล์ส่วนตัว ประวัติการดูดวง และการตั้งค่าบัญชี Likhitfa",
+      path: "/profile",
+      noindex: true,
+    }),
   component: ProfileLayout,
 });
 

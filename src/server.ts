@@ -2,6 +2,9 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { type Article } from "./lib/articles";
+import { buildSitemapXml } from "./lib/sitemap";
+import { siteUrl } from "./lib/seo";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -56,10 +59,63 @@ function withHtmlNoStore(response: Response) {
   });
 }
 
+function xmlHeaders(headers?: HeadersInit) {
+  const next = new Headers(headers);
+  next.set("Content-Type", "application/xml; charset=utf-8");
+  next.set("Cache-Control", "public, max-age=300, s-maxage=300, stale-while-revalidate=86400");
+  return next;
+}
+
+function textHeaders(headers?: HeadersInit) {
+  const next = new Headers(headers);
+  next.set("Content-Type", "text/plain; charset=utf-8");
+  next.set("Cache-Control", "public, max-age=300, s-maxage=300, stale-while-revalidate=86400");
+  return next;
+}
+
+async function loadArticlesForSitemap(
+  handler: ServerEntry,
+  request: Request,
+  env: unknown,
+  ctx: unknown,
+) {
+  const url = new URL(request.url);
+  const response = await handler.fetch(new Request(`${url.origin}/api/articles`), env, ctx);
+  if (!response.ok) return undefined;
+  const data = (await response.json().catch(() => null)) as { articles?: Article[] } | null;
+  return Array.isArray(data?.articles) ? data.articles : undefined;
+}
+
+async function sitemapResponse(handler: ServerEntry, request: Request, env: unknown, ctx: unknown) {
+  const articles = await loadArticlesForSitemap(handler, request, env, ctx);
+  return new Response(buildSitemapXml(articles, siteUrl), { headers: xmlHeaders() });
+}
+
+function robotsResponse() {
+  return new Response(
+    [
+      "User-agent: *",
+      "Allow: /",
+      "Disallow: /admin",
+      "Disallow: /admin-login",
+      "Disallow: /login",
+      "Disallow: /register",
+      "Disallow: /profile",
+      "",
+      `Sitemap: ${siteUrl}/sitemap.xml`,
+      "",
+    ].join("\n"),
+    { headers: textHeaders() },
+  );
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();
+      const url = new URL(request.url);
+      if (url.pathname === "/sitemap.xml") return sitemapResponse(handler, request, env, ctx);
+      if (url.pathname === "/robots.txt") return robotsResponse();
       const response = await handler.fetch(request, env, ctx);
       return withHtmlNoStore(await normalizeCatastrophicSsrResponse(response));
     } catch (error) {

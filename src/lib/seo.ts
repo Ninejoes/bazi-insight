@@ -1,5 +1,5 @@
 const SITE_NAME = "Likhitfa ลิขิตฟ้า";
-const SITE_URL = "https://bazi-insight.vercel.app";
+const SITE_URL = "https://www.likhitfa.online";
 const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg`;
 
 type SeoInput = {

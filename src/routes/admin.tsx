@@ -1,8 +1,16 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { BrandMark } from "@/components/site-header";
 import { useEffect, useState } from "react";
+import { seo } from "@/lib/seo";
 
 export const Route = createFileRoute("/admin")({
+  head: () =>
+    seo({
+      title: "ระบบหลังบ้าน — Admin",
+      description: "ระบบหลังบ้านสำหรับจัดการบทความ ผู้ใช้งาน ทำนายฝัน และเนื้อหาเว็บไซต์",
+      path: "/admin",
+      noindex: true,
+    }),
   component: AdminLayout,
 });
 
