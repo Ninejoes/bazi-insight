@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
-import { faqSeed, type FAQRecord } from "@/lib/admin-content";
+import { type FAQRecord } from "@/lib/admin-content";
 import { getSupabaseConfig, json, supabaseRequest } from "@/lib/supabase-rest";
 
 type FAQRow = {
@@ -10,8 +10,6 @@ type FAQRow = {
   sort_order?: number;
   sortOrder?: number;
 };
-
-let memoryFaqs: FAQRecord[] = [...faqSeed];
 
 function normalizeFaq(row: FAQRow): FAQRecord {
   return {
@@ -33,61 +31,67 @@ function toRow(faq: FAQRecord) {
 }
 
 async function listFaqs() {
-  const configured = Boolean(getSupabaseConfig());
-  try {
-    const response = await supabaseRequest("faqs?select=*&order=sort_order.asc");
-    if (!response) return { source: "memory", faqs: memoryFaqs };
-    const rows = (await response.json().catch(() => [])) as FAQRow[];
-    return { source: "supabase", faqs: rows.map(normalizeFaq) };
-  } catch (error) {
-    return {
-      source: "memory",
-      faqs: memoryFaqs,
-      error: configured && error instanceof Error ? error.message : undefined,
-    };
+  if (!getSupabaseConfig()) {
+    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
+
+  const response = await supabaseRequest("faqs?select=*&order=sort_order.asc");
+  if (!response) {
+    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
+  }
+
+  const rows = (await response.json().catch(() => [])) as FAQRow[];
+  return { source: "supabase", faqs: rows.map(normalizeFaq) };
 }
 
 async function saveFaqs(rows: FAQRow[]) {
-  const configured = Boolean(getSupabaseConfig());
-  const faqs = rows.map(normalizeFaq);
-  memoryFaqs = faqs;
-
-  try {
-    const response = await supabaseRequest("faqs?on_conflict=id", {
-      method: "POST",
-      headers: { Prefer: "resolution=merge-duplicates,return=representation" },
-      body: JSON.stringify(faqs.map(toRow)),
-    });
-    if (!response) return { source: "memory", faqs };
-    const saved = (await response.json().catch(() => [])) as FAQRow[];
-    return { source: "supabase", faqs: saved.map(normalizeFaq) };
-  } catch (error) {
-    if (configured) throw error;
-    return { source: "memory", faqs };
+  if (!getSupabaseConfig()) {
+    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
+
+  const faqs = rows.map(normalizeFaq);
+
+  const response = await supabaseRequest("faqs?on_conflict=id", {
+    method: "POST",
+    headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+    body: JSON.stringify(faqs.map(toRow)),
+  });
+  if (!response) {
+    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
+  }
+
+  const saved = (await response.json().catch(() => [])) as FAQRow[];
+  return { source: "supabase", faqs: saved.map(normalizeFaq) };
 }
 
 async function deleteFaq(id: string) {
-  const configured = Boolean(getSupabaseConfig());
-  memoryFaqs = memoryFaqs.filter((item) => item.id !== id);
-  try {
-    const response = await supabaseRequest(`faqs?id=eq.${encodeURIComponent(id)}`, {
-      method: "DELETE",
-    });
-    if (!response) return { source: "memory" };
-    return { source: "supabase" };
-  } catch (error) {
-    if (configured) throw error;
-    return { source: "memory" };
+  if (!getSupabaseConfig()) {
+    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
+
+  const response = await supabaseRequest(`faqs?id=eq.${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
+  if (!response) {
+    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
+  }
+  return { source: "supabase" };
 }
 
 export const Route = createFileRoute("/api/faqs")({
   server: {
     handlers: {
       OPTIONS: async () => json(null, { status: 204 }),
-      GET: async () => json({ ok: true, ...(await listFaqs()) }),
+      GET: async () => {
+        try {
+          return json({ ok: true, ...(await listFaqs()) });
+        } catch (error) {
+          return json(
+            { ok: false, error: error instanceof Error ? error.message : "โหลด FAQ ไม่สำเร็จ" },
+            { status: 502 },
+          );
+        }
+      },
       POST: async ({ request }) => {
         try {
           const body = await request.json();

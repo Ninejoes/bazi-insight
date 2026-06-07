@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { seo } from "@/lib/seo";
 import { useMemo, useRef, useState, useEffect } from "react";
-import { articles as seed, type Article } from "@/lib/articles";
+import type { Article } from "@/lib/articles";
 
 export const Route = createFileRoute("/admin/articles")({
   head: () =>
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/admin/articles")({
 });
 
 function AdminArticles() {
-  const [items, setItems] = useState<Article[]>(seed);
+  const [items, setItems] = useState<Article[]>([]);
   const [editing, setEditing] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [notice, setNotice] = useState("");
@@ -29,13 +29,10 @@ function AdminArticles() {
       const data = await response.json().catch(() => ({}));
       if (mounted && data.ok) {
         setItems(data.articles || []);
-        setNotice(
-          data.error
-            ? `เชื่อมต่อ Supabase สำหรับบทความไม่ได้: ${data.error}`
-            : data.source === "supabase"
-              ? "เชื่อมต่อบทความจาก Supabase แล้ว"
-              : "",
-        );
+        setNotice(data.source === "supabase" ? "เชื่อมต่อบทความจาก Supabase แล้ว" : "");
+      } else if (mounted) {
+        setItems([]);
+        setNotice(data.error || "โหลดบทความจาก Supabase ไม่สำเร็จ");
       }
       if (mounted) setLoading(false);
     }
@@ -52,7 +49,9 @@ function AdminArticles() {
     const data = await response.json().catch(() => ({}));
     if (data.ok) {
       setItems(data.articles || []);
-      if (data.error) setNotice(`เชื่อมต่อ Supabase สำหรับบทความไม่ได้: ${data.error}`);
+    } else {
+      setItems([]);
+      setNotice(data.error || "โหลดบทความจาก Supabase ไม่สำเร็จ");
     }
   };
 
@@ -173,6 +172,11 @@ function AdminArticles() {
             ))}
           </tbody>
         </table>
+        {!loading && items.length === 0 ? (
+          <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+            ยังไม่มีบทความจาก Supabase
+          </div>
+        ) : null}
       </section>
 
       {editing && (

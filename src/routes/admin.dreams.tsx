@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { seo } from "@/lib/seo";
 import { useEffect, useState } from "react";
-import { dreamSeed as seed, type DreamRecord as Dream } from "@/lib/admin-content";
+import type { DreamRecord as Dream } from "@/lib/admin-content";
 
 export const Route = createFileRoute("/admin/dreams")({
   head: () =>
@@ -17,7 +17,7 @@ export const Route = createFileRoute("/admin/dreams")({
 const letters = "กขคงจฉชซญดตถทนบปผฝพฟภมยรลวศษสหฬอฮ".split("");
 
 function AdminDreams() {
-  const [items, setItems] = useState(seed);
+  const [items, setItems] = useState<Dream[]>([]);
   const [filterLetter, setFilterLetter] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<Dream | null>(null);
@@ -31,14 +31,11 @@ function AdminDreams() {
       const response = await fetch("/api/dreams");
       const data = await response.json().catch(() => ({}));
       if (mounted && data.ok) {
-        setItems(data.dreams || seed);
-        setNotice(
-          data.error
-            ? `เชื่อมต่อ Supabase สำหรับทำนายฝันไม่ได้: ${data.error}`
-            : data.source === "supabase"
-              ? "เชื่อมต่อข้อมูลทำนายฝันจาก Supabase แล้ว"
-              : "",
-        );
+        setItems(data.dreams || []);
+        setNotice(data.source === "supabase" ? "เชื่อมต่อข้อมูลทำนายฝันจาก Supabase แล้ว" : "");
+      } else if (mounted) {
+        setItems([]);
+        setNotice(data.error || "โหลดข้อมูลทำนายฝันจาก Supabase ไม่สำเร็จ");
       }
       if (mounted) setLoading(false);
     }
@@ -53,8 +50,12 @@ function AdminDreams() {
   const reload = async () => {
     const response = await fetch("/api/dreams");
     const data = await response.json().catch(() => ({}));
-    if (data.ok) setItems(data.dreams || seed);
-    if (data.error) setNotice(`เชื่อมต่อ Supabase สำหรับทำนายฝันไม่ได้: ${data.error}`);
+    if (data.ok) {
+      setItems(data.dreams || []);
+    } else {
+      setItems([]);
+      setNotice(data.error || "โหลดข้อมูลทำนายฝันจาก Supabase ไม่สำเร็จ");
+    }
   };
 
   const saveDream = async (dream: Dream, message: string) => {
@@ -172,6 +173,11 @@ function AdminDreams() {
             ))}
           </tbody>
         </table>
+        {!loading && shown.length === 0 ? (
+          <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+            ยังไม่มีข้อมูลทำนายฝันจาก Supabase
+          </div>
+        ) : null}
       </section>
 
       {adding && (

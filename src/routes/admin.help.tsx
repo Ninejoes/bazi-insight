@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { seo } from "@/lib/seo";
 import { useEffect, useState } from "react";
-import { faqSeed as initial, type FAQRecord as FAQ } from "@/lib/admin-content";
+import { type FAQRecord as FAQ } from "@/lib/admin-content";
 
 export const Route = createFileRoute("/admin/help")({
   head: () =>
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/admin/help")({
 });
 
 function AdminHelp() {
-  const [faqs, setFaqs] = useState(initial);
+  const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [adding, setAdding] = useState(false);
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(true);
@@ -26,8 +26,15 @@ function AdminHelp() {
     async function loadFaqs() {
       const response = await fetch("/api/faqs");
       const data = await response.json().catch(() => ({}));
+      if (!mounted) return;
+      if (!response.ok || !data.ok) {
+        setNotice(data.error || "โหลด FAQ จาก Supabase ไม่สำเร็จ");
+        setLoading(false);
+        return;
+      }
+
       if (mounted && data.ok) {
-        setFaqs(data.faqs || initial);
+        setFaqs(data.faqs || []);
         setNotice(
           data.error
             ? `เชื่อมต่อ Supabase สำหรับศูนย์ช่วยเหลือไม่ได้: ${data.error}`

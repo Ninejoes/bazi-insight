@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo } from "@/lib/seo";
-import { faqSeed, type FAQRecord } from "@/lib/admin-content";
+import { type FAQRecord } from "@/lib/admin-content";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/help")({
@@ -26,8 +26,9 @@ const topics = [
 
 function HelpPage() {
   const [open, setOpen] = useState<number | null>(0);
-  const [faqs, setFaqs] = useState<FAQRecord[]>(faqSeed);
+  const [faqs, setFaqs] = useState<FAQRecord[]>([]);
   const [query, setQuery] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -35,7 +36,12 @@ function HelpPage() {
     async function loadFaqs() {
       const response = await fetch("/api/faqs");
       const data = await response.json().catch(() => ({}));
-      if (mounted && data.ok) setFaqs(data.faqs || faqSeed);
+      if (!mounted) return;
+      if (!response.ok || !data.ok) {
+        setError(data.error || "โหลดศูนย์ช่วยเหลือไม่สำเร็จ");
+        return;
+      }
+      setFaqs(data.faqs || []);
     }
 
     void loadFaqs();
@@ -57,7 +63,7 @@ function HelpPage() {
           <div className="text-[11px] uppercase tracking-[0.3em] text-gold/70">HELP CENTER</div>
           <h1 className="mt-2 font-display text-5xl text-foreground">ศูนย์ช่วยเหลือ</h1>
           <p className="mx-auto mt-4 max-w-xl text-sm text-muted-foreground">
-            ค้นหาคำตอบ หรือเลือกหมวดด้านล่าง
+            {error || "ค้นหาคำตอบ หรือเลือกหมวดด้านล่าง"}
           </p>
           <div className="mx-auto mt-6 max-w-xl">
             <input
@@ -82,6 +88,9 @@ function HelpPage() {
         <section className="mt-12">
           <h2 className="font-display text-3xl text-foreground">คำถามที่พบบ่อย</h2>
           <div className="gold-divider my-5 w-24" />
+          {error ? (
+            <div className="glass rounded-2xl p-5 text-sm text-rose-200">{error}</div>
+          ) : null}
           <div className="space-y-3">
             {filteredFaqs.map((f, i) => {
               const o = open === i;

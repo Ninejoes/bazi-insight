@@ -22,30 +22,24 @@ type DashboardData = {
   error?: string;
 };
 
-const dashboardSeed: DashboardData = {
+const emptyDashboard: DashboardData = {
   kpis: [
-    { label: "ผู้ใช้งานทั้งหมด", value: "12,482", delta: "+8.2%" },
-    { label: "การดูดวงวันนี้", value: "1,284", delta: "+12.4%" },
-    { label: "สมาชิกใหม่สัปดาห์นี้", value: "342", delta: "+4.1%" },
-    { label: "บทความที่เผยแพร่", value: "86", delta: "+2" },
+    { label: "ผู้ใช้งานทั้งหมด", value: "0", delta: "รอข้อมูล Supabase" },
+    { label: "ข้อมูลทำนายฝัน", value: "0", delta: "รอข้อมูล Supabase" },
+    { label: "ข้อความติดต่อ", value: "0", delta: "รอข้อมูล Supabase" },
+    { label: "บทความที่เผยแพร่", value: "0", delta: "รอข้อมูล Supabase" },
   ],
-  visits: [42, 56, 38, 71, 64, 88, 76],
+  visits: [0, 0, 0, 0, 0, 0, 0],
   services: [
-    { label: "ไพ่ยิปซี", pct: 54, color: "bg-gradient-gold" },
-    { label: "ปาจื้อ", pct: 28, color: "bg-emerald-400/80" },
-    { label: "ทำนายฝัน", pct: 18, color: "bg-sky-400/80" },
+    { label: "ไพ่ยิปซี", pct: 0, color: "bg-gradient-gold" },
+    { label: "ปาจื้อ", pct: 0, color: "bg-emerald-400/80" },
+    { label: "ทำนายฝัน", pct: 0, color: "bg-sky-400/80" },
   ],
-  topPages: [
-    { page: "/tarot/daily", views: 4820, pct: 92 },
-    { page: "/tarot/love", views: 3210, pct: 70 },
-    { page: "/dream", views: 2980, pct: 64 },
-    { page: "/bazi", views: 2410, pct: 55 },
-    { page: "/articles", views: 980, pct: 24 },
-  ],
+  topPages: [],
 };
 
 function AdminDashboard() {
-  const [data, setData] = useState<DashboardData>(dashboardSeed);
+  const [data, setData] = useState<DashboardData>(emptyDashboard);
   const [notice, setNotice] = useState("");
 
   useEffect(() => {
@@ -54,6 +48,11 @@ function AdminDashboard() {
     async function loadDashboard() {
       const response = await fetch("/api/dashboard");
       const result = await response.json().catch(() => ({}));
+      if (!mounted) return;
+      if (!response.ok || !result.ok) {
+        setNotice(result.error || "โหลด Dashboard จาก Supabase ไม่สำเร็จ");
+        return;
+      }
       if (mounted && result.ok) {
         setData(result);
         setNotice(
