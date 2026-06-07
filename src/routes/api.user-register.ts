@@ -20,23 +20,6 @@ function json(body: unknown, init?: ResponseInit) {
   });
 }
 
-function localSession(body: RegisterBody) {
-  return {
-    id: `local-user-${Date.now()}`,
-    email: body.email,
-    name: body.displayName || `${body.firstName} ${body.lastName}`.trim() || body.email,
-    role: "User",
-    mode: "local-dev",
-    profile: {
-      firstName: body.firstName,
-      lastName: body.lastName,
-      displayName: body.displayName,
-      birthDate: body.birthDate,
-      gender: body.gender,
-    },
-  };
-}
-
 type RegisterBody = {
   firstName: string;
   lastName: string;
@@ -114,12 +97,9 @@ export const Route = createFileRoute("/api/user-register")({
 
           const config = getSupabaseAuthConfig();
           if (!config) {
-            if (process.env.NODE_ENV === "production") {
-              throw new Error(
-                "ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server",
-              );
-            }
-            return json({ ok: true, session: localSession(body) });
+            throw new Error(
+              "ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server",
+            );
           }
 
           await createSupabaseUser(config.url, config.serviceKey, body);

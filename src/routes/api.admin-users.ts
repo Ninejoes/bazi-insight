@@ -114,26 +114,9 @@ export const Route = createFileRoute("/api/admin-users")({
         try {
           const config = getSupabaseConfig();
           if (!config) {
-            if (process.env.NODE_ENV === "production") {
-              throw new Error(
-                "ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server",
-              );
-            }
-
-            return json({
-              ok: true,
-              source: "local-dev",
-              users: [
-                {
-                  id: "local-admin",
-                  name: "Admin",
-                  email: ADMIN_EMAIL,
-                  role: "Admin",
-                  joined: "2026-06-06",
-                  status: "Active",
-                },
-              ],
-            });
+            throw new Error(
+              "ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server",
+            );
           }
 
           await requireAdmin(config.url, config.serviceKey, readBearer(request));

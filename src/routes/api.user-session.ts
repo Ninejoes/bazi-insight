@@ -27,12 +27,9 @@ export const Route = createFileRoute("/api/user-session")({
           const config = getSupabaseAuthConfig();
           const token = readBearer(request);
           if (!config) {
-            if (process.env.NODE_ENV === "production") {
-              throw new Error(
-                "ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server",
-              );
-            }
-            return json({ ok: true, session: { role: "User", mode: "local-dev" } });
+            throw new Error(
+              "ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server",
+            );
           }
           const user = await verifySupabaseUser(config.url, config.serviceKey, token);
           return json({ ok: true, session: toUserSession({}, user) });
