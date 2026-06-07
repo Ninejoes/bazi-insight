@@ -65,7 +65,7 @@ async function rest(path, init = {}) {
 }
 
 function sendRestError(res, result) {
-  return send(res, 502, { ok: false, error: result.error || "Supabase request failed" });
+  return send(res, 200, { ok: false, error: result.error || "Supabase request failed" });
 }
 
 function pathName(req) {
@@ -518,7 +518,7 @@ export default async function handler(req, res) {
     if (route === "dashboard" && req.method === "GET") return await dashboard(res);
     return send(res, 404, { ok: false, error: `Unknown API route: ${route}` });
   } catch (error) {
-    return send(res, 502, {
+    return send(res, 200, {
       ok: false,
       error: error instanceof Error ? error.message : "API ทำงานไม่สำเร็จ",
     });
