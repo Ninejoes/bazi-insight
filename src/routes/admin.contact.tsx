@@ -25,6 +25,13 @@ function AdminContact() {
     async function loadContent() {
       const response = await fetch("/api/site-content");
       const data = await response.json().catch(() => ({}));
+      if (!mounted) return;
+      if (!response.ok || !data.ok) {
+        setNotice(data.error || "โหลดข้อมูลเว็บไซต์จาก Supabase ไม่สำเร็จ");
+        setLoading(false);
+        return;
+      }
+
       if (mounted && data.ok) {
         setContent(data.content || siteContentSeed);
         setNotice(

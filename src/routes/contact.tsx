@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo } from "@/lib/seo";
-import { siteContentSeed, type ContactContent } from "@/lib/admin-content";
+import { type ContactContent } from "@/lib/admin-content";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/contact")({
@@ -18,8 +18,9 @@ export const Route = createFileRoute("/contact")({
 });
 
 function ContactPage() {
-  const [contact, setContact] = useState<ContactContent>(siteContentSeed.contact);
+  const [contact, setContact] = useState<ContactContent | null>(null);
   const [notice, setNotice] = useState("");
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -27,7 +28,12 @@ function ContactPage() {
     async function loadContact() {
       const response = await fetch("/api/site-content");
       const data = await response.json().catch(() => ({}));
-      if (mounted && data.ok) setContact(data.content?.contact || siteContentSeed.contact);
+      if (!mounted) return;
+      if (!response.ok || !data.ok) {
+        setLoadError(data.error || "โหลดข้อมูลติดต่อไม่สำเร็จ");
+        return;
+      }
+      setContact(data.content?.contact || null);
     }
 
     void loadContact();
@@ -38,10 +44,10 @@ function ContactPage() {
   }, []);
 
   const channels = [
-    { icon: "✉", label: "อีเมล", value: contact.email, link: `mailto:${contact.email}` },
-    { icon: "☎", label: "โทรศัพท์", value: contact.phone, link: `tel:${contact.phone}` },
-    { icon: "✦", label: "Line Official", value: contact.line, link: "#" },
-    { icon: "✉", label: "ที่อยู่", value: contact.address },
+    { icon: "✉", label: "อีเมล", value: contact?.email, link: `mailto:${contact?.email || ""}` },
+    { icon: "☎", label: "โทรศัพท์", value: contact?.phone, link: `tel:${contact?.phone || ""}` },
+    { icon: "✦", label: "Line Official", value: contact?.line, link: "#" },
+    { icon: "✉", label: "ที่อยู่", value: contact?.address },
   ];
 
   return (
@@ -52,7 +58,7 @@ function ContactPage() {
           <div className="text-[11px] uppercase tracking-[0.3em] text-gold/70">CONTACT</div>
           <h1 className="mt-2 font-display text-5xl text-foreground">ติดต่อเรา</h1>
           <p className="mx-auto mt-4 max-w-xl text-sm text-muted-foreground">
-            ทีมงานพร้อมตอบทุกคำถาม คำแนะนำ และเรื่องร้องเรียน ภายใน 1-2 วันทำการ
+            {loadError || "ทีมงานพร้อมตอบทุกคำถาม คำแนะนำ และเรื่องร้องเรียน ภายใน 1-2 วันทำการ"}
           </p>
         </section>
 
@@ -108,26 +114,33 @@ function ContactPage() {
           </div>
 
           <div className="space-y-4">
-            {channels.map((c) => (
-              <a
-                key={c.label}
-                href={c.link ?? "#"}
-                className="glass flex items-center gap-4 rounded-2xl p-5 transition hover:bg-gold/10"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-gold text-xl text-primary-foreground">
-                  {c.icon}
-                </div>
-                <div>
-                  <div className="text-xs uppercase tracking-wider text-gold/80">{c.label}</div>
-                  <div className="text-sm text-foreground">{c.value}</div>
-                </div>
-              </a>
-            ))}
-            <div className="glass rounded-2xl p-5">
-              <div className="text-xs uppercase tracking-wider text-gold/80">เวลาทำการ</div>
-              <div className="mt-2 text-sm text-foreground">{contact.hoursWeekday}</div>
-              <div className="text-sm text-muted-foreground">{contact.hoursSaturday}</div>
-            </div>
+            {loadError ? (
+              <div className="glass rounded-2xl p-5 text-sm text-rose-200">{loadError}</div>
+            ) : null}
+            {contact
+              ? channels.map((c) => (
+                  <a
+                    key={c.label}
+                    href={c.link ?? "#"}
+                    className="glass flex items-center gap-4 rounded-2xl p-5 transition hover:bg-gold/10"
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-gold text-xl text-primary-foreground">
+                      {c.icon}
+                    </div>
+                    <div>
+                      <div className="text-xs uppercase tracking-wider text-gold/80">{c.label}</div>
+                      <div className="text-sm text-foreground">{c.value}</div>
+                    </div>
+                  </a>
+                ))
+              : null}
+            {contact ? (
+              <div className="glass rounded-2xl p-5">
+                <div className="text-xs uppercase tracking-wider text-gold/80">เวลาทำการ</div>
+                <div className="mt-2 text-sm text-foreground">{contact.hoursWeekday}</div>
+                <div className="text-sm text-muted-foreground">{contact.hoursSaturday}</div>
+              </div>
+            ) : null}
           </div>
         </section>
       </main>
