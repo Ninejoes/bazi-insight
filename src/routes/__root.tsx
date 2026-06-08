@@ -107,7 +107,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: `${siteUrl}/sitemap.xml`,
       },
     ],
-    scripts: [websiteJsonLd(), organizationJsonLd()],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -121,6 +120,14 @@ function RootShell({ children }: { children: ReactNode }) {
       <head>
         <HeadContent />
         <script async src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: websiteJsonLd().children }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: organizationJsonLd().children }}
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `

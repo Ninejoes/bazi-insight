@@ -132,6 +132,10 @@ function ArticleDetail() {
           ← กลับสู่บทความทั้งหมด
         </Link>
         <article className="mt-6">
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: articleJsonLd(a).children }}
+          />
           <div className="text-[11px] uppercase tracking-[0.25em] text-gold">{a.category}</div>
           <h1 className="mt-2 font-display text-4xl text-foreground md:text-5xl">{a.title}</h1>
           <div className="mt-4 flex items-center gap-3 text-xs text-muted-foreground">
@@ -225,7 +229,6 @@ function articleSeo(article: Article) {
     type: "article",
     keywords: article.keywords || ["บทความดูดวง", article.category, article.title],
     publishedTime: article.date,
-    scripts: [articleJsonLd(article)],
   });
 }
 

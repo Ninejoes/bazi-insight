@@ -18,7 +18,6 @@ type SeoInput = {
   publishedTime?: string;
   modifiedTime?: string;
   canonicalUrl?: string;
-  scripts?: Array<Record<string, string>>;
 };
 
 export function seo({
@@ -32,7 +31,6 @@ export function seo({
   publishedTime,
   modifiedTime,
   canonicalUrl,
-  scripts = [],
 }: SeoInput) {
   const canonical = canonicalUrl || `${SITE_URL}${path}`;
   const imageUrl = image.startsWith("http")
@@ -74,7 +72,6 @@ export function seo({
       { rel: "alternate", hrefLang: "th-TH", href: canonical },
       { rel: "sitemap", type: "application/xml", href: `${SITE_URL}/sitemap.xml` },
     ],
-    scripts,
   };
 }
 
