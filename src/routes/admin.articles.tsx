@@ -20,6 +20,7 @@ function AdminArticles() {
   const [creating, setCreating] = useState(false);
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(true);
+  const [savingAction, setSavingAction] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -56,31 +57,47 @@ function AdminArticles() {
   };
 
   const saveArticle = async (article: Article, message: string) => {
-    const response = await fetch("/api/articles", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(article),
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok || !data.ok) {
-      setNotice(data.error || "บันทึกบทความไม่สำเร็จ");
-      return;
+    setSavingAction(`save:${article.slug}`);
+    setNotice("");
+    try {
+      const response = await fetch("/api/articles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(article),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) {
+        setNotice(data.error || "บันทึกบทความไม่สำเร็จ");
+        return false;
+      }
+      await reload();
+      setNotice(message);
+      window.alert(message);
+      return true;
+    } finally {
+      setSavingAction("");
     }
-    await reload();
-    setNotice(message);
   };
 
   const removeArticle = async (slug: string) => {
-    const response = await fetch(`/api/articles?slug=${encodeURIComponent(slug)}`, {
-      method: "DELETE",
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok || !data.ok) {
-      setNotice(data.error || "ลบบทความไม่สำเร็จ");
-      return;
+    if (!window.confirm("ลบบทความนี้ออกจาก Supabase จริงไหม?")) return;
+    setSavingAction(`delete:${slug}`);
+    setNotice("");
+    try {
+      const response = await fetch(`/api/articles?slug=${encodeURIComponent(slug)}`, {
+        method: "DELETE",
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) {
+        setNotice(data.error || "ลบบทความไม่สำเร็จ");
+        return;
+      }
+      await reload();
+      setNotice("ลบบทความแล้ว");
+      window.alert("ลบบทความแล้ว");
+    } finally {
+      setSavingAction("");
     }
-    await reload();
-    setNotice("ลบบทความแล้ว");
   };
 
   return (
@@ -108,9 +125,10 @@ function AdminArticles() {
         <Editor
           onClose={() => setCreating(false)}
           title="เพิ่มบทความใหม่"
+          saving={savingAction.startsWith("save:")}
           onSave={async (article) => {
-            await saveArticle(article, "เพิ่มบทความแล้ว และซิงก์ไปหน้า public แล้ว");
-            setCreating(false);
+            const saved = await saveArticle(article, "เพิ่มบทความแล้ว และซิงก์ไปหน้า public แล้ว");
+            if (saved) setCreating(false);
           }}
         />
       )}
@@ -163,9 +181,10 @@ function AdminArticles() {
                   </button>
                   <button
                     onClick={() => void removeArticle(a.slug)}
+                    disabled={savingAction === `delete:${a.slug}`}
                     className="rounded-md border border-rose-400/30 px-2 py-1 text-xs text-rose-300 hover:bg-rose-400/10"
                   >
-                    ลบ
+                    {savingAction === `delete:${a.slug}` ? "กำลังลบ..." : "ลบ"}
                   </button>
                 </td>
               </tr>
@@ -184,9 +203,10 @@ function AdminArticles() {
           onClose={() => setEditing(null)}
           title={`แก้ไข: ${items.find((x) => x.slug === editing)?.title}`}
           initial={items.find((x) => x.slug === editing)}
+          saving={savingAction.startsWith("save:")}
           onSave={async (article) => {
-            await saveArticle(article, "บันทึกบทความแล้ว และซิงก์ไปหน้า public แล้ว");
-            setEditing(null);
+            const saved = await saveArticle(article, "บันทึกบทความแล้ว และซิงก์ไปหน้า public แล้ว");
+            if (saved) setEditing(null);
           }}
         />
       )}
@@ -198,11 +218,13 @@ function Editor({
   onClose,
   title,
   initial,
+  saving,
   onSave,
 }: {
   onClose: () => void;
   title: string;
   initial?: Article;
+  saving: boolean;
   onSave: (article: Article) => void | Promise<void>;
 }) {
   const makeSlug = (titleValue: string) =>
@@ -301,10 +323,7 @@ function Editor({
                 .map((part) => part.trim())
                 .filter(Boolean),
               canonicalUrl: canonicalUrl.trim(),
-              content: content
-                .split(/\n\s*\n/)
-                .map((part) => part.trim())
-                .filter(Boolean),
+              content: splitMarkdownBlocks(content),
               date: initial?.date || new Date().toISOString().slice(0, 10),
               readMin,
             });
@@ -387,6 +406,10 @@ function Editor({
                   label="หัวข้อ"
                   onClick={() => insertMarkdown("## ", "", "หัวข้อย่อย")}
                 />
+                <ToolbarButton
+                  label="หัวข้อเล็ก"
+                  onClick={() => insertMarkdown("### ", "", "หัวข้อย่อย")}
+                />
                 <ToolbarButton label="ตัวหนา" onClick={() => insertMarkdown("**", "**")} />
                 <ToolbarButton label="ตัวเอียง" onClick={() => insertMarkdown("*", "*")} />
                 <ToolbarButton
@@ -394,7 +417,9 @@ function Editor({
                   onClick={() => insertMarkdown("[", "](https://)", "ข้อความลิงก์")}
                 />
                 <ToolbarButton label="รายการ" onClick={() => insertMarkdown("- ", "", "รายการ")} />
+                <ToolbarButton label="ลำดับ" onClick={() => insertMarkdown("1. ", "", "รายการ")} />
                 <ToolbarButton label="คำคม" onClick={() => insertMarkdown("> ", "", "คำคม")} />
+                <ToolbarButton label="เส้นคั่น" onClick={() => insertMarkdown("\n---\n", "", "")} />
               </div>
               <textarea
                 ref={textareaRef}
@@ -479,13 +504,17 @@ function Editor({
             <div className="flex justify-end gap-2">
               <button
                 type="button"
+                disabled={saving}
                 onClick={onClose}
                 className="rounded-xl border border-gold/20 px-5 py-2 text-sm"
               >
                 ยกเลิก
               </button>
-              <button className="rounded-xl bg-gradient-gold px-6 py-2 text-sm font-semibold text-primary-foreground shadow-gold">
-                บันทึก
+              <button
+                disabled={saving}
+                className="rounded-xl bg-gradient-gold px-6 py-2 text-sm font-semibold text-primary-foreground shadow-gold disabled:cursor-wait disabled:opacity-60"
+              >
+                {saving ? "กำลังบันทึก..." : "บันทึก"}
               </button>
             </div>
           </aside>
@@ -493,6 +522,39 @@ function Editor({
       </div>
     </div>
   );
+}
+
+function splitMarkdownBlocks(value: string) {
+  const blocks: string[] = [];
+  let listBuffer: string[] = [];
+
+  const flushList = () => {
+    if (listBuffer.length) {
+      blocks.push(listBuffer.join("\n"));
+      listBuffer = [];
+    }
+  };
+
+  for (const rawLine of value.replace(/\r\n/g, "\n").split("\n")) {
+    const line = rawLine.trimEnd();
+    const trimmed = line.trim();
+
+    if (!trimmed) {
+      flushList();
+      continue;
+    }
+
+    if (/^(-|\d+\.)\s+/.test(trimmed)) {
+      listBuffer.push(trimmed);
+      continue;
+    }
+
+    flushList();
+    blocks.push(trimmed);
+  }
+
+  flushList();
+  return blocks.filter(Boolean);
 }
 
 function ToolbarButton({ label, onClick }: { label: string; onClick: () => void }) {

@@ -271,6 +271,12 @@ function ArticleBlock({ text }: { text: string }) {
       <h2 className="pt-4 font-display text-2xl text-foreground">{renderInline(text.slice(3))}</h2>
     );
   }
+  if (text.startsWith("### ")) {
+    return <h3 className="pt-2 text-xl font-semibold text-foreground">{renderInline(text.slice(4))}</h3>;
+  }
+  if (text.trim() === "---") {
+    return <hr className="my-6 border-gold/20" />;
+  }
   if (text.startsWith("> ")) {
     return (
       <blockquote className="rounded-2xl border-l-4 border-gold bg-gold/5 px-5 py-4 text-gold/90">
@@ -290,7 +296,28 @@ function ArticleBlock({ text }: { text: string }) {
       </ul>
     );
   }
-  return <p>{renderInline(text)}</p>;
+  if (/^\d+\.\s/.test(text.trim())) {
+    return (
+      <ol className="list-decimal space-y-2 pl-6">
+        {text
+          .split("\n")
+          .filter((line) => /^\d+\.\s/.test(line.trim()))
+          .map((line, index) => (
+            <li key={index}>{renderInline(line.trim().replace(/^\d+\.\s/, ""))}</li>
+          ))}
+      </ol>
+    );
+  }
+  return (
+    <p>
+      {text.split("\n").map((line, index) => (
+        <Fragment key={index}>
+          {index > 0 ? <br /> : null}
+          {renderInline(line)}
+        </Fragment>
+      ))}
+    </p>
+  );
 }
 
 function renderInline(text: string) {

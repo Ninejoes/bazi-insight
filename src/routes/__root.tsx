@@ -3,6 +3,7 @@ import {
   Outlet,
   Link,
   createRootRouteWithContext,
+  useLocation,
   useRouter,
   HeadContent,
   Scripts,
@@ -12,6 +13,12 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { googleAnalyticsId, siteName, siteUrl } from "../lib/seo";
+
+declare global {
+  interface Window {
+    gtag?: (...args: unknown[]) => void;
+  }
+}
 
 function NotFoundComponent() {
   return (
@@ -107,26 +114,9 @@ function RootShell({ children }: { children: ReactNode }) {
             __html: `
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
+window.gtag = gtag;
 gtag('js', new Date());
-gtag('config', '${googleAnalyticsId}', { page_path: window.location.pathname + window.location.search });
-(function(){
-  var lastPath = window.location.pathname + window.location.search;
-  function trackPageView(){
-    var nextPath = window.location.pathname + window.location.search;
-    if (nextPath === lastPath) return;
-    lastPath = nextPath;
-    gtag('config', '${googleAnalyticsId}', { page_path: nextPath, page_location: window.location.href });
-  }
-  ['pushState', 'replaceState'].forEach(function(method){
-    var original = history[method];
-    history[method] = function(){
-      var result = original.apply(this, arguments);
-      setTimeout(trackPageView, 0);
-      return result;
-    };
-  });
-  window.addEventListener('popstate', trackPageView);
-})();
+gtag('config', '${googleAnalyticsId}', { send_page_view: false });
 `.trim(),
           }}
         />
@@ -144,8 +134,26 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AnalyticsTracker />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
     </QueryClientProvider>
   );
+}
+
+function AnalyticsTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const pagePath = `${location.pathname}${location.search || ""}`;
+    const pageLocation = `${window.location.origin}${pagePath}`;
+    window.gtag?.("event", "page_view", {
+      send_to: googleAnalyticsId,
+      page_title: document.title,
+      page_location: pageLocation,
+      page_path: pagePath,
+    });
+  }, [location.pathname, location.search]);
+
+  return null;
 }

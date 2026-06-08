@@ -211,21 +211,118 @@ async function adminSession(req, res) {
 
 async function adminUsers(req, res) {
   await requireAdmin(req);
-  const result = await rest("users?select=*&order=created_at.desc");
-  if (!result.ok) return sendRestError(res, result);
-  const rows = Array.isArray(result.data) ? result.data : [];
-  const users = rows.map((user) => ({
-    id: user.id,
-    email: user.email,
-    name: user.name || user.email,
-    role: user.role || "User",
-    status: user.status === "disabled" ? "Suspended" : "Active",
-    joined: String(user.created_at || "").slice(0, 10),
-    createdAt: user.created_at,
-    lastSignInAt: user.last_sign_in_at,
-    provider: user.provider || "email",
-  }));
-  return send(res, 200, { ok: true, source: "supabase-public-users", users });
+
+  if (req.method === "GET") {
+    const result = await rest("users?select=*&order=created_at.desc");
+    if (!result.ok) return sendRestError(res, result);
+    const rows = Array.isArray(result.data) ? result.data : [];
+    const users = rows.map((user) => ({
+      id: user.id,
+      email: user.email,
+      name: user.name || user.email,
+      role: user.role || "User",
+      status: user.status === "disabled" ? "Suspended" : "Active",
+      joined: String(user.created_at || "").slice(0, 10),
+      createdAt: user.created_at,
+      lastSignInAt: user.last_sign_in_at,
+      provider: user.provider || "email",
+    }));
+    return send(res, 200, { ok: true, source: "supabase-public-users", users });
+  }
+
+  if (req.method === "PATCH") {
+    const body = await readBody(req);
+    const id = String(body.id || "").trim();
+    const email = String(body.email || "")
+      .trim()
+      .toLowerCase();
+    const name = String(body.name || email || "User").trim().slice(0, 160);
+    const isPrimaryAdmin = email === ADMIN_EMAIL;
+    const role = isPrimaryAdmin ? ADMIN_ROLE : body.role === ADMIN_ROLE ? ADMIN_ROLE : "User";
+    const status = isPrimaryAdmin
+      ? "active"
+      : body.status === "Suspended" || body.status === "disabled"
+        ? "disabled"
+        : "active";
+    if (!id) return send(res, 400, { ok: false, error: "Missing user id" });
+
+    const { url, serviceKey } = requireConfig();
+    const publicResult = await rest(`users?id=eq.${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({
+        name,
+        role,
+        status,
+        updated_at: new Date().toISOString(),
+      }),
+    });
+    if (!publicResult.ok) return sendRestError(res, publicResult);
+
+    const authPayload = {
+      user_metadata: { name, role },
+      app_metadata: { role },
+      ban_duration: status === "disabled" ? "876000h" : "none",
+    };
+    const authResponse = await fetch(`${url}/auth/v1/admin/users/${encodeURIComponent(id)}`, {
+      method: "PUT",
+      headers: headers(serviceKey),
+      body: JSON.stringify(authPayload),
+    });
+    if (!authResponse.ok) {
+      const detail = await readText(authResponse);
+      return send(res, 200, {
+        ok: false,
+        error: `Supabase Auth update failed ${authResponse.status}: ${detail}`,
+      });
+    }
+
+    const rows = Array.isArray(publicResult.data) ? publicResult.data : [];
+    const saved = rows[0] || { id, email, name, role, status };
+    return send(res, 200, {
+      ok: true,
+      source: "supabase-public-users",
+      user: {
+        id: saved.id,
+        email: saved.email || email,
+        name: saved.name || name,
+        role: saved.role || role,
+        status: saved.status === "disabled" ? "Suspended" : "Active",
+        joined: String(saved.created_at || "").slice(0, 10),
+        createdAt: saved.created_at,
+        lastSignInAt: saved.last_sign_in_at,
+        provider: saved.provider || "email",
+      },
+    });
+  }
+
+  if (req.method === "DELETE") {
+    const id = new URL(req.url, "https://likhitfa.local").searchParams.get("id") || "";
+    const email = new URL(req.url, "https://likhitfa.local").searchParams.get("email") || "";
+    if (!id) return send(res, 400, { ok: false, error: "Missing user id" });
+    if (email.toLowerCase() === ADMIN_EMAIL) {
+      return send(res, 400, { ok: false, error: "ไม่สามารถลบบัญชีแอดมินหลักได้" });
+    }
+
+    const { url, serviceKey } = requireConfig();
+    const authResponse = await fetch(`${url}/auth/v1/admin/users/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+      headers: headers(serviceKey),
+    });
+    if (!authResponse.ok && authResponse.status !== 404) {
+      const detail = await readText(authResponse);
+      return send(res, 200, {
+        ok: false,
+        error: `Supabase Auth delete failed ${authResponse.status}: ${detail}`,
+      });
+    }
+
+    const publicResult = await rest(`users?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+    if (!publicResult.ok) return sendRestError(res, publicResult);
+    return send(res, 200, { ok: true, source: "supabase-public-users" });
+  }
+
+  return send(res, 405, { ok: false, error: "Method not allowed" });
 }
 
 async function userRegister(req, res) {
@@ -655,7 +752,7 @@ export default async function handler(req, res) {
     const route = pathName(req);
     if (route === "admin-login" && req.method === "POST") return await adminLogin(req, res);
     if (route === "admin-session" && req.method === "GET") return await adminSession(req, res);
-    if (route === "admin-users" && req.method === "GET") return await adminUsers(req, res);
+    if (route === "admin-users") return await adminUsers(req, res);
     if (route === "user-register" && req.method === "POST") return await userRegister(req, res);
     if (route === "user-login" && req.method === "POST") return await userLogin(req, res);
     if (route === "user-session" && req.method === "GET") return await userSession(req, res);
