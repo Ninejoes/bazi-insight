@@ -4,7 +4,6 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
-  useLocation,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -109,7 +108,25 @@ function RootShell({ children }: { children: ReactNode }) {
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
-gtag('config', '${googleAnalyticsId}', { send_page_view: false });
+gtag('config', '${googleAnalyticsId}', { page_path: window.location.pathname + window.location.search });
+(function(){
+  var lastPath = window.location.pathname + window.location.search;
+  function trackPageView(){
+    var nextPath = window.location.pathname + window.location.search;
+    if (nextPath === lastPath) return;
+    lastPath = nextPath;
+    gtag('config', '${googleAnalyticsId}', { page_path: nextPath, page_location: window.location.href });
+  }
+  ['pushState', 'replaceState'].forEach(function(method){
+    var original = history[method];
+    history[method] = function(){
+      var result = original.apply(this, arguments);
+      setTimeout(trackPageView, 0);
+      return result;
+    };
+  });
+  window.addEventListener('popstate', trackPageView);
+})();
 `.trim(),
           }}
         />
@@ -127,25 +144,8 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <GoogleAnalyticsPageView />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
     </QueryClientProvider>
   );
-}
-
-function GoogleAnalyticsPageView() {
-  const location = useLocation();
-
-  useEffect(() => {
-    const gtag = (window as Window & {
-      gtag?: (command: string, target: string, params?: Record<string, string>) => void;
-    }).gtag;
-    gtag?.("config", googleAnalyticsId, {
-      page_path: `${location.pathname}${location.search}`,
-      page_location: `${window.location.origin}${location.pathname}${location.search}`,
-    });
-  }, [location.pathname, location.search]);
-
-  return null;
 }
