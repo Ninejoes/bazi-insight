@@ -115,6 +115,20 @@ function toPublicReading(row = {}) {
   };
 }
 
+function normalizeLead(row = {}) {
+  const now = new Date().toISOString();
+  return {
+    id: String(row.id || randomUUID()).slice(0, 80),
+    name: String(row.name || "").slice(0, 120),
+    gender: String(row.gender || "").slice(0, 40),
+    birth_date: String(row.birthDate || row.birth_date || "").slice(0, 30),
+    birth_time: String(row.birthTime || row.birth_time || "").slice(0, 20),
+    source: String(row.source || "bazi-insight").slice(0, 80),
+    reason: String(row.reason || "submit").slice(0, 80),
+    updated_at: now,
+  };
+}
+
 function pathName(req) {
   const url = new URL(req.url || "/", "https://likhitfa.local");
   return url.pathname.replace(/^\/api\/?/, "").replace(/\/$/, "");
@@ -550,6 +564,24 @@ async function readingHistory(req, res) {
   return send(res, 405, { ok: false, error: "Method not allowed" });
 }
 
+async function leads(req, res) {
+  if (req.method !== "POST") return send(res, 405, { ok: false, error: "Method not allowed" });
+  const lead = normalizeLead(await readBody(req));
+  const result = await rest("leads?on_conflict=id", {
+    method: "POST",
+    headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+    body: JSON.stringify({ ...lead, created_at: new Date().toISOString() }),
+  });
+  if (!result.ok) return sendRestError(res, result);
+  const rows = Array.isArray(result.data) ? result.data : [];
+  return send(res, 200, {
+    ok: true,
+    source: "supabase",
+    stored: "supabase",
+    lead: normalizeLead(rows[0] || lead),
+  });
+}
+
 async function verifyUserFromOptionalAuth(req) {
   const authorization = req.headers.authorization || "";
   const token = authorization.match(/^Bearer\s+(.+)$/i)?.[1] || "";
@@ -633,6 +665,7 @@ export default async function handler(req, res) {
     if (route === "site-content") return await siteContent(req, res);
     if (route === "contact-messages") return await contactMessages(req, res);
     if (route === "reading-history") return await readingHistory(req, res);
+    if (route === "leads") return await leads(req, res);
     if (route === "dashboard" && req.method === "GET") return await dashboard(res);
     return send(res, 404, { ok: false, error: `Unknown API route: ${route}` });
   } catch (error) {
