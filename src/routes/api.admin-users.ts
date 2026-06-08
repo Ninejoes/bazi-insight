@@ -5,14 +5,20 @@ const ADMIN_EMAIL = "admin@gmail.com";
 type SupabaseUser = {
   id?: string;
   email?: string;
-  created_at?: string;
   banned_until?: string;
   user_metadata?: Record<string, unknown>;
   app_metadata?: Record<string, unknown>;
 };
 
-type SupabaseUsersResponse = {
-  users?: SupabaseUser[];
+type PublicUserRow = {
+  id?: string;
+  email?: string;
+  name?: string;
+  role?: "Admin" | "User";
+  status?: "active" | "disabled";
+  provider?: string;
+  last_sign_in_at?: string;
+  created_at?: string;
 };
 
 function json(body: unknown, init?: ResponseInit) {
@@ -52,21 +58,10 @@ function readBearer(request: Request) {
   return match?.[1] || "";
 }
 
-function userName(user: SupabaseUser) {
-  const metadataName = user.user_metadata?.name;
-  if (typeof metadataName === "string" && metadataName.trim()) return metadataName.trim();
-  return user.email?.split("@")[0] || "User";
-}
-
 function userRole(user: SupabaseUser) {
   const appRole = user.app_metadata?.role;
   const userMetadataRole = user.user_metadata?.role;
   return appRole === "Admin" || userMetadataRole === "Admin" ? "Admin" : "User";
-}
-
-function userStatus(user: SupabaseUser) {
-  if (!user.banned_until) return "Active";
-  return new Date(user.banned_until).getTime() > Date.now() ? "Suspended" : "Active";
 }
 
 async function requireAdmin(url: string, serviceKey: string, accessToken: string) {
@@ -85,24 +80,26 @@ async function requireAdmin(url: string, serviceKey: string, accessToken: string
   }
 }
 
-async function listSupabaseUsers(url: string, serviceKey: string) {
-  const response = await fetch(`${url}/auth/v1/admin/users?per_page=1000`, {
+async function listPublicUsers(url: string, serviceKey: string) {
+  const response = await fetch(`${url}/rest/v1/users?select=*&order=created_at.desc`, {
     headers: supabaseHeaders(serviceKey),
   });
 
   if (!response.ok) {
     const detail = await response.text().catch(() => "");
-    throw new Error(`Supabase users failed ${response.status}: ${detail}`);
+    throw new Error(`Supabase public.users failed ${response.status}: ${detail}`);
   }
 
-  const data = (await response.json().catch(() => ({}))) as SupabaseUsersResponse;
-  return (data.users || []).map((user) => ({
+  const rows = (await response.json().catch(() => [])) as PublicUserRow[];
+  return rows.map((user) => ({
     id: user.id || user.email || "unknown",
-    name: userName(user),
+    name: user.name || user.email || "User",
     email: user.email || "",
-    role: userRole(user),
+    role: user.role || "User",
     joined: user.created_at?.slice(0, 10) || "",
-    status: userStatus(user),
+    status: user.status === "disabled" ? "Suspended" : "Active",
+    provider: user.provider || "email",
+    lastSignInAt: user.last_sign_in_at,
   }));
 }
 
@@ -122,8 +119,8 @@ export const Route = createFileRoute("/api/admin-users")({
           await requireAdmin(config.url, config.serviceKey, readBearer(request));
           return json({
             ok: true,
-            source: "supabase-auth",
-            users: await listSupabaseUsers(config.url, config.serviceKey),
+            source: "supabase-public-users",
+            users: await listPublicUsers(config.url, config.serviceKey),
           });
         } catch (error) {
           return json(

@@ -34,6 +34,7 @@ import { Route as ApiUserSessionRouteImport } from './routes/api.user-session'
 import { Route as ApiUserRegisterRouteImport } from './routes/api.user-register'
 import { Route as ApiUserLoginRouteImport } from './routes/api.user-login'
 import { Route as ApiSiteContentRouteImport } from './routes/api.site-content'
+import { Route as ApiReadingHistoryRouteImport } from './routes/api.reading-history'
 import { Route as ApiLeadsRouteImport } from './routes/api.leads'
 import { Route as ApiFaqsRouteImport } from './routes/api.faqs'
 import { Route as ApiDreamsRouteImport } from './routes/api.dreams'
@@ -175,6 +176,11 @@ const ApiSiteContentRoute = ApiSiteContentRouteImport.update({
   path: '/api/site-content',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiReadingHistoryRoute = ApiReadingHistoryRouteImport.update({
+  id: '/api/reading-history',
+  path: '/api/reading-history',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiLeadsRoute = ApiLeadsRouteImport.update({
   id: '/api/leads',
   path: '/api/leads',
@@ -280,6 +286,7 @@ export interface FileRoutesByFullPath {
   '/api/dreams': typeof ApiDreamsRoute
   '/api/faqs': typeof ApiFaqsRoute
   '/api/leads': typeof ApiLeadsRoute
+  '/api/reading-history': typeof ApiReadingHistoryRoute
   '/api/site-content': typeof ApiSiteContentRoute
   '/api/user-login': typeof ApiUserLoginRoute
   '/api/user-register': typeof ApiUserRegisterRoute
@@ -318,6 +325,7 @@ export interface FileRoutesByTo {
   '/api/dreams': typeof ApiDreamsRoute
   '/api/faqs': typeof ApiFaqsRoute
   '/api/leads': typeof ApiLeadsRoute
+  '/api/reading-history': typeof ApiReadingHistoryRoute
   '/api/site-content': typeof ApiSiteContentRoute
   '/api/user-login': typeof ApiUserLoginRoute
   '/api/user-register': typeof ApiUserRegisterRoute
@@ -361,6 +369,7 @@ export interface FileRoutesById {
   '/api/dreams': typeof ApiDreamsRoute
   '/api/faqs': typeof ApiFaqsRoute
   '/api/leads': typeof ApiLeadsRoute
+  '/api/reading-history': typeof ApiReadingHistoryRoute
   '/api/site-content': typeof ApiSiteContentRoute
   '/api/user-login': typeof ApiUserLoginRoute
   '/api/user-register': typeof ApiUserRegisterRoute
@@ -405,6 +414,7 @@ export interface FileRouteTypes {
     | '/api/dreams'
     | '/api/faqs'
     | '/api/leads'
+    | '/api/reading-history'
     | '/api/site-content'
     | '/api/user-login'
     | '/api/user-register'
@@ -443,6 +453,7 @@ export interface FileRouteTypes {
     | '/api/dreams'
     | '/api/faqs'
     | '/api/leads'
+    | '/api/reading-history'
     | '/api/site-content'
     | '/api/user-login'
     | '/api/user-register'
@@ -485,6 +496,7 @@ export interface FileRouteTypes {
     | '/api/dreams'
     | '/api/faqs'
     | '/api/leads'
+    | '/api/reading-history'
     | '/api/site-content'
     | '/api/user-login'
     | '/api/user-register'
@@ -522,6 +534,7 @@ export interface RootRouteChildren {
   ApiDreamsRoute: typeof ApiDreamsRoute
   ApiFaqsRoute: typeof ApiFaqsRoute
   ApiLeadsRoute: typeof ApiLeadsRoute
+  ApiReadingHistoryRoute: typeof ApiReadingHistoryRoute
   ApiSiteContentRoute: typeof ApiSiteContentRoute
   ApiUserLoginRoute: typeof ApiUserLoginRoute
   ApiUserRegisterRoute: typeof ApiUserRegisterRoute
@@ -703,6 +716,13 @@ declare module '@tanstack/react-router' {
       path: '/api/site-content'
       fullPath: '/api/site-content'
       preLoaderRoute: typeof ApiSiteContentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/reading-history': {
+      id: '/api/reading-history'
+      path: '/api/reading-history'
+      fullPath: '/api/reading-history'
+      preLoaderRoute: typeof ApiReadingHistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/leads': {
@@ -899,6 +919,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiDreamsRoute: ApiDreamsRoute,
   ApiFaqsRoute: ApiFaqsRoute,
   ApiLeadsRoute: ApiLeadsRoute,
+  ApiReadingHistoryRoute: ApiReadingHistoryRoute,
   ApiSiteContentRoute: ApiSiteContentRoute,
   ApiUserLoginRoute: ApiUserLoginRoute,
   ApiUserRegisterRoute: ApiUserRegisterRoute,

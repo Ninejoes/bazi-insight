@@ -24,6 +24,306 @@ alter table public.articles add column if not exists keywords text[] not null de
 alter table public.articles add column if not exists canonical_url text not null default '';
 create index if not exists articles_date_idx on public.articles (date desc);
 
+create table if not exists public.users (
+  id uuid primary key,
+  email text not null unique,
+  name text not null default '',
+  role text not null default 'User',
+  status text not null default 'active',
+  provider text not null default 'email',
+  last_sign_in_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint users_role_check check (role in ('Admin', 'User')),
+  constraint users_status_check check (status in ('active', 'disabled'))
+);
+
+create index if not exists users_email_idx on public.users (lower(email));
+create index if not exists users_role_idx on public.users (role);
+
+create table if not exists public.auth_events (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references public.users(id) on delete set null,
+  email text not null default '',
+  event_type text not null,
+  role text not null default 'User',
+  ip text not null default '',
+  user_agent text not null default '',
+  created_at timestamptz not null default now(),
+  constraint auth_events_event_type_check check (
+    event_type in (
+      'admin_login',
+      'admin_session',
+      'user_register',
+      'user_login',
+      'user_session'
+    )
+  ),
+  constraint auth_events_role_check check (role in ('Admin', 'User'))
+);
+
+create index if not exists auth_events_user_id_idx on public.auth_events (user_id);
+create index if not exists auth_events_created_at_idx on public.auth_events (created_at desc);
+
+create table if not exists public.reading_history (
+  id text primary key,
+  user_id uuid references public.users(id) on delete set null,
+  email text not null default '',
+  type text not null,
+  title text not null,
+  result text not null default '',
+  input jsonb not null default '{}'::jsonb,
+  output jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint reading_history_type_check check (
+    type in ('ไพ่ยิปซี', 'ปาจื้อ', 'ทำนายฝัน')
+  )
+);
+
+create index if not exists reading_history_user_id_idx on public.reading_history (user_id);
+create index if not exists reading_history_email_idx on public.reading_history (lower(email));
+create index if not exists reading_history_created_at_idx on public.reading_history (created_at desc);
+
+create or replace function public.sync_auth_user_to_public_users()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.users (
+    id,
+    email,
+    name,
+    role,
+    status,
+    provider,
+    last_sign_in_at,
+    created_at,
+    updated_at
+  )
+  values (
+    new.id,
+    coalesce(new.email, ''),
+    coalesce(
+      new.raw_user_meta_data->>'name',
+      new.raw_user_meta_data->>'displayName',
+      new.email,
+      ''
+    ),
+    case
+      when new.raw_app_meta_data->>'role' = 'Admin'
+        or new.raw_user_meta_data->>'role' = 'Admin'
+      then 'Admin'
+      else 'User'
+    end,
+    case when new.deleted_at is null then 'active' else 'disabled' end,
+    coalesce(new.raw_app_meta_data->>'provider', 'email'),
+    new.last_sign_in_at,
+    new.created_at,
+    now()
+  )
+  on conflict (id) do update set
+    email = excluded.email,
+    name = excluded.name,
+    role = excluded.role,
+    status = excluded.status,
+    provider = excluded.provider,
+    last_sign_in_at = excluded.last_sign_in_at,
+    updated_at = now();
+
+  return new;
+end;
+$$;
+
+drop trigger if exists sync_auth_user_to_public_users_insert on auth.users;
+create trigger sync_auth_user_to_public_users_insert
+after insert or update on auth.users
+for each row execute function public.sync_auth_user_to_public_users();
+
+insert into public.users (
+  id,
+  email,
+  name,
+  role,
+  status,
+  provider,
+  last_sign_in_at,
+  created_at,
+  updated_at
+)
+select
+  au.id,
+  coalesce(au.email, ''),
+  coalesce(
+    au.raw_user_meta_data->>'name',
+    au.raw_user_meta_data->>'displayName',
+    au.email,
+    ''
+  ),
+  case
+    when au.raw_app_meta_data->>'role' = 'Admin'
+      or au.raw_user_meta_data->>'role' = 'Admin'
+    then 'Admin'
+    else 'User'
+  end,
+  case when au.deleted_at is null then 'active' else 'disabled' end,
+  coalesce(au.raw_app_meta_data->>'provider', 'email'),
+  au.last_sign_in_at,
+  au.created_at,
+  now()
+from auth.users au
+on conflict (id) do update set
+  email = excluded.email,
+  name = excluded.name,
+  role = excluded.role,
+  status = excluded.status,
+  provider = excluded.provider,
+  last_sign_in_at = excluded.last_sign_in_at,
+  updated_at = now();
+
+insert into public.articles (
+  slug,
+  title,
+  excerpt,
+  category,
+  author,
+  date,
+  read_min,
+  cover,
+  cover_alt,
+  seo_title,
+  seo_description,
+  keywords,
+  canonical_url,
+  content
+)
+values
+  (
+    'bazi-101',
+    'ปาจื้อเบื้องต้น เข้าใจ 4 เสาแห่งชะตา',
+    'ปาจื้อ (八字) คือศาสตร์การคำนวณดวงชะตาจากวันเดือนปีและเวลาเกิด มาทำความเข้าใจ 4 เสาในแบบเข้าใจง่าย',
+    'ปาจื้อ',
+    'อ.ฟ้าลิขิต',
+    '2025-09-12',
+    6,
+    'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=1200&q=80',
+    'ปาจื้อและศาสตร์ดวงจีน',
+    'ปาจื้อเบื้องต้น เข้าใจ 4 เสาแห่งชะตา',
+    'เรียนรู้พื้นฐานปาจื้อ 八字 และ 4 เสาแห่งชะตาในแบบเข้าใจง่าย',
+    array['ปาจื้อ','八字','4 เสา','ดวงจีน'],
+    '',
+    '[
+      "ปาจื้อแปลตามตัวอักษรว่า ‘แปดอักษร’ คืออักษรสวรรค์ 4 ตัว และอักษรดิน 4 ตัว ที่ได้จากปี เดือน วัน และยามที่เกิด",
+      "การอ่านปาจื้อเริ่มจากการแยกธาตุของแต่ละเสา แล้วดูความสัมพันธ์ของธาตุที่เกื้อหนุนและขัดแย้งกัน",
+      "เสาแรกคือเสาวันซึ่งหมายถึงตัวเจ้าชะตา เสานี้สำคัญที่สุดในการวิเคราะห์",
+      "เมื่อเข้าใจพื้นฐานเหล่านี้แล้ว เราจึงสามารถมองเห็นจังหวะของชีวิตในแต่ละช่วงวัยจรได้ชัดเจนยิ่งขึ้น"
+    ]'::jsonb
+  ),
+  (
+    'tarot-spread-beginner',
+    'เริ่มเปิดไพ่ทาโรต์ใบแรก สำหรับมือใหม่',
+    'ก่อนเปิดไพ่ใบแรก สิ่งสำคัญคือการตั้งคำถามให้ชัดเจน บทความนี้รวม 5 ขั้นตอนเริ่มต้นที่มือใหม่ควรรู้',
+    'ไพ่ยิปซี',
+    'อ.จันทร์เพ็ญ',
+    '2025-10-02',
+    5,
+    'https://images.unsplash.com/photo-1577897665977-3a3f25c8a85a?w=1200&q=80',
+    'ไพ่ทาโรต์สำหรับมือใหม่',
+    'เริ่มเปิดไพ่ทาโรต์ใบแรก สำหรับมือใหม่',
+    'คู่มือเริ่มต้นเปิดไพ่ทาโรต์ ตั้งคำถาม และอ่านไพ่ใบแรกอย่างมีสติ',
+    array['ไพ่ทาโรต์','ไพ่ยิปซี','มือใหม่','ดูดวงความรัก'],
+    '',
+    '[
+      "การเปิดไพ่ทาโรต์ไม่ใช่เรื่องของการทำนายอนาคต แต่คือกระบวนการทบทวนความคิด ความรู้สึก และมุมมองที่อยู่ในใจเราเอง",
+      "ก่อนสับไพ่ ให้นั่งสบาย หายใจเข้าออกช้าๆ แล้วถามคำถามที่ ‘เปิด’ มากกว่าคำถามใช่/ไม่ใช่",
+      "เลือกการวางไพ่ที่ตรงกับคำถาม เช่น 3 ใบ (อดีต-ปัจจุบัน-อนาคต) สำหรับคำถามทั่วไป",
+      "เมื่อเปิดไพ่แล้ว ให้สังเกตทั้งภาพและความรู้สึกแรกที่ขึ้นมาในใจก่อนจะอ่านความหมาย"
+    ]'::jsonb
+  ),
+  (
+    'dream-numbers',
+    'ฝันเห็นอะไรได้เลขอะไร รวมความเชื่อยอดนิยม',
+    'รวมคำฝันยอดฮิตและเลขเด็ดที่คนไทยนิยมตีความ พร้อมข้อแนะนำในการใช้เลขอย่างมีสติ',
+    'ทำนายฝัน',
+    'ทีม Likhitfa',
+    '2025-10-20',
+    4,
+    'https://images.unsplash.com/photo-1532635241-17e820acc59f?w=1200&q=80',
+    'ความฝันและเลขนำโชค',
+    'ฝันเห็นอะไรได้เลขอะไร รวมความเชื่อยอดนิยม',
+    'รวมความหมายฝันยอดนิยม เลขนำโชค และคำแนะนำในการใช้เลขจากความฝันอย่างมีสติ',
+    array['ทำนายฝัน','เลขเด็ด','ฝันเห็นงู','ฝันเห็นพระ'],
+    '',
+    '[
+      "ฝันเห็นงู มักตีความว่ามีคนรักหรือเนื้อคู่เข้ามาในชีวิต เลขที่นิยมคือ 06, 56, 89",
+      "ฝันเห็นพระสงฆ์ หมายถึงสิ่งศักดิ์สิทธิ์คุ้มครอง มักได้เลขชุด 9 หรือเลข 09",
+      "ฝันเห็นน้ำใส โดยทั่วไปสื่อถึงโชคลาภและความสำเร็จที่กำลังจะมาถึง",
+      "การตีฝันเป็นความเชื่อ ควรใช้สติและไม่นำไปสู่การพนันเกินตัว"
+    ]'::jsonb
+  ),
+  (
+    'monthly-energy-guide',
+    'พลังประจำเดือน วิธีอ่านแนวโน้มเดือนนี้ของคุณ',
+    'เรียนรู้วิธีอ่านพลังของเดือนผ่านไพ่ทาโรต์ 10 ใบ พร้อมเทคนิคนำมาปรับใช้ในชีวิตจริง',
+    'ไพ่ยิปซี',
+    'อ.จันทร์เพ็ญ',
+    '2025-11-01',
+    7,
+    'https://images.unsplash.com/photo-1518932945647-7a1c969f8be2?w=1200&q=80',
+    'พลังประจำเดือนจากไพ่ทาโรต์',
+    'พลังประจำเดือน วิธีอ่านแนวโน้มเดือนนี้ของคุณ',
+    'เรียนรู้วิธีอ่านพลังประจำเดือนผ่านไพ่ทาโรต์ 10 ใบ พร้อมแนวทางใช้งานจริง',
+    array['พลังประจำเดือน','ไพ่ทาโรต์','ดูดวงรายเดือน'],
+    '',
+    '[
+      "สเปรด 10 ใบให้ภาพรวมที่ครอบคลุมทั้งสถานะ ปัญหา และแนวทางในเดือนนั้น",
+      "เริ่มจากการดูใบที่ 1 ซึ่งสะท้อน ‘ตัวเรา’ ก่อนเสมอ",
+      "อย่ารีบสรุปจากใบเดียว ต้องดูองค์รวมและความสัมพันธ์ระหว่างไพ่"
+    ]'::jsonb
+  ),
+  (
+    'luck-rituals',
+    'พิธีกรรมเสริมโชคแบบจีนที่ทำได้ง่ายที่บ้าน',
+    'รวมพิธีกรรมโบราณที่ปรับให้เข้ากับยุคสมัย ทำได้ง่ายและให้พลังบวกแก่ผู้ทำ',
+    'ปาจื้อ',
+    'อ.ฟ้าลิขิต',
+    '2025-11-14',
+    5,
+    'https://images.unsplash.com/photo-1583244532610-2a234c8b81b6?w=1200&q=80',
+    'พิธีกรรมเสริมโชคแบบจีน',
+    'พิธีกรรมเสริมโชคแบบจีนที่ทำได้ง่ายที่บ้าน',
+    'รวมพิธีกรรมจีนเสริมโชคที่ทำได้ง่ายในบ้าน พร้อมแนวคิดเรื่องพลังธาตุ',
+    array['เสริมโชค','พิธีกรรมจีน','ปาจื้อ','ฮวงจุ้ย'],
+    '',
+    '[
+      "การจุดเทียนแดงในวันเกิดเพื่อเสริมพลังธาตุไฟ",
+      "การวางเหรียญทองแดงร้อยเชือกแดงไว้ใกล้กระเป๋าเงินเสริมการเงิน",
+      "การกวาดบ้านด้วยใจสงบในเช้าวันที่ 1 ของเดือน"
+    ]'::jsonb
+  ),
+  (
+    'love-tarot-guide',
+    'อ่านไพ่ความรักให้ตรงใจ ไม่ลำเอียง',
+    'วิธีตั้งคำถามและตีความไพ่ความรักโดยไม่เอาความหวังของตัวเองไปบดบังคำตอบของไพ่',
+    'ไพ่ยิปซี',
+    'อ.จันทร์เพ็ญ',
+    '2025-11-25',
+    6,
+    'https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?w=1200&q=80',
+    'อ่านไพ่ความรักให้ตรงใจ',
+    'อ่านไพ่ความรักให้ตรงใจ ไม่ลำเอียง',
+    'วิธีตั้งคำถามและตีความไพ่ความรักอย่างไม่ลำเอียง เพื่อใช้ทบทวนความสัมพันธ์',
+    array['ไพ่ความรัก','ไพ่ยิปซี','ทาโรต์ความรัก'],
+    '',
+    '[
+      "เริ่มจากการแยก ‘สิ่งที่อยากให้เกิด’ ออกจาก ‘สิ่งที่กำลังเกิด’",
+      "ไพ่ที่ได้คือกระจกสะท้อน ไม่ใช่คำสั่ง ใช้เป็นแนวทางตัดสินใจ"
+    ]'::jsonb
+  )
+on conflict (slug) do nothing;
+
 create table if not exists public.dreams (
   id text primary key,
   keyword text not null,
@@ -93,6 +393,9 @@ create index if not exists leads_created_at_idx on public.leads (created_at desc
 create index if not exists leads_source_idx on public.leads (source);
 
 alter table public.articles enable row level security;
+alter table public.users enable row level security;
+alter table public.auth_events enable row level security;
+alter table public.reading_history enable row level security;
 alter table public.dreams enable row level security;
 alter table public.faqs enable row level security;
 alter table public.site_content enable row level security;
@@ -102,6 +405,27 @@ alter table public.leads enable row level security;
 drop policy if exists "service role manages articles" on public.articles;
 create policy "service role manages articles"
   on public.articles
+  for all
+  using (auth.role() = 'service_role')
+  with check (auth.role() = 'service_role');
+
+drop policy if exists "service role manages users" on public.users;
+create policy "service role manages users"
+  on public.users
+  for all
+  using (auth.role() = 'service_role')
+  with check (auth.role() = 'service_role');
+
+drop policy if exists "service role manages auth events" on public.auth_events;
+create policy "service role manages auth events"
+  on public.auth_events
+  for all
+  using (auth.role() = 'service_role')
+  with check (auth.role() = 'service_role');
+
+drop policy if exists "service role manages reading history" on public.reading_history;
+create policy "service role manages reading history"
+  on public.reading_history
   for all
   using (auth.role() = 'service_role')
   with check (auth.role() = 'service_role');

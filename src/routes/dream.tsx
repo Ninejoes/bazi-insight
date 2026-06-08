@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo } from "@/lib/seo";
 import { type DreamRecord } from "@/lib/admin-content";
+import { readStoredUserSession } from "@/lib/user-session";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/dream")({
@@ -52,6 +53,7 @@ function DreamPage() {
       : dreams.slice(0, 2);
     setResults(matched);
     setShow(true);
+    if (matched[0]) void persistDreamReading(keyword || matched[0].keyword, matched[0]);
   };
 
   return (
@@ -187,4 +189,22 @@ function DreamPage() {
       <SiteFooter />
     </div>
   );
+}
+
+async function persistDreamReading(query: string, dream: DreamRecord) {
+  const session = readStoredUserSession();
+  await fetch("/api/reading-history", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
+    },
+    body: JSON.stringify({
+      type: "ทำนายฝัน",
+      title: `ฝันเห็น${dream.keyword}`,
+      result: `เลข ${dream.numbers}`,
+      input: { query },
+      output: dream,
+    }),
+  }).catch(() => {});
 }

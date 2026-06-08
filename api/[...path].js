@@ -68,6 +68,53 @@ function sendRestError(res, result) {
   return send(res, 200, { ok: false, error: result.error || "Supabase request failed" });
 }
 
+async function saveAuthEvent(req, eventType, user = {}) {
+  await rest("auth_events", {
+    method: "POST",
+    headers: { Prefer: "return=minimal" },
+    body: JSON.stringify({
+      user_id: user.id || null,
+      email: user.email || "",
+      event_type: eventType,
+      role: roleOf(user),
+      ip: String(req.headers["x-forwarded-for"] || req.headers["x-real-ip"] || "")
+        .split(",")[0]
+        .slice(0, 80),
+      user_agent: String(req.headers["user-agent"] || "").slice(0, 500),
+    }),
+  });
+}
+
+function normalizeReading(row = {}) {
+  const now = new Date().toISOString();
+  return {
+    id: String(row.id || randomUUID()).slice(0, 80),
+    user_id: row.user_id || row.userId || null,
+    email: String(row.email || "").trim().toLowerCase().slice(0, 160),
+    type: String(row.type || "ปาจื้อ").slice(0, 40),
+    title: String(row.title || "ผลดูดวง").slice(0, 200),
+    result: String(row.result || "").slice(0, 1000),
+    input: row.input && typeof row.input === "object" ? row.input : {},
+    output: row.output && typeof row.output === "object" ? row.output : {},
+    created_at: row.created_at || now,
+    updated_at: row.updated_at || now,
+  };
+}
+
+function toPublicReading(row = {}) {
+  const reading = normalizeReading(row);
+  return {
+    id: reading.id,
+    type: reading.type,
+    title: reading.title,
+    result: reading.result,
+    date: String(reading.created_at || "").replace("T", " ").slice(0, 16),
+    input: reading.input,
+    output: reading.output,
+    createdAt: reading.created_at,
+  };
+}
+
 function pathName(req) {
   const url = new URL(req.url || "/", "https://likhitfa.local");
   return url.pathname.replace(/^\/api\/?/, "").replace(/\/$/, "");
@@ -125,6 +172,7 @@ async function adminLogin(req, res) {
   const { url, serviceKey } = requireConfig();
   await ensureAdmin(url, serviceKey, password);
   const token = await signIn(url, serviceKey, email, password);
+  await saveAuthEvent(req, "admin_login", token.user || { email, user_metadata: { role: ADMIN_ROLE } });
   return send(res, 200, { ok: true, session: toSession(token, { email }) });
 }
 
@@ -136,6 +184,7 @@ async function adminSession(req, res) {
   if (user.email?.toLowerCase() !== ADMIN_EMAIL || roleOf(user) !== ADMIN_ROLE) {
     return send(res, 401, { ok: false, error: "บัญชีนี้ไม่มีสิทธิ์แอดมิน" });
   }
+  await saveAuthEvent(req, "admin_session", user);
   return send(res, 200, {
     ok: true,
     session: {
@@ -146,22 +195,23 @@ async function adminSession(req, res) {
   });
 }
 
-async function adminUsers(res) {
-  const { url, serviceKey } = requireConfig();
-  const response = await fetch(`${url}/auth/v1/admin/users?per_page=1000`, {
-    headers: headers(serviceKey),
-  });
-  if (!response.ok)
-    throw new Error(`Supabase users failed ${response.status}: ${await readText(response)}`);
-  const data = await response.json().catch(() => ({}));
-  const users = (data.users || []).map((user) => ({
+async function adminUsers(req, res) {
+  await requireAdmin(req);
+  const result = await rest("users?select=*&order=created_at.desc");
+  if (!result.ok) return sendRestError(res, result);
+  const rows = Array.isArray(result.data) ? result.data : [];
+  const users = rows.map((user) => ({
     id: user.id,
     email: user.email,
-    name: user.user_metadata?.name || user.user_metadata?.displayName || user.email,
-    role: roleOf(user),
+    name: user.name || user.email,
+    role: user.role || "User",
+    status: user.status === "disabled" ? "Suspended" : "Active",
+    joined: String(user.created_at || "").slice(0, 10),
     createdAt: user.created_at,
+    lastSignInAt: user.last_sign_in_at,
+    provider: user.provider || "email",
   }));
-  return send(res, 200, { ok: true, source: "supabase", users });
+  return send(res, 200, { ok: true, source: "supabase-public-users", users });
 }
 
 async function userRegister(req, res) {
@@ -211,6 +261,7 @@ async function userRegister(req, res) {
   if (!response.ok)
     throw new Error(`Supabase create user failed ${response.status}: ${await readText(response)}`);
   const token = await signIn(url, serviceKey, email, password);
+  await saveAuthEvent(req, "user_register", token.user || { email });
   return send(res, 200, { ok: true, session: toSession(token, { email }) });
 }
 
@@ -226,6 +277,7 @@ async function userLogin(req, res) {
   if (token.user && roleOf(token.user) !== "User") {
     return send(res, 403, { ok: false, error: "บัญชีนี้ไม่ใช่ผู้ใช้งานทั่วไป กรุณาใช้หน้าแอดมิน" });
   }
+  await saveAuthEvent(req, "user_login", token.user || { email });
   return send(res, 200, { ok: true, session: toSession(token, { email }) });
 }
 
@@ -234,6 +286,7 @@ async function userSession(req, res) {
   const authorization = req.headers.authorization || "";
   const token = authorization.match(/^Bearer\s+(.+)$/i)?.[1] || "";
   const user = await verifyUser(url, serviceKey, token);
+  await saveAuthEvent(req, "user_session", user);
   return send(res, 200, { ok: true, session: toSession({}, user) });
 }
 
@@ -444,6 +497,73 @@ async function contactMessages(req, res) {
   return send(res, 405, { ok: false, error: "Method not allowed" });
 }
 
+async function readingHistory(req, res) {
+  if (req.method === "GET") {
+    const user = await requireUserFromAuth(req);
+    const params = new URL(req.url, "https://likhitfa.local").searchParams;
+    const type = params.get("type");
+    let query = `reading_history?user_id=eq.${encodeURIComponent(user.id)}&select=*&order=created_at.desc`;
+    if (type) query += `&type=eq.${encodeURIComponent(type)}`;
+    const result = await rest(query);
+    if (!result.ok) return sendRestError(res, result);
+    const rows = Array.isArray(result.data) ? result.data : [];
+    return send(res, 200, {
+      ok: true,
+      source: "supabase-public-reading-history",
+      history: rows.map(toPublicReading),
+    });
+  }
+
+  if (req.method === "POST") {
+    const user = await verifyUserFromOptionalAuth(req);
+    const payload = normalizeReading(await readBody(req));
+    const row = {
+      ...payload,
+      user_id: user?.id || payload.user_id || null,
+      email: user?.email || payload.email || "",
+      updated_at: new Date().toISOString(),
+    };
+    const result = await rest("reading_history?on_conflict=id", {
+      method: "POST",
+      headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+      body: JSON.stringify(row),
+    });
+    if (!result.ok) return sendRestError(res, result);
+    const rows = Array.isArray(result.data) ? result.data : [];
+    return send(res, 200, {
+      ok: true,
+      source: "supabase-public-reading-history",
+      entry: toPublicReading(rows[0] || row),
+    });
+  }
+
+  if (req.method === "DELETE") {
+    const user = await requireUserFromAuth(req);
+    const id = new URL(req.url, "https://likhitfa.local").searchParams.get("id");
+    if (!id) return send(res, 400, { ok: false, error: "Missing id" });
+    const filter = `reading_history?id=eq.${encodeURIComponent(id)}&user_id=eq.${encodeURIComponent(user.id)}`;
+    const result = await rest(filter, { method: "DELETE" });
+    if (!result.ok) return sendRestError(res, result);
+    return send(res, 200, { ok: true, source: "supabase-public-reading-history" });
+  }
+
+  return send(res, 405, { ok: false, error: "Method not allowed" });
+}
+
+async function verifyUserFromOptionalAuth(req) {
+  const authorization = req.headers.authorization || "";
+  const token = authorization.match(/^Bearer\s+(.+)$/i)?.[1] || "";
+  if (!token) return null;
+  const { url, serviceKey } = requireConfig();
+  return verifyUser(url, serviceKey, token);
+}
+
+async function requireUserFromAuth(req) {
+  const user = await verifyUserFromOptionalAuth(req);
+  if (!user?.id) throw new Error("กรุณาเข้าสู่ระบบก่อนดูประวัติการดูดวง");
+  return user;
+}
+
 async function dashboard(res) {
   const countTable = async (table) => {
     const result = await rest(`${table}?select=*`, {
@@ -454,16 +574,13 @@ async function dashboard(res) {
     const range = result.headers.get("content-range") || "";
     return Number(range.split("/")[1] || 0);
   };
-  const { url, serviceKey } = requireConfig();
-  const usersResponse = await fetch(`${url}/auth/v1/admin/users?per_page=1`, {
-    headers: headers(serviceKey),
-  });
-  const users = Number(usersResponse.headers.get("x-total-count") || 0);
-  const [articlesCount, dreamsCount, leadsCount, messagesCount] = await Promise.all([
+  const [users, articlesCount, dreamsCount, leadsCount, messagesCount, historyCount] = await Promise.all([
+    countTable("users"),
     countTable("articles"),
     countTable("dreams"),
     countTable("leads"),
     countTable("contact_messages"),
+    countTable("reading_history"),
   ]);
   return send(res, 200, {
     ok: true,
@@ -477,9 +594,9 @@ async function dashboard(res) {
       { label: "ข้อมูลทำนายฝัน", value: dreamsCount.toLocaleString(), delta: "จากตาราง dreams" },
       { label: "ข้อความติดต่อ", value: messagesCount.toLocaleString(), delta: "จากฟอร์ม contact" },
       {
-        label: "บทความที่เผยแพร่",
-        value: articlesCount.toLocaleString(),
-        delta: "จากตาราง articles",
+        label: "ประวัติการดูดวง",
+        value: historyCount.toLocaleString(),
+        delta: "จากตาราง reading_history",
       },
     ],
     visits: [0, 0, 0, 0, 0, 0, 0],
@@ -506,7 +623,7 @@ export default async function handler(req, res) {
     const route = pathName(req);
     if (route === "admin-login" && req.method === "POST") return await adminLogin(req, res);
     if (route === "admin-session" && req.method === "GET") return await adminSession(req, res);
-    if (route === "admin-users" && req.method === "GET") return await adminUsers(res);
+    if (route === "admin-users" && req.method === "GET") return await adminUsers(req, res);
     if (route === "user-register" && req.method === "POST") return await userRegister(req, res);
     if (route === "user-login" && req.method === "POST") return await userLogin(req, res);
     if (route === "user-session" && req.method === "GET") return await userSession(req, res);
@@ -515,6 +632,7 @@ export default async function handler(req, res) {
     if (route === "faqs") return await faqs(req, res);
     if (route === "site-content") return await siteContent(req, res);
     if (route === "contact-messages") return await contactMessages(req, res);
+    if (route === "reading-history") return await readingHistory(req, res);
     if (route === "dashboard" && req.method === "GET") return await dashboard(res);
     return send(res, 404, { ok: false, error: `Unknown API route: ${route}` });
   } catch (error) {

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { seo } from "@/lib/seo";
-import { useState } from "react";
+import { readStoredUserSession } from "@/lib/user-session";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/profile/history")({
   head: () =>
@@ -14,37 +15,60 @@ export const Route = createFileRoute("/profile/history")({
 });
 
 type Entry = { id: string; type: string; title: string; date: string; result: string };
-const initial: Entry[] = [
-  {
-    id: "1",
-    type: "ไพ่ยิปซี",
-    title: "ความรัก",
-    date: "2025-12-06 14:22",
-    result: "Six of Cups · The Lovers",
-  },
-  {
-    id: "2",
-    type: "ปาจื้อ",
-    title: "พยากรณ์ปี 2025",
-    date: "2025-12-05 09:11",
-    result: "ธาตุไฟแกร่ง",
-  },
-  { id: "3", type: "ทำนายฝัน", title: "ฝันเห็นงู", date: "2025-12-03 22:40", result: "เลข 56, 89" },
-  {
-    id: "4",
-    type: "ไพ่ยิปซี",
-    title: "การงาน",
-    date: "2025-12-01 10:02",
-    result: "King of Pentacles",
-  },
-  { id: "5", type: "ไพ่ยิปซี", title: "รายวัน", date: "2025-11-29 08:30", result: "The Sun" },
-];
 
 function HistoryPage() {
-  const [items, setItems] = useState(initial);
+  const [items, setItems] = useState<Entry[]>([]);
   const [filter, setFilter] = useState("ทั้งหมด");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const types = ["ทั้งหมด", "ไพ่ยิปซี", "ปาจื้อ", "ทำนายฝัน"];
   const shown = filter === "ทั้งหมด" ? items : items.filter((i) => i.type === filter);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadHistory() {
+      setLoading(true);
+      setError("");
+      try {
+        const session = readStoredUserSession();
+        const response = await fetch("/api/reading-history", {
+          headers: session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {},
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.ok) {
+          throw new Error(data.error || "โหลดประวัติการดูดวงไม่สำเร็จ");
+        }
+        if (mounted) setItems(data.history || []);
+      } catch (loadError) {
+        if (mounted) {
+          setError(loadError instanceof Error ? loadError.message : "โหลดประวัติการดูดวงไม่สำเร็จ");
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    void loadHistory();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const removeEntry = async (id: string) => {
+    const session = readStoredUserSession();
+    const response = await fetch(`/api/reading-history?id=${encodeURIComponent(id)}`, {
+      method: "DELETE",
+      headers: session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {},
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) {
+      setError(data.error || "ลบประวัติไม่สำเร็จ");
+      return;
+    }
+    setItems((current) => current.filter((item) => item.id !== id));
+  };
 
   return (
     <section className="glass-strong rounded-3xl p-6 shadow-elegant">
@@ -67,6 +91,12 @@ function HistoryPage() {
         </div>
       </div>
 
+      {error ? (
+        <div className="mt-4 rounded-2xl border border-rose-400/20 bg-rose-400/10 px-4 py-3 text-sm text-rose-200">
+          {error}
+        </div>
+      ) : null}
+
       <div className="mt-6 overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-left text-[11px] uppercase tracking-wider text-muted-foreground">
@@ -79,6 +109,13 @@ function HistoryPage() {
             </tr>
           </thead>
           <tbody>
+            {loading && (
+              <tr>
+                <td colSpan={5} className="px-3 py-10 text-center text-sm text-muted-foreground">
+                  กำลังโหลดประวัติจาก Supabase...
+                </td>
+              </tr>
+            )}
             {shown.map((e) => (
               <tr key={e.id} className="border-b border-gold/5 hover:bg-gold/5">
                 <td className="px-3 py-3">
@@ -91,7 +128,7 @@ function HistoryPage() {
                 <td className="px-3 py-3 text-xs text-gold/90">{e.result}</td>
                 <td className="px-3 py-3 text-right">
                   <button
-                    onClick={() => setItems((s) => s.filter((x) => x.id !== e.id))}
+                    onClick={() => void removeEntry(e.id)}
                     className="rounded-md border border-rose-400/30 px-2 py-1 text-xs text-rose-300 hover:bg-rose-400/10"
                   >
                     ลบ
@@ -99,10 +136,10 @@ function HistoryPage() {
                 </td>
               </tr>
             ))}
-            {shown.length === 0 && (
+            {!loading && shown.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-3 py-10 text-center text-sm text-muted-foreground">
-                  ไม่มีรายการ
+                  ไม่มีรายการในฐานข้อมูล
                 </td>
               </tr>
             )}

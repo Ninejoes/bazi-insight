@@ -18,35 +18,18 @@ async function countTable(table: string) {
   return Number(range.split("/")[1] || 0);
 }
 
-async function countUsers() {
-  const config = getSupabaseConfig();
-  if (!config)
-    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
-
-  const response = await fetch(`${config.url}/auth/v1/admin/users?per_page=1`, {
-    headers: {
-      apikey: config.serviceKey,
-      Authorization: `Bearer ${config.serviceKey}`,
-    },
-  });
-  if (!response.ok) return 0;
-  const total = response.headers.get("x-total-count");
-  if (total) return Number(total);
-  const data = (await response.json().catch(() => ({}))) as { users?: unknown[] };
-  return data.users?.length || 0;
-}
-
 async function loadDashboard() {
   if (!getSupabaseConfig()) {
     throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
 
-  const [users, articles, dreams, baziLeads, messages] = await Promise.all([
-    countUsers(),
+  const [users, articles, dreams, baziLeads, messages, history] = await Promise.all([
+    countTable("users"),
     countTable("articles"),
     countTable("dreams"),
     countTable("leads"),
     countTable("contact_messages"),
+    countTable("reading_history"),
   ]);
 
   const readings = dreams + articles + baziLeads;
@@ -62,11 +45,11 @@ async function loadDashboard() {
     {
       label: "ผู้ใช้งานทั้งหมด",
       value: users.toLocaleString(),
-      delta: "ข้อมูลจาก Supabase Auth",
+      delta: "จากตาราง public.users",
     },
     { label: "ข้อมูลทำนายฝัน", value: dreams.toLocaleString(), delta: "จากตาราง dreams" },
     { label: "ข้อความติดต่อ", value: messages.toLocaleString(), delta: "จากฟอร์ม contact" },
-    { label: "บทความที่เผยแพร่", value: articles.toLocaleString(), delta: "จากตาราง articles" },
+    { label: "ประวัติการดูดวง", value: history.toLocaleString(), delta: "จากตาราง reading_history" },
   ];
   const services: ServiceShare[] = [
     {

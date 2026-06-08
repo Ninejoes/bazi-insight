@@ -2,6 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo } from "@/lib/seo";
+import { readStoredUserSession } from "@/lib/user-session";
 import { useMemo, useState } from "react";
 import { getCategory, tarotCards, type TarotCard, type TarotCategory } from "@/lib/tarot-cards";
 import {
@@ -65,8 +66,10 @@ function TarotReading() {
   };
 
   const reveal = () => {
-    setDrawn(drawSelectedCards(deck, selected, category.count));
+    const nextDrawn = drawSelectedCards(deck, selected, category.count);
+    setDrawn(nextDrawn);
     setPhase("result");
+    void persistTarotReading(category, nextDrawn);
   };
 
   const reset = () => {
@@ -144,6 +147,34 @@ function TarotReading() {
       <SiteFooter />
     </div>
   );
+}
+
+async function persistTarotReading(category: TarotCategory, drawn: DrawnTarotCard[]) {
+  const session = readStoredUserSession();
+  const summary = summarizeTarotReading(drawn, category);
+  await fetch("/api/reading-history", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
+    },
+    body: JSON.stringify({
+      type: "ไพ่ยิปซี",
+      title: category.title,
+      result: summary.headline,
+      input: {
+        category: category.slug,
+        positions: category.positions,
+      },
+      output: {
+        summary,
+        cards: drawn.map((item) => ({
+          name: item.card.name,
+          reversed: item.reversed,
+        })),
+      },
+    }),
+  }).catch(() => {});
 }
 
 function Intro({ onStart }: { onStart: () => void }) {

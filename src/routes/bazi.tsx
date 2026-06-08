@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo } from "@/lib/seo";
+import { readStoredUserSession } from "@/lib/user-session";
 import { useState } from "react";
 import {
   analyzeBazi,
@@ -62,7 +63,9 @@ function BaziPage() {
     }
     setFormError("");
     setBirthInput(nextInput);
-    setAnalysis(analyzeBazi(nextInput));
+    const nextAnalysis = analyzeBazi(nextInput);
+    setAnalysis(nextAnalysis);
+    void persistBaziReading(nextInput, nextAnalysis);
   };
 
   return (
@@ -144,6 +147,44 @@ function BaziPage() {
       <SiteFooter />
     </div>
   );
+}
+
+async function persistBaziReading(input: BaziInput, analysis: BaziAnalysis) {
+  const session = readStoredUserSession();
+  const headers = {
+    "Content-Type": "application/json",
+    ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
+  };
+
+  await Promise.allSettled([
+    fetch("/api/leads", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        name: input.name,
+        gender: input.gender,
+        birthDate: input.birthDate,
+        birthTime: input.birthTime,
+        source: "bazi",
+        reason: "analysis",
+      }),
+    }),
+    fetch("/api/reading-history", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        type: "ปาจื้อ",
+        title: `ปาจื้อ ${analysis.chart.day.stem.han}${analysis.chart.day.branch.han}`,
+        result: `${analysis.context.dm.th} · ความแข็งแรง ${analysis.strength.toFixed(1)}/100`,
+        input,
+        output: {
+          strength: analysis.strength,
+          dayMaster: analysis.context.dm,
+          usefulElements: analysis.context.useful,
+        },
+      }),
+    }),
+  ]);
 }
 
 function FormCard({

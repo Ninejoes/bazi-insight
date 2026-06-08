@@ -6,7 +6,7 @@ export const Route = createFileRoute("/admin/users")({
   head: () =>
     seo({
       title: "จัดการผู้ใช้งาน — Admin",
-      description: "จัดการผู้ใช้งานจริงจาก Supabase Auth",
+      description: "จัดการผู้ใช้งานจริงจาก Supabase Auth ที่ซิงก์เข้า public.users",
       path: "/admin/users",
       noindex: true,
     }),
@@ -85,7 +85,7 @@ function AdminUsers() {
       <div>
         <h1 className="font-display text-3xl text-foreground">จัดการผู้ใช้งาน</h1>
         <p className="text-sm text-muted-foreground">
-          อ่านบัญชีจริงจาก Supabase Auth และไม่แสดงข้อมูล demo ในระบบ
+          อ่านบัญชีจริงจากตาราง public.users ที่ซิงก์กับ Supabase Auth และไม่แสดงข้อมูล demo
         </p>
       </div>
 
@@ -109,7 +109,7 @@ function AdminUsers() {
           disabled
           className="rounded-xl border border-gold/20 px-5 py-2.5 text-sm font-semibold text-gold/70"
         >
-          Supabase Auth
+          public.users
         </button>
       </section>
 
@@ -121,7 +121,7 @@ function AdminUsers() {
         ) : null}
         {loading ? (
           <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-            กำลังโหลดผู้ใช้งานจาก Supabase Auth...
+            กำลังโหลดผู้ใช้งานจาก public.users...
           </div>
         ) : null}
         {!loading && !error && filtered.length === 0 ? (
