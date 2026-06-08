@@ -2,11 +2,16 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { type Article } from "@/lib/articles";
-import { seo } from "@/lib/seo";
+import { seo, siteUrl } from "@/lib/seo";
 import { Fragment, useEffect, useState } from "react";
 
 export const Route = createFileRoute("/articles/$slug")({
-  head: ({ params }) => {
+  head: ({ params, ...ctx }) => {
+    const article = (ctx as { loaderData?: { article?: Article | null } }).loaderData?.article;
+    if (article) {
+      return articleSeo(article);
+    }
+
     return seo({
       title: "บทความ",
       description: "บทความดูดวงจาก Likhitfa",
@@ -15,7 +20,10 @@ export const Route = createFileRoute("/articles/$slug")({
       keywords: ["บทความดูดวง", "Likhitfa"],
     });
   },
-  loader: ({ params }) => ({ slug: params.slug }),
+  loader: async ({ params }) => ({
+    slug: params.slug,
+    article: await loadArticleBySlug(params.slug),
+  }),
   notFoundComponent: () => (
     <div className="min-h-screen flex items-center justify-center text-center">
       <div>
@@ -30,34 +38,37 @@ export const Route = createFileRoute("/articles/$slug")({
 });
 
 function ArticleDetail() {
-  const { slug } = Route.useLoaderData() as { slug: string };
-  const [article, setArticle] = useState<Article | null>(null);
+  const { slug, article: initialArticle } = Route.useLoaderData() as {
+    slug: string;
+    article: Article | null;
+  };
+  const [article, setArticle] = useState<Article | null>(initialArticle);
   const [related, setRelated] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialArticle);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let mounted = true;
 
     async function loadArticle() {
-      const response = await fetch(`/api/articles?slug=${encodeURIComponent(slug)}`);
-      const data = await response.json().catch(() => ({}));
+      const loaded = await loadArticleBySlug(slug);
       if (!mounted) return;
-      if (!response.ok || !data.ok) {
-        setError(data.error || "โหลดบทความจาก Supabase ไม่สำเร็จ");
+      if (!loaded) {
+        setError("โหลดบทความจาก Supabase ไม่สำเร็จ");
         setLoading(false);
         return;
       }
-      setArticle(data.articles?.[0] || null);
+      setArticle(loaded);
       if (mounted) setLoading(false);
     }
 
+    if (initialArticle) return;
     void loadArticle();
 
     return () => {
       mounted = false;
     };
-  }, [slug]);
+  }, [initialArticle, slug]);
 
   useEffect(() => {
     if (!article) return;
@@ -170,24 +181,56 @@ function ArticleDetail() {
 }
 
 function applyClientArticleSeo(article: Article) {
-  const title = article.seoTitle || article.title;
-  const fullTitle = title.includes("Likhitfa") ? title : `${title} — Likhitfa ลิขิตฟ้า`;
+  const metadata = articleSeo(article);
+  const title = metadata.meta.find((item) => "title" in item)?.title || article.title;
   const description = article.seoDescription || article.excerpt;
   const canonical = article.canonicalUrl || `${window.location.origin}/articles/${article.slug}`;
-  document.title = fullTitle;
+  const image = absoluteImage(article.cover);
+  document.title = title;
   setMeta("description", description);
   setMeta(
     "keywords",
     (article.keywords || ["บทความดูดวง", article.category, article.title]).join(", "),
   );
-  setMeta("twitter:title", fullTitle);
+  setMeta("twitter:title", title);
   setMeta("twitter:description", description);
-  setMeta("twitter:image", article.cover);
-  setProperty("og:title", fullTitle);
+  setMeta("twitter:image", image);
+  setProperty("og:title", title);
   setProperty("og:description", description);
-  setProperty("og:image", article.cover);
+  setProperty("og:image", image);
   setProperty("og:url", canonical);
   setCanonical(canonical);
+}
+
+async function loadArticleBySlug(slug: string): Promise<Article | null> {
+  try {
+    const origin = typeof window === "undefined" ? siteUrl : window.location.origin;
+    const response = await fetch(`${origin}/api/articles?slug=${encodeURIComponent(slug)}`);
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) return null;
+    return (data.articles?.[0] || null) as Article | null;
+  } catch {
+    return null;
+  }
+}
+
+function articleSeo(article: Article) {
+  return seo({
+    title: article.seoTitle || article.title,
+    description: article.seoDescription || article.excerpt,
+    path: `/articles/${article.slug}`,
+    canonicalUrl: article.canonicalUrl || `${siteUrl}/articles/${article.slug}`,
+    image: absoluteImage(article.cover),
+    type: "article",
+    keywords: article.keywords || ["บทความดูดวง", article.category, article.title],
+    publishedTime: article.date,
+  });
+}
+
+function absoluteImage(image?: string) {
+  if (!image) return `${siteUrl}/og-image.jpg`;
+  if (image.startsWith("http")) return image;
+  return `${siteUrl}${image.startsWith("/") ? image : `/${image}`}`;
 }
 
 function setMeta(name: string, content: string) {

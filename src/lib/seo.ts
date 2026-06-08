@@ -1,6 +1,7 @@
 const SITE_NAME = "Likhitfa ลิขิตฟ้า";
 const SITE_URL = "https://www.likhitfa.online";
 const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg`;
+export const googleAnalyticsId = "G-7F7B1DXGC1";
 
 type SeoInput = {
   title: string;
@@ -28,6 +29,7 @@ export function seo({
   canonicalUrl,
 }: SeoInput) {
   const canonical = canonicalUrl || `${SITE_URL}${path}`;
+  const imageUrl = image.startsWith("http") ? image : `${SITE_URL}${image.startsWith("/") ? image : `/${image}`}`;
   const fullTitle = title.includes("Likhitfa") ? title : `${title} — ${SITE_NAME}`;
   const meta = [
     { title: fullTitle },
@@ -35,15 +37,20 @@ export function seo({
     { name: "keywords", content: keywords.join(", ") },
     { name: "robots", content: noindex ? "noindex,nofollow" : "index,follow" },
     { property: "og:site_name", content: SITE_NAME },
+    { property: "og:locale", content: "th_TH" },
     { property: "og:type", content: type },
     { property: "og:title", content: fullTitle },
     { property: "og:description", content: description },
     { property: "og:url", content: canonical },
-    { property: "og:image", content: image },
+    { property: "og:image", content: imageUrl },
+    { property: "og:image:secure_url", content: imageUrl },
+    { property: "og:image:type", content: "image/jpeg" },
+    { property: "og:image:width", content: "1200" },
+    { property: "og:image:height", content: "630" },
     { name: "twitter:card", content: "summary_large_image" },
     { name: "twitter:title", content: fullTitle },
     { name: "twitter:description", content: description },
-    { name: "twitter:image", content: image },
+    { name: "twitter:image", content: imageUrl },
   ];
 
   if (publishedTime) meta.push({ property: "article:published_time", content: publishedTime });

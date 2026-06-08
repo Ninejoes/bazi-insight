@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -11,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { googleAnalyticsId, siteName, siteUrl } from "../lib/seo";
 
 function NotFoundComponent() {
   return (
@@ -78,6 +80,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "author", content: "Likhitfa" },
+      { name: "theme-color", content: "#05080d" },
+      { property: "og:site_name", content: siteName },
+      { property: "og:url", content: siteUrl },
     ],
     links: [
       {
@@ -97,6 +102,17 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="th">
       <head>
         <HeadContent />
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`} />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${googleAnalyticsId}', { send_page_view: false });
+`.trim(),
+          }}
+        />
       </head>
       <body>
         {children}
@@ -111,8 +127,25 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <GoogleAnalyticsPageView />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
     </QueryClientProvider>
   );
+}
+
+function GoogleAnalyticsPageView() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const gtag = (window as Window & {
+      gtag?: (command: string, target: string, params?: Record<string, string>) => void;
+    }).gtag;
+    gtag?.("config", googleAnalyticsId, {
+      page_path: `${location.pathname}${location.search}`,
+      page_location: `${window.location.origin}${location.pathname}${location.search}`,
+    });
+  }, [location.pathname, location.search]);
+
+  return null;
 }
