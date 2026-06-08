@@ -6,12 +6,11 @@ const functionsPath = new URL("../.vercel/output/functions/", import.meta.url);
 const config = JSON.parse(await readFile(outputConfigPath, "utf8"));
 
 // Vercel's Build Output API v3 config schema is strict. Nitro includes display
-// metadata that can make the deploy fail after a successful build.
-if (config.framework && typeof config.framework === "object") {
-  delete config.framework.name;
-  if (!Object.keys(config.framework).length) {
-    delete config.framework;
-  }
+// metadata that can make Git-connected deploys fail after a successful build.
+delete config.framework;
+
+if (config.overrides && !Object.keys(config.overrides).length) {
+  delete config.overrides;
 }
 
 await writeFile(outputConfigPath, `${JSON.stringify(config, null, 2)}\n`);
