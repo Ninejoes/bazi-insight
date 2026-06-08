@@ -5,5 +5,11 @@ Disallow: /admin-login
 Disallow: /login
 Disallow: /register
 Disallow: /profile
+Disallow: /api/
+
+Allow: /api/articles
+Allow: /api/dreams
+Allow: /api/faqs
+Allow: /api/site-content
 
 Sitemap: https://www.likhitfa.online/sitemap.xml

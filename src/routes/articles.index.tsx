@@ -3,7 +3,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { type Article } from "@/lib/articles";
 import { seo } from "@/lib/seo";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export const Route = createFileRoute("/articles/")({
   head: () =>
@@ -20,7 +20,11 @@ export const Route = createFileRoute("/articles/")({
 const categories = ["ทั้งหมด", "ปาจื้อ", "ไพ่ยิปซี", "ทำนายฝัน"];
 
 function ArticlesIndex() {
+  const searchParams =
+    typeof window === "undefined" ? new URLSearchParams() : new URLSearchParams(window.location.search);
+  const initialSearch = searchParams.get("search") || "";
   const [active, setActive] = useState("ทั้งหมด");
+  const [search, setSearch] = useState(initialSearch);
   const [items, setItems] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -48,7 +52,22 @@ function ArticlesIndex() {
     };
   }, []);
 
-  const filtered = active === "ทั้งหมด" ? items : items.filter((a) => a.category === active);
+  const filtered = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+    return items.filter((article) => {
+      const matchCategory = active === "ทั้งหมด" || article.category === active;
+      const searchable = [
+        article.title,
+        article.excerpt,
+        article.category,
+        article.author,
+        ...(article.keywords || []),
+      ]
+        .join(" ")
+        .toLowerCase();
+      return matchCategory && (!keyword || searchable.includes(keyword));
+    });
+  }, [active, items, search]);
   const featured = filtered[0];
   const rest = filtered.slice(1);
 
@@ -82,6 +101,16 @@ function ArticlesIndex() {
           ))}
         </div>
 
+        <div className="mx-auto mt-5 max-w-xl">
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            className="input-styled"
+            placeholder="ค้นหาบทความ เช่น ปาจื้อ ไพ่ยิปซี ทำนายฝัน"
+            type="search"
+          />
+        </div>
+
         {loading ? (
           <div className="mt-8 text-center text-sm text-muted-foreground">
             กำลังโหลดบทความล่าสุด...
@@ -92,9 +121,9 @@ function ArticlesIndex() {
             {error}
           </div>
         ) : null}
-        {!loading && !error && items.length === 0 ? (
+        {!loading && !error && filtered.length === 0 ? (
           <div className="mx-auto mt-8 max-w-2xl rounded-2xl border border-gold/10 bg-gold/5 px-4 py-3 text-center text-sm text-muted-foreground">
-            ยังไม่มีบทความจาก Supabase
+            ไม่พบบทความที่ตรงกับคำค้นหรือหมวดที่เลือก
           </div>
         ) : null}
 

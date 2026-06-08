@@ -12,7 +12,13 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { googleAnalyticsId, siteName, siteUrl } from "../lib/seo";
+import {
+  googleAnalyticsId,
+  organizationJsonLd,
+  siteName,
+  siteUrl,
+  websiteJsonLd,
+} from "../lib/seo";
 
 declare global {
   interface Window {
@@ -95,7 +101,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
+      {
+        rel: "sitemap",
+        type: "application/xml",
+        href: `${siteUrl}/sitemap.xml`,
+      },
     ],
+    scripts: [websiteJsonLd(), organizationJsonLd()],
   }),
   shellComponent: RootShell,
   component: RootComponent,
