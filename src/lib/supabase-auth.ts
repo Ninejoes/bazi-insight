@@ -122,3 +122,14 @@ export async function verifySupabaseUser(url: string, serviceKey: string, access
   if (userRole(user) !== "User") throw new Error("บัญชีนี้ไม่ใช่ผู้ใช้งานทั่วไป");
   return user;
 }
+
+export async function verifySupabaseSession(url: string, serviceKey: string, accessToken: string) {
+  if (!accessToken) throw new Error("ไม่มี session สำหรับตรวจสอบสิทธิ์");
+
+  const response = await fetch(`${url}/auth/v1/user`, {
+    headers: supabaseAuthHeaders(serviceKey, accessToken),
+  });
+  if (!response.ok) throw new Error("session ไม่ถูกต้องหรือหมดอายุ");
+
+  return (await response.json().catch(() => ({}))) as SupabaseAuthUser;
+}

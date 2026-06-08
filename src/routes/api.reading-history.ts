@@ -4,7 +4,7 @@ import {
   getSupabaseAuthConfig,
   readBearer,
   supabaseAuthHeaders,
-  verifySupabaseUser,
+  verifySupabaseSession,
 } from "@/lib/supabase-auth";
 
 type ReadingRow = {
@@ -20,7 +20,7 @@ type ReadingRow = {
   updated_at?: string;
 };
 
-type VerifiedUser = Awaited<ReturnType<typeof verifySupabaseUser>> & {
+type VerifiedUser = Awaited<ReturnType<typeof verifySupabaseSession>> & {
   id: string;
 };
 
@@ -88,7 +88,7 @@ async function supabaseRest(
 async function optionalUser(url: string, serviceKey: string, request: Request) {
   const token = readBearer(request);
   if (!token) return null;
-  return verifySupabaseUser(url, serviceKey, token);
+  return verifySupabaseSession(url, serviceKey, token);
 }
 
 async function requiredUser(url: string, serviceKey: string, request: Request): Promise<VerifiedUser> {
