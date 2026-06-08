@@ -1,6 +1,7 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { readdir, readFile, writeFile } from "node:fs/promises";
 
 const outputConfigPath = new URL("../.vercel/output/config.json", import.meta.url);
+const functionsPath = new URL("../.vercel/output/functions/", import.meta.url);
 
 const config = JSON.parse(await readFile(outputConfigPath, "utf8"));
 
@@ -14,3 +15,18 @@ if (config.framework && typeof config.framework === "object") {
 }
 
 await writeFile(outputConfigPath, `${JSON.stringify(config, null, 2)}\n`);
+
+for (const entry of await readdir(functionsPath, { withFileTypes: true })) {
+  if (!entry.isDirectory() || !entry.name.endsWith(".func")) {
+    continue;
+  }
+
+  const functionConfigPath = new URL(`${entry.name}/.vc-config.json`, functionsPath);
+  const functionConfig = JSON.parse(await readFile(functionConfigPath, "utf8"));
+
+  if (functionConfig.runtime === "nodejs24.x") {
+    functionConfig.runtime = "nodejs22.x";
+  }
+
+  await writeFile(functionConfigPath, `${JSON.stringify(functionConfig, null, 2)}\n`);
+}
