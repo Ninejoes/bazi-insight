@@ -12,13 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import {
-  googleAnalyticsId,
-  organizationJsonLd,
-  siteName,
-  siteUrl,
-  websiteJsonLd,
-} from "../lib/seo";
+import { googleAnalyticsId, siteName, siteUrl } from "../lib/seo";
 
 declare global {
   interface Window {
@@ -120,14 +114,6 @@ function RootShell({ children }: { children: ReactNode }) {
       <head>
         <HeadContent />
         <script async src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`} />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: websiteJsonLd().children }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: organizationJsonLd().children }}
-        />
         <script
           dangerouslySetInnerHTML={{
             __html: `

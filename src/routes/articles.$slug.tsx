@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { type Article } from "@/lib/articles";
-import { jsonLd, seo, siteName, siteUrl } from "@/lib/seo";
+import { seo, siteUrl } from "@/lib/seo";
 import { Fragment, useEffect, useState } from "react";
 
 export const Route = createFileRoute("/articles/$slug")({
@@ -132,10 +132,6 @@ function ArticleDetail() {
           ← กลับสู่บทความทั้งหมด
         </Link>
         <article className="mt-6">
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: articleJsonLd(a).children }}
-          />
           <div className="text-[11px] uppercase tracking-[0.25em] text-gold">{a.category}</div>
           <h1 className="mt-2 font-display text-4xl text-foreground md:text-5xl">{a.title}</h1>
           <div className="mt-4 flex items-center gap-3 text-xs text-muted-foreground">
@@ -204,7 +200,6 @@ function applyClientArticleSeo(article: Article) {
   setProperty("og:image", image);
   setProperty("og:url", canonical);
   setCanonical(canonical);
-  setJsonLd("article-json-ld", articleJsonLd(article).children);
 }
 
 async function loadArticleBySlug(slug: string): Promise<Article | null> {
@@ -229,35 +224,6 @@ function articleSeo(article: Article) {
     type: "article",
     keywords: article.keywords || ["บทความดูดวง", article.category, article.title],
     publishedTime: article.date,
-  });
-}
-
-function articleJsonLd(article: Article) {
-  const canonical = article.canonicalUrl || `${siteUrl}/articles/${article.slug}`;
-  return jsonLd({
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: article.title,
-    description: article.seoDescription || article.excerpt,
-    image: [absoluteImage(article.cover)],
-    datePublished: article.date,
-    dateModified: article.date,
-    author: {
-      "@type": "Person",
-      name: article.author || siteName,
-    },
-    publisher: {
-      "@type": "Organization",
-      name: siteName,
-      logo: {
-        "@type": "ImageObject",
-        url: `${siteUrl}/og-image.jpg`,
-      },
-    },
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": canonical,
-    },
   });
 }
 
@@ -297,17 +263,6 @@ function setCanonical(href: string) {
     document.head.appendChild(element);
   }
   element.setAttribute("href", href);
-}
-
-function setJsonLd(id: string, content: string) {
-  let element = document.querySelector<HTMLScriptElement>(`script#${id}`);
-  if (!element) {
-    element = document.createElement("script");
-    element.id = id;
-    element.type = "application/ld+json";
-    document.head.appendChild(element);
-  }
-  element.textContent = content;
 }
 
 function ArticleBlock({ text }: { text: string }) {
