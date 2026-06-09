@@ -145,7 +145,7 @@ function AnalyticsTracker() {
   const location = useLocation();
 
   useEffect(() => {
-    const pagePath = `${location.pathname}${location.search || ""}`;
+    const pagePath = `${location.pathname}${window.location.search || ""}`;
     const pageLocation = `${window.location.origin}${pagePath}`;
     window.gtag?.("event", "page_view", {
       send_to: googleAnalyticsId,
@@ -153,7 +153,7 @@ function AnalyticsTracker() {
       page_location: pageLocation,
       page_path: pagePath,
     });
-  }, [location.pathname, location.search]);
+  }, [location.href, location.pathname]);
 
   return null;
 }
