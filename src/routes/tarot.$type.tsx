@@ -404,8 +404,12 @@ function CardImage({
         alt={card.name}
         loading="lazy"
         className="h-full w-full object-cover"
-        style={{ transform: reversed ? "rotate(180deg)" : undefined }}
       />
+      {reversed && (
+        <div className="absolute inset-x-1 bottom-1 rounded-full border border-rose-200/40 bg-rose-950/80 px-2 py-1 text-center text-[10px] font-semibold text-rose-100 shadow-lg backdrop-blur">
+          กลับหัว
+        </div>
+      )}
     </div>
   );
 }
