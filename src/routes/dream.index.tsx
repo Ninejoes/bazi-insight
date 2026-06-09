@@ -6,6 +6,18 @@ import { type DreamRecord } from "@/lib/admin-content";
 import { readStoredUserSession } from "@/lib/user-session";
 import { useEffect, useState } from "react";
 
+const PAGE_SIZE = 20;
+
+type DreamResponse = {
+  ok?: boolean;
+  error?: string;
+  dreams?: DreamRecord[];
+  page?: number;
+  limit?: number;
+  total?: number;
+  totalPages?: number;
+};
+
 export const Route = createFileRoute("/dream/")({
   head: () =>
     seo({
@@ -19,23 +31,39 @@ export const Route = createFileRoute("/dream/")({
 
 function DreamPage() {
   const [q, setQ] = useState("");
-  const [show, setShow] = useState(false);
+  const [activeQuery, setActiveQuery] = useState("");
   const [dreams, setDreams] = useState<DreamRecord[]>([]);
-  const [results, setResults] = useState<DreamRecord[]>([]);
+  const [popular, setPopular] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let mounted = true;
 
     async function loadDreams() {
-      const response = await fetch("/api/dreams");
-      const data = await response.json().catch(() => ({}));
+      setLoading(true);
+      setError("");
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(PAGE_SIZE),
+      });
+      if (activeQuery) params.set("q", activeQuery);
+      const response = await fetch(`/api/dreams?${params.toString()}`);
+      const data = (await response.json().catch(() => ({}))) as DreamResponse;
       if (!mounted) return;
+      setLoading(false);
       if (!response.ok || !data.ok) {
         setError(data.error || "โหลดข้อมูลทำนายฝันจาก Supabase ไม่สำเร็จ");
+        setDreams([]);
         return;
       }
       setDreams(data.dreams || []);
+      setTotal(data.total || 0);
+      setTotalPages(data.totalPages || 1);
+      if (activeQuery && data.dreams?.[0]) void persistDreamReading(activeQuery, data.dreams[0]);
     }
 
     void loadDreams();
@@ -43,18 +71,29 @@ function DreamPage() {
     return () => {
       mounted = false;
     };
+  }, [activeQuery, page]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadPopular() {
+      const response = await fetch(`/api/dreams?page=1&limit=12`);
+      const data = (await response.json().catch(() => ({}))) as DreamResponse;
+      if (!mounted || !response.ok || !data.ok) return;
+      setPopular((data.dreams || []).map((dream) => dream.keyword));
+    }
+
+    void loadPopular();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  const popular = dreams.slice(0, 12).map((dream) => dream.keyword);
-  const visibleResults = show ? results : dreams.slice(0, 32);
-  const searchDreams = (query: string) => {
+  const searchDreams = (query: string, nextPage = 1) => {
     const keyword = query.trim().toLowerCase();
-    const matched = keyword
-      ? dreams.filter((dream) => dreamMatches(dream, keyword))
-      : dreams.slice(0, 2);
-    setResults(matched);
-    setShow(true);
-    if (matched[0]) void persistDreamReading(keyword || matched[0].keyword, matched[0]);
+    setPage(nextPage);
+    setActiveQuery(keyword);
   };
 
   return (
@@ -81,7 +120,7 @@ function DreamPage() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                searchDreams(q);
+                searchDreams(q, 1);
               }}
               className="mt-8 flex flex-col gap-3 md:flex-row"
             >
@@ -111,7 +150,7 @@ function DreamPage() {
                     key={p}
                     onClick={() => {
                       setQ(p);
-                      searchDreams(p);
+                      searchDreams(p, 1);
                     }}
                     className="rounded-full border border-border bg-card/40 px-4 py-1.5 text-xs text-muted-foreground transition-all hover:border-gold/40 hover:text-gold"
                   >
@@ -123,44 +162,109 @@ function DreamPage() {
           </div>
         </section>
 
-        {show && (
-          <section className="mt-6 space-y-4">
-            {results.length === 0 ? (
-              <div className="glass-strong rounded-3xl p-6 text-sm text-muted-foreground">
-                ไม่พบข้อมูลคำฝันจาก Supabase
-              </div>
-            ) : null}
-            {results.length > 0 ? (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                {results.slice(0, 16).map((dream) => (
-                  <DreamSummaryCard key={dream.id} dream={dream} />
-                ))}
-              </div>
-            ) : null}
-          </section>
-        )}
-
-        {!show && !error && (
+        {!error && (
           <section className="mt-10">
             <div className="mb-4 flex items-end justify-between gap-4">
               <div>
-                <h2 className="font-display text-3xl text-foreground">คำทำนายฝันยอดนิยม</h2>
+                <h2 className="font-display text-3xl text-foreground">
+                  {activeQuery ? `ผลค้นหา "${activeQuery}"` : "คำทำนายฝันยอดนิยม"}
+                </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  แสดงคำฝันพร้อมความหมายย่อ กดต่อเพื่อดูเลขเด็ด ช่วงเวลาฝัน และวิธีแก้เคล็ด
+                  {activeQuery
+                    ? `ค้นหาจากฐานข้อมูล Supabase พบ ${total.toLocaleString("th-TH")} รายการ`
+                    : "โหลดจากฐานข้อมูลทีละ 20 รายการ กดต่อเพื่อดูเลขเด็ด ช่วงเวลาฝัน และวิธีแก้เคล็ด"}
                 </p>
               </div>
+              {activeQuery ? (
+                <button
+                  onClick={() => {
+                    setQ("");
+                    searchDreams("", 1);
+                  }}
+                  className="rounded-full border border-border px-4 py-2 text-xs text-muted-foreground hover:border-gold/40 hover:text-gold"
+                >
+                  ล้างคำค้น
+                </button>
+              ) : null}
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {visibleResults.map((dream) => (
-                <DreamSummaryCard key={dream.id} dream={dream} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="glass-strong rounded-3xl p-6 text-sm text-muted-foreground">
+                กำลังโหลดข้อมูลจาก Supabase...
+              </div>
+            ) : dreams.length === 0 ? (
+              <div className="glass-strong rounded-3xl p-6 text-sm text-muted-foreground">
+                ไม่พบข้อมูลคำฝันจาก Supabase
+              </div>
+            ) : (
+              <>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  {dreams.map((dream) => (
+                    <DreamSummaryCard key={dream.id} dream={dream} />
+                  ))}
+                </div>
+                <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+              </>
+            )}
           </section>
         )}
       </main>
 
       <SiteFooter />
     </div>
+  );
+}
+
+function Pagination({
+  page,
+  totalPages,
+  onPageChange,
+}: {
+  page: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}) {
+  if (totalPages <= 1) return null;
+  const pages = Array.from({ length: totalPages }, (_, index) => index + 1).filter(
+    (item) => item === 1 || item === totalPages || Math.abs(item - page) <= 2,
+  );
+
+  return (
+    <nav className="mt-8 flex flex-wrap items-center justify-center gap-2" aria-label="Dream pages">
+      <button
+        disabled={page <= 1}
+        onClick={() => onPageChange(page - 1)}
+        className="rounded-full border border-border px-4 py-2 text-xs text-muted-foreground disabled:opacity-40 hover:border-gold/40 hover:text-gold"
+      >
+        ก่อนหน้า
+      </button>
+      {pages.map((item, index) => {
+        const previous = pages[index - 1];
+        return (
+          <span key={item} className="flex items-center gap-2">
+            {previous && item - previous > 1 ? (
+              <span className="text-xs text-muted-foreground">...</span>
+            ) : null}
+            <button
+              onClick={() => onPageChange(item)}
+              className={`h-9 min-w-9 rounded-full px-3 text-xs font-semibold ${
+                item === page
+                  ? "bg-gradient-gold text-primary-foreground"
+                  : "border border-border text-muted-foreground hover:border-gold/40 hover:text-gold"
+              }`}
+            >
+              {item}
+            </button>
+          </span>
+        );
+      })}
+      <button
+        disabled={page >= totalPages}
+        onClick={() => onPageChange(page + 1)}
+        className="rounded-full border border-border px-4 py-2 text-xs text-muted-foreground disabled:opacity-40 hover:border-gold/40 hover:text-gold"
+      >
+        ถัดไป
+      </button>
+    </nav>
   );
 }
 
@@ -179,13 +283,6 @@ function DreamSummaryCard({ dream }: { dream: DreamRecord }) {
       </article>
     </Link>
   );
-}
-
-function dreamMatches(dream: DreamRecord, keyword: string) {
-  return [dream.keyword, dream.category, dream.meaning, dream.numbers, dream.time, dream.advice]
-    .join(" ")
-    .toLowerCase()
-    .includes(keyword);
 }
 
 async function persistDreamReading(query: string, dream: DreamRecord) {

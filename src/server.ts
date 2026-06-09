@@ -94,10 +94,28 @@ async function loadDreamsForSitemap(
   ctx: unknown,
 ) {
   const url = new URL(request.url);
-  const response = await handler.fetch(new Request(`${url.origin}/api/dreams`), env, ctx);
-  if (!response.ok) return undefined;
-  const data = (await response.json().catch(() => null)) as { dreams?: DreamRecord[] } | null;
-  return Array.isArray(data?.dreams) ? data.dreams : undefined;
+  const dreams: DreamRecord[] = [];
+  let page = 1;
+  let totalPages = 1;
+
+  do {
+    const response = await handler.fetch(
+      new Request(`${url.origin}/api/dreams?page=${page}&limit=50`),
+      env,
+      ctx,
+    );
+    if (!response.ok) return dreams.length ? dreams : undefined;
+    const data = (await response.json().catch(() => null)) as {
+      dreams?: DreamRecord[];
+      totalPages?: number;
+    } | null;
+    if (!Array.isArray(data?.dreams)) return dreams.length ? dreams : undefined;
+    dreams.push(...data.dreams);
+    totalPages = data.totalPages || page;
+    page += 1;
+  } while (page <= totalPages);
+
+  return dreams;
 }
 
 async function sitemapResponse(handler: ServerEntry, request: Request, env: unknown, ctx: unknown) {

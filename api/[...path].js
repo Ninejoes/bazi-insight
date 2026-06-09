@@ -438,17 +438,25 @@ async function articles(req, res) {
 async function dreams(req, res) {
   if (req.method === "GET") {
     const url = new URL(req.url, "https://likhitfa.local");
-    const q = url.searchParams.get("q")?.toLowerCase() || "";
-    const keyword = url.searchParams.get("keyword")?.toLowerCase() || "";
-    const result = await rest("dreams?select=*&order=keyword.asc");
+    const q = (url.searchParams.get("q") || "").trim().toLowerCase();
+    const keyword = (url.searchParams.get("keyword") || "").trim().toLowerCase();
+    const page = clampPage(url.searchParams.get("page"));
+    const limit = clampLimit(url.searchParams.get("limit"));
+    const result = await rest(buildDreamQuery({ q, keyword, page, limit }), {
+      headers: { Prefer: "count=exact" },
+    });
     if (!result.ok) return sendRestError(res, result);
     const rows = Array.isArray(result.data) ? result.data : [];
-    const dreams = rows
-      .map(normalizeDream)
-      .filter((dream) =>
-        keyword ? dream.keyword.toLowerCase() === keyword : !q || dreamMatches(dream, q),
-      );
-    return send(res, 200, { ok: true, source: "supabase", dreams });
+    const total = parseTotal(result.headers.get("content-range"), rows.length);
+    return send(res, 200, {
+      ok: true,
+      source: "supabase",
+      dreams: rows.map(normalizeDream),
+      page,
+      limit,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+    });
   }
   if (req.method === "POST") {
     const dream = normalizeDream(await readBody(req));
@@ -475,11 +483,50 @@ async function dreams(req, res) {
   return send(res, 405, { ok: false, error: "Method not allowed" });
 }
 
-function dreamMatches(dream, keyword) {
-  return [dream.keyword, dream.category, dream.meaning, dream.numbers, dream.time, dream.advice]
-    .join(" ")
-    .toLowerCase()
-    .includes(keyword);
+function clampPage(value) {
+  const page = Number.parseInt(value || "1", 10);
+  return Number.isFinite(page) && page > 0 ? page : 1;
+}
+
+function clampLimit(value) {
+  const limit = Number.parseInt(value || "20", 10);
+  if (!Number.isFinite(limit) || limit < 1) return 20;
+  return Math.min(limit, 50);
+}
+
+function parseTotal(contentRange, fallback) {
+  const total = contentRange?.match(/\/(\d+|\*)$/)?.[1];
+  if (!total || total === "*") return fallback;
+  return Number.parseInt(total, 10);
+}
+
+function buildDreamQuery({ q, keyword, page, limit }) {
+  const offset = (page - 1) * limit;
+  const params = new URLSearchParams({
+    select: "*",
+    order: "keyword.asc",
+    limit: String(limit),
+    offset: String(offset),
+  });
+
+  if (keyword) {
+    params.set("keyword", `eq.${keyword}`);
+  } else if (q) {
+    const pattern = `*${q.replace(/[,*()]/g, " ")}*`;
+    params.set(
+      "or",
+      [
+        `keyword.ilike.${pattern}`,
+        `category.ilike.${pattern}`,
+        `meaning.ilike.${pattern}`,
+        `numbers.ilike.${pattern}`,
+        `time.ilike.${pattern}`,
+        `advice.ilike.${pattern}`,
+      ].join(","),
+    );
+  }
+
+  return `dreams?${params.toString()}`;
 }
 
 async function faqs(req, res) {

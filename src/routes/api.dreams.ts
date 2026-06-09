@@ -42,24 +42,73 @@ function toRow(dream: DreamRecord) {
   };
 }
 
-function dreamMatches(dream: DreamRecord, keyword: string) {
-  return [dream.keyword, dream.category, dream.meaning, dream.numbers, dream.time, dream.advice]
-    .join(" ")
-    .toLowerCase()
-    .includes(keyword);
+function clampPage(value: string | null) {
+  const page = Number.parseInt(value || "1", 10);
+  return Number.isFinite(page) && page > 0 ? page : 1;
 }
 
-async function listDreams() {
+function clampLimit(value: string | null) {
+  const limit = Number.parseInt(value || "20", 10);
+  if (!Number.isFinite(limit) || limit < 1) return 20;
+  return Math.min(limit, 50);
+}
+
+function parseTotal(contentRange: string | null, fallback: number) {
+  const total = contentRange?.match(/\/(\d+|\*)$/)?.[1];
+  if (!total || total === "*") return fallback;
+  return Number.parseInt(total, 10);
+}
+
+function buildDreamQuery({ q, keyword, page, limit }: { q: string; keyword: string; page: number; limit: number }) {
+  const offset = (page - 1) * limit;
+  const params = new URLSearchParams({
+    select: "*",
+    order: "keyword.asc",
+    limit: String(limit),
+    offset: String(offset),
+  });
+
+  if (keyword) {
+    params.set("keyword", `eq.${keyword}`);
+  } else if (q) {
+    const pattern = `*${q.replace(/[,*()]/g, " ")}*`;
+    params.set(
+      "or",
+      [
+        `keyword.ilike.${pattern}`,
+        `category.ilike.${pattern}`,
+        `meaning.ilike.${pattern}`,
+        `numbers.ilike.${pattern}`,
+        `time.ilike.${pattern}`,
+        `advice.ilike.${pattern}`,
+      ].join(","),
+    );
+  }
+
+  return `dreams?${params.toString()}`;
+}
+
+async function listDreams({ q = "", keyword = "", page = 1, limit = 20 } = {}) {
   if (!getSupabaseConfig()) {
     throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
 
-  const response = await supabaseRequest("dreams?select=*&order=keyword.asc");
+  const response = await supabaseRequest(buildDreamQuery({ q, keyword, page, limit }), {
+    headers: { Prefer: "count=exact" },
+  });
   if (!response) {
     throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
   const rows = (await response.json().catch(() => [])) as DreamRow[];
-  return { source: "supabase", dreams: rows.map(normalizeDream) };
+  const total = parseTotal(response.headers.get("content-range"), rows.length);
+  return {
+    source: "supabase",
+    dreams: rows.map(normalizeDream),
+    page,
+    limit,
+    total,
+    totalPages: Math.max(1, Math.ceil(total / limit)),
+  };
 }
 
 async function saveDream(payload: DreamRow) {
@@ -104,13 +153,9 @@ export const Route = createFileRoute("/api/dreams")({
           const url = new URL(request.url);
           const q = (url.searchParams.get("q") || "").trim().toLowerCase();
           const keyword = (url.searchParams.get("keyword") || "").trim().toLowerCase();
-          const result = await listDreams();
-          const dreams = keyword
-            ? result.dreams.filter((dream) => dream.keyword.toLowerCase() === keyword)
-            : q
-              ? result.dreams.filter((dream) => dreamMatches(dream, q))
-              : result.dreams;
-          return json({ ok: true, ...result, dreams });
+          const page = clampPage(url.searchParams.get("page"));
+          const limit = clampLimit(url.searchParams.get("limit"));
+          return json({ ok: true, ...(await listDreams({ q, keyword, page, limit })) });
         } catch (error) {
           return json(
             {
