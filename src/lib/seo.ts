@@ -67,11 +67,7 @@ export function seo({
 
   return {
     meta,
-    links: [
-      { rel: "canonical", href: canonical },
-      { rel: "alternate", hrefLang: "th-TH", href: canonical },
-      { rel: "sitemap", type: "application/xml", href: `${SITE_URL}/sitemap.xml` },
-    ],
+    links: [{ rel: "canonical", href: canonical }],
   };
 }
 

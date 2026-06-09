@@ -95,11 +95,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      {
-        rel: "sitemap",
-        type: "application/xml",
-        href: `${siteUrl}/sitemap.xml`,
-      },
     ],
   }),
   shellComponent: RootShell,
