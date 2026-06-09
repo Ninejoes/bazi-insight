@@ -68,9 +68,6 @@ function ArticlesIndex() {
       return matchCategory && (!keyword || searchable.includes(keyword));
     });
   }, [active, items, search]);
-  const featured = filtered[0];
-  const rest = filtered.slice(1);
-
   return (
     <div className="min-h-screen">
       <SiteHeader subtitle="บทความ" subtitleCn="文章" />
@@ -127,42 +124,16 @@ function ArticlesIndex() {
           </div>
         ) : null}
 
-        {featured && (
-          <Link to="/articles/$slug" params={{ slug: featured.slug }} className="mt-10 block">
-            <article className="glass-strong overflow-hidden rounded-3xl shadow-elegant transition hover:shadow-gold md:grid md:grid-cols-2">
-              <div className="aspect-[16/10] overflow-hidden md:aspect-auto">
-                <img
-                  src={featured.cover}
-                  alt={featured.title}
-                  className="h-full w-full object-cover transition group-hover:scale-105"
-                />
-              </div>
-              <div className="flex flex-col justify-center p-8">
-                <div className="text-[11px] uppercase tracking-[0.25em] text-gold">
-                  FEATURED · {featured.category}
-                </div>
-                <h2 className="mt-2 font-display text-3xl text-foreground md:text-4xl">
-                  {featured.title}
-                </h2>
-                <p className="mt-3 text-sm text-muted-foreground">{featured.excerpt}</p>
-                <div className="mt-5 flex items-center gap-3 text-xs text-muted-foreground">
-                  <span>{featured.author}</span>
-                  <span>·</span>
-                  <span>{featured.date}</span>
-                  <span>·</span>
-                  <span>{featured.readMin} นาที</span>
-                </div>
-              </div>
-            </article>
-          </Link>
-        )}
-
-        <section className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {rest.map((a) => (
-            <Link key={a.slug} to="/articles/$slug" params={{ slug: a.slug }}>
+        <section className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {filtered.map((a) => (
+            <Link key={a.slug} to="/articles/$slug" params={{ slug: a.slug }} className="group">
               <article className="ornate-border h-full overflow-hidden rounded-2xl glass-strong transition hover:-translate-y-1 hover:shadow-gold">
                 <div className="aspect-[16/10] overflow-hidden">
-                  <img src={a.cover} alt={a.title} className="h-full w-full object-cover" />
+                  <img
+                    src={a.cover}
+                    alt={a.title}
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                  />
                 </div>
                 <div className="p-5">
                   <div className="text-[10px] uppercase tracking-wider text-gold/80">
