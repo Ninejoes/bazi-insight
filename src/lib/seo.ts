@@ -1,6 +1,6 @@
 const SITE_NAME = "Likhitfa ลิขิตฟ้า";
 const SITE_URL = "https://www.likhitfa.online";
-const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg`;
+const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg?v=20260609`;
 export const googleAnalyticsId = "G-7F7B1DXGC1";
 export const googleSearchVerification =
   import.meta.env.VITE_GOOGLE_SITE_VERIFICATION ||
@@ -89,7 +89,7 @@ export function organizationJsonLd() {
     name: SITE_NAME,
     alternateName: ["Likhitfa", "ลิขิตฟ้า"],
     url: SITE_URL,
-    logo: `${SITE_URL}/og-image.jpg`,
+    logo: DEFAULT_IMAGE,
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "customer support",
