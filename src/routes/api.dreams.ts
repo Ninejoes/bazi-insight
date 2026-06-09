@@ -50,7 +50,7 @@ function clampPage(value: string | null) {
 function clampLimit(value: string | null) {
   const limit = Number.parseInt(value || "20", 10);
   if (!Number.isFinite(limit) || limit < 1) return 20;
-  return Math.min(limit, 50);
+  return Math.min(limit, 1000);
 }
 
 function parseTotal(contentRange: string | null, fallback: number) {
@@ -59,7 +59,21 @@ function parseTotal(contentRange: string | null, fallback: number) {
   return Number.parseInt(total, 10);
 }
 
-function buildDreamQuery({ q, keyword, page, limit }: { q: string; keyword: string; page: number; limit: number }) {
+function buildDreamQuery({
+  q,
+  keyword,
+  category,
+  letter,
+  page,
+  limit,
+}: {
+  q: string;
+  keyword: string;
+  category: string;
+  letter: string;
+  page: number;
+  limit: number;
+}) {
   const offset = (page - 1) * limit;
   const params = new URLSearchParams({
     select: "*",
@@ -70,7 +84,16 @@ function buildDreamQuery({ q, keyword, page, limit }: { q: string; keyword: stri
 
   if (keyword) {
     params.set("keyword", `eq.${keyword}`);
-  } else if (q) {
+  } else {
+    if (category && category !== "ทั้งหมด") {
+      params.set("category", `eq.${category}`);
+    }
+    if (letter && letter !== "ทั้งหมด") {
+      params.set("letter", `eq.${letter}`);
+    }
+  }
+
+  if (!keyword && q) {
     const pattern = `*${q.replace(/[,*()]/g, " ")}*`;
     params.set(
       "or",
@@ -88,12 +111,19 @@ function buildDreamQuery({ q, keyword, page, limit }: { q: string; keyword: stri
   return `dreams?${params.toString()}`;
 }
 
-async function listDreams({ q = "", keyword = "", page = 1, limit = 20 } = {}) {
+async function listDreams({
+  q = "",
+  keyword = "",
+  category = "",
+  letter = "",
+  page = 1,
+  limit = 20,
+} = {}) {
   if (!getSupabaseConfig()) {
     throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
 
-  const response = await supabaseRequest(buildDreamQuery({ q, keyword, page, limit }), {
+  const response = await supabaseRequest(buildDreamQuery({ q, keyword, category, letter, page, limit }), {
     headers: { Prefer: "count=exact" },
   });
   if (!response) {
@@ -153,9 +183,11 @@ export const Route = createFileRoute("/api/dreams")({
           const url = new URL(request.url);
           const q = (url.searchParams.get("q") || "").trim().toLowerCase();
           const keyword = (url.searchParams.get("keyword") || "").trim().toLowerCase();
+          const category = (url.searchParams.get("category") || "").trim();
+          const letter = (url.searchParams.get("letter") || "").trim();
           const page = clampPage(url.searchParams.get("page"));
           const limit = clampLimit(url.searchParams.get("limit"));
-          return json({ ok: true, ...(await listDreams({ q, keyword, page, limit })) });
+          return json({ ok: true, ...(await listDreams({ q, keyword, category, letter, page, limit })) });
         } catch (error) {
           return json(
             {

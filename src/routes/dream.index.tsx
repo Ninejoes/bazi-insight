@@ -7,6 +7,23 @@ import { readStoredUserSession } from "@/lib/user-session";
 import { useEffect, useState } from "react";
 
 const PAGE_SIZE = 20;
+const DREAM_CATEGORIES = [
+  "ทั้งหมด",
+  "สัตว์",
+  "คนและครอบครัว",
+  "ร่างกาย",
+  "ธรรมชาติ",
+  "สิ่งของและทรัพย์",
+  "สถานที่",
+  "เหตุการณ์",
+  "สิ่งลี้ลับและมงคล",
+  "อาหาร",
+  "ยานพาหนะ",
+];
+const THAI_LETTERS = [
+  "ทั้งหมด",
+  ..."กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ".split(""),
+];
 
 type DreamResponse = {
   ok?: boolean;
@@ -35,6 +52,8 @@ function DreamPage() {
   const [dreams, setDreams] = useState<DreamRecord[]>([]);
   const [popular, setPopular] = useState<string[]>([]);
   const [page, setPage] = useState(1);
+  const [category, setCategory] = useState("ทั้งหมด");
+  const [letter, setLetter] = useState("ทั้งหมด");
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -51,6 +70,8 @@ function DreamPage() {
         limit: String(PAGE_SIZE),
       });
       if (activeQuery) params.set("q", activeQuery);
+      if (category !== "ทั้งหมด") params.set("category", category);
+      if (letter !== "ทั้งหมด") params.set("letter", letter);
       const response = await fetch(`/api/dreams?${params.toString()}`);
       const data = (await response.json().catch(() => ({}))) as DreamResponse;
       if (!mounted) return;
@@ -71,7 +92,7 @@ function DreamPage() {
     return () => {
       mounted = false;
     };
-  }, [activeQuery, page]);
+  }, [activeQuery, page, category, letter]);
 
   useEffect(() => {
     let mounted = true;
@@ -159,6 +180,43 @@ function DreamPage() {
                 ))}
               </div>
             </div>
+
+            <div className="mt-6 grid gap-3 md:grid-cols-[1fr_1fr]">
+              <label className="text-xs text-muted-foreground">
+                หมวดคำฝัน
+                <select
+                  value={category}
+                  onChange={(event) => {
+                    setCategory(event.target.value);
+                    setPage(1);
+                  }}
+                  className="input-styled mt-2 h-12 w-full"
+                >
+                  {DREAM_CATEGORIES.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-xs text-muted-foreground">
+                ตัวอักษรขึ้นต้น
+                <select
+                  value={letter}
+                  onChange={(event) => {
+                    setLetter(event.target.value);
+                    setPage(1);
+                  }}
+                  className="input-styled mt-2 h-12 w-full"
+                >
+                  {THAI_LETTERS.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
           </div>
         </section>
 
@@ -172,7 +230,7 @@ function DreamPage() {
                 <p className="mt-1 text-sm text-muted-foreground">
                   {activeQuery
                     ? `ค้นหาจากฐานข้อมูล Supabase พบ ${total.toLocaleString("th-TH")} รายการ`
-                    : "โหลดจากฐานข้อมูลทีละ 20 รายการ กดต่อเพื่อดูเลขเด็ด ช่วงเวลาฝัน และวิธีแก้เคล็ด"}
+                    : "โหลดจากฐานข้อมูลทีละ 20 รายการ กรองหมวดและตัวอักษรจาก API โดยตรง"}
                 </p>
               </div>
               {activeQuery ? (

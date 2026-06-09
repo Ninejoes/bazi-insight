@@ -87,7 +87,7 @@ async function loadArticlesForSitemap(
 
   do {
     const response = await handler.fetch(
-      new Request(`${url.origin}/api/articles?page=${page}&limit=50`),
+      new Request(`${url.origin}/api/articles?page=${page}&limit=1000`),
       env,
       ctx,
     );
@@ -118,7 +118,7 @@ async function loadDreamsForSitemap(
 
   do {
     const response = await handler.fetch(
-      new Request(`${url.origin}/api/dreams?page=${page}&limit=50`),
+      new Request(`${url.origin}/api/dreams?page=${page}&limit=1000`),
       env,
       ctx,
     );

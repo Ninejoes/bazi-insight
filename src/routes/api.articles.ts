@@ -128,7 +128,7 @@ function clampPage(value: string | null) {
 function clampLimit(value: string | null) {
   const limit = Number.parseInt(value || "20", 10);
   if (!Number.isFinite(limit) || limit < 1) return 20;
-  return Math.min(limit, 50);
+  return Math.min(limit, 1000);
 }
 
 function parseTotal(contentRange: string | null, fallback: number) {

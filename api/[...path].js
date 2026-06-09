@@ -488,9 +488,11 @@ async function dreams(req, res) {
     const url = new URL(req.url, "https://likhitfa.local");
     const q = (url.searchParams.get("q") || "").trim().toLowerCase();
     const keyword = (url.searchParams.get("keyword") || "").trim().toLowerCase();
+    const category = (url.searchParams.get("category") || "").trim();
+    const letter = (url.searchParams.get("letter") || "").trim();
     const page = clampPage(url.searchParams.get("page"));
     const limit = clampLimit(url.searchParams.get("limit"));
-    const result = await rest(buildDreamQuery({ q, keyword, page, limit }), {
+    const result = await rest(buildDreamQuery({ q, keyword, category, letter, page, limit }), {
       headers: { Prefer: "count=exact" },
     });
     if (!result.ok) return sendRestError(res, result);
@@ -539,7 +541,7 @@ function clampPage(value) {
 function clampLimit(value) {
   const limit = Number.parseInt(value || "20", 10);
   if (!Number.isFinite(limit) || limit < 1) return 20;
-  return Math.min(limit, 50);
+  return Math.min(limit, 1000);
 }
 
 function parseTotal(contentRange, fallback) {
@@ -548,7 +550,7 @@ function parseTotal(contentRange, fallback) {
   return Number.parseInt(total, 10);
 }
 
-function buildDreamQuery({ q, keyword, page, limit }) {
+function buildDreamQuery({ q, keyword, category, letter, page, limit }) {
   const offset = (page - 1) * limit;
   const params = new URLSearchParams({
     select: "*",
@@ -559,7 +561,12 @@ function buildDreamQuery({ q, keyword, page, limit }) {
 
   if (keyword) {
     params.set("keyword", `eq.${keyword}`);
-  } else if (q) {
+  } else {
+    if (category && category !== "ทั้งหมด") params.set("category", `eq.${category}`);
+    if (letter && letter !== "ทั้งหมด") params.set("letter", `eq.${letter}`);
+  }
+
+  if (!keyword && q) {
     const pattern = `*${q.replace(/[,*()]/g, " ")}*`;
     params.set(
       "or",
