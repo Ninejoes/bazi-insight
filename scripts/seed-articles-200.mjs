@@ -7,25 +7,31 @@ const authorByCategory = {
 
 const imagePools = {
   "ปาจื้อ": [
-    "https://images.unsplash.com/photo-1518709268805-4e9042af2176?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1583244532610-2a234c8b81b6?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1490730141103-6cac27aaab94?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1513781050488-6dd358209a1b?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1578762857609-6ffbcb8b4642?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1533294455009-a77b7557d2d1?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1610116306796-6fea9f4fae38?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=1200&q=80",
     "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80",
   ],
   "ไพ่ยิปซี": [
-    "https://images.unsplash.com/photo-1577897665977-3a3f25c8a85a?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1600429991827-5224817554f8?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1627764574958-fb54cd7d7448?auto=format&fit=crop&w=1200&q=80",
     "https://images.unsplash.com/photo-1518932945647-7a1c969f8be2?auto=format&fit=crop&w=1200&q=80",
     "https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?auto=format&fit=crop&w=1200&q=80",
     "https://images.unsplash.com/photo-1516331138075-f3adc1e149cd?auto=format&fit=crop&w=1200&q=80",
     "https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=1200&q=80",
   ],
   "ทำนายฝัน": [
+    "https://images.unsplash.com/photo-1528353518104-dbd48bee7bc4?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1472552944129-b035e9ea3744?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1490814525860-594e82bfd34a?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1514897575457-c4db467cf78e?auto=format&fit=crop&w=1200&q=80",
     "https://images.unsplash.com/photo-1532635241-17e820acc59f?auto=format&fit=crop&w=1200&q=80",
     "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80",
     "https://images.unsplash.com/photo-1489573280374-2e193c63726c?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1200&q=80",
   ],
 };
 
