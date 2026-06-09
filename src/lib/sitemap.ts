@@ -1,4 +1,5 @@
 import { type Article } from "./articles";
+import { type DreamRecord } from "./admin-content";
 import { siteUrl } from "./seo";
 import { tarotCategories } from "./tarot-cards";
 
@@ -49,7 +50,7 @@ function dedupeEntries(entries: SitemapEntry[]) {
   });
 }
 
-export function publicSitemapEntries(articles: Article[] = []) {
+export function publicSitemapEntries(articles: Article[] = [], dreams: DreamRecord[] = []) {
   const today = new Date().toISOString().slice(0, 10);
   const tarotRoutes = tarotCategories.map((category) => ({
     loc: `/tarot/${category.slug}`,
@@ -63,17 +64,24 @@ export function publicSitemapEntries(articles: Article[] = []) {
     changefreq: "weekly" as const,
     priority: "0.7",
   }));
+  const dreamRoutes = dreams.map((dream) => ({
+    loc: `/dream/${encodeURIComponent(dream.keyword)}`,
+    lastmod: today,
+    changefreq: "weekly" as const,
+    priority: "0.7",
+  }));
 
   return dedupeEntries([
     ...basePublicRoutes.map((entry) => ({ ...entry, lastmod: today })),
     ...tarotRoutes,
     ...articleRoutes,
+    ...dreamRoutes,
   ]);
 }
 
-export function buildSitemapXml(articles: Article[] = [], url = siteUrl) {
+export function buildSitemapXml(articles: Article[] = [], url = siteUrl, dreams: DreamRecord[] = []) {
   const origin = normalizeSiteUrl(url);
-  const entries = publicSitemapEntries(articles);
+  const entries = publicSitemapEntries(articles, dreams);
   const body = entries
     .map(
       (entry) => `  <url>

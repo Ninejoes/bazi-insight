@@ -24,11 +24,13 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TarotIndexRouteImport } from './routes/tarot.index'
 import { Route as ProfileIndexRouteImport } from './routes/profile.index'
+import { Route as DreamIndexRouteImport } from './routes/dream.index'
 import { Route as ArticlesIndexRouteImport } from './routes/articles.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TarotTypeRouteImport } from './routes/tarot.$type'
 import { Route as ProfileSettingsRouteImport } from './routes/profile.settings'
 import { Route as ProfileHistoryRouteImport } from './routes/profile.history'
+import { Route as DreamSlugRouteImport } from './routes/dream.$slug'
 import { Route as ArticlesSlugRouteImport } from './routes/articles.$slug'
 import { Route as ApiUserSessionRouteImport } from './routes/api.user-session'
 import { Route as ApiUserRegisterRouteImport } from './routes/api.user-register'
@@ -126,6 +128,11 @@ const ProfileIndexRoute = ProfileIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ProfileRoute,
 } as any)
+const DreamIndexRoute = DreamIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DreamRoute,
+} as any)
 const ArticlesIndexRoute = ArticlesIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -150,6 +157,11 @@ const ProfileHistoryRoute = ProfileHistoryRouteImport.update({
   id: '/history',
   path: '/history',
   getParentRoute: () => ProfileRoute,
+} as any)
+const DreamSlugRoute = DreamSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => DreamRoute,
 } as any)
 const ArticlesSlugRoute = ArticlesSlugRouteImport.update({
   id: '/$slug',
@@ -265,7 +277,7 @@ export interface FileRoutesByFullPath {
   '/articles': typeof ArticlesRouteWithChildren
   '/bazi': typeof BaziRoute
   '/contact': typeof ContactRoute
-  '/dream': typeof DreamRoute
+  '/dream': typeof DreamRouteWithChildren
   '/help': typeof HelpRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRouteWithChildren
@@ -292,11 +304,13 @@ export interface FileRoutesByFullPath {
   '/api/user-register': typeof ApiUserRegisterRoute
   '/api/user-session': typeof ApiUserSessionRoute
   '/articles/$slug': typeof ArticlesSlugRoute
+  '/dream/$slug': typeof DreamSlugRoute
   '/profile/history': typeof ProfileHistoryRoute
   '/profile/settings': typeof ProfileSettingsRoute
   '/tarot/$type': typeof TarotTypeRoute
   '/admin/': typeof AdminIndexRoute
   '/articles/': typeof ArticlesIndexRoute
+  '/dream/': typeof DreamIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/tarot/': typeof TarotIndexRoute
 }
@@ -306,7 +320,6 @@ export interface FileRoutesByTo {
   '/admin-login': typeof AdminLoginRoute
   '/bazi': typeof BaziRoute
   '/contact': typeof ContactRoute
-  '/dream': typeof DreamRoute
   '/help': typeof HelpRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -331,11 +344,13 @@ export interface FileRoutesByTo {
   '/api/user-register': typeof ApiUserRegisterRoute
   '/api/user-session': typeof ApiUserSessionRoute
   '/articles/$slug': typeof ArticlesSlugRoute
+  '/dream/$slug': typeof DreamSlugRoute
   '/profile/history': typeof ProfileHistoryRoute
   '/profile/settings': typeof ProfileSettingsRoute
   '/tarot/$type': typeof TarotTypeRoute
   '/admin': typeof AdminIndexRoute
   '/articles': typeof ArticlesIndexRoute
+  '/dream': typeof DreamIndexRoute
   '/profile': typeof ProfileIndexRoute
   '/tarot': typeof TarotIndexRoute
 }
@@ -348,7 +363,7 @@ export interface FileRoutesById {
   '/articles': typeof ArticlesRouteWithChildren
   '/bazi': typeof BaziRoute
   '/contact': typeof ContactRoute
-  '/dream': typeof DreamRoute
+  '/dream': typeof DreamRouteWithChildren
   '/help': typeof HelpRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRouteWithChildren
@@ -375,11 +390,13 @@ export interface FileRoutesById {
   '/api/user-register': typeof ApiUserRegisterRoute
   '/api/user-session': typeof ApiUserSessionRoute
   '/articles/$slug': typeof ArticlesSlugRoute
+  '/dream/$slug': typeof DreamSlugRoute
   '/profile/history': typeof ProfileHistoryRoute
   '/profile/settings': typeof ProfileSettingsRoute
   '/tarot/$type': typeof TarotTypeRoute
   '/admin/': typeof AdminIndexRoute
   '/articles/': typeof ArticlesIndexRoute
+  '/dream/': typeof DreamIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/tarot/': typeof TarotIndexRoute
 }
@@ -420,11 +437,13 @@ export interface FileRouteTypes {
     | '/api/user-register'
     | '/api/user-session'
     | '/articles/$slug'
+    | '/dream/$slug'
     | '/profile/history'
     | '/profile/settings'
     | '/tarot/$type'
     | '/admin/'
     | '/articles/'
+    | '/dream/'
     | '/profile/'
     | '/tarot/'
   fileRoutesByTo: FileRoutesByTo
@@ -434,7 +453,6 @@ export interface FileRouteTypes {
     | '/admin-login'
     | '/bazi'
     | '/contact'
-    | '/dream'
     | '/help'
     | '/login'
     | '/register'
@@ -459,11 +477,13 @@ export interface FileRouteTypes {
     | '/api/user-register'
     | '/api/user-session'
     | '/articles/$slug'
+    | '/dream/$slug'
     | '/profile/history'
     | '/profile/settings'
     | '/tarot/$type'
     | '/admin'
     | '/articles'
+    | '/dream'
     | '/profile'
     | '/tarot'
   id:
@@ -502,11 +522,13 @@ export interface FileRouteTypes {
     | '/api/user-register'
     | '/api/user-session'
     | '/articles/$slug'
+    | '/dream/$slug'
     | '/profile/history'
     | '/profile/settings'
     | '/tarot/$type'
     | '/admin/'
     | '/articles/'
+    | '/dream/'
     | '/profile/'
     | '/tarot/'
   fileRoutesById: FileRoutesById
@@ -519,7 +541,7 @@ export interface RootRouteChildren {
   ArticlesRoute: typeof ArticlesRouteWithChildren
   BaziRoute: typeof BaziRoute
   ContactRoute: typeof ContactRoute
-  DreamRoute: typeof DreamRoute
+  DreamRoute: typeof DreamRouteWithChildren
   HelpRoute: typeof HelpRoute
   LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRouteWithChildren
@@ -648,6 +670,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileIndexRouteImport
       parentRoute: typeof ProfileRoute
     }
+    '/dream/': {
+      id: '/dream/'
+      path: '/'
+      fullPath: '/dream/'
+      preLoaderRoute: typeof DreamIndexRouteImport
+      parentRoute: typeof DreamRoute
+    }
     '/articles/': {
       id: '/articles/'
       path: '/'
@@ -682,6 +711,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/profile/history'
       preLoaderRoute: typeof ProfileHistoryRouteImport
       parentRoute: typeof ProfileRoute
+    }
+    '/dream/$slug': {
+      id: '/dream/$slug'
+      path: '/$slug'
+      fullPath: '/dream/$slug'
+      preLoaderRoute: typeof DreamSlugRouteImport
+      parentRoute: typeof DreamRoute
     }
     '/articles/$slug': {
       id: '/articles/$slug'
@@ -869,6 +905,18 @@ const ArticlesRouteWithChildren = ArticlesRoute._addFileChildren(
   ArticlesRouteChildren,
 )
 
+interface DreamRouteChildren {
+  DreamSlugRoute: typeof DreamSlugRoute
+  DreamIndexRoute: typeof DreamIndexRoute
+}
+
+const DreamRouteChildren: DreamRouteChildren = {
+  DreamSlugRoute: DreamSlugRoute,
+  DreamIndexRoute: DreamIndexRoute,
+}
+
+const DreamRouteWithChildren = DreamRoute._addFileChildren(DreamRouteChildren)
+
 interface ProfileRouteChildren {
   ProfileHistoryRoute: typeof ProfileHistoryRoute
   ProfileSettingsRoute: typeof ProfileSettingsRoute
@@ -904,7 +952,7 @@ const rootRouteChildren: RootRouteChildren = {
   ArticlesRoute: ArticlesRouteWithChildren,
   BaziRoute: BaziRoute,
   ContactRoute: ContactRoute,
-  DreamRoute: DreamRoute,
+  DreamRoute: DreamRouteWithChildren,
   HelpRoute: HelpRoute,
   LoginRoute: LoginRoute,
   ProfileRoute: ProfileRouteWithChildren,
@@ -931,6 +979,7 @@ export const routeTree = rootRouteImport
 
 import type { getRouter } from './router.tsx'
 import type { startInstance } from './start.ts'
+
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true

@@ -103,8 +103,13 @@ export const Route = createFileRoute("/api/dreams")({
         try {
           const url = new URL(request.url);
           const q = (url.searchParams.get("q") || "").trim().toLowerCase();
+          const keyword = (url.searchParams.get("keyword") || "").trim().toLowerCase();
           const result = await listDreams();
-          const dreams = q ? result.dreams.filter((dream) => dreamMatches(dream, q)) : result.dreams;
+          const dreams = keyword
+            ? result.dreams.filter((dream) => dream.keyword.toLowerCase() === keyword)
+            : q
+              ? result.dreams.filter((dream) => dreamMatches(dream, q))
+              : result.dreams;
           return json({ ok: true, ...result, dreams });
         } catch (error) {
           return json(

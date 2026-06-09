@@ -437,13 +437,17 @@ async function articles(req, res) {
 
 async function dreams(req, res) {
   if (req.method === "GET") {
-    const q = new URL(req.url, "https://likhitfa.local").searchParams.get("q")?.toLowerCase() || "";
+    const url = new URL(req.url, "https://likhitfa.local");
+    const q = url.searchParams.get("q")?.toLowerCase() || "";
+    const keyword = url.searchParams.get("keyword")?.toLowerCase() || "";
     const result = await rest("dreams?select=*&order=keyword.asc");
     if (!result.ok) return sendRestError(res, result);
     const rows = Array.isArray(result.data) ? result.data : [];
     const dreams = rows
       .map(normalizeDream)
-      .filter((dream) => !q || dreamMatches(dream, q));
+      .filter((dream) =>
+        keyword ? dream.keyword.toLowerCase() === keyword : !q || dreamMatches(dream, q),
+      );
     return send(res, 200, { ok: true, source: "supabase", dreams });
   }
   if (req.method === "POST") {

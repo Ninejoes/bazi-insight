@@ -3,6 +3,7 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { type Article } from "./lib/articles";
+import { type DreamRecord } from "./lib/admin-content";
 import { buildSitemapXml } from "./lib/sitemap";
 import { siteUrl } from "./lib/seo";
 
@@ -86,9 +87,25 @@ async function loadArticlesForSitemap(
   return Array.isArray(data?.articles) ? data.articles : undefined;
 }
 
+async function loadDreamsForSitemap(
+  handler: ServerEntry,
+  request: Request,
+  env: unknown,
+  ctx: unknown,
+) {
+  const url = new URL(request.url);
+  const response = await handler.fetch(new Request(`${url.origin}/api/dreams`), env, ctx);
+  if (!response.ok) return undefined;
+  const data = (await response.json().catch(() => null)) as { dreams?: DreamRecord[] } | null;
+  return Array.isArray(data?.dreams) ? data.dreams : undefined;
+}
+
 async function sitemapResponse(handler: ServerEntry, request: Request, env: unknown, ctx: unknown) {
-  const articles = await loadArticlesForSitemap(handler, request, env, ctx);
-  return new Response(buildSitemapXml(articles, siteUrl), { headers: xmlHeaders() });
+  const [articles, dreams] = await Promise.all([
+    loadArticlesForSitemap(handler, request, env, ctx),
+    loadDreamsForSitemap(handler, request, env, ctx),
+  ]);
+  return new Response(buildSitemapXml(articles, siteUrl, dreams), { headers: xmlHeaders() });
 }
 
 function robotsResponse() {
