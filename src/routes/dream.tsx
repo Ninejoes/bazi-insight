@@ -49,7 +49,7 @@ function DreamPage() {
   const searchDreams = (query: string) => {
     const keyword = query.trim().toLowerCase();
     const matched = keyword
-      ? dreams.filter((dream) => dream.keyword.toLowerCase().includes(keyword))
+      ? dreams.filter((dream) => dreamMatches(dream, keyword))
       : dreams.slice(0, 2);
     setResults(matched);
     setShow(true);
@@ -189,6 +189,13 @@ function DreamPage() {
       <SiteFooter />
     </div>
   );
+}
+
+function dreamMatches(dream: DreamRecord, keyword: string) {
+  return [dream.keyword, dream.category, dream.meaning, dream.numbers, dream.time, dream.advice]
+    .join(" ")
+    .toLowerCase()
+    .includes(keyword);
 }
 
 async function persistDreamReading(query: string, dream: DreamRecord) {

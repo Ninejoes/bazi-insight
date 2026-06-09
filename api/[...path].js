@@ -443,7 +443,7 @@ async function dreams(req, res) {
     const rows = Array.isArray(result.data) ? result.data : [];
     const dreams = rows
       .map(normalizeDream)
-      .filter((dream) => !q || dream.keyword.toLowerCase().includes(q));
+      .filter((dream) => !q || dreamMatches(dream, q));
     return send(res, 200, { ok: true, source: "supabase", dreams });
   }
   if (req.method === "POST") {
@@ -469,6 +469,13 @@ async function dreams(req, res) {
     return send(res, 200, { ok: true, source: "supabase" });
   }
   return send(res, 405, { ok: false, error: "Method not allowed" });
+}
+
+function dreamMatches(dream, keyword) {
+  return [dream.keyword, dream.category, dream.meaning, dream.numbers, dream.time, dream.advice]
+    .join(" ")
+    .toLowerCase()
+    .includes(keyword);
 }
 
 async function faqs(req, res) {

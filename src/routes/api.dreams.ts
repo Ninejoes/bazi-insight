@@ -42,6 +42,13 @@ function toRow(dream: DreamRecord) {
   };
 }
 
+function dreamMatches(dream: DreamRecord, keyword: string) {
+  return [dream.keyword, dream.category, dream.meaning, dream.numbers, dream.time, dream.advice]
+    .join(" ")
+    .toLowerCase()
+    .includes(keyword);
+}
+
 async function listDreams() {
   if (!getSupabaseConfig()) {
     throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
@@ -97,9 +104,7 @@ export const Route = createFileRoute("/api/dreams")({
           const url = new URL(request.url);
           const q = (url.searchParams.get("q") || "").trim().toLowerCase();
           const result = await listDreams();
-          const dreams = q
-            ? result.dreams.filter((dream) => dream.keyword.toLowerCase().includes(q))
-            : result.dreams;
+          const dreams = q ? result.dreams.filter((dream) => dreamMatches(dream, q)) : result.dreams;
           return json({ ok: true, ...result, dreams });
         } catch (error) {
           return json(
