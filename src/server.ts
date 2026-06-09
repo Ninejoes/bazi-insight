@@ -81,10 +81,28 @@ async function loadArticlesForSitemap(
   ctx: unknown,
 ) {
   const url = new URL(request.url);
-  const response = await handler.fetch(new Request(`${url.origin}/api/articles`), env, ctx);
-  if (!response.ok) return undefined;
-  const data = (await response.json().catch(() => null)) as { articles?: Article[] } | null;
-  return Array.isArray(data?.articles) ? data.articles : undefined;
+  const articles: Article[] = [];
+  let page = 1;
+  let totalPages = 1;
+
+  do {
+    const response = await handler.fetch(
+      new Request(`${url.origin}/api/articles?page=${page}&limit=50`),
+      env,
+      ctx,
+    );
+    if (!response.ok) return articles.length ? articles : undefined;
+    const data = (await response.json().catch(() => null)) as {
+      articles?: Article[];
+      totalPages?: number;
+    } | null;
+    if (!Array.isArray(data?.articles)) return articles.length ? articles : undefined;
+    articles.push(...data.articles);
+    totalPages = data.totalPages || page;
+    page += 1;
+  } while (page <= totalPages);
+
+  return articles;
 }
 
 async function loadDreamsForSitemap(

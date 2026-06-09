@@ -403,12 +403,27 @@ async function userSession(req, res) {
 
 async function articles(req, res) {
   if (req.method === "GET") {
-    const slug = new URL(req.url, "https://likhitfa.local").searchParams.get("slug");
-    const result = await rest("articles?select=*&order=date.desc");
+    const url = new URL(req.url, "https://likhitfa.local");
+    const slug = url.searchParams.get("slug") || "";
+    const q = (url.searchParams.get("q") || "").trim();
+    const category = (url.searchParams.get("category") || "").trim();
+    const page = clampPage(url.searchParams.get("page"));
+    const limit = clampLimit(url.searchParams.get("limit"));
+    const result = await rest(buildArticleQuery({ slug, q, category, page, limit }), {
+      headers: { Prefer: "count=exact" },
+    });
     if (!result.ok) return sendRestError(res, result);
     const rows = Array.isArray(result.data) ? result.data : [];
-    const articles = rows.map(normalizeArticle).filter((article) => !slug || article.slug === slug);
-    return send(res, 200, { ok: true, source: "supabase", articles });
+    const total = parseTotal(result.headers.get("content-range"), rows.length);
+    return send(res, 200, {
+      ok: true,
+      source: "supabase",
+      articles: rows.map(normalizeArticle),
+      page,
+      limit,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+    });
   }
   if (req.method === "POST") {
     const article = normalizeArticle(await readBody(req));
@@ -433,6 +448,39 @@ async function articles(req, res) {
     return send(res, 200, { ok: true, source: "supabase" });
   }
   return send(res, 405, { ok: false, error: "Method not allowed" });
+}
+
+function buildArticleQuery({ slug, q, category, page, limit }) {
+  const offset = (page - 1) * limit;
+  const params = new URLSearchParams({
+    select: "*",
+    order: "date.desc",
+    limit: String(limit),
+    offset: String(offset),
+  });
+
+  if (slug) {
+    params.set("slug", `eq.${slug}`);
+  }
+  if (category && category !== "ทั้งหมด") {
+    params.set("category", `eq.${category}`);
+  }
+  if (q) {
+    const pattern = `*${q.replace(/[,*()]/g, " ")}*`;
+    params.set(
+      "or",
+      `(${[
+        `title.ilike.${pattern}`,
+        `excerpt.ilike.${pattern}`,
+        `category.ilike.${pattern}`,
+        `author.ilike.${pattern}`,
+        `seo_title.ilike.${pattern}`,
+        `seo_description.ilike.${pattern}`,
+      ].join(",")})`,
+    );
+  }
+
+  return `articles?${params.toString()}`;
 }
 
 async function dreams(req, res) {

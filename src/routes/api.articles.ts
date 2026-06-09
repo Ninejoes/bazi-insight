@@ -120,17 +120,89 @@ async function supabaseRequest(path: string, init?: RequestInit) {
   return response;
 }
 
-async function listArticles() {
+function clampPage(value: string | null) {
+  const page = Number.parseInt(value || "1", 10);
+  return Number.isFinite(page) && page > 0 ? page : 1;
+}
+
+function clampLimit(value: string | null) {
+  const limit = Number.parseInt(value || "20", 10);
+  if (!Number.isFinite(limit) || limit < 1) return 20;
+  return Math.min(limit, 50);
+}
+
+function parseTotal(contentRange: string | null, fallback: number) {
+  const total = contentRange?.match(/\/(\d+|\*)$/)?.[1];
+  if (!total || total === "*") return fallback;
+  return Number.parseInt(total, 10);
+}
+
+function buildArticleQuery({
+  slug,
+  q,
+  category,
+  page,
+  limit,
+}: {
+  slug: string;
+  q: string;
+  category: string;
+  page: number;
+  limit: number;
+}) {
+  const offset = (page - 1) * limit;
+  const params = new URLSearchParams({
+    select: "*",
+    order: "date.desc",
+    limit: String(limit),
+    offset: String(offset),
+  });
+
+  if (slug) {
+    params.set("slug", `eq.${slug}`);
+  }
+  if (category && category !== "ทั้งหมด") {
+    params.set("category", `eq.${category}`);
+  }
+  if (q) {
+    const pattern = `*${q.replace(/[,*()]/g, " ")}*`;
+    params.set(
+      "or",
+      `(${[
+        `title.ilike.${pattern}`,
+        `excerpt.ilike.${pattern}`,
+        `category.ilike.${pattern}`,
+        `author.ilike.${pattern}`,
+        `seo_title.ilike.${pattern}`,
+        `seo_description.ilike.${pattern}`,
+      ].join(",")})`,
+    );
+  }
+
+  return `articles?${params.toString()}`;
+}
+
+async function listArticles({ slug = "", q = "", category = "", page = 1, limit = 20 } = {}) {
   if (!getSupabaseConfig()) {
     throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
 
-  const response = await supabaseRequest("articles?select=*&order=date.desc");
+  const response = await supabaseRequest(buildArticleQuery({ slug, q, category, page, limit }), {
+    headers: { Prefer: "count=exact" },
+  });
   if (!response) {
     throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
   const rows = (await response.json().catch(() => [])) as ArticleRow[];
-  return { source: "supabase", articles: rows.map(normalizeArticle) };
+  const total = parseTotal(response.headers.get("content-range"), rows.length);
+  return {
+    source: "supabase",
+    articles: rows.map(normalizeArticle),
+    page,
+    limit,
+    total,
+    totalPages: Math.max(1, Math.ceil(total / limit)),
+  };
 }
 
 async function saveArticle(article: Article) {
@@ -171,12 +243,15 @@ export const Route = createFileRoute("/api/articles")({
       GET: async ({ request }) => {
         try {
           const url = new URL(request.url);
-          const slug = url.searchParams.get("slug");
-          const result = await listArticles();
-          const articles = slug
-            ? result.articles.filter((article) => article.slug === slug)
-            : result.articles;
-          return json({ ok: true, source: result.source, articles });
+          const slug = url.searchParams.get("slug") || "";
+          const q = (url.searchParams.get("q") || "").trim();
+          const category = (url.searchParams.get("category") || "").trim();
+          const page = clampPage(url.searchParams.get("page"));
+          const limit = clampLimit(url.searchParams.get("limit"));
+          return json({
+            ok: true,
+            ...(await listArticles({ slug, q, category, page, limit })),
+          });
         } catch (error) {
           return json(
             {
