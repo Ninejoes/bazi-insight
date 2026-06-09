@@ -515,14 +515,14 @@ function buildDreamQuery({ q, keyword, page, limit }) {
     const pattern = `*${q.replace(/[,*()]/g, " ")}*`;
     params.set(
       "or",
-      [
+      `(${[
         `keyword.ilike.${pattern}`,
         `category.ilike.${pattern}`,
         `meaning.ilike.${pattern}`,
         `numbers.ilike.${pattern}`,
         `time.ilike.${pattern}`,
         `advice.ilike.${pattern}`,
-      ].join(","),
+      ].join(",")})`,
     );
   }
 
