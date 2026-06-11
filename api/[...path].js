@@ -129,6 +129,180 @@ function normalizeLead(row = {}) {
   };
 }
 
+const GLO_LATEST_ENDPOINT = "https://www.glo.or.th/api/lottery/getLatestLottery";
+const GLO_RESULT_ENDPOINT = "https://www.glo.or.th/api/checking/getLotteryResult";
+const LOTTERY_PRIZE_KEYS = [
+  "first",
+  "near1",
+  "second",
+  "third",
+  "fourth",
+  "fifth",
+  "last3f",
+  "last3b",
+  "last2",
+];
+
+function normalizeLotteryData(raw = {}) {
+  if (!raw || typeof raw !== "object") return {};
+  const output = {};
+  for (const key of LOTTERY_PRIZE_KEYS) {
+    const numberRows = raw[key]?.number || raw[key]?.numbers || raw[key] || [];
+    const values = (Array.isArray(numberRows) ? numberRows : [numberRows])
+      .map((item) => {
+        if (typeof item === "string" || typeof item === "number") return String(item);
+        return String(item?.value || item?.number || item?.lotteryNumber || "").trim();
+      })
+      .filter(Boolean)
+      .map((value) => ({ value }));
+    if (values.length) output[key] = { number: values };
+  }
+  return output;
+}
+
+function hasLotteryData(data = {}) {
+  return LOTTERY_PRIZE_KEYS.some((key) => (data[key]?.number || []).length > 0);
+}
+
+function getRecentLotteryDraws(limit = 12) {
+  const draws = [];
+  const cursor = new Date();
+  cursor.setHours(12, 0, 0, 0);
+  cursor.setDate(cursor.getDate() >= 16 ? 16 : 1);
+
+  for (let i = 0; i < limit; i += 1) {
+    draws.push({
+      date: String(cursor.getDate()).padStart(2, "0"),
+      month: String(cursor.getMonth() + 1).padStart(2, "0"),
+      year: String(cursor.getFullYear()),
+    });
+
+    if (cursor.getDate() === 16) {
+      cursor.setDate(1);
+    } else {
+      cursor.setMonth(cursor.getMonth() - 1);
+      cursor.setDate(16);
+    }
+  }
+  return draws;
+}
+
+function buildLotteryFrequency(history = []) {
+  const frequency = { last2: {}, last3b: {}, last3f: {}, first: {} };
+  for (const item of history) {
+    for (const key of Object.keys(frequency)) {
+      const numbers = item.data?.[key]?.number || [];
+      for (const number of numbers) {
+        const value = String(number.value || "").trim();
+        if (value) frequency[key][value] = (frequency[key][value] || 0) + 1;
+      }
+    }
+  }
+  return frequency;
+}
+
+function extractLotteryData(payload = {}) {
+  return (
+    payload?.response?.result?.data ||
+    payload?.response?.result?.lotteryResult ||
+    payload?.response?.result ||
+    payload?.data?.result?.data ||
+    payload?.data?.result ||
+    payload?.result?.data ||
+    payload?.result ||
+    payload?.data ||
+    payload
+  );
+}
+
+function cleanLotteryDraw(input = {}) {
+  const now = new Date();
+  const date = String(input.date || "").padStart(2, "0") === "16" ? "16" : "01";
+  const monthNumber = Number.parseInt(String(input.month || now.getMonth() + 1), 10);
+  const yearNumber = Number.parseInt(String(input.year || now.getFullYear()), 10);
+  return {
+    date,
+    month: String(Number.isFinite(monthNumber) ? Math.min(12, Math.max(1, monthNumber)) : now.getMonth() + 1).padStart(2, "0"),
+    year: String(Number.isFinite(yearNumber) ? Math.min(2099, Math.max(2020, yearNumber)) : now.getFullYear()),
+  };
+}
+
+async function postGloLottery(endpoint, body = {}) {
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      "User-Agent": "Likhitfa/1.0",
+    },
+    body: JSON.stringify(body),
+  });
+  const text = await response.text().catch(() => "");
+  let payload = null;
+  try {
+    payload = text ? JSON.parse(text) : null;
+  } catch {
+    payload = text;
+  }
+  if (!response.ok) {
+    throw new Error(`GLO API returned ${response.status}: ${String(text).slice(0, 200)}`);
+  }
+  return payload;
+}
+
+async function lottery(req, res) {
+  if (!["GET", "POST"].includes(req.method)) {
+    return send(res, 405, { ok: false, error: "Method not allowed" });
+  }
+
+  const url = new URL(req.url || "/", "https://likhitfa.local");
+  const body = req.method === "POST" ? await readBody(req) : {};
+  const mode = String(body.mode || url.searchParams.get("mode") || "result");
+
+  if (mode === "history") {
+    const limit = Math.min(
+      36,
+      Math.max(1, Number.parseInt(String(body.limit || url.searchParams.get("limit") || "12"), 10) || 12),
+    );
+    const draws = getRecentLotteryDraws(limit);
+    const settled = await Promise.allSettled(
+      draws.map(async (date) => {
+        const payload = await postGloLottery(GLO_RESULT_ENDPOINT, date);
+        const data = normalizeLotteryData(extractLotteryData(payload));
+        if (!hasLotteryData(data)) throw new Error("empty result");
+        return { date, data };
+      }),
+    );
+    const history = settled
+      .filter((item) => item.status === "fulfilled")
+      .map((item) => item.value);
+    return send(res, 200, {
+      ok: true,
+      source: "glo",
+      mode: "history",
+      history,
+      frequency: buildLotteryFrequency(history),
+    });
+  }
+
+  if (mode === "latest") {
+    const payload = await postGloLottery(GLO_LATEST_ENDPOINT, {});
+    const data = normalizeLotteryData(extractLotteryData(payload));
+    if (!hasLotteryData(data)) throw new Error("ไม่พบผลรางวัลงวดล่าสุดจาก GLO");
+    return send(res, 200, { ok: true, source: "glo", mode: "latest", data, rawDate: payload?.response?.result?.date || null });
+  }
+
+  const draw = cleanLotteryDraw({
+    date: body.date || url.searchParams.get("date"),
+    month: body.month || url.searchParams.get("month"),
+    year: body.year || url.searchParams.get("year"),
+  });
+  const payload = await postGloLottery(GLO_RESULT_ENDPOINT, draw);
+  const data = normalizeLotteryData(extractLotteryData(payload));
+  if (!hasLotteryData(data)) throw new Error("ไม่พบผลรางวัลงวดนี้จาก GLO");
+  return send(res, 200, { ok: true, source: "glo", mode: "result", date: draw, data });
+}
+
 function pathName(req) {
   const url = new URL(req.url || "/", "https://likhitfa.local");
   return url.pathname.replace(/^\/api\/?/, "").replace(/\/$/, "");
@@ -876,6 +1050,7 @@ export default async function handler(req, res) {
     if (route === "contact-messages") return await contactMessages(req, res);
     if (route === "reading-history") return await readingHistory(req, res);
     if (route === "leads") return await leads(req, res);
+    if (route === "lottery") return await lottery(req, res);
     if (route === "dashboard" && req.method === "GET") return await dashboard(res);
     return send(res, 404, { ok: false, error: `Unknown API route: ${route}` });
   } catch (error) {

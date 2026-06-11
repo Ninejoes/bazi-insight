@@ -20,6 +20,7 @@ type LotteryTab = "result" | "stats" | "probability" | "predict";
 type LotteryApiResponse = {
   ok?: boolean;
   error?: string;
+  mode?: "latest" | "result";
   date?: LotteryDrawDate;
   data?: LotteryResultData;
   history?: LotteryHistoryItem[];
@@ -62,6 +63,7 @@ function LotteryPage() {
   });
   const [result, setResult] = useState<LotteryResultData | null>(null);
   const [resultDate, setResultDate] = useState<LotteryDrawDate | null>(null);
+  const [resultLabel, setResultLabel] = useState("");
   const [history, setHistory] = useState<LotteryHistoryItem[]>([]);
   const [frequency, setFrequency] = useState<LotteryFrequencyMap | null>(null);
   const [freqMode, setFreqMode] = useState<LotteryFrequencyMode>("last2");
@@ -88,8 +90,28 @@ function LotteryPage() {
       }
       setResult(data.data);
       setResultDate(data.date);
+      setResultLabel(data.date ? `งวดประจำวันที่ ${thaiLotteryDate(data.date)}` : "งวดที่เลือก");
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "โหลดผลรางวัลไม่สำเร็จ");
+    } finally {
+      setLoading("");
+    }
+  }
+
+  async function loadLatestResult() {
+    setError("");
+    setLoading("latest");
+    try {
+      const response = await fetch("/api/lottery?mode=latest");
+      const data = (await response.json()) as LotteryApiResponse;
+      if (!response.ok || !data.ok || !data.data) {
+        throw new Error(data.error || "โหลดผลรางวัลงวดล่าสุดไม่สำเร็จ");
+      }
+      setResult(data.data);
+      setResultDate(data.date || null);
+      setResultLabel(data.date ? `งวดประจำวันที่ ${thaiLotteryDate(data.date)}` : "ผลรางวัลงวดล่าสุด");
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : "โหลดผลรางวัลงวดล่าสุดไม่สำเร็จ");
     } finally {
       setLoading("");
     }
@@ -171,8 +193,10 @@ function LotteryPage() {
               setDrawDate={setDrawDate}
               result={result}
               resultDate={resultDate}
-              loading={loading === "result"}
+              resultLabel={resultLabel}
+              loading={loading === "result" || loading === "latest"}
               onLoad={loadResult}
+              onLoadLatest={loadLatestResult}
             />
           )}
           {activeTab === "stats" && (
@@ -214,15 +238,19 @@ function ResultPanel({
   setDrawDate,
   result,
   resultDate,
+  resultLabel,
   loading,
   onLoad,
+  onLoadLatest,
 }: {
   drawDate: LotteryDrawDate;
   setDrawDate: (value: LotteryDrawDate) => void;
   result: LotteryResultData | null;
   resultDate: LotteryDrawDate | null;
+  resultLabel: string;
   loading: boolean;
   onLoad: () => void;
+  onLoadLatest: () => void;
 }) {
   const years = Array.from({ length: 6 }, (_, i) => String(new Date().getFullYear() - i));
   return (
@@ -258,11 +286,19 @@ function ResultPanel({
           />
           <button
             type="button"
-            onClick={onLoad}
+            onClick={onLoadLatest}
             disabled={loading}
             className="mt-2 rounded-2xl bg-gradient-gold px-5 py-3 text-sm font-semibold text-primary-foreground shadow-gold disabled:opacity-50"
           >
-            {loading ? "กำลังดึงข้อมูล..." : "ดูผลรางวัล"}
+            {loading ? "กำลังดึงข้อมูล..." : "ผลรางวัลงวดล่าสุด"}
+          </button>
+          <button
+            type="button"
+            onClick={onLoad}
+            disabled={loading}
+            className="rounded-2xl border border-gold/30 px-5 py-3 text-sm font-semibold text-gold hover:bg-gold/10 disabled:opacity-50"
+          >
+            {loading ? "กำลังดึงข้อมูล..." : "ดูผลตามวันที่เลือก"}
           </button>
         </div>
       </div>
@@ -272,7 +308,7 @@ function ResultPanel({
           <>
             <div className="mb-5 flex items-center gap-2 text-xs text-muted-foreground">
               <span className="h-1.5 w-1.5 rounded-full bg-gold" />
-              งวดประจำวันที่ {thaiLotteryDate(resultDate || drawDate)}
+              {resultLabel || (resultDate ? `งวดประจำวันที่ ${thaiLotteryDate(resultDate)}` : "ผลรางวัล")}
             </div>
             <div className="space-y-3">
               {lotteryPrizeRows.map((row) => {

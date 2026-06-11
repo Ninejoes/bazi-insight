@@ -10,6 +10,7 @@ import {
 import { json } from "@/lib/supabase-rest";
 
 const GLO_ENDPOINT = "https://www.glo.or.th/api/checking/getLotteryResult";
+const GLO_LATEST_ENDPOINT = "https://www.glo.or.th/api/lottery/getLatestLottery";
 
 function cleanDrawDate(input: Partial<LotteryDrawDate>): LotteryDrawDate {
   const now = new Date();
@@ -25,26 +26,49 @@ function cleanDrawDate(input: Partial<LotteryDrawDate>): LotteryDrawDate {
 }
 
 async function fetchLotteryResult(draw: LotteryDrawDate) {
-  const response = await fetch(GLO_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "User-Agent": "Likhitfa/1.0",
-    },
-    body: JSON.stringify(draw),
-  });
-
-  if (!response.ok) {
-    throw new Error(`GLO API returned ${response.status}`);
-  }
-
+  const response = await postGlo(GLO_ENDPOINT, draw);
   const payload = await response.json().catch(() => null);
   const data = normalizeLotteryData(payload?.response?.result?.data);
   if (!hasLotteryData(data)) {
     throw new Error("ไม่พบข้อมูลงวดนี้จาก GLO");
   }
   return data;
+}
+
+async function fetchLatestLotteryResult() {
+  const response = await postGlo(GLO_LATEST_ENDPOINT, {});
+  const payload = await response.json().catch(() => null);
+  const data = normalizeLotteryData(
+    payload?.response?.result?.data ||
+      payload?.response?.result?.lotteryResult ||
+      payload?.response?.result ||
+      payload?.data?.result?.data ||
+      payload?.data?.result ||
+      payload?.result?.data ||
+      payload?.result ||
+      payload?.data,
+  );
+  if (!hasLotteryData(data)) {
+    throw new Error("ไม่พบผลรางวัลงวดล่าสุดจาก GLO");
+  }
+  return data;
+}
+
+async function postGlo(endpoint: string, body: unknown) {
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      "User-Agent": "Likhitfa/1.0",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    throw new Error(`GLO API returned ${response.status}`);
+  }
+  return response;
 }
 
 async function fetchHistory(limit: number) {
@@ -65,6 +89,11 @@ export const Route = createFileRoute("/api/lottery")({
         try {
           const url = new URL(request.url);
           const mode = url.searchParams.get("mode") || "result";
+
+          if (mode === "latest") {
+            const data = await fetchLatestLotteryResult();
+            return json({ ok: true, source: "glo", mode: "latest", data });
+          }
 
           if (mode === "history") {
             const limit = Math.min(
