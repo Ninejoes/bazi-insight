@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TarotRouteImport } from './routes/tarot'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as LotteryRouteImport } from './routes/lottery'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as DreamRouteImport } from './routes/dream'
@@ -37,6 +38,7 @@ import { Route as ApiUserRegisterRouteImport } from './routes/api.user-register'
 import { Route as ApiUserLoginRouteImport } from './routes/api.user-login'
 import { Route as ApiSiteContentRouteImport } from './routes/api.site-content'
 import { Route as ApiReadingHistoryRouteImport } from './routes/api.reading-history'
+import { Route as ApiLotteryRouteImport } from './routes/api.lottery'
 import { Route as ApiLeadsRouteImport } from './routes/api.leads'
 import { Route as ApiFaqsRouteImport } from './routes/api.faqs'
 import { Route as ApiDreamsRouteImport } from './routes/api.dreams'
@@ -66,6 +68,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LotteryRoute = LotteryRouteImport.update({
+  id: '/lottery',
+  path: '/lottery',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -193,6 +200,11 @@ const ApiReadingHistoryRoute = ApiReadingHistoryRouteImport.update({
   path: '/api/reading-history',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiLotteryRoute = ApiLotteryRouteImport.update({
+  id: '/api/lottery',
+  path: '/api/lottery',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiLeadsRoute = ApiLeadsRouteImport.update({
   id: '/api/leads',
   path: '/api/leads',
@@ -280,6 +292,7 @@ export interface FileRoutesByFullPath {
   '/dream': typeof DreamRouteWithChildren
   '/help': typeof HelpRoute
   '/login': typeof LoginRoute
+  '/lottery': typeof LotteryRoute
   '/profile': typeof ProfileRouteWithChildren
   '/register': typeof RegisterRoute
   '/tarot': typeof TarotRouteWithChildren
@@ -298,6 +311,7 @@ export interface FileRoutesByFullPath {
   '/api/dreams': typeof ApiDreamsRoute
   '/api/faqs': typeof ApiFaqsRoute
   '/api/leads': typeof ApiLeadsRoute
+  '/api/lottery': typeof ApiLotteryRoute
   '/api/reading-history': typeof ApiReadingHistoryRoute
   '/api/site-content': typeof ApiSiteContentRoute
   '/api/user-login': typeof ApiUserLoginRoute
@@ -322,6 +336,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/help': typeof HelpRoute
   '/login': typeof LoginRoute
+  '/lottery': typeof LotteryRoute
   '/register': typeof RegisterRoute
   '/admin/articles': typeof AdminArticlesRoute
   '/admin/contact': typeof AdminContactRoute
@@ -338,6 +353,7 @@ export interface FileRoutesByTo {
   '/api/dreams': typeof ApiDreamsRoute
   '/api/faqs': typeof ApiFaqsRoute
   '/api/leads': typeof ApiLeadsRoute
+  '/api/lottery': typeof ApiLotteryRoute
   '/api/reading-history': typeof ApiReadingHistoryRoute
   '/api/site-content': typeof ApiSiteContentRoute
   '/api/user-login': typeof ApiUserLoginRoute
@@ -366,6 +382,7 @@ export interface FileRoutesById {
   '/dream': typeof DreamRouteWithChildren
   '/help': typeof HelpRoute
   '/login': typeof LoginRoute
+  '/lottery': typeof LotteryRoute
   '/profile': typeof ProfileRouteWithChildren
   '/register': typeof RegisterRoute
   '/tarot': typeof TarotRouteWithChildren
@@ -384,6 +401,7 @@ export interface FileRoutesById {
   '/api/dreams': typeof ApiDreamsRoute
   '/api/faqs': typeof ApiFaqsRoute
   '/api/leads': typeof ApiLeadsRoute
+  '/api/lottery': typeof ApiLotteryRoute
   '/api/reading-history': typeof ApiReadingHistoryRoute
   '/api/site-content': typeof ApiSiteContentRoute
   '/api/user-login': typeof ApiUserLoginRoute
@@ -413,6 +431,7 @@ export interface FileRouteTypes {
     | '/dream'
     | '/help'
     | '/login'
+    | '/lottery'
     | '/profile'
     | '/register'
     | '/tarot'
@@ -431,6 +450,7 @@ export interface FileRouteTypes {
     | '/api/dreams'
     | '/api/faqs'
     | '/api/leads'
+    | '/api/lottery'
     | '/api/reading-history'
     | '/api/site-content'
     | '/api/user-login'
@@ -455,6 +475,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/help'
     | '/login'
+    | '/lottery'
     | '/register'
     | '/admin/articles'
     | '/admin/contact'
@@ -471,6 +492,7 @@ export interface FileRouteTypes {
     | '/api/dreams'
     | '/api/faqs'
     | '/api/leads'
+    | '/api/lottery'
     | '/api/reading-history'
     | '/api/site-content'
     | '/api/user-login'
@@ -498,6 +520,7 @@ export interface FileRouteTypes {
     | '/dream'
     | '/help'
     | '/login'
+    | '/lottery'
     | '/profile'
     | '/register'
     | '/tarot'
@@ -516,6 +539,7 @@ export interface FileRouteTypes {
     | '/api/dreams'
     | '/api/faqs'
     | '/api/leads'
+    | '/api/lottery'
     | '/api/reading-history'
     | '/api/site-content'
     | '/api/user-login'
@@ -544,6 +568,7 @@ export interface RootRouteChildren {
   DreamRoute: typeof DreamRouteWithChildren
   HelpRoute: typeof HelpRoute
   LoginRoute: typeof LoginRoute
+  LotteryRoute: typeof LotteryRoute
   ProfileRoute: typeof ProfileRouteWithChildren
   RegisterRoute: typeof RegisterRoute
   TarotRoute: typeof TarotRouteWithChildren
@@ -556,6 +581,7 @@ export interface RootRouteChildren {
   ApiDreamsRoute: typeof ApiDreamsRoute
   ApiFaqsRoute: typeof ApiFaqsRoute
   ApiLeadsRoute: typeof ApiLeadsRoute
+  ApiLotteryRoute: typeof ApiLotteryRoute
   ApiReadingHistoryRoute: typeof ApiReadingHistoryRoute
   ApiSiteContentRoute: typeof ApiSiteContentRoute
   ApiUserLoginRoute: typeof ApiUserLoginRoute
@@ -584,6 +610,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lottery': {
+      id: '/lottery'
+      path: '/lottery'
+      fullPath: '/lottery'
+      preLoaderRoute: typeof LotteryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -759,6 +792,13 @@ declare module '@tanstack/react-router' {
       path: '/api/reading-history'
       fullPath: '/api/reading-history'
       preLoaderRoute: typeof ApiReadingHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/lottery': {
+      id: '/api/lottery'
+      path: '/api/lottery'
+      fullPath: '/api/lottery'
+      preLoaderRoute: typeof ApiLotteryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/leads': {
@@ -955,6 +995,7 @@ const rootRouteChildren: RootRouteChildren = {
   DreamRoute: DreamRouteWithChildren,
   HelpRoute: HelpRoute,
   LoginRoute: LoginRoute,
+  LotteryRoute: LotteryRoute,
   ProfileRoute: ProfileRouteWithChildren,
   RegisterRoute: RegisterRoute,
   TarotRoute: TarotRouteWithChildren,
@@ -967,6 +1008,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiDreamsRoute: ApiDreamsRoute,
   ApiFaqsRoute: ApiFaqsRoute,
   ApiLeadsRoute: ApiLeadsRoute,
+  ApiLotteryRoute: ApiLotteryRoute,
   ApiReadingHistoryRoute: ApiReadingHistoryRoute,
   ApiSiteContentRoute: ApiSiteContentRoute,
   ApiUserLoginRoute: ApiUserLoginRoute,

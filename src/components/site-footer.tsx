@@ -15,7 +15,7 @@ export function SiteFooter() {
               </div>
             </div>
             <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-              ศาสตร์ดูดวงระดับพรีเมียม รวมปาจื้อ ไพ่ยิปซี และทำนายฝันไว้ในที่เดียว
+              ศาสตร์ดูดวงระดับพรีเมียม รวมปาจื้อ ไพ่ยิปซี ทำนายฝัน และเลขเด็ดไว้ในที่เดียว
             </p>
           </div>
 
@@ -25,6 +25,7 @@ export function SiteFooter() {
               { to: "/bazi", label: "ปาจื้อ 八字" },
               { to: "/tarot", label: "ไพ่ยิปซี" },
               { to: "/dream", label: "ทำนายฝัน" },
+              { to: "/lottery", label: "เลขเด็ด" },
             ]}
           />
 

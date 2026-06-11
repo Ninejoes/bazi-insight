@@ -125,6 +125,9 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
             <NavLink to="/dream" active={isActive("/dream")}>
               ทำนายฝัน
             </NavLink>
+            <NavLink to="/lottery" active={isActive("/lottery")}>
+              เลขเด็ด
+            </NavLink>
             <NavLink to="/articles" active={isActive("/articles")}>
               บทความ
             </NavLink>
@@ -226,6 +229,9 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
             </div>
             <MobileLink to="/dream" onClick={closeMobile}>
               ทำนายฝัน
+            </MobileLink>
+            <MobileLink to="/lottery" onClick={closeMobile}>
+              เลขเด็ด
             </MobileLink>
             <MobileLink to="/articles" onClick={closeMobile}>
               บทความ
