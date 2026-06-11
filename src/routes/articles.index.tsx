@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { ALL_ARTICLE_CATEGORY, ARTICLE_CATEGORIES } from "@/lib/article-categories";
 import { type Article } from "@/lib/articles";
 import { seo } from "@/lib/seo";
 import { useEffect, useState } from "react";
@@ -17,7 +18,7 @@ export const Route = createFileRoute("/articles/")({
   component: ArticlesIndex,
 });
 
-const categories = ["ทั้งหมด", "ปาจื้อ", "ไพ่ยิปซี", "ทำนายฝัน"];
+const categories = [ALL_ARTICLE_CATEGORY, ...ARTICLE_CATEGORIES.map((category) => category.value)];
 const PAGE_SIZE = 20;
 
 type ArticlesResponse = {
@@ -34,7 +35,7 @@ function ArticlesIndex() {
   const searchParams =
     typeof window === "undefined" ? new URLSearchParams() : new URLSearchParams(window.location.search);
   const initialSearch = searchParams.get("search") || "";
-  const [active, setActive] = useState("ทั้งหมด");
+  const [active, setActive] = useState(ALL_ARTICLE_CATEGORY);
   const [search, setSearch] = useState(initialSearch);
   const [activeSearch, setActiveSearch] = useState(initialSearch.trim());
   const [items, setItems] = useState<Article[]>([]);
@@ -54,7 +55,7 @@ function ArticlesIndex() {
         page: String(page),
         limit: String(PAGE_SIZE),
       });
-      if (active !== "ทั้งหมด") params.set("category", active);
+      if (active !== ALL_ARTICLE_CATEGORY) params.set("category", active);
       if (activeSearch) params.set("q", activeSearch);
       const response = await fetch(`/api/articles?${params.toString()}`);
       const data = (await response.json().catch(() => ({}))) as ArticlesResponse;
@@ -131,7 +132,7 @@ function ArticlesIndex() {
         </form>
 
         <div className="mt-4 text-center text-xs text-muted-foreground">
-          {activeSearch || active !== "ทั้งหมด"
+          {activeSearch || active !== ALL_ARTICLE_CATEGORY
             ? `ค้นหาจากฐานข้อมูล Supabase พบ ${total.toLocaleString("th-TH")} บทความ`
             : `แสดงบทความจากฐานข้อมูลทีละ ${PAGE_SIZE} รายการ`}
         </div>

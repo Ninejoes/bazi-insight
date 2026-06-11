@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
+import {
+  ARTICLE_CATEGORIES,
+  articleCategoryValues,
+  getArticleCategoryHint,
+} from "@/lib/article-categories";
 import { seo } from "@/lib/seo";
-import { useMemo, useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import type { Article } from "@/lib/articles";
 
 export const Route = createFileRoute("/admin/articles")({
@@ -249,6 +254,9 @@ function Editor({
   const [canonicalUrl, setCanonicalUrl] = useState(initial?.canonicalUrl || "");
   const [content, setContent] = useState(initial?.content?.join("\n\n") || "");
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const predefinedCategories = articleCategoryValues();
+  const isCustomCategory = !predefinedCategories.includes(category);
+  const selectedCategory = isCustomCategory ? "__custom" : category;
   const urlPreview = slug || makeSlug(titleValue || "article");
   const readMin = Math.max(
     1,
@@ -259,15 +267,7 @@ function Editor({
         .filter(Boolean).length / 220,
     ),
   );
-  const categoryHint = useMemo(
-    () =>
-      ({
-        ปาจื้อ: "เหมาะกับโครง: บทนำ, หลักการ, วิธีอ่านดวง, ตัวอย่าง, ข้อควรระวัง",
-        ไพ่ยิปซี: "เหมาะกับโครง: คำถาม, วิธีวางไพ่, ความหมายไพ่, ตัวอย่างการอ่าน",
-        ทำนายฝัน: "เหมาะกับโครง: ความหมายฝัน, เลขที่เกี่ยวข้อง, บริบท, คำเตือนการใช้เลข",
-      })[category] || "จัดหัวข้อให้ตรงกับเจตนาของบทความ",
-    [category],
-  );
+  const categoryHint = getArticleCategoryHint(category);
 
   const insertMarkdown = (before: string, after = "", placeholder = "ข้อความ") => {
     const textarea = textareaRef.current;
@@ -308,10 +308,11 @@ function Editor({
             e.preventDefault();
             const finalTitle = titleValue.trim();
             const finalSlug = slug.trim() || makeSlug(finalTitle);
+            const finalCategory = category.trim() || "ปาจื้อ";
             onSave({
               slug: finalSlug,
               title: finalTitle,
-              category,
+              category: finalCategory,
               author: author.trim() || "Admin",
               cover: cover.trim(),
               coverAlt: coverAlt.trim() || finalTitle,
@@ -347,12 +348,18 @@ function Editor({
             <div className="grid gap-3 sm:grid-cols-3">
               <select
                 className="input-styled"
-                value={category}
-                onChange={(event) => setCategory(event.target.value)}
+                value={selectedCategory}
+                onChange={(event) => {
+                  const next = event.target.value;
+                  setCategory(next === "__custom" ? "" : next);
+                }}
               >
-                <option>ปาจื้อ</option>
-                <option>ไพ่ยิปซี</option>
-                <option>ทำนายฝัน</option>
+                {ARTICLE_CATEGORIES.map((item) => (
+                  <option key={item.value} value={item.value}>
+                    {item.label}
+                  </option>
+                ))}
+                <option value="__custom">+ หมวดใหม่ / กำหนดเอง</option>
               </select>
               <input
                 className="input-styled sm:col-span-2"
@@ -361,6 +368,15 @@ function Editor({
                 onChange={(event) => setAuthor(event.target.value)}
               />
             </div>
+            {isCustomCategory || !category ? (
+              <input
+                className="input-styled"
+                placeholder="ชื่อหมวดใหม่ เช่น เลขศาสตร์ไทย, ฤกษ์มงคล, ฮวงจุ้ย"
+                value={category}
+                onChange={(event) => setCategory(event.target.value)}
+                required
+              />
+            ) : null}
             <div className="rounded-2xl border border-gold/15 bg-gold/5 px-4 py-3 text-xs text-gold/80">
               {categoryHint}
             </div>
