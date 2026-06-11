@@ -185,6 +185,87 @@ function cardMeaning(card: TarotCard) {
   };
 }
 
+function periodText(category: TarotCategory) {
+  if (category.slug === "daily") return "วันนี้";
+  if (category.slug === "weekly") return "สัปดาห์นี้";
+  if (category.slug === "monthly") return "เดือนนี้";
+  return "ช่วงนี้";
+}
+
+function categoryFocus(category: TarotCategory) {
+  const focus: Record<string, string> = {
+    daily: "จังหวะของวัน การตัดสินใจเล็ก ๆ และวิธีดูแลใจให้ผ่านวันนี้อย่างราบรื่น",
+    weekly: "เรื่องที่ค่อย ๆ เห็นผลภายในสัปดาห์ ทั้งงาน ความสัมพันธ์ และภาระที่ต้องจัดลำดับ",
+    monthly: "ภาพรวมของเดือน การเปลี่ยนผ่าน แผนระยะกลาง และบทเรียนที่ควรเก็บไปใช้ต่อ",
+    career: "งาน เป้าหมาย บทบาท ความรับผิดชอบ และโอกาสที่ต้องลงมืออย่างเป็นระบบ",
+    finance: "การเงิน รายรับรายจ่าย ความมั่นคง และการใช้ทรัพยากรให้คุ้มค่า",
+    love: "ความสัมพันธ์ ความรู้สึก การสื่อสาร และขอบเขตที่ทำให้หัวใจปลอดภัยขึ้น",
+    health: "สุขภาพกาย สุขภาพใจ พลังงานส่วนตัว และการดูแลตัวเองอย่างสม่ำเสมอ",
+    family: "ครอบครัว คนใกล้ตัว บริวาร และบรรยากาศภายในบ้าน",
+    study: "การเรียน การสอบ การพัฒนาทักษะ และวินัยที่ทำให้ผลลัพธ์ดีขึ้น",
+    luck: "โชค จังหวะเสี่ยง โอกาสกะทันหัน และสิ่งที่ควรทำเพื่อเปิดทางให้ตัวเอง",
+  };
+  return focus[category.slug] || "สถานการณ์ตรงหน้าและทางเลือกที่ควรพิจารณาอย่างรอบคอบ";
+}
+
+function positionLead(position: string, index: number) {
+  const label = position || `ใบที่ ${index + 1}`;
+  const normalized = label.toLowerCase();
+  if (normalized.includes("บทสรุป") || normalized.includes("ผลลัพธ์")) {
+    return `เมื่อมาถึงตำแหน่ง “${label}” ภาพรวมกำลังพาไปสู่ข้อสรุปที่ต้องใช้ทั้งเหตุผลและความซื่อสัตย์กับใจตัวเอง`;
+  }
+  if (normalized.includes("อุปสรรค") || normalized.includes("ระวัง")) {
+    return `ในตำแหน่ง “${label}” จุดที่ควรตั้งสติเป็นพิเศษคือสิ่งที่อาจทำให้เรื่องง่ายกลายเป็นซับซ้อน`;
+  }
+  if (normalized.includes("โอกาส") || normalized.includes("ส่งเสริม")) {
+    return `ตำแหน่ง “${label}” เปิดพื้นที่ให้เห็นโอกาสที่อาจไม่ได้มาในรูปแบบหวือหวา แต่มีประโยชน์ต่อการเดินต่อ`;
+  }
+  if (normalized.includes("ความรัก") || normalized.includes("สัมพันธ์")) {
+    return `ตำแหน่ง “${label}” ชวนให้กลับมาฟังหัวใจอย่างละเอียด โดยไม่ปล่อยให้อารมณ์ช่วงสั้น ๆ ตัดสินทั้งความสัมพันธ์`;
+  }
+  if (normalized.includes("เงิน") || normalized.includes("ทรัพย์")) {
+    return `ตำแหน่ง “${label}” เน้นเรื่องทรัพยากร ความคุ้มค่า และการตัดสินใจที่ต้องมีตัวเลขหรือเงื่อนไขรองรับ`;
+  }
+  if (normalized.includes("งาน")) {
+    return `ตำแหน่ง “${label}” พูดถึงจังหวะการทำงาน ความรับผิดชอบ และวิธีใช้แรงของตัวเองให้เกิดผลจริง`;
+  }
+  return `สำหรับตำแหน่ง “${label}” คำอ่านนี้ชวนให้มองสถานการณ์อย่างใจเย็นและเห็นภาพรวมมากกว่าเดิม`;
+}
+
+function orientationText(item: DrawnTarotCard, meaning: ReturnType<typeof cardMeaning>) {
+  if (!item.reversed) {
+    return `เมื่อ ${item.card.name} ปรากฏในลักษณะปกติ แนวโน้มโดยรวมถือว่าเปิดทางพอสมควร สิ่งที่เด่นคือเรื่อง “${meaning.keyword}” ซึ่งไม่ได้ต้องการให้รีบเร่ง แต่ต้องการให้ใช้จังหวะที่มีอยู่ให้เป็นประโยชน์`;
+  }
+
+  return `การขึ้นแบบกลับหัวของ ${item.card.name} ไม่ได้แปลว่าเรื่องนี้ต้องจบไม่ดีเสมอไป แต่สะท้อนว่าพลังของ “${meaning.keyword}” อาจยังติดขัด ใช้มากเกินไป หรือยังไม่ถูกวางในจังหวะที่เหมาะสม`;
+}
+
+function practicalAdvice(
+  item: DrawnTarotCard,
+  meaning: ReturnType<typeof cardMeaning>,
+  category: TarotCategory,
+) {
+  const core = item.reversed ? meaning.caution : meaning.advice;
+  const categoryAdvice: Record<string, string> = {
+    daily: "เริ่มจากสิ่งเล็กที่สุดที่ควบคุมได้ในวันนี้ แล้วอย่าปล่อยให้ความคิดฟุ้งซ่านพาออกนอกทาง",
+    weekly: "จัดลำดับงานหรือเรื่องสำคัญของสัปดาห์ให้ชัด เลือกทำทีละเรื่อง และกันเวลาไว้สำหรับตรวจทาน",
+    monthly: "อย่าเพิ่งตัดสินทั้งเดือนจากเหตุการณ์เดียว ให้ดูแนวโน้มซ้ำ ๆ แล้วค่อยวางแผนระยะต่อไป",
+    career: "ใช้ข้อมูล ผลงาน และบทบาทจริงเป็นฐานในการตัดสินใจมากกว่าความรู้สึกกดดันชั่วคราว",
+    finance: "เช็กตัวเลขให้ครบ แยกสิ่งจำเป็นออกจากสิ่งที่อยากได้ และอย่าเสี่ยงเพราะอารมณ์",
+    love: "คุยให้ตรงแต่ไม่ทำร้ายกัน ฟังอีกฝ่ายให้จบ และกลับมาถามตัวเองว่าต้องการความสัมพันธ์แบบไหน",
+    health: "ฟังสัญญาณจากร่างกายและใจ หากเหนื่อยสะสมควรพักก่อนผลักตัวเองต่อ",
+    family: "ลดการตีความแทนคนอื่น แล้วเลือกพูดในเวลาที่ทุกฝ่ายพร้อมรับฟัง",
+    study: "แบ่งเป้าหมายออกเป็นช่วงสั้น ๆ ทบทวนสม่ำเสมอ และอย่าวัดคุณค่าตัวเองจากคะแนนครั้งเดียว",
+    luck: "เปิดรับโอกาสได้ แต่ควรมีขอบเขตและไม่ฝากความหวังทั้งหมดไว้กับดวงเพียงอย่างเดียว",
+  };
+
+  return `${core}. ${categoryAdvice[category.slug] || "ใช้ข้อมูลที่มีอยู่ประกอบกับสัญชาตญาณ แล้วเลือกทางที่รับผิดชอบผลลัพธ์ได้จริง"}`;
+}
+
+function paragraphBreaks(text: string) {
+  return text.replace(/\n{3,}/g, "\n\n").trim();
+}
+
 export function drawSelectedCards(
   deck: TarotCard[],
   selectedIndexes: number[],
@@ -209,17 +290,24 @@ export function interpretTarotCard(
   index: number,
 ) {
   const meaning = cardMeaning(item.card);
-  const orientation = item.reversed ? "พลังติดขัด/ต้องทบทวน" : "พลังเปิดทาง";
-  const period =
-    category.slug === "daily"
-      ? "วันนี้"
-      : category.slug === "weekly"
-        ? "สัปดาห์นี้"
-        : category.slug === "monthly"
-          ? "เดือนนี้"
-          : "ช่วงนี้";
-  const core = item.reversed ? meaning.caution : meaning.advice;
-  return `${category.title} ${period}: ตำแหน่ง “${position || `ใบที่ ${index + 1}`}” เปิดด้วย ${item.card.name} ในรูปแบบ${orientation}. ไพ่ใบนี้ชี้เรื่อง “${meaning.keyword}” และให้พลังด้าน${meaning.energy}. ${core}`;
+  const period = periodText(category);
+  const lead = positionLead(position, index);
+  const focus = categoryFocus(category);
+  const orientation = orientationText(item, meaning);
+  const advice = practicalAdvice(item, meaning, category);
+  const reversalNote = item.reversed
+    ? "หากช่วงนี้รู้สึกว่าทุกอย่างไม่ไหลลื่น อย่าเพิ่งมองว่าเป็นความล้มเหลว บางครั้งความติดขัดเป็นเพียงสัญญาณให้กลับไปปรับวิธีคิด วิธีสื่อสาร หรือจังหวะการลงมือให้เหมาะกว่าเดิม"
+    : "จังหวะนี้เหมาะกับการขยับอย่างมีสติ ไม่จำเป็นต้องทำทุกอย่างให้สมบูรณ์แบบตั้งแต่แรก ขอเพียงเห็นทิศทางและค่อย ๆ ลงมือให้ต่อเนื่อง";
+
+  return paragraphBreaks(`${position || `ใบที่ ${index + 1}`} : ${item.card.name}${item.reversed ? " (กลับหัว)" : ""}
+
+${period}ในหัวข้อนี้เกี่ยวกับ${focus} ${lead}
+
+${orientation} แก่นความหมายเดิมยังคงพาคุณกลับมาดูแกนสำคัญของสถานการณ์ นั่นคือการไม่ปล่อยให้ภาพตรงหน้ากลืนความจริงทั้งหมด บางเรื่องอาจดูเหมือนชัดแล้ว แต่เมื่อค่อย ๆ พิจารณา จะพบว่ายังมีรายละเอียดเล็ก ๆ ที่ส่งผลต่อการตัดสินใจมากกว่าที่คิด
+
+${reversalNote}
+
+คำแนะนำที่ใช้ได้จริง: ${advice} ข้อคิดสำคัญคือ อย่ารีบตอบสนองจากความกดดันในทันที ให้เวลากับตัวเองสักนิด มองสิ่งที่เกิดขึ้นทั้งด้านเหตุผลและความรู้สึก แล้วเลือกก้าวต่อไปในแบบที่ทำให้คุณยังเคารพตัวเองได้ในระยะยาว`);
 }
 
 export function summarizeTarotReading(items: DrawnTarotCard[], category: TarotCategory) {
@@ -231,12 +319,12 @@ export function summarizeTarotReading(items: DrawnTarotCard[], category: TarotCa
   const lastMeaning = last ? cardMeaning(last.card) : null;
   const tone =
     majorCount >= Math.max(1, Math.floor(items.length / 3))
-      ? "มีบทเรียนใหญ่หรือการตัดสินใจสำคัญ"
-      : "เป็นจังหวะที่จัดการได้ด้วยการลงมือทีละขั้น";
+      ? "รอบนี้ไม่ได้เป็นแค่เรื่องเล็ก ๆ ผ่านมาแล้วผ่านไป แต่มีบทเรียนหรือการตัดสินใจสำคัญซ่อนอยู่"
+      : "ภาพรวมยังเป็นสถานการณ์ที่จัดการได้ หากค่อย ๆ แยกปัญหาและลงมือทีละขั้น";
   const caution =
     reversedCount >= Math.ceil(items.length / 2)
-      ? "ไพ่กลับหัวค่อนข้างมาก แนะนำให้ชะลอ ตรวจข้อมูล และไม่รีบสรุป"
-      : "ไพ่ส่วนใหญ่เปิดทางพอสมควร แต่ยังควรวางแผนก่อนตัดสินใจ";
+      ? "จำนวนไพ่กลับหัวค่อนข้างมาก จึงควรชะลอ ตรวจข้อมูล และไม่รีบสรุปเพียงเพราะอยากให้เรื่องจบเร็ว"
+      : "ไพ่ส่วนใหญ่เปิดทางพอสมควร แต่ยังควรวางแผนและเช็กความพร้อมก่อนตัดสินใจ";
 
   return {
     headline: firstMeaning
@@ -244,8 +332,10 @@ export function summarizeTarotReading(items: DrawnTarotCard[], category: TarotCa
       : "อ่านไพ่ครบแล้ว",
     body:
       first && last && firstMeaning && lastMeaning
-        ? `${tone}. แกนแรกเปิดด้วย ${first.card.name} จึงเริ่มจากเรื่อง “${firstMeaning.keyword}” ส่วนปลายทางโยงกับ ${last.card.name} คือ “${lastMeaning.keyword}”. ${caution}.`
+        ? `${tone}. จุดเริ่มต้นของคำอ่านวางน้ำหนักไว้ที่ ${first.card.name} จึงควรเริ่มจากการทำความเข้าใจเรื่อง “${firstMeaning.keyword}” ให้ชัดก่อน ส่วนปลายทางของชุดไพ่เชื่อมไปที่ ${last.card.name} ซึ่งพาไปสู่ประเด็น “${lastMeaning.keyword}”. ${caution}. ภาพรวมแนะนำให้ใช้คำทำนายนี้เป็นเหมือนแผนที่ ไม่ใช่คำสั่งตายตัว เลือกหยิบสิ่งที่ตรงกับสถานการณ์จริง แล้วนำไปปรับใช้ด้วยสติ`
         : "ตั้งสมาธิ เลือกไพ่ แล้วระบบจะอ่านผลตามตำแหน่งของหมวดนี้",
-    next: lastMeaning ? lastMeaning.advice : "เริ่มจากเรื่องเล็กที่ควบคุมได้ก่อน",
+    next: lastMeaning
+      ? `${lastMeaning.advice} แล้วตรวจอีกครั้งว่าสิ่งที่กำลังทำอยู่ยังตรงกับเป้าหมายจริงของคุณหรือไม่`
+      : "เริ่มจากเรื่องเล็กที่ควบคุมได้ก่อน",
   };
 }

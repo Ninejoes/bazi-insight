@@ -358,7 +358,7 @@ function Result({
                   {d.card.name}
                   {d.reversed && <span className="ml-2 text-sm text-rose-300">(กลับหัว)</span>}
                 </h4>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
                   {interpretTarotCard(d, positions[i], category, i)}
                 </p>
               </div>
