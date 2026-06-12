@@ -3,6 +3,9 @@ import { type DreamRecord } from "./admin-content";
 import { siteUrl } from "./seo";
 import { tarotCategories } from "./tarot-cards";
 
+export type SitemapArticle = Pick<Article, "slug" | "date">;
+export type SitemapDream = Pick<DreamRecord, "keyword">;
+
 type SitemapEntry = {
   loc: string;
   lastmod?: string;
@@ -50,7 +53,7 @@ function dedupeEntries(entries: SitemapEntry[]) {
   });
 }
 
-export function publicSitemapEntries(articles: Article[] = [], dreams: DreamRecord[] = []) {
+export function publicSitemapEntries(articles: SitemapArticle[] = [], dreams: SitemapDream[] = []) {
   const today = new Date().toISOString().slice(0, 10);
   const tarotRoutes = tarotCategories.map((category) => ({
     loc: `/tarot/${category.slug}`,
@@ -79,7 +82,7 @@ export function publicSitemapEntries(articles: Article[] = [], dreams: DreamReco
   ]);
 }
 
-export function buildSitemapXml(articles: Article[] = [], url = siteUrl, dreams: DreamRecord[] = []) {
+export function buildSitemapXml(articles: SitemapArticle[] = [], url = siteUrl, dreams: SitemapDream[] = []) {
   const origin = normalizeSiteUrl(url);
   const entries = publicSitemapEntries(articles, dreams);
   const body = entries

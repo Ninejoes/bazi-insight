@@ -2,16 +2,20 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
-import { type Article } from "./lib/articles";
-import { type DreamRecord } from "./lib/admin-content";
-import { buildSitemapXml } from "./lib/sitemap";
+import { buildSitemapXml, type SitemapArticle, type SitemapDream } from "./lib/sitemap";
 import { siteUrl } from "./lib/seo";
+import { getSupabaseConfig, supabaseRequest } from "./lib/supabase-rest";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
 };
 
 let serverEntryPromise: Promise<ServerEntry> | undefined;
+let sitemapCache: { xml: string; expiresAt: number } | undefined;
+let sitemapRefreshPromise: Promise<string> | undefined;
+
+const sitemapCacheMs = 60 * 60 * 1000;
+const sitemapPageLimit = 1000;
 
 async function getServerEntry(): Promise<ServerEntry> {
   if (!serverEntryPromise) {
@@ -20,6 +24,40 @@ async function getServerEntry(): Promise<ServerEntry> {
     );
   }
   return serverEntryPromise;
+}
+
+async function loadSupabaseSitemapRows<T extends Record<string, unknown>>({
+  table,
+  select,
+  order,
+}: {
+  table: string;
+  select: string;
+  order: string;
+}) {
+  const rows: T[] = [];
+  let offset = 0;
+
+  while (true) {
+    const params = new URLSearchParams({
+      select,
+      limit: String(sitemapPageLimit),
+      offset: String(offset),
+    });
+    params.set("order", order);
+
+    const response = await supabaseRequest(`${table}?${params.toString()}`);
+    if (!response) return undefined;
+
+    const pageRows = (await response.json().catch(() => [])) as T[];
+    if (!Array.isArray(pageRows)) return rows.length ? rows : undefined;
+
+    rows.push(...pageRows);
+    if (pageRows.length < sitemapPageLimit) break;
+    offset += sitemapPageLimit;
+  }
+
+  return rows;
 }
 
 // h3 swallows in-handler throws into a normal 500 Response with body
@@ -74,74 +112,68 @@ function textHeaders(headers?: HeadersInit) {
   return next;
 }
 
-async function loadArticlesForSitemap(
-  handler: ServerEntry,
-  request: Request,
-  env: unknown,
-  ctx: unknown,
-) {
-  const url = new URL(request.url);
-  const articles: Article[] = [];
-  let page = 1;
-  let totalPages = 1;
+async function loadArticlesForSitemap() {
+  if (!getSupabaseConfig()) return undefined;
 
-  do {
-    const response = await handler.fetch(
-      new Request(`${url.origin}/api/articles?page=${page}&limit=1000`),
-      env,
-      ctx,
-    );
-    if (!response.ok) return articles.length ? articles : undefined;
-    const data = (await response.json().catch(() => null)) as {
-      articles?: Article[];
-      totalPages?: number;
-    } | null;
-    if (!Array.isArray(data?.articles)) return articles.length ? articles : undefined;
-    articles.push(...data.articles);
-    totalPages = data.totalPages || page;
-    page += 1;
-  } while (page <= totalPages);
+  const rows = await loadSupabaseSitemapRows<{ slug?: string; date?: string }>({
+    table: "articles",
+    select: "slug,date",
+    order: "date.desc",
+  });
 
-  return articles;
+  return rows
+    ?.map((row): SitemapArticle | null => {
+      const slug = String(row.slug || "").trim();
+      if (!slug) return null;
+      return { slug, date: String(row.date || "") };
+    })
+    .filter((row): row is SitemapArticle => Boolean(row));
 }
 
-async function loadDreamsForSitemap(
-  handler: ServerEntry,
-  request: Request,
-  env: unknown,
-  ctx: unknown,
-) {
-  const url = new URL(request.url);
-  const dreams: DreamRecord[] = [];
-  let page = 1;
-  let totalPages = 1;
+async function loadDreamsForSitemap() {
+  if (!getSupabaseConfig()) return undefined;
 
-  do {
-    const response = await handler.fetch(
-      new Request(`${url.origin}/api/dreams?page=${page}&limit=1000`),
-      env,
-      ctx,
-    );
-    if (!response.ok) return dreams.length ? dreams : undefined;
-    const data = (await response.json().catch(() => null)) as {
-      dreams?: DreamRecord[];
-      totalPages?: number;
-    } | null;
-    if (!Array.isArray(data?.dreams)) return dreams.length ? dreams : undefined;
-    dreams.push(...data.dreams);
-    totalPages = data.totalPages || page;
-    page += 1;
-  } while (page <= totalPages);
+  const rows = await loadSupabaseSitemapRows<{ keyword?: string }>({
+    table: "dreams",
+    select: "keyword",
+    order: "keyword.asc",
+  });
 
-  return dreams;
+  return rows
+    ?.map((row): SitemapDream | null => {
+      const keyword = String(row.keyword || "").trim();
+      if (!keyword) return null;
+      return { keyword };
+    })
+    .filter((row): row is SitemapDream => Boolean(row));
 }
 
-async function sitemapResponse(handler: ServerEntry, request: Request, env: unknown, ctx: unknown) {
-  const [articles, dreams] = await Promise.all([
-    loadArticlesForSitemap(handler, request, env, ctx),
-    loadDreamsForSitemap(handler, request, env, ctx),
-  ]);
-  return new Response(buildSitemapXml(articles, siteUrl, dreams), { headers: xmlHeaders() });
+async function buildFreshSitemapXml() {
+  const [articles, dreams] = await Promise.all([loadArticlesForSitemap(), loadDreamsForSitemap()]);
+  return buildSitemapXml(articles, siteUrl, dreams);
+}
+
+async function getCachedSitemapXml() {
+  const now = Date.now();
+  if (sitemapCache && sitemapCache.expiresAt > now) return sitemapCache.xml;
+
+  if (!sitemapRefreshPromise) {
+    sitemapRefreshPromise = buildFreshSitemapXml()
+      .then((xml) => {
+        sitemapCache = { xml, expiresAt: Date.now() + sitemapCacheMs };
+        return xml;
+      })
+      .finally(() => {
+        sitemapRefreshPromise = undefined;
+      });
+  }
+
+  if (sitemapCache) return sitemapCache.xml;
+  return sitemapRefreshPromise;
+}
+
+async function sitemapResponse() {
+  return new Response(await getCachedSitemapXml(), { headers: xmlHeaders() });
 }
 
 function robotsResponse() {
@@ -171,10 +203,10 @@ function robotsResponse() {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
-      const handler = await getServerEntry();
       const url = new URL(request.url);
-      if (url.pathname === "/sitemap.xml") return sitemapResponse(handler, request, env, ctx);
+      if (url.pathname === "/sitemap.xml") return sitemapResponse();
       if (url.pathname === "/robots.txt") return robotsResponse();
+      const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return withHtmlNoStore(await normalizeCatastrophicSsrResponse(response));
     } catch (error) {
