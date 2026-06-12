@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import {
@@ -77,6 +77,16 @@ function LotteryPage() {
     [frequency, history],
   );
   const predictions = useMemo(() => makePredictions(effectiveFrequency, seed), [effectiveFrequency, seed]);
+
+  useEffect(() => {
+    const applyHashTab = () => {
+      const hash = window.location.hash.replace("#", "");
+      if (tabs.some((tab) => tab.id === hash)) setActiveTab(hash as LotteryTab);
+    };
+    applyHashTab();
+    window.addEventListener("hashchange", applyHashTab);
+    return () => window.removeEventListener("hashchange", applyHashTab);
+  }, []);
 
   async function loadResult() {
     setError("");
