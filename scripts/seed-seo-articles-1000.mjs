@@ -200,6 +200,21 @@ const pools = {
   },
 };
 
+const longTailIntents = [
+  "ดูอย่างไรให้เข้าใจง่าย",
+  "เหมาะกับใครและควรระวังอะไร",
+  "คำแนะนำสำหรับมือใหม่",
+  "ความหมายเชิงลึกที่คนมักเข้าใจผิด",
+  "ใช้ดูงาน เงิน ความรักได้อย่างไร",
+  "สัญญาณดีและสัญญาณเตือนที่ควรรู้",
+  "วิธีนำไปใช้ในชีวิตประจำวัน",
+  "อ่านแบบไม่งมงายและใช้ได้จริง",
+  "คำถามยอดนิยมและคำตอบแบบละเอียด",
+  "แนวทางเสริมดวงแบบปลอดภัย",
+  "เปรียบเทียบความหมายดีร้ายแบบเข้าใจง่าย",
+  "ข้อควรระวังก่อนตัดสินใจ",
+];
+
 const existing = await loadExistingArticles();
 const articles = buildArticles(existing);
 
@@ -254,6 +269,30 @@ function buildArticles(existingArticles) {
     }
   }
 
+  for (const pool of Object.values(pools)) {
+    for (const subject of pool.subjects) {
+      for (const intent of longTailIntents) {
+        if (rows.length >= TARGET_COUNT) break;
+        const title = longTailTitleFor(pool.category, subject, intent);
+        const normalizedTitle = normalize(title);
+        if (seenTitles.has(normalizedTitle)) continue;
+        let slug = slugify(pool.category, title, globalIndex);
+        let suffix = 2;
+        while (seenSlugs.has(slug)) {
+          slug = `${slug}-${suffix}`;
+          suffix += 1;
+        }
+        const article = makeArticle(pool.category, title, slug, globalIndex);
+        rows.push(article);
+        seenTitles.add(normalizedTitle);
+        seenSlugs.add(slug);
+        globalIndex += 1;
+      }
+      if (rows.length >= TARGET_COUNT) break;
+    }
+    if (rows.length >= TARGET_COUNT) break;
+  }
+
   if (rows.length !== TARGET_COUNT) {
     throw new Error(`Expected ${TARGET_COUNT} articles, got ${rows.length}`);
   }
@@ -264,6 +303,22 @@ function titleFor(category, subject, intent) {
   if (category === "ทำนายฝัน") return `ฝันเห็น${subject} ${intent}`;
   if (category === "ไพ่ยิปซี") return `ไพ่ ${subject} ${intent}`;
   return `${subject} ${intent}`;
+}
+
+function longTailTitleFor(category, subject, intent) {
+  const prefix = {
+    "ทำนายฝัน": `ฝันเห็น${subject}`,
+    "ไพ่ยิปซี": `ความหมายไพ่ ${subject}`,
+    "ปาจื้อ": `${subject} ในปาจื้อ`,
+    "เลขศาสตร์": `${subject} ในเลขศาสตร์`,
+    "ฤกษ์มงคลและฮวงจุ้ย": `${subject}`,
+    "12 ราศี": `${subject}`,
+    "12 นักษัตร": `${subject}`,
+    "ความเชื่อไทย": `${subject}`,
+    "เลขเด็ด": `${subject}`,
+    "พระประจำวันเกิด": `${subject}`,
+  }[category] || subject;
+  return `${prefix} ${intent}`;
 }
 
 function makeArticle(category, title, slug, index) {
