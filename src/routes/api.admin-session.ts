@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 const ADMIN_EMAIL = "admin@gmail.com";
 
@@ -89,7 +90,7 @@ export const Route = createFileRoute("/api/admin-session")({
           return json(
             {
               ok: false,
-              error: error instanceof Error ? error.message : "session แอดมินไม่ถูกต้อง",
+              error: friendlyErrorMessage(error, "session แอดมินไม่ถูกต้อง"),
             },
             { status: 401 },
           );

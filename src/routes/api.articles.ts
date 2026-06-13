@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { type Article } from "@/lib/articles";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 type ArticleRow = {
   slug: string;
@@ -114,7 +115,7 @@ async function supabaseRequest(path: string, init?: RequestInit) {
 
   if (!response.ok) {
     const detail = await response.text().catch(() => "");
-    throw new Error(`Supabase articles failed ${response.status}: ${detail}`);
+    throw new Error(friendlyErrorMessage(detail, "เชื่อมต่อบทความไม่สำเร็จ"));
   }
 
   return response;
@@ -256,7 +257,7 @@ export const Route = createFileRoute("/api/articles")({
           return json(
             {
               ok: false,
-              error: error instanceof Error ? error.message : "โหลดบทความไม่สำเร็จ",
+              error: friendlyErrorMessage(error, "โหลดบทความไม่สำเร็จ"),
             },
             { status: 502 },
           );
@@ -270,7 +271,7 @@ export const Route = createFileRoute("/api/articles")({
           return json(
             {
               ok: false,
-              error: error instanceof Error ? error.message : "บันทึกบทความไม่สำเร็จ",
+              error: friendlyErrorMessage(error, "บันทึกบทความไม่สำเร็จ"),
             },
             { status: 502 },
           );
@@ -284,7 +285,7 @@ export const Route = createFileRoute("/api/articles")({
           return json(
             {
               ok: false,
-              error: error instanceof Error ? error.message : "บันทึกบทความไม่สำเร็จ",
+              error: friendlyErrorMessage(error, "บันทึกบทความไม่สำเร็จ"),
             },
             { status: 502 },
           );
@@ -300,7 +301,7 @@ export const Route = createFileRoute("/api/articles")({
           return json(
             {
               ok: false,
-              error: error instanceof Error ? error.message : "ลบบทความไม่สำเร็จ",
+              error: friendlyErrorMessage(error, "ลบบทความไม่สำเร็จ"),
             },
             { status: 502 },
           );

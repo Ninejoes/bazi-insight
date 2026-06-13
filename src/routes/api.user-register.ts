@@ -7,6 +7,7 @@ import {
   supabaseAuthHeaders,
   toUserSession,
 } from "@/lib/supabase-auth";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 function json(body: unknown, init?: ResponseInit) {
   return Response.json(body, {
@@ -79,7 +80,7 @@ async function createSupabaseUser(url: string, serviceKey: string, body: Registe
 
   if (!response.ok) {
     const detail = await readText(response);
-    throw new Error(`Supabase create user failed ${response.status}: ${detail}`);
+    throw new Error(friendlyErrorMessage(detail, "สมัครสมาชิกไม่สำเร็จ"));
   }
 }
 
@@ -114,7 +115,7 @@ export const Route = createFileRoute("/api/user-register")({
           return json(
             {
               ok: false,
-              error: error instanceof Error ? error.message : "สมัครสมาชิกไม่สำเร็จ",
+              error: friendlyErrorMessage(error, "สมัครสมาชิกไม่สำเร็จ"),
             },
             { status: 500 },
           );

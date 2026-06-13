@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { seo } from "@/lib/seo";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/admin/")({
@@ -50,14 +51,14 @@ function AdminDashboard() {
       const result = await response.json().catch(() => ({}));
       if (!mounted) return;
       if (!response.ok || !result.ok) {
-        setNotice(result.error || "โหลด Dashboard จาก Supabase ไม่สำเร็จ");
+        setNotice(friendlyErrorMessage(result.error, "โหลด Dashboard ไม่สำเร็จ"));
         return;
       }
       if (mounted && result.ok) {
         setData(result);
         setNotice(
           result.error
-            ? `เชื่อมต่อข้อมูล dashboard ไม่ครบ: ${result.error}`
+            ? friendlyErrorMessage(result.error, "เชื่อมต่อข้อมูล dashboard ไม่ครบ")
             : result.source === "supabase"
               ? "Dashboard เชื่อมต่อข้อมูลจริงจาก Supabase แล้ว"
               : "",
@@ -92,7 +93,7 @@ function AdminDashboard() {
 
       <section className="grid gap-6 lg:grid-cols-3">
         <div className="glass-strong rounded-3xl p-6 lg:col-span-2">
-          <h2 className="font-display text-xl text-foreground">การเข้าชม 7 วันล่าสุด</h2>
+          <h2 className="font-display text-xl text-foreground">กิจกรรมระบบ 7 วันล่าสุด</h2>
           <div className="mt-5 flex h-48 items-end gap-2">
             {data.visits.map((v, i) => (
               <div key={i} className="flex flex-1 flex-col items-center gap-1">
@@ -127,7 +128,7 @@ function AdminDashboard() {
       </section>
 
       <section className="glass-strong rounded-3xl p-6">
-        <h2 className="font-display text-xl text-foreground">หน้าที่มีผู้เข้าชมมากที่สุด</h2>
+        <h2 className="font-display text-xl text-foreground">ข้อมูลกิจกรรมตามบริการ</h2>
         <table className="mt-5 w-full text-sm">
           <thead className="text-left text-[11px] uppercase tracking-wider text-muted-foreground">
             <tr className="border-b border-gold/10">

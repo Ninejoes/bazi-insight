@@ -5,6 +5,7 @@ import {
   toUserSession,
   userRole,
 } from "@/lib/supabase-auth";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 function json(body: unknown, init?: ResponseInit) {
   return Response.json(body, {
@@ -57,7 +58,7 @@ export const Route = createFileRoute("/api/user-login")({
           return json(
             {
               ok: false,
-              error: error instanceof Error ? error.message : "เข้าสู่ระบบไม่สำเร็จ",
+              error: friendlyErrorMessage(error, "เข้าสู่ระบบไม่สำเร็จ"),
             },
             { status: 401 },
           );

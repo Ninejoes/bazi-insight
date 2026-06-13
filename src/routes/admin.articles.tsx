@@ -5,6 +5,7 @@ import {
   getArticleCategoryHint,
 } from "@/lib/article-categories";
 import { seo } from "@/lib/seo";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { useRef, useState, useEffect } from "react";
 import type { Article } from "@/lib/articles";
 
@@ -38,7 +39,7 @@ function AdminArticles() {
         setNotice(data.source === "supabase" ? "เชื่อมต่อบทความจาก Supabase แล้ว" : "");
       } else if (mounted) {
         setItems([]);
-        setNotice(data.error || "โหลดบทความจาก Supabase ไม่สำเร็จ");
+        setNotice(friendlyErrorMessage(data.error, "โหลดบทความไม่สำเร็จ"));
       }
       if (mounted) setLoading(false);
     }
@@ -57,7 +58,7 @@ function AdminArticles() {
       setItems(data.articles || []);
     } else {
       setItems([]);
-      setNotice(data.error || "โหลดบทความจาก Supabase ไม่สำเร็จ");
+      setNotice(friendlyErrorMessage(data.error, "โหลดบทความไม่สำเร็จ"));
     }
   };
 
@@ -72,7 +73,7 @@ function AdminArticles() {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data.ok) {
-        setNotice(data.error || "บันทึกบทความไม่สำเร็จ");
+        setNotice(friendlyErrorMessage(data.error, "บันทึกบทความไม่สำเร็จ"));
         return false;
       }
       await reload();
@@ -94,7 +95,7 @@ function AdminArticles() {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data.ok) {
-        setNotice(data.error || "ลบบทความไม่สำเร็จ");
+        setNotice(friendlyErrorMessage(data.error, "ลบบทความไม่สำเร็จ"));
         return;
       }
       await reload();

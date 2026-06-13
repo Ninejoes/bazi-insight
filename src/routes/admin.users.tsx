@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { seo } from "@/lib/seo";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/admin/users")({
@@ -54,10 +55,12 @@ function AdminUsers() {
     try {
       const response = await fetch("/api/admin-users", { headers: authHeaders() });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok || !data.ok) throw new Error(data.error || "โหลดผู้ใช้งานไม่สำเร็จ");
+      if (!response.ok || !data.ok) {
+        throw new Error(friendlyErrorMessage(data.error, "โหลดผู้ใช้งานไม่สำเร็จ"));
+      }
       setItems(data.users || []);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "โหลดผู้ใช้งานไม่สำเร็จ");
+      setError(friendlyErrorMessage(loadError, "โหลดผู้ใช้งานไม่สำเร็จ"));
     } finally {
       setLoading(false);
     }
@@ -82,12 +85,14 @@ function AdminUsers() {
         body: JSON.stringify(user),
       });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok || !data.ok) throw new Error(data.error || "บันทึกผู้ใช้งานไม่สำเร็จ");
+      if (!response.ok || !data.ok) {
+        throw new Error(friendlyErrorMessage(data.error, "บันทึกผู้ใช้งานไม่สำเร็จ"));
+      }
       await loadUsers();
       setEditing(null);
       notify("บันทึกผู้ใช้งานแล้ว");
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : "บันทึกผู้ใช้งานไม่สำเร็จ");
+      setError(friendlyErrorMessage(saveError, "บันทึกผู้ใช้งานไม่สำเร็จ"));
     } finally {
       setSavingId("");
     }
@@ -107,11 +112,13 @@ function AdminUsers() {
         { method: "DELETE", headers: authHeaders() },
       );
       const data = await response.json().catch(() => ({}));
-      if (!response.ok || !data.ok) throw new Error(data.error || "ลบผู้ใช้งานไม่สำเร็จ");
+      if (!response.ok || !data.ok) {
+        throw new Error(friendlyErrorMessage(data.error, "ลบผู้ใช้งานไม่สำเร็จ"));
+      }
       await loadUsers();
       notify("ลบผู้ใช้งานแล้ว");
     } catch (deleteError) {
-      setError(deleteError instanceof Error ? deleteError.message : "ลบผู้ใช้งานไม่สำเร็จ");
+      setError(friendlyErrorMessage(deleteError, "ลบผู้ใช้งานไม่สำเร็จ"));
     } finally {
       setSavingId("");
     }

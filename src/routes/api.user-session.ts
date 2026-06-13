@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 import {
   getSupabaseAuthConfig,
   readBearer,
@@ -37,7 +38,7 @@ export const Route = createFileRoute("/api/user-session")({
           return json(
             {
               ok: false,
-              error: error instanceof Error ? error.message : "session ผู้ใช้งานไม่ถูกต้อง",
+              error: friendlyErrorMessage(error, "session ผู้ใช้งานไม่ถูกต้อง"),
             },
             { status: 401 },
           );

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { seo } from "@/lib/seo";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { useEffect, useState } from "react";
 import type { DreamRecord as Dream } from "@/lib/admin-content";
 
@@ -19,6 +20,10 @@ const letters = "กขคงจฉชซญดตถทนบปผฝพฟภ
 function AdminDreams() {
   const [items, setItems] = useState<Dream[]>([]);
   const [filterLetter, setFilterLetter] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<Dream | null>(null);
   const [notice, setNotice] = useState("");
@@ -28,14 +33,24 @@ function AdminDreams() {
     let mounted = true;
 
     async function loadDreams() {
-      const response = await fetch("/api/dreams");
+      setLoading(true);
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(pageSize),
+      });
+      if (filterLetter) params.set("letter", filterLetter);
+      const response = await fetch(`/api/dreams?${params.toString()}`);
       const data = await response.json().catch(() => ({}));
       if (mounted && data.ok) {
         setItems(data.dreams || []);
+        setTotal(Number(data.total || 0));
+        setTotalPages(Number(data.totalPages || 1));
         setNotice(data.source === "supabase" ? "เชื่อมต่อข้อมูลทำนายฝันจาก Supabase แล้ว" : "");
       } else if (mounted) {
         setItems([]);
-        setNotice(data.error || "โหลดข้อมูลทำนายฝันจาก Supabase ไม่สำเร็จ");
+        setTotal(0);
+        setTotalPages(1);
+        setNotice(friendlyErrorMessage(data.error, "โหลดข้อมูลทำนายฝันไม่สำเร็จ"));
       }
       if (mounted) setLoading(false);
     }
@@ -45,16 +60,25 @@ function AdminDreams() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [filterLetter, page, pageSize]);
 
   const reload = async () => {
-    const response = await fetch("/api/dreams");
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(pageSize),
+    });
+    if (filterLetter) params.set("letter", filterLetter);
+    const response = await fetch(`/api/dreams?${params.toString()}`);
     const data = await response.json().catch(() => ({}));
     if (data.ok) {
       setItems(data.dreams || []);
+      setTotal(Number(data.total || 0));
+      setTotalPages(Number(data.totalPages || 1));
     } else {
       setItems([]);
-      setNotice(data.error || "โหลดข้อมูลทำนายฝันจาก Supabase ไม่สำเร็จ");
+      setTotal(0);
+      setTotalPages(1);
+      setNotice(friendlyErrorMessage(data.error, "โหลดข้อมูลทำนายฝันไม่สำเร็จ"));
     }
   };
 
@@ -66,7 +90,7 @@ function AdminDreams() {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.ok) {
-      setNotice(data.error || "บันทึกคำฝันไม่สำเร็จ");
+      setNotice(friendlyErrorMessage(data.error, "บันทึกคำฝันไม่สำเร็จ"));
       return;
     }
     await reload();
@@ -79,14 +103,15 @@ function AdminDreams() {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.ok) {
-      setNotice(data.error || "ลบคำฝันไม่สำเร็จ");
+      setNotice(friendlyErrorMessage(data.error, "ลบคำฝันไม่สำเร็จ"));
       return;
     }
     await reload();
     setNotice("ลบคำฝันแล้ว");
   };
 
-  const shown = filterLetter ? items.filter((i) => i.letter === filterLetter) : items;
+  const currentStart = total ? (page - 1) * pageSize + 1 : 0;
+  const currentEnd = Math.min(page * pageSize, total);
 
   return (
     <div className="space-y-6">
@@ -107,7 +132,10 @@ function AdminDreams() {
         <div className="text-xs text-muted-foreground mb-2">กรองตามอักษร ก-ฮ</div>
         <div className="flex flex-wrap gap-1.5">
           <button
-            onClick={() => setFilterLetter(null)}
+            onClick={() => {
+              setFilterLetter(null);
+              setPage(1);
+            }}
             className={`rounded-md border px-2.5 py-1 text-xs ${!filterLetter ? "border-gold bg-gold/15 text-gold" : "border-gold/20 text-muted-foreground hover:text-gold"}`}
           >
             ทั้งหมด
@@ -115,7 +143,10 @@ function AdminDreams() {
           {letters.map((l) => (
             <button
               key={l}
-              onClick={() => setFilterLetter(l)}
+              onClick={() => {
+                setFilterLetter(l);
+                setPage(1);
+              }}
               className={`rounded-md border px-2.5 py-1 text-xs ${filterLetter === l ? "border-gold bg-gold/15 text-gold" : "border-gold/20 text-muted-foreground hover:text-gold"}`}
             >
               {l}
@@ -129,6 +160,37 @@ function AdminDreams() {
           {notice}
         </div>
       ) : null}
+
+      <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gold/10 bg-card/40 px-4 py-3 text-xs text-muted-foreground">
+        <div>
+          {filterLetter ? (
+            <>
+              กำลังแสดงคำทำนายฝันหมวดอักษร <span className="text-gold">{filterLetter}</span>
+            </>
+          ) : (
+            "กำลังแสดงคำทำนายฝันทุกหมวดอักษร"
+          )}{" "}
+          • {currentStart.toLocaleString()}-{currentEnd.toLocaleString()} จาก{" "}
+          {total.toLocaleString()} รายการ
+        </div>
+        <label className="flex items-center gap-2">
+          แสดงต่อหน้า
+          <select
+            className="rounded-lg border border-gold/20 bg-card px-2 py-1 text-foreground"
+            value={pageSize}
+            onChange={(event) => {
+              setPageSize(Number(event.target.value));
+              setPage(1);
+            }}
+          >
+            {[10, 20, 50, 100].map((size) => (
+              <option key={size} value={size}>
+                {size} รายการ
+              </option>
+            ))}
+          </select>
+        </label>
+      </section>
 
       <section className="glass-strong max-w-full overflow-x-auto rounded-3xl">
         {loading ? (
@@ -148,7 +210,7 @@ function AdminDreams() {
             </tr>
           </thead>
           <tbody>
-            {shown.map((d) => (
+            {items.map((d) => (
               <tr key={d.id} className="border-b border-gold/5 hover:bg-gold/5">
                 <td className="px-4 py-3 text-foreground">{d.keyword}</td>
                 <td className="px-4 py-3 text-gold">{d.letter}</td>
@@ -173,12 +235,35 @@ function AdminDreams() {
             ))}
           </tbody>
         </table>
-        {!loading && shown.length === 0 ? (
+        {!loading && items.length === 0 ? (
           <div className="px-4 py-8 text-center text-sm text-muted-foreground">
             ยังไม่มีข้อมูลทำนายฝันจาก Supabase
           </div>
         ) : null}
       </section>
+
+      {totalPages > 1 ? (
+        <section className="flex flex-wrap items-center justify-between gap-3 text-sm">
+          <button
+            className="rounded-xl border border-gold/20 px-4 py-2 text-muted-foreground disabled:cursor-not-allowed disabled:opacity-40 hover:text-gold"
+            disabled={page <= 1}
+            onClick={() => setPage((value) => Math.max(1, value - 1))}
+          >
+            ← ก่อนหน้า
+          </button>
+          <div className="text-xs text-muted-foreground">
+            หน้า <span className="text-gold">{page.toLocaleString()}</span> /{" "}
+            {totalPages.toLocaleString()}
+          </div>
+          <button
+            className="rounded-xl border border-gold/20 px-4 py-2 text-muted-foreground disabled:cursor-not-allowed disabled:opacity-40 hover:text-gold"
+            disabled={page >= totalPages}
+            onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
+          >
+            ถัดไป →
+          </button>
+        </section>
+      ) : null}
 
       {adding && (
         <DreamEditor

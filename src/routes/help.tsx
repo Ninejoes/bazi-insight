@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo } from "@/lib/seo";
 import { type FAQRecord } from "@/lib/admin-content";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/help")({
@@ -38,7 +39,7 @@ function HelpPage() {
       const data = await response.json().catch(() => ({}));
       if (!mounted) return;
       if (!response.ok || !data.ok) {
-        setError(data.error || "โหลดศูนย์ช่วยเหลือไม่สำเร็จ");
+        setError(friendlyErrorMessage(data.error, "โหลดศูนย์ช่วยเหลือไม่สำเร็จ"));
         return;
       }
       setFaqs(data.faqs || []);

@@ -1,3 +1,5 @@
+import { friendlyErrorMessage } from "./friendly-error";
+
 export type SupabaseAuthUser = {
   id?: string;
   email?: string;
@@ -104,7 +106,7 @@ export async function signInSupabaseUser(
 
   if (!response.ok) {
     const detail = await readText(response);
-    throw new Error(`Supabase sign in failed ${response.status}: ${detail}`);
+    throw new Error(friendlyErrorMessage(detail, "เข้าสู่ระบบไม่สำเร็จ"));
   }
 
   return (await response.json().catch(() => ({}))) as SupabaseTokenResponse;

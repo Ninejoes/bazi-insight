@@ -15,6 +15,7 @@ import {
   type LotteryResultData,
 } from "@/lib/lottery";
 import { seo } from "@/lib/seo";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 type LotteryTab = "result" | "stats" | "probability" | "predict";
 type LotteryApiResponse = {
@@ -96,13 +97,13 @@ function LotteryPage() {
       const response = await fetch(`/api/lottery?${params.toString()}`);
       const data = (await response.json()) as LotteryApiResponse;
       if (!response.ok || !data.ok || !data.data || !data.date) {
-        throw new Error(data.error || "โหลดผลรางวัลไม่สำเร็จ");
+        throw new Error(friendlyErrorMessage(data.error, "โหลดผลรางวัลไม่สำเร็จ"));
       }
       setResult(data.data);
       setResultDate(data.date);
       setResultLabel(data.date ? `งวดประจำวันที่ ${thaiLotteryDate(data.date)}` : "งวดที่เลือก");
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "โหลดผลรางวัลไม่สำเร็จ");
+      setError(friendlyErrorMessage(loadError, "โหลดผลรางวัลไม่สำเร็จ"));
     } finally {
       setLoading("");
     }
@@ -115,13 +116,13 @@ function LotteryPage() {
       const response = await fetch("/api/lottery?mode=latest");
       const data = (await response.json()) as LotteryApiResponse;
       if (!response.ok || !data.ok || !data.data) {
-        throw new Error(data.error || "โหลดผลรางวัลงวดล่าสุดไม่สำเร็จ");
+        throw new Error(friendlyErrorMessage(data.error, "โหลดผลรางวัลงวดล่าสุดไม่สำเร็จ"));
       }
       setResult(data.data);
       setResultDate(data.date || null);
       setResultLabel(data.date ? `งวดประจำวันที่ ${thaiLotteryDate(data.date)}` : "ผลรางวัลงวดล่าสุด");
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "โหลดผลรางวัลงวดล่าสุดไม่สำเร็จ");
+      setError(friendlyErrorMessage(loadError, "โหลดผลรางวัลงวดล่าสุดไม่สำเร็จ"));
     } finally {
       setLoading("");
     }
@@ -134,13 +135,13 @@ function LotteryPage() {
       const response = await fetch(`/api/lottery?mode=history&limit=${limit}`);
       const data = (await response.json()) as LotteryApiResponse;
       if (!response.ok || !data.ok) {
-        throw new Error(data.error || "โหลดสถิติไม่สำเร็จ");
+        throw new Error(friendlyErrorMessage(data.error, "โหลดสถิติไม่สำเร็จ"));
       }
       setHistory(data.history || []);
       setFrequency(data.frequency || null);
       if (!(data.history || []).length) throw new Error("ยังไม่มีข้อมูลย้อนหลังจาก GLO");
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "โหลดสถิติไม่สำเร็จ");
+      setError(friendlyErrorMessage(loadError, "โหลดสถิติไม่สำเร็จ"));
     } finally {
       setLoading("");
     }

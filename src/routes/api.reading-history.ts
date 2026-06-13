@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 import {
   getSupabaseAuthConfig,
   readBearer,
@@ -81,7 +82,7 @@ async function supabaseRest(
   });
   const text = await response.text().catch(() => "");
   const data = text ? JSON.parse(text) : null;
-  if (!response.ok) throw new Error(`Supabase reading_history failed ${response.status}: ${text}`);
+  if (!response.ok) throw new Error(friendlyErrorMessage(text, "เชื่อมต่อประวัติการดูดวงไม่สำเร็จ"));
   return data;
 }
 
@@ -120,7 +121,7 @@ export const Route = createFileRoute("/api/reading-history")({
           return json(
             {
               ok: false,
-              error: error instanceof Error ? error.message : "โหลดประวัติไม่สำเร็จ",
+              error: friendlyErrorMessage(error, "โหลดประวัติไม่สำเร็จ"),
             },
             { status: 500 },
           );
@@ -156,7 +157,7 @@ export const Route = createFileRoute("/api/reading-history")({
           return json(
             {
               ok: false,
-              error: error instanceof Error ? error.message : "บันทึกประวัติไม่สำเร็จ",
+              error: friendlyErrorMessage(error, "บันทึกประวัติไม่สำเร็จ"),
             },
             { status: 500 },
           );
@@ -180,7 +181,7 @@ export const Route = createFileRoute("/api/reading-history")({
           return json(
             {
               ok: false,
-              error: error instanceof Error ? error.message : "ลบประวัติไม่สำเร็จ",
+              error: friendlyErrorMessage(error, "ลบประวัติไม่สำเร็จ"),
             },
             { status: 500 },
           );

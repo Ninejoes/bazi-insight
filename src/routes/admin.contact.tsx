@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { seo } from "@/lib/seo";
 import { useEffect, useState } from "react";
 import { siteContentSeed, type SiteContent } from "@/lib/admin-content";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 export const Route = createFileRoute("/admin/contact")({
   head: () =>
@@ -27,7 +28,7 @@ function AdminContact() {
       const data = await response.json().catch(() => ({}));
       if (!mounted) return;
       if (!response.ok || !data.ok) {
-        setNotice(data.error || "โหลดข้อมูลเว็บไซต์จาก Supabase ไม่สำเร็จ");
+        setNotice(friendlyErrorMessage(data.error, "โหลดข้อมูลเว็บไซต์ไม่สำเร็จ"));
         setLoading(false);
         return;
       }
@@ -36,7 +37,7 @@ function AdminContact() {
         setContent(data.content || siteContentSeed);
         setNotice(
           data.error
-            ? `เชื่อมต่อ Supabase สำหรับข้อมูลเว็บไซต์ไม่ได้: ${data.error}`
+            ? friendlyErrorMessage(data.error, "เชื่อมต่อข้อมูลเว็บไซต์ไม่ได้")
             : data.source === "supabase"
               ? "เชื่อมต่อข้อมูลเว็บไซต์จาก Supabase แล้ว"
               : "",
@@ -60,7 +61,7 @@ function AdminContact() {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.ok) {
-      setNotice(data.error || "บันทึกข้อมูลเว็บไซต์ไม่สำเร็จ");
+      setNotice(friendlyErrorMessage(data.error, "บันทึกข้อมูลเว็บไซต์ไม่สำเร็จ"));
       return;
     }
     setContent(data.content || next);

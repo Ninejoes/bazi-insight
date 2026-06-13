@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo } from "@/lib/seo";
 import { type AboutContent } from "@/lib/admin-content";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/about")({
@@ -29,7 +30,7 @@ function AboutPage() {
       const data = await response.json().catch(() => ({}));
       if (!mounted) return;
       if (!response.ok || !data.ok) {
-        setError(data.error || "โหลดข้อมูลเกี่ยวกับเราไม่สำเร็จ");
+        setError(friendlyErrorMessage(data.error, "โหลดข้อมูลเกี่ยวกับเราไม่สำเร็จ"));
         return;
       }
       setAbout(data.content?.about || null);

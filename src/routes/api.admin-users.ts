@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 const ADMIN_EMAIL = "admin@gmail.com";
 
@@ -87,7 +88,7 @@ async function listPublicUsers(url: string, serviceKey: string) {
 
   if (!response.ok) {
     const detail = await response.text().catch(() => "");
-    throw new Error(`Supabase public.users failed ${response.status}: ${detail}`);
+    throw new Error(friendlyErrorMessage(detail, "เชื่อมต่อข้อมูลผู้ใช้งานไม่สำเร็จ"));
   }
 
   const rows = (await response.json().catch(() => [])) as PublicUserRow[];
@@ -126,7 +127,7 @@ export const Route = createFileRoute("/api/admin-users")({
           return json(
             {
               ok: false,
-              error: error instanceof Error ? error.message : "โหลดผู้ใช้งานไม่สำเร็จ",
+              error: friendlyErrorMessage(error, "โหลดผู้ใช้งานไม่สำเร็จ"),
             },
             { status: 401 },
           );

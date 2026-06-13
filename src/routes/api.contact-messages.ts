@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { getSupabaseConfig, json, supabaseRequest } from "@/lib/supabase-rest";
 
 const ADMIN_EMAIL = "admin@gmail.com";
@@ -158,7 +159,7 @@ export const Route = createFileRoute("/api/contact-messages")({
           return json({ ok: true, source: "supabase", messages: await listMessages() });
         } catch (error) {
           return json(
-            { ok: false, error: error instanceof Error ? error.message : "โหลดข้อความไม่สำเร็จ" },
+            { ok: false, error: friendlyErrorMessage(error, "โหลดข้อความไม่สำเร็จ") },
             { status: 401 },
           );
         }
@@ -172,7 +173,7 @@ export const Route = createFileRoute("/api/contact-messages")({
           });
         } catch (error) {
           return json(
-            { ok: false, error: error instanceof Error ? error.message : "ส่งข้อความไม่สำเร็จ" },
+            { ok: false, error: friendlyErrorMessage(error, "ส่งข้อความไม่สำเร็จ") },
             { status: 502 },
           );
         }
@@ -187,7 +188,7 @@ export const Route = createFileRoute("/api/contact-messages")({
           });
         } catch (error) {
           return json(
-            { ok: false, error: error instanceof Error ? error.message : "อัปเดตข้อความไม่สำเร็จ" },
+            { ok: false, error: friendlyErrorMessage(error, "อัปเดตข้อความไม่สำเร็จ") },
             { status: 401 },
           );
         }

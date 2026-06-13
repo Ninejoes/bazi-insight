@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
 import { type FAQRecord } from "@/lib/admin-content";
 import { getSupabaseConfig, json, supabaseRequest } from "@/lib/supabase-rest";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 type FAQRow = {
   id?: string;
@@ -87,7 +88,7 @@ export const Route = createFileRoute("/api/faqs")({
           return json({ ok: true, ...(await listFaqs()) });
         } catch (error) {
           return json(
-            { ok: false, error: error instanceof Error ? error.message : "โหลด FAQ ไม่สำเร็จ" },
+            { ok: false, error: friendlyErrorMessage(error, "โหลด FAQ ไม่สำเร็จ") },
             { status: 502 },
           );
         }
@@ -99,7 +100,7 @@ export const Route = createFileRoute("/api/faqs")({
           return json({ ok: true, ...(await saveFaqs(rows || [])) });
         } catch (error) {
           return json(
-            { ok: false, error: error instanceof Error ? error.message : "บันทึก FAQ ไม่สำเร็จ" },
+            { ok: false, error: friendlyErrorMessage(error, "บันทึก FAQ ไม่สำเร็จ") },
             { status: 502 },
           );
         }
@@ -111,7 +112,7 @@ export const Route = createFileRoute("/api/faqs")({
           return json({ ok: true, ...(await deleteFaq(id)) });
         } catch (error) {
           return json(
-            { ok: false, error: error instanceof Error ? error.message : "ลบ FAQ ไม่สำเร็จ" },
+            { ok: false, error: friendlyErrorMessage(error, "ลบ FAQ ไม่สำเร็จ") },
             { status: 502 },
           );
         }

@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 const ADMIN_EMAIL = "admin@gmail.com";
 const ADMIN_NAME = "Admin";
@@ -89,7 +90,7 @@ async function createSupabaseAdmin(
 
   const detail = await readText(response);
   if (/already|registered|exists|duplicate/i.test(detail)) return;
-  throw new Error(`Supabase create admin failed ${response.status}: ${detail}`);
+  throw new Error(friendlyErrorMessage(detail, "เตรียมบัญชีแอดมินไม่สำเร็จ"));
 }
 
 async function updateSupabaseAdminPassword(
@@ -111,7 +112,7 @@ async function updateSupabaseAdminPassword(
 
   if (!response.ok) {
     const detail = await readText(response);
-    throw new Error(`Supabase update admin failed ${response.status}: ${detail}`);
+    throw new Error(friendlyErrorMessage(detail, "อัปเดตบัญชีแอดมินไม่สำเร็จ"));
   }
 }
 
@@ -146,7 +147,7 @@ async function signInWithSupabase(email: string, password: string) {
 
   if (!response.ok) {
     const detail = await readText(response);
-    throw new Error(`Supabase sign in failed ${response.status}: ${detail}`);
+    throw new Error(friendlyErrorMessage(detail, "ไม่สามารถเข้าสู่ระบบแอดมินได้"));
   }
 
   const data = await response.json().catch(() => ({}));
@@ -191,7 +192,7 @@ export const Route = createFileRoute("/api/admin-login")({
           return json(
             {
               ok: false,
-              error: error instanceof Error ? error.message : "ไม่สามารถเข้าสู่ระบบแอดมินได้",
+              error: friendlyErrorMessage(error, "ไม่สามารถเข้าสู่ระบบแอดมินได้"),
             },
             { status: 500 },
           );

@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 type LeadPayload = {
   id?: string;
@@ -48,7 +49,7 @@ async function saveToSupabase(lead: ReturnType<typeof sanitizeLead>) {
 
   if (!response.ok) {
     const detail = await response.text();
-    throw new Error(`Supabase error ${response.status}: ${detail}`);
+    throw new Error(friendlyErrorMessage(detail, "บันทึกข้อมูลไม่สำเร็จ"));
   }
 
   return { rows: await response.json().catch(() => []) };
@@ -81,7 +82,7 @@ export const Route = createFileRoute("/api/leads")({
           });
         } catch (error) {
           return json(
-            { ok: false, error: error instanceof Error ? error.message : "Unknown error" },
+            { ok: false, error: friendlyErrorMessage(error, "บันทึกข้อมูลไม่สำเร็จ") },
             { status: 500 },
           );
         }

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { seo } from "@/lib/seo";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { readStoredUserSession } from "@/lib/user-session";
 import { useEffect, useState } from "react";
 
@@ -37,12 +38,12 @@ function HistoryPage() {
         });
         const data = await response.json().catch(() => ({}));
         if (!response.ok || !data.ok) {
-          throw new Error(data.error || "โหลดประวัติการดูดวงไม่สำเร็จ");
+          throw new Error(friendlyErrorMessage(data.error, "โหลดประวัติการดูดวงไม่สำเร็จ"));
         }
         if (mounted) setItems(data.history || []);
       } catch (loadError) {
         if (mounted) {
-          setError(loadError instanceof Error ? loadError.message : "โหลดประวัติการดูดวงไม่สำเร็จ");
+          setError(friendlyErrorMessage(loadError, "โหลดประวัติการดูดวงไม่สำเร็จ"));
         }
       } finally {
         if (mounted) setLoading(false);
@@ -64,7 +65,7 @@ function HistoryPage() {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.ok) {
-      setError(data.error || "ลบประวัติไม่สำเร็จ");
+      setError(friendlyErrorMessage(data.error, "ลบประวัติไม่สำเร็จ"));
       return;
     }
     setItems((current) => current.filter((item) => item.id !== id));

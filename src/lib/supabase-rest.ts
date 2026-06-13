@@ -1,3 +1,5 @@
+import { friendlyErrorMessage } from "./friendly-error";
+
 export function getSupabaseConfig() {
   const url = (
     process.env.SUPABASE_URL ||
@@ -37,7 +39,7 @@ export async function supabaseRequest(path: string, init?: RequestInit) {
 
   if (!response.ok) {
     const detail = await response.text().catch(() => "");
-    throw new Error(`Supabase failed ${response.status}: ${detail}`);
+    throw new Error(friendlyErrorMessage(detail, "เชื่อมต่อฐานข้อมูลไม่สำเร็จ"));
   }
 
   return response;

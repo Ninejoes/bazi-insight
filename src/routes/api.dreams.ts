@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
 import { type DreamRecord } from "@/lib/admin-content";
 import { getSupabaseConfig, json, supabaseRequest } from "@/lib/supabase-rest";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 type DreamRow = {
   id?: string;
@@ -192,7 +193,7 @@ export const Route = createFileRoute("/api/dreams")({
           return json(
             {
               ok: false,
-              error: error instanceof Error ? error.message : "โหลดข้อมูลทำนายฝันไม่สำเร็จ",
+              error: friendlyErrorMessage(error, "โหลดข้อมูลทำนายฝันไม่สำเร็จ"),
             },
             { status: 502 },
           );
@@ -203,7 +204,7 @@ export const Route = createFileRoute("/api/dreams")({
           return json({ ok: true, ...(await saveDream(await request.json())) });
         } catch (error) {
           return json(
-            { ok: false, error: error instanceof Error ? error.message : "บันทึกคำฝันไม่สำเร็จ" },
+            { ok: false, error: friendlyErrorMessage(error, "บันทึกคำฝันไม่สำเร็จ") },
             { status: 502 },
           );
         }
@@ -215,7 +216,7 @@ export const Route = createFileRoute("/api/dreams")({
           return json({ ok: true, ...(await deleteDream(id)) });
         } catch (error) {
           return json(
-            { ok: false, error: error instanceof Error ? error.message : "ลบคำฝันไม่สำเร็จ" },
+            { ok: false, error: friendlyErrorMessage(error, "ลบคำฝันไม่สำเร็จ") },
             { status: 502 },
           );
         }

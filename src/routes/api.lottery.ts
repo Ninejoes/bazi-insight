@@ -8,6 +8,7 @@ import {
   type LotteryHistoryItem,
 } from "@/lib/lottery";
 import { json } from "@/lib/supabase-rest";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 const GLO_ENDPOINT = "https://www.glo.or.th/api/checking/getLotteryResult";
 const GLO_LATEST_ENDPOINT = "https://www.glo.or.th/api/lottery/getLatestLottery";
@@ -120,7 +121,7 @@ export const Route = createFileRoute("/api/lottery")({
           return json(
             {
               ok: false,
-              error: error instanceof Error ? error.message : "โหลดข้อมูลสลากไม่สำเร็จ",
+              error: friendlyErrorMessage(error, "โหลดข้อมูลสลากไม่สำเร็จ"),
             },
             { status: 502 },
           );

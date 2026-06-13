@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { seo } from "@/lib/seo";
 import { useEffect, useState } from "react";
 import { type FAQRecord as FAQ } from "@/lib/admin-content";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 export const Route = createFileRoute("/admin/help")({
   head: () =>
@@ -28,7 +29,7 @@ function AdminHelp() {
       const data = await response.json().catch(() => ({}));
       if (!mounted) return;
       if (!response.ok || !data.ok) {
-        setNotice(data.error || "โหลด FAQ จาก Supabase ไม่สำเร็จ");
+        setNotice(friendlyErrorMessage(data.error, "โหลด FAQ ไม่สำเร็จ"));
         setLoading(false);
         return;
       }
@@ -37,7 +38,7 @@ function AdminHelp() {
         setFaqs(data.faqs || []);
         setNotice(
           data.error
-            ? `เชื่อมต่อ Supabase สำหรับศูนย์ช่วยเหลือไม่ได้: ${data.error}`
+            ? friendlyErrorMessage(data.error, "เชื่อมต่อศูนย์ช่วยเหลือไม่ได้")
             : data.source === "supabase"
               ? "เชื่อมต่อ FAQ จาก Supabase แล้ว"
               : "",
@@ -62,7 +63,7 @@ function AdminHelp() {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.ok) {
-      setNotice(data.error || "บันทึก FAQ ไม่สำเร็จ");
+      setNotice(friendlyErrorMessage(data.error, "บันทึก FAQ ไม่สำเร็จ"));
       return;
     }
     setFaqs(data.faqs || normalized);
@@ -75,7 +76,7 @@ function AdminHelp() {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.ok) {
-      setNotice(data.error || "ลบ FAQ ไม่สำเร็จ");
+      setNotice(friendlyErrorMessage(data.error, "ลบ FAQ ไม่สำเร็จ"));
       return;
     }
     setFaqs((items) => items.filter((item) => item.id !== id));

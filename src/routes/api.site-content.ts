@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { siteContentSeed, type SiteContent } from "@/lib/admin-content";
 import { getSupabaseConfig, json, supabaseRequest } from "@/lib/supabase-rest";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 type SiteContentRow = {
   id?: string;
@@ -67,7 +68,7 @@ export const Route = createFileRoute("/api/site-content")({
           return json(
             {
               ok: false,
-              error: error instanceof Error ? error.message : "โหลดข้อมูลเว็บไซต์ไม่สำเร็จ",
+              error: friendlyErrorMessage(error, "โหลดข้อมูลเว็บไซต์ไม่สำเร็จ"),
             },
             { status: 502 },
           );
@@ -81,7 +82,7 @@ export const Route = createFileRoute("/api/site-content")({
           return json(
             {
               ok: false,
-              error: error instanceof Error ? error.message : "บันทึกข้อมูลเว็บไซต์ไม่สำเร็จ",
+              error: friendlyErrorMessage(error, "บันทึกข้อมูลเว็บไซต์ไม่สำเร็จ"),
             },
             { status: 502 },
           );

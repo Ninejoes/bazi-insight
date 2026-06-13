@@ -4,6 +4,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { ALL_ARTICLE_CATEGORY, ARTICLE_CATEGORIES } from "@/lib/article-categories";
 import { type Article } from "@/lib/articles";
 import { seo } from "@/lib/seo";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/articles/")({
@@ -61,7 +62,7 @@ function ArticlesIndex() {
       const data = (await response.json().catch(() => ({}))) as ArticlesResponse;
       if (!mounted) return;
       if (!response.ok || !data.ok) {
-        setError(data.error || "โหลดบทความจาก Supabase ไม่สำเร็จ");
+        setError(friendlyErrorMessage(data.error, "โหลดบทความไม่สำเร็จ"));
         setLoading(false);
         return;
       }

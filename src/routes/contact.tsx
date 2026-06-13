@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo } from "@/lib/seo";
 import { type ContactContent } from "@/lib/admin-content";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/contact")({
@@ -30,7 +31,7 @@ function ContactPage() {
       const data = await response.json().catch(() => ({}));
       if (!mounted) return;
       if (!response.ok || !data.ok) {
-        setLoadError(data.error || "โหลดข้อมูลติดต่อไม่สำเร็จ");
+        setLoadError(friendlyErrorMessage(data.error, "โหลดข้อมูลติดต่อไม่สำเร็จ"));
         return;
       }
       setContact(data.content?.contact || null);
@@ -84,7 +85,7 @@ function ContactPage() {
                 setNotice(
                   data.ok
                     ? "ส่งข้อความแล้ว ทีมงานจะติดต่อกลับ"
-                    : data.error || "ส่งข้อความไม่สำเร็จ",
+                    : friendlyErrorMessage(data.error, "ส่งข้อความไม่สำเร็จ"),
                 );
                 if (data.ok) e.currentTarget.reset();
               }}

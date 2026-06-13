@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { seo } from "@/lib/seo";
 import { useState } from "react";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 const ADMIN_SESSION_KEY = "likhitfa-admin-session-v2";
 
@@ -39,7 +40,7 @@ function AdminLoginPage() {
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok || !data.ok || !data.session) {
-        setError(data.error || "ไม่สามารถเข้าสู่ระบบแอดมินได้");
+        setError(friendlyErrorMessage(data.error, "ไม่สามารถเข้าสู่ระบบแอดมินได้"));
         return;
       }
 

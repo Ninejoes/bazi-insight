@@ -4,6 +4,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { seo } from "@/lib/seo";
 import { useState } from "react";
 import { storeUserSession, type UserSession } from "@/lib/user-session";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 export const Route = createFileRoute("/login")({
   head: () =>
@@ -51,7 +52,7 @@ function LoginPage() {
             };
             setLoading(false);
             if (!response.ok || !data.ok || !data.session) {
-              setNotice(data.error || "เข้าสู่ระบบไม่สำเร็จ");
+              setNotice(friendlyErrorMessage(data.error, "เข้าสู่ระบบไม่สำเร็จ"));
               return;
             }
             storeUserSession(data.session);

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { seo } from "@/lib/seo";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { useEffect, useMemo, useState } from "react";
 
 export const Route = createFileRoute("/admin/messages")({
@@ -69,7 +70,9 @@ function AdminMessages() {
         headers: adminHeaders(),
       });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok || !data.ok) throw new Error(data.error || "โหลดข้อความไม่สำเร็จ");
+      if (!response.ok || !data.ok) {
+        throw new Error(friendlyErrorMessage(data.error, "โหลดข้อความไม่สำเร็จ"));
+      }
 
       const messages = (data.messages || []) as ContactMessage[];
       setItems(messages);
@@ -78,7 +81,7 @@ function AdminMessages() {
         return messages.find((item) => item.id === current.id) || messages[0] || null;
       });
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "โหลดข้อความไม่สำเร็จ");
+      setNotice(friendlyErrorMessage(error, "โหลดข้อความไม่สำเร็จ"));
     } finally {
       setLoading(false);
     }
@@ -113,7 +116,7 @@ function AdminMessages() {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.ok) {
-      setNotice(data.error || "อัปเดตข้อความไม่สำเร็จ");
+      setNotice(friendlyErrorMessage(data.error, "อัปเดตข้อความไม่สำเร็จ"));
       return;
     }
 

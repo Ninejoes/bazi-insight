@@ -4,6 +4,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { seo } from "@/lib/seo";
 import { type DreamRecord } from "@/lib/admin-content";
 import { readStoredUserSession } from "@/lib/user-session";
+import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { useEffect, useState } from "react";
 
 const PAGE_SIZE = 20;
@@ -77,7 +78,7 @@ function DreamPage() {
       if (!mounted) return;
       setLoading(false);
       if (!response.ok || !data.ok) {
-        setError(data.error || "โหลดข้อมูลทำนายฝันจาก Supabase ไม่สำเร็จ");
+        setError(friendlyErrorMessage(data.error, "โหลดข้อมูลทำนายฝันไม่สำเร็จ"));
         setDreams([]);
         return;
       }
