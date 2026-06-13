@@ -212,32 +212,32 @@ function positionLead(position: string, index: number) {
   const label = position || `ใบที่ ${index + 1}`;
   const normalized = label.toLowerCase();
   if (normalized.includes("บทสรุป") || normalized.includes("ผลลัพธ์")) {
-    return `เมื่อมาถึงตำแหน่ง “${label}” ภาพรวมกำลังพาไปสู่ข้อสรุปที่ต้องใช้ทั้งเหตุผลและความซื่อสัตย์กับใจตัวเอง`;
+    return `ตำแหน่ง “${label}” คือภาพรวมสุดท้ายของคำอ่าน`;
   }
   if (normalized.includes("อุปสรรค") || normalized.includes("ระวัง")) {
-    return `ในตำแหน่ง “${label}” จุดที่ควรตั้งสติเป็นพิเศษคือสิ่งที่อาจทำให้เรื่องง่ายกลายเป็นซับซ้อน`;
+    return `ตำแหน่ง “${label}” ชี้จุดที่ควรระวังเป็นพิเศษ`;
   }
   if (normalized.includes("โอกาส") || normalized.includes("ส่งเสริม")) {
-    return `ตำแหน่ง “${label}” เปิดพื้นที่ให้เห็นโอกาสที่อาจไม่ได้มาในรูปแบบหวือหวา แต่มีประโยชน์ต่อการเดินต่อ`;
+    return `ตำแหน่ง “${label}” เปิดให้เห็นโอกาสที่ใช้ต่อยอดได้`;
   }
   if (normalized.includes("ความรัก") || normalized.includes("สัมพันธ์")) {
-    return `ตำแหน่ง “${label}” ชวนให้กลับมาฟังหัวใจอย่างละเอียด โดยไม่ปล่อยให้อารมณ์ช่วงสั้น ๆ ตัดสินทั้งความสัมพันธ์`;
+    return `ตำแหน่ง “${label}” เน้นความรู้สึกและการสื่อสาร`;
   }
   if (normalized.includes("เงิน") || normalized.includes("ทรัพย์")) {
-    return `ตำแหน่ง “${label}” เน้นเรื่องทรัพยากร ความคุ้มค่า และการตัดสินใจที่ต้องมีตัวเลขหรือเงื่อนไขรองรับ`;
+    return `ตำแหน่ง “${label}” เน้นเงิน ทรัพยากร และความคุ้มค่า`;
   }
   if (normalized.includes("งาน")) {
-    return `ตำแหน่ง “${label}” พูดถึงจังหวะการทำงาน ความรับผิดชอบ และวิธีใช้แรงของตัวเองให้เกิดผลจริง`;
+    return `ตำแหน่ง “${label}” พูดถึงงาน บทบาท และความรับผิดชอบ`;
   }
-  return `สำหรับตำแหน่ง “${label}” คำอ่านนี้ชวนให้มองสถานการณ์อย่างใจเย็นและเห็นภาพรวมมากกว่าเดิม`;
+  return `ตำแหน่ง “${label}” ชวนให้ดูสถานการณ์แบบใจเย็น`;
 }
 
 function orientationText(item: DrawnTarotCard, meaning: ReturnType<typeof cardMeaning>) {
   if (!item.reversed) {
-    return `เมื่อ ${item.card.name} ปรากฏในลักษณะปกติ แนวโน้มโดยรวมถือว่าเปิดทางพอสมควร สิ่งที่เด่นคือเรื่อง “${meaning.keyword}” ซึ่งไม่ได้ต้องการให้รีบเร่ง แต่ต้องการให้ใช้จังหวะที่มีอยู่ให้เป็นประโยชน์`;
+    return `${item.card.name} ในลักษณะปกติทำให้เรื่อง “${meaning.keyword}” เด่นขึ้น จังหวะนี้ยังพอเปิดทางให้ขยับต่อได้`;
   }
 
-  return `การขึ้นแบบกลับหัวของ ${item.card.name} ไม่ได้แปลว่าเรื่องนี้ต้องจบไม่ดีเสมอไป แต่สะท้อนว่าพลังของ “${meaning.keyword}” อาจยังติดขัด ใช้มากเกินไป หรือยังไม่ถูกวางในจังหวะที่เหมาะสม`;
+  return `${item.card.name} แบบกลับหัวไม่ได้แปลว่าร้ายเสมอไป แต่บอกว่าเรื่อง “${meaning.keyword}” ยังติดขัดหรือใช้ผิดจังหวะ`;
 }
 
 function practicalAdvice(
@@ -264,6 +264,10 @@ function practicalAdvice(
 
 function paragraphBreaks(text: string) {
   return text.replace(/\n{3,}/g, "\n\n").trim();
+}
+
+function isFinalCard(position: string, category: TarotCategory, index: number) {
+  return index === category.count - 1 || /บทสรุป|ผลลัพธ์/.test(position);
 }
 
 export function drawSelectedCards(
@@ -295,19 +299,21 @@ export function interpretTarotCard(
   const focus = categoryFocus(category);
   const orientation = orientationText(item, meaning);
   const advice = practicalAdvice(item, meaning, category);
+  const isSummary = isFinalCard(position, category, index);
   const reversalNote = item.reversed
-    ? "หากช่วงนี้รู้สึกว่าทุกอย่างไม่ไหลลื่น อย่าเพิ่งมองว่าเป็นความล้มเหลว บางครั้งความติดขัดเป็นเพียงสัญญาณให้กลับไปปรับวิธีคิด วิธีสื่อสาร หรือจังหวะการลงมือให้เหมาะกว่าเดิม"
-    : "จังหวะนี้เหมาะกับการขยับอย่างมีสติ ไม่จำเป็นต้องทำทุกอย่างให้สมบูรณ์แบบตั้งแต่แรก ขอเพียงเห็นทิศทางและค่อย ๆ ลงมือให้ต่อเนื่อง";
+    ? "ถ้าเรื่องนี้ยังติด ๆ ขัด ๆ ให้ชะลอและกลับไปจัดจังหวะใหม่ก่อน ไม่จำเป็นต้องฝืนให้จบในทันที"
+    : "จังหวะนี้เดินต่อได้ แต่ควรค่อย ๆ ทำให้ชัดทีละขั้น ไม่ต้องรีบพิสูจน์ทุกอย่างพร้อมกัน";
+  const practicalNote = isSummary
+    ? `\n\nคำแนะนำที่ใช้ได้จริง: ${advice} เลือกเริ่มจากเรื่องเล็กที่ควบคุมได้ก่อน แล้วค่อยตัดสินใจเรื่องใหญ่เมื่อใจและข้อมูลพร้อมกว่านี้`
+    : "";
 
   return paragraphBreaks(`${position || `ใบที่ ${index + 1}`} : ${item.card.name}${item.reversed ? " (กลับหัว)" : ""}
 
 ${period}ในหัวข้อนี้เกี่ยวกับ${focus} ${lead}
 
-${orientation} แก่นความหมายเดิมยังคงพาคุณกลับมาดูแกนสำคัญของสถานการณ์ นั่นคือการไม่ปล่อยให้ภาพตรงหน้ากลืนความจริงทั้งหมด บางเรื่องอาจดูเหมือนชัดแล้ว แต่เมื่อค่อย ๆ พิจารณา จะพบว่ายังมีรายละเอียดเล็ก ๆ ที่ส่งผลต่อการตัดสินใจมากกว่าที่คิด
+${orientation} ภาพรวมของใบนี้ชวนให้มองสถานการณ์ตามจริง ไม่รีบตีความให้ดีหรือร้ายเกินไป และดูว่าตอนนี้ควรใช้แรงไปกับเรื่องไหนก่อน
 
-${reversalNote}
-
-คำแนะนำที่ใช้ได้จริง: ${advice} ข้อคิดสำคัญคือ อย่ารีบตอบสนองจากความกดดันในทันที ให้เวลากับตัวเองสักนิด มองสิ่งที่เกิดขึ้นทั้งด้านเหตุผลและความรู้สึก แล้วเลือกก้าวต่อไปในแบบที่ทำให้คุณยังเคารพตัวเองได้ในระยะยาว`);
+${reversalNote}${practicalNote}`);
 }
 
 export function summarizeTarotReading(items: DrawnTarotCard[], category: TarotCategory) {
