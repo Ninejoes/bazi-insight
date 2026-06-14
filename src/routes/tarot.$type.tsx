@@ -3,7 +3,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo } from "@/lib/seo";
 import { readStoredUserSession } from "@/lib/user-session";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getCategory, tarotCards, type TarotCard, type TarotCategory } from "@/lib/tarot-cards";
 import {
   drawSelectedCards,
@@ -46,6 +46,16 @@ function TarotReading() {
   const [selected, setSelected] = useState<number[]>([]);
   const [drawn, setDrawn] = useState<DrawnTarotCard[]>([]);
   const [shuffleSeed, setShuffleSeed] = useState(0);
+  const previousCategorySlug = useRef(category.slug);
+
+  useEffect(() => {
+    if (previousCategorySlug.current === category.slug) return;
+    previousCategorySlug.current = category.slug;
+    setPhase("select");
+    setSelected([]);
+    setDrawn([]);
+    setShuffleSeed((seed) => seed + 1);
+  }, [category.slug]);
 
   // Deck for selection: shuffle 24 cards visually
   const deck = useMemo(() => {
