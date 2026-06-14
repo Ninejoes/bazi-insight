@@ -581,131 +581,6 @@ function periodText(category: TarotCategory) {
   return "ช่วงนี้";
 }
 
-function categoryFocus(category: TarotCategory) {
-  const focus: Record<string, string> = {
-    daily: "เรื่องที่ต้องเจอในวันนี้และวิธีผ่านวันให้สบายใจขึ้น",
-    weekly: "เรื่องเด่นของสัปดาห์ ทั้งงาน ความสัมพันธ์ และสิ่งที่ควรจัดให้เข้าที่",
-    monthly: "ภาพรวมของเดือนนี้ ว่าควรเดินหน้าเรื่องไหนและควรชะลอเรื่องไหน",
-    career: "งาน หน้าที่ ความก้าวหน้า และโอกาสที่ต้องลงมือจริง",
-    finance: "เงิน รายรับ รายจ่าย และสิ่งที่ควรคิดให้รอบคอบ",
-    love: "ความรัก ความรู้สึก และวิธีคุยกันให้เข้าใจกว่าเดิม",
-    health: "ร่างกาย ใจ และสิ่งที่ควรดูแลตัวเองมากขึ้น",
-    family: "ครอบครัว คนใกล้ตัว และบรรยากาศในบ้าน",
-    study: "การเรียน การสอบ และวินัยที่ช่วยให้ไปต่อได้",
-    luck: "โชค โอกาส และจังหวะที่ควรใช้ด้วยความพอดี",
-  };
-  return focus[category.slug] || "เรื่องตรงหน้าและทางเลือกที่ควรดูให้ชัด";
-}
-
-function cardFamily(card: TarotCard) {
-  if (card.no <= 21) return "Major";
-  const suit = card.name.split(" of ")[1];
-  return suit || "Major";
-}
-
-function contextAngle(category: TarotCategory, item: DrawnTarotCard, meaning: ReturnType<typeof cardMeaning>) {
-  const family = cardFamily(item.card);
-  const state = item.reversed ? "ยังติดขัด" : "กำลังเปิดทาง";
-  const byCategory: Record<string, Record<string, string>> = {
-    daily: {
-      Major: `วันนี้เรื่อง “${meaning.keyword}” จะเด่นกว่าปกติ อาจเป็นเหตุการณ์หรือความรู้สึกที่ทำให้ต้องตั้งหลัก`,
-      Wands: `วันนี้เหมาะกับการลงมือ เคลียร์งาน หรือเริ่มสิ่งที่ค้างไว้ แต่ต้องระวังใช้พลังเกินตัว`,
-      Cups: `วันนี้อารมณ์และความสัมพันธ์มีผลกับการตัดสินใจมากเป็นพิเศษ ควรคุยกันให้นุ่มลง`,
-      Swords: `วันนี้คำพูด ข้อมูล และการตัดสินใจต้องชัด อย่าปล่อยให้ความคิดเร็วพาใจวุ่น`,
-      Pentacles: `วันนี้เรื่องงาน เงิน สุขภาพ หรือสิ่งที่จับต้องได้ควรมาก่อน ใช้แผนง่าย ๆ จะดีที่สุด`,
-    },
-    weekly: {
-      Major: `สัปดาห์นี้มีบทเรียนสำคัญเข้ามา ไม่ใช่เรื่องเล็กที่ผ่านแล้วจบ ควรดูทิศทางโดยรวมให้ชัด`,
-      Wands: `สัปดาห์นี้งานและแรงขับเคลื่อนเด่น เหมาะกับการผลักเรื่องที่ต้องใช้ความกล้า`,
-      Cups: `สัปดาห์นี้ความรู้สึกของคุณและคนรอบข้างจะมีน้ำหนัก ควรจัดเวลาคุยเรื่องใจให้ดี`,
-      Swords: `สัปดาห์นี้ต้องระวังการสื่อสาร เอกสาร และการตัดสินใจเร็วเกินไป`,
-      Pentacles: `สัปดาห์นี้เหมาะกับการจัดเงิน งานประจำ สุขภาพ และสิ่งที่ต้องใช้ความสม่ำเสมอ`,
-    },
-    monthly: {
-      Major: `เดือนนี้เป็นช่วงเปลี่ยนจังหวะชีวิต ไพ่ใบนี้ทำหน้าที่เหมือนธีมหลักที่ควรกลับมาทบทวนบ่อย ๆ`,
-      Wands: `เดือนนี้เน้นการเติบโตของงาน แผนใหม่ และแรงบันดาลใจ แต่ต้องวางพลังให้ยืนระยะ`,
-      Cups: `เดือนนี้เรื่องใจ ความรัก และความสัมพันธ์จะเป็นตัวกำหนดบรรยากาศหลายอย่าง`,
-      Swords: `เดือนนี้ต้องตัดสินใจจากข้อมูลจริง เคลียร์คำพูดและความเข้าใจผิดให้เร็ว`,
-      Pentacles: `เดือนนี้เน้นฐานชีวิต เงิน งาน สุขภาพ และสิ่งที่ต้องค่อย ๆ สร้างให้มั่นคง`,
-    },
-    career: {
-      Major: `ในเรื่องงาน ไพ่ใบนี้ชี้จุดเปลี่ยนสำคัญของทิศทางอาชีพหรือวิธีรับผิดชอบงาน`,
-      Wands: `ด้านการงาน ${state} เรื่องไอเดีย โปรเจกต์ การแข่งขัน และแรงผลักดัน`,
-      Cups: `ด้านการงาน ไพ่ชวนดูบรรยากาศในทีม ความรู้สึก และความสัมพันธ์กับคนที่ทำงานด้วย`,
-      Swords: `ด้านการงานควรจับตาเรื่องการสื่อสาร การประชุม เอกสาร และการตัดสินใจด้วยเหตุผล`,
-      Pentacles: `ด้านการงานเกี่ยวกับผลงานจริง รายได้ ความมั่นคง และผลลัพธ์ที่วัดได้`,
-    },
-    finance: {
-      Major: `เรื่องเงินมีบทเรียนสำคัญ ไพ่ใบนี้ชวนดูนิสัยการใช้เงินและการตัดสินใจระยะยาว`,
-      Wands: `เรื่องเงินผูกกับงานใหม่ ความกล้าเริ่ม หรือรายได้จากการลงมือมากขึ้น`,
-      Cups: `เรื่องเงินอาจเกี่ยวกับความรู้สึก คนรัก ครอบครัว หรือการใช้เงินเพื่อเติมใจ`,
-      Swords: `เรื่องเงินต้องใช้ตัวเลข สัญญา และเงื่อนไขให้ชัด อย่าตัดสินจากคำพูดลอย ๆ`,
-      Pentacles: `เรื่องเงินตรงกับไพ่ชุดเหรียญโดยตรง จึงเน้นรายรับ รายจ่าย ทรัพย์สิน และความมั่นคง`,
-    },
-    love: {
-      Major: `ความรักรอบนี้มีบทเรียนหรือจุดเปลี่ยนที่ควรใส่ใจ ไม่ใช่แค่อารมณ์ชั่วคราว`,
-      Wands: `ความรักมีแรงดึงดูด ความตื่นเต้น หรือความใจร้อนเข้ามา ต้องดูว่าพลังนี้พาไปทางไหน`,
-      Cups: `ความรักตรงกับเรื่องหัวใจโดยตรง จึงเน้นความรู้สึก ความเข้าใจ และการเปิดใจคุยกัน`,
-      Swords: `ความรักต้องระวังคำพูด ความคิดมาก หรือการตีความกันผิด คุยให้ชัดจะช่วยได้มาก`,
-      Pentacles: `ความรักเน้นความมั่นคง การดูแลกันในชีวิตจริง และความสัมพันธ์ที่พิสูจน์ด้วยการกระทำ`,
-    },
-    health: {
-      Major: `สุขภาพช่วงนี้สัมพันธ์กับบทเรียนชีวิตหรือความเครียดลึก ๆ ที่ควรดูแลจริงจัง`,
-      Wands: `สุขภาพเกี่ยวกับพลังงาน กล้ามเนื้อ การพักผ่อนไม่พอ หรือการใช้แรงเกินตัว`,
-      Cups: `สุขภาพใจและอารมณ์ส่งผลชัด ควรดูแลการนอน ความเครียด และพื้นที่ปลอดภัยของตัวเอง`,
-      Swords: `สุขภาพอาจผูกกับความคิดมาก ความตึงเครียด หรือการพักสมองไม่พอ`,
-      Pentacles: `สุขภาพกาย ตารางชีวิต อาหาร การนอน และวินัยประจำวันเป็นจุดที่ควรดูแล`,
-    },
-    family: {
-      Major: `เรื่องครอบครัวมีประเด็นสำคัญที่ควรคุยกันอย่างจริงใจและมองระยะยาว`,
-      Wands: `คนในบ้านหรือบริวารอาจมีความเห็นแรง ต่างคนต่างอยากเดินตามทางของตัวเอง`,
-      Cups: `ครอบครัวต้องใช้ความเข้าใจ ความอ่อนโยน และการรับฟังความรู้สึกกันมากขึ้น`,
-      Swords: `ครอบครัวควรระวังคำพูดแข็ง การตีความผิด หรือเรื่องเก่าที่ถูกหยิบมาพูดซ้ำ`,
-      Pentacles: `ครอบครัวเกี่ยวกับบ้าน เงิน ความรับผิดชอบ และการดูแลชีวิตจริงของกันและกัน`,
-    },
-    study: {
-      Major: `การเรียนมีจุดเปลี่ยนด้านทัศนคติหรือเป้าหมาย ควรถามตัวเองว่าเรียนไปเพื่ออะไร`,
-      Wands: `การเรียนต้องใช้ไฟและความกล้าเริ่ม เหมาะกับการทำโปรเจกต์หรือฝึกสิ่งใหม่`,
-      Cups: `การเรียนสัมพันธ์กับแรงใจ คนสนับสนุน และความรู้สึกต่อสิ่งที่กำลังศึกษา`,
-      Swords: `การเรียนต้องเน้นความเข้าใจ การจับประเด็น การอ่านโจทย์ และการคิดเป็นระบบ`,
-      Pentacles: `การเรียนต้องอาศัยวินัย การฝึกซ้ำ และตารางที่ทำได้จริงมากกว่าการเร่งช่วงท้าย`,
-    },
-    luck: {
-      Major: `โชคช่วงนี้มีจังหวะใหญ่เข้ามา แต่ควรอ่านเป็นสัญญาณ ไม่ใช่ฝากทุกอย่างไว้กับดวง`,
-      Wands: `โชคมาจากการขยับตัว กล้าลอง และอยู่ในจังหวะที่มีการแข่งขัน`,
-      Cups: `โชคอาจมาจากคนใกล้ตัว ความสัมพันธ์ หรือการฟังความรู้สึกนำทาง`,
-      Swords: `โชคต้องใช้สติ ตัวเลข ข้อมูล และการอ่านสถานการณ์ให้คม`,
-      Pentacles: `โชคเกี่ยวกับเงิน สิ่งของ งาน หรือโอกาสที่จับต้องได้ แต่ยังควรใช้ความพอดี`,
-    },
-  };
-
-  return byCategory[category.slug]?.[family] || byCategory.daily[family] || byCategory.daily.Major;
-}
-
-function positionLead(position: string, index: number) {
-  const label = position || `ใบที่ ${index + 1}`;
-  const normalized = label.toLowerCase();
-  if (normalized.includes("บทสรุป") || normalized.includes("ผลลัพธ์")) {
-    return `ใบนี้คือข้อสรุปของคำทำนาย`;
-  }
-  if (normalized.includes("อุปสรรค") || normalized.includes("ระวัง")) {
-    return `ใบนี้บอกจุดที่ควรระวัง`;
-  }
-  if (normalized.includes("โอกาส") || normalized.includes("ส่งเสริม")) {
-    return `ใบนี้บอกโอกาสที่พอหยิบไปต่อยอดได้`;
-  }
-  if (normalized.includes("ความรัก") || normalized.includes("สัมพันธ์")) {
-    return `ใบนี้เน้นความรู้สึกและการคุยกัน`;
-  }
-  if (normalized.includes("เงิน") || normalized.includes("ทรัพย์")) {
-    return `ใบนี้เน้นเรื่องเงินและความคุ้มค่า`;
-  }
-  if (normalized.includes("งาน")) {
-    return `ใบนี้พูดถึงงานและหน้าที่ที่ต้องรับผิดชอบ`;
-  }
-  return `ใบนี้ชวนให้ค่อย ๆ ดูเรื่องนี้แบบไม่รีบตัดสิน`;
-}
-
 function positionAngle(position: string, index: number) {
   const label = position || `ใบที่ ${index + 1}`;
   const normalized = label.toLowerCase();
@@ -724,7 +599,7 @@ function positionAngle(position: string, index: number) {
   if (normalized.includes("สถานะ") || normalized.includes("ปัจจุบัน") || normalized.includes("พลัง")) {
     return "ตำแหน่งนี้บอกบรรยากาศปัจจุบันและสิ่งที่ควรรับรู้ก่อนลงมือ";
   }
-  return "อ่านตำแหน่งนี้เป็นสัญญาณประกอบ เพื่อช่วยให้เห็นภาพรวมชัดขึ้น";
+  return "";
 }
 
 function orientationText(item: DrawnTarotCard, meaning: ReturnType<typeof cardMeaning>) {
@@ -737,20 +612,44 @@ function practicalAdvice(
   category: TarotCategory,
 ) {
   const core = item.reversed ? meaning.caution : meaning.advice;
-  const categoryAdvice: Record<string, string> = {
-    daily: "วันนี้เริ่มจากเรื่องเล็กที่ทำได้ก่อน อย่าให้ความคิดเยอะพาเหนื่อยเกินไป",
-    weekly: "สัปดาห์นี้จัดเรื่องสำคัญก่อน ทำทีละอย่าง แล้วค่อยดูผล",
-    monthly: "เดือนนี้อย่าตัดสินจากเหตุการณ์เดียว รอดูภาพรวมอีกนิด",
-    career: "เรื่องงานให้ดูจากข้อมูลจริงและผลงาน อย่าตัดสินเพราะกดดันชั่วคราว",
-    finance: "เรื่องเงินเช็กตัวเลขให้ครบ แยกของจำเป็นกับของอยากได้ให้ชัด",
-    love: "เรื่องรักคุยกันตรง ๆ แต่ใช้ถ้อยคำที่ถนอมน้ำใจกัน",
-    health: "ถ้าเหนื่อยให้พัก อย่าฝืนร่างกายหรือใจจนเกินไป",
-    family: "คุยกันในเวลาที่พร้อมฟัง จะช่วยลดความเข้าใจผิดได้",
-    study: "แบ่งเป้าหมายให้เล็กลง แล้วค่อย ๆ ทำให้สม่ำเสมอ",
-    luck: "รับโอกาสได้ แต่อย่าเอาความหวังทั้งหมดไปผูกกับโชค",
+  const categoryAdvice: Record<string, (keyword: string) => string> = {
+    daily: (keyword) => `วันนี้ให้ใช้เรื่อง “${keyword}” เป็นตัวตั้ง แล้วเลือกทำสิ่งที่คุมได้ก่อน`,
+    weekly: (keyword) => `สัปดาห์นี้ให้จัดลำดับเรื่อง “${keyword}” ให้ชัด จะได้ไม่กระจายแรงไปหลายทาง`,
+    monthly: (keyword) => `เดือนนี้ให้ดูว่าเรื่อง “${keyword}” กำลังพาคุณไปทางไหน แล้วค่อยตัดสินใจเรื่องใหญ่`,
+    career: (keyword) => `เรื่องงานให้เอา “${keyword}” มาเป็นเกณฑ์ตัดสินใจ ดูจากผลลัพธ์จริงมากกว่าความกดดัน`,
+    finance: (keyword) => `เรื่องเงินให้ใช้ “${keyword}” เป็นหลัก เช็กตัวเลขและเงื่อนไขก่อนจ่ายหรือรับปาก`,
+    love: (keyword) => `เรื่องรักให้ดูว่า “${keyword}” สะท้อนความต้องการของคุณและอีกฝ่ายอย่างไร`,
+    health: (keyword) => `สุขภาพให้เริ่มจากการดูแลเรื่อง “${keyword}” ในชีวิตประจำวัน อย่าฝืนเกินกำลัง`,
+    family: (keyword) => `เรื่องครอบครัวให้คุยกันโดยยึด “${keyword}” เป็นแกน จะช่วยลดการตีความผิด`,
+    study: (keyword) => `การเรียนให้ใช้ “${keyword}” เป็นแผนหลัก แบ่งงานให้เล็กและทำต่อเนื่อง`,
+    luck: (keyword) => `เรื่องโชคให้มอง “${keyword}” เป็นสัญญาณประกอบ แล้วใช้สติช่วยตัดสินใจ`,
   };
 
-  return `${core}. ${categoryAdvice[category.slug] || "ดูทั้งข้อมูลและความรู้สึก แล้วเลือกทางที่รับผิดชอบได้"}`;
+  return `${core}. ${categoryAdvice[category.slug]?.(meaning.keyword) || "ดูทั้งข้อมูลและความรู้สึก แล้วเลือกทางที่รับผิดชอบได้"}`;
+}
+
+function categoryCardContext(
+  category: TarotCategory,
+  item: DrawnTarotCard,
+  meaning: ReturnType<typeof cardMeaning>,
+) {
+  const period = periodText(category);
+  const card = item.card.name;
+  const status = item.reversed ? "กลับหัว" : "พลังปกติ";
+  const categoryHooks: Record<string, string> = {
+    daily: `${period} ${card} ในรูปแบบ${status} ชี้ว่าประเด็นหลักของวันคือ “${meaning.keyword}”`,
+    weekly: `${period} ${card} ในรูปแบบ${status} ทำให้เรื่อง “${meaning.keyword}” เป็นจุดที่ควรจัดการให้ชัด`,
+    monthly: `${period} ${card} ในรูปแบบ${status} วางธีมของเดือนนี้ไว้ที่ “${meaning.keyword}”`,
+    career: `ด้านการงาน ${card} ในรูปแบบ${status} ให้ดูเรื่อง “${meaning.keyword}” เป็นพิเศษ`,
+    finance: `ด้านการเงิน ${card} ในรูปแบบ${status} สะท้อนบทเรียนเรื่อง “${meaning.keyword}”`,
+    love: `ด้านความรัก ${card} ในรูปแบบ${status} พาไปดูเรื่อง “${meaning.keyword}” ในความสัมพันธ์`,
+    health: `ด้านสุขภาพ ${card} ในรูปแบบ${status} ชวนกลับมาดูแลเรื่อง “${meaning.keyword}”`,
+    family: `ด้านครอบครัวและบริวาร ${card} ในรูปแบบ${status} เน้นเรื่อง “${meaning.keyword}”`,
+    study: `ด้านการเรียน ${card} ในรูปแบบ${status} แนะนำให้ใช้เรื่อง “${meaning.keyword}” เป็นแนวทาง`,
+    luck: `ด้านโชคลาภ ${card} ในรูปแบบ${status} ให้สังเกตจังหวะที่เกี่ยวกับ “${meaning.keyword}”`,
+  };
+
+  return categoryHooks[category.slug] || `${period} ${card} เน้นเรื่อง “${meaning.keyword}”`;
 }
 
 function paragraphBreaks(text: string) {
@@ -785,32 +684,21 @@ export function interpretTarotCard(
   index: number,
 ) {
   const meaning = cardMeaning(item.card);
-  const period = periodText(category);
-  const lead = positionLead(position, index);
-  const focus = categoryFocus(category);
   const orientation = orientationText(item, meaning);
-  const context = contextAngle(category, item, meaning);
+  const cardContext = categoryCardContext(category, item, meaning);
   const positionContext = positionAngle(position, index);
   const advice = practicalAdvice(item, meaning, category);
   const isSummary = isFinalCard(position, category, index);
-  const reversalNote = item.reversed
-    ? "ถ้ายังติดขัดอยู่ ให้ถอยมาดูจังหวะก่อน ไม่ต้องฝืนให้จบเดี๋ยวนี้"
-    : "ตอนนี้ยังเดินต่อได้ แค่ค่อย ๆ ทำให้ชัดทีละขั้นก็พอ";
-  const practicalNote = isSummary
-    ? `\n\nคำแนะนำ: ${advice} เริ่มจากเรื่องที่ทำได้ก่อน แล้วค่อยตัดสินใจเรื่องใหญ่เมื่อพร้อมกว่านี้`
-    : "";
+  const positionNote = positionContext ? `\n\n${positionContext}` : "";
+  const adviceLabel = isSummary ? "คำแนะนำสรุป" : "แนวทางจากไพ่";
 
   return paragraphBreaks(`${position || `ใบที่ ${index + 1}`} : ${item.card.name}${item.reversed ? " (กลับหัว)" : ""}
 
-${period}เรื่องนี้เกี่ยวกับ${focus} ${lead}
+${cardContext}
 
 ${orientation}
 
-${context}
-
-${positionContext}
-
-${reversalNote}${practicalNote}`);
+${adviceLabel}: ${advice}${positionNote}`);
 }
 
 export function summarizeTarotReading(items: DrawnTarotCard[], category: TarotCategory) {
