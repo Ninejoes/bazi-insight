@@ -5,7 +5,6 @@ import { friendlyErrorMessage } from "@/lib/friendly-error";
 const ADMIN_EMAIL = "admin@gmail.com";
 const ADMIN_NAME = "Admin";
 const ADMIN_ROLE = "Admin";
-const DEFAULT_ADMIN_PASSWORD = "Admin1234";
 
 type SupabaseUser = {
   id?: string;
@@ -31,7 +30,9 @@ function json(body: unknown, init?: ResponseInit) {
 }
 
 function getAdminPassword() {
-  return process.env.ADMIN_BOOTSTRAP_PASSWORD || DEFAULT_ADMIN_PASSWORD;
+  const password = process.env.ADMIN_BOOTSTRAP_PASSWORD;
+  if (!password) throw new Error("ยังไม่ได้ตั้งค่า ADMIN_BOOTSTRAP_PASSWORD");
+  return password;
 }
 
 function getSupabaseConfig() {

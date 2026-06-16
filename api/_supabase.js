@@ -3,7 +3,6 @@ import { randomUUID } from "node:crypto";
 export const ADMIN_EMAIL = "admin@gmail.com";
 export const ADMIN_NAME = "Admin";
 export const ADMIN_ROLE = "Admin";
-export const DEFAULT_ADMIN_PASSWORD = "Admin1234";
 
 export function getSupabaseConfig() {
   const url = (

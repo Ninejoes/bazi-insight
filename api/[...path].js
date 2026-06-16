@@ -3,7 +3,6 @@ import {
   ADMIN_EMAIL,
   ADMIN_NAME,
   ADMIN_ROLE,
-  DEFAULT_ADMIN_PASSWORD,
   articleToRow,
   cors,
   dreamToRow,
@@ -353,7 +352,10 @@ async function adminLogin(req, res) {
     .trim()
     .toLowerCase();
   const password = String(body.password || "");
-  const adminPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD || DEFAULT_ADMIN_PASSWORD;
+  const adminPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD;
+  if (!adminPassword) {
+    return send(res, 500, { ok: false, error: "ยังไม่ได้ตั้งค่า ADMIN_BOOTSTRAP_PASSWORD" });
+  }
   if (email !== ADMIN_EMAIL || password !== adminPassword) {
     return send(res, 401, { ok: false, error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
   }
