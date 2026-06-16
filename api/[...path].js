@@ -153,6 +153,17 @@ function normalizeAuditEvent(row = {}) {
   };
 }
 
+function isMissingAuditTableError(resultOrError) {
+  const message = String(resultOrError?.error || resultOrError?.message || resultOrError || "");
+  return (
+    message.includes("content_audit_events") &&
+    (message.includes("Could not find the table") ||
+      message.includes("schema cache") ||
+      message.includes("PGRST205") ||
+      message.includes("404"))
+  );
+}
+
 function normalizeReading(row = {}) {
   const now = new Date().toISOString();
   return {
@@ -1007,6 +1018,19 @@ async function auditEvents(req, res) {
   const result = await rest(`content_audit_events?${params.toString()}`, {
     headers: { Prefer: "count=exact" },
   });
+  if (!result.ok && isMissingAuditTableError(result)) {
+    return send(res, 200, {
+      ok: true,
+      source: "supabase",
+      setupRequired: true,
+      events: [],
+      page,
+      limit,
+      total: 0,
+      totalPages: 1,
+      message: "ยังไม่ได้สร้างตาราง content_audit_events ใน Supabase",
+    });
+  }
   if (!result.ok) return sendRestError(res, result);
   const rows = Array.isArray(result.data) ? result.data : [];
   const total = parseTotal(result.headers.get("content-range"), rows.length);

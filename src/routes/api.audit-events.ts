@@ -51,6 +51,17 @@ function normalizeAuditEvent(row: AuditEventRow) {
   };
 }
 
+function isMissingAuditTableError(error: unknown) {
+  const message = friendlyErrorMessage(error, "");
+  return (
+    message.includes("content_audit_events") &&
+    (message.includes("Could not find the table") ||
+      message.includes("schema cache") ||
+      message.includes("PGRST205") ||
+      message.includes("404"))
+  );
+}
+
 function buildAuditQuery({
   action,
   tableName,
@@ -132,6 +143,19 @@ export const Route = createFileRoute("/api/audit-events")({
             ...(await listAuditEvents({ action, tableName, q, page, limit })),
           });
         } catch (error) {
+          if (isMissingAuditTableError(error)) {
+            return json({
+              ok: true,
+              source: "supabase",
+              setupRequired: true,
+              events: [],
+              page: 1,
+              limit: 20,
+              total: 0,
+              totalPages: 1,
+              message: "ยังไม่ได้สร้างตาราง content_audit_events ใน Supabase",
+            });
+          }
           const message = friendlyErrorMessage(error, "โหลด Audit Log ไม่สำเร็จ");
           return json(
             { ok: false, error: message },

@@ -67,6 +67,7 @@ function AdminAuditLog() {
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [notice, setNotice] = useState("");
+  const [setupRequired, setSetupRequired] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -102,12 +103,14 @@ function AdminAuditLog() {
         setEvents((data.events || []) as AuditEvent[]);
         setTotal(Number(data.total || 0));
         setTotalPages(Number(data.totalPages || 1));
-        setNotice("");
+        setSetupRequired(Boolean(data.setupRequired));
+        setNotice(data.setupRequired ? data.message || "ยังไม่ได้สร้างตาราง Audit Log" : "");
       } catch (error) {
         if (!mounted) return;
         setEvents([]);
         setTotal(0);
         setTotalPages(1);
+        setSetupRequired(false);
         setNotice(friendlyErrorMessage(error, "โหลด Audit Log ไม่สำเร็จ"));
       } finally {
         if (mounted) setLoading(false);
@@ -139,7 +142,16 @@ function AdminAuditLog() {
         </p>
       </div>
 
-      {notice ? (
+      {setupRequired ? (
+        <div className="rounded-2xl border border-gold/20 bg-gold/10 px-4 py-4 text-sm text-gold">
+          <div className="font-semibold">ต้องสร้างตาราง Audit Log ใน Supabase ก่อน</div>
+          <div className="mt-1 text-gold/80">
+            เปิด Supabase SQL Editor แล้วรันไฟล์{" "}
+            <span className="font-mono">supabase/audit-events.sql</span> จากนั้นหน้านี้จะเริ่มแสดง
+            log ใหม่ หลังมีการเพิ่ม แก้ไข หรือลบข้อมูล
+          </div>
+        </div>
+      ) : notice ? (
         <div className="rounded-2xl border border-rose-400/20 bg-rose-400/10 px-4 py-3 text-sm text-rose-200">
           {notice}
         </div>
