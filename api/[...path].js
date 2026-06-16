@@ -23,6 +23,8 @@ import {
   verifyUser,
 } from "./_supabase.js";
 
+const rateLimitBuckets = new Map();
+
 async function rest(path, init = {}) {
   try {
     const { url, serviceKey } = requireConfig();
@@ -65,6 +67,31 @@ async function rest(path, init = {}) {
 
 function sendRestError(res, result) {
   return send(res, 200, { ok: false, error: result.error || "Supabase request failed" });
+}
+
+function clientIp(req) {
+  return String(req.headers["x-forwarded-for"] || req.headers["x-real-ip"] || "unknown")
+    .split(",")[0]
+    .trim()
+    .slice(0, 80);
+}
+
+function requireRateLimit(req, scope, limit, windowMs) {
+  const now = Date.now();
+  const key = `${scope}:${clientIp(req)}`;
+  const bucket = rateLimitBuckets.get(key);
+  if (!bucket || bucket.resetAt <= now) {
+    rateLimitBuckets.set(key, { count: 1, resetAt: now + windowMs });
+    return;
+  }
+
+  bucket.count += 1;
+  if (bucket.count > limit) {
+    const waitSeconds = Math.max(1, Math.ceil((bucket.resetAt - now) / 1000));
+    const error = new Error(`ส่งคำขอถี่เกินไป กรุณาลองใหม่อีกครั้งใน ${waitSeconds} วินาที`);
+    error.statusCode = 429;
+    throw error;
+  }
 }
 
 async function saveAuthEvent(req, eventType, user = {}) {
@@ -347,6 +374,7 @@ async function ensureAdmin(url, serviceKey, password) {
 }
 
 async function adminLogin(req, res) {
+  requireRateLimit(req, "admin-login", 8, 15 * 60 * 1000);
   const body = await readBody(req);
   const email = String(body.email || "")
     .trim()
@@ -502,6 +530,7 @@ async function adminUsers(req, res) {
 }
 
 async function userRegister(req, res) {
+  requireRateLimit(req, "user-register", 8, 60 * 60 * 1000);
   const body = await readBody(req);
   const email = String(body.email || "")
     .trim()
@@ -553,6 +582,7 @@ async function userRegister(req, res) {
 }
 
 async function userLogin(req, res) {
+  requireRateLimit(req, "user-login", 20, 15 * 60 * 1000);
   const body = await readBody(req);
   const email = String(body.email || "")
     .trim()
@@ -863,6 +893,7 @@ async function contactMessages(req, res) {
     return send(res, 200, { ok: true, source: "supabase", messages: rows.map(normalizeMessage) });
   }
   if (req.method === "POST") {
+    requireRateLimit(req, "contact-messages", 10, 15 * 60 * 1000);
     const message = normalizeMessage(await readBody(req));
     if (!message.name || !message.email.includes("@") || !message.subject || !message.message) {
       return send(res, 400, { ok: false, error: "กรุณากรอกข้อมูลติดต่อให้ครบ" });
@@ -1063,7 +1094,7 @@ export default async function handler(req, res) {
     if (route === "dashboard" && req.method === "GET") return await dashboard(res);
     return send(res, 404, { ok: false, error: `Unknown API route: ${route}` });
   } catch (error) {
-    return send(res, 200, {
+    return send(res, error?.statusCode || 200, {
       ok: false,
       error: error instanceof Error ? error.message : "API ทำงานไม่สำเร็จ",
     });
