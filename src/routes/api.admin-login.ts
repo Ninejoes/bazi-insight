@@ -29,12 +29,6 @@ function json(body: unknown, init?: ResponseInit) {
   });
 }
 
-function getAdminPassword() {
-  const password = process.env.ADMIN_BOOTSTRAP_PASSWORD;
-  if (!password) throw new Error("ยังไม่ได้ตั้งค่า ADMIN_BOOTSTRAP_PASSWORD");
-  return password;
-}
-
 function getSupabaseConfig() {
   const url = (
     process.env.SUPABASE_URL ||
@@ -139,7 +133,10 @@ async function signInWithSupabase(email: string, password: string) {
     throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
 
-  const userId = await ensureSupabaseAdmin(config.url, config.serviceKey, email, password);
+  const adminPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD;
+  const userId = adminPassword
+    ? await ensureSupabaseAdmin(config.url, config.serviceKey, email, password)
+    : undefined;
   const response = await fetch(`${config.url}/auth/v1/token?grant_type=password`, {
     method: "POST",
     headers: supabaseHeaders(config.serviceKey),
@@ -152,6 +149,11 @@ async function signInWithSupabase(email: string, password: string) {
   }
 
   const data = await response.json().catch(() => ({}));
+  const role = data.user?.app_metadata?.role || data.user?.user_metadata?.role;
+  if (data.user?.email?.toLowerCase() !== ADMIN_EMAIL || role !== ADMIN_ROLE) {
+    throw new Error("บัญชีนี้ไม่มีสิทธิ์แอดมิน");
+  }
+
   return {
     id: data.user?.id || userId,
     email: data.user?.email || email,
@@ -180,7 +182,11 @@ export const Route = createFileRoute("/api/admin-login")({
             .toLowerCase();
           const password = String(body.password || "");
 
-          if (email !== ADMIN_EMAIL || password !== getAdminPassword()) {
+          if (email !== ADMIN_EMAIL || !password) {
+            return json({ ok: false, error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" }, { status: 401 });
+          }
+          const adminPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD;
+          if (adminPassword && password !== adminPassword) {
             return json({ ok: false, error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" }, { status: 401 });
           }
 

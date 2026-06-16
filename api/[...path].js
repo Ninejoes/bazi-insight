@@ -380,16 +380,21 @@ async function adminLogin(req, res) {
     .trim()
     .toLowerCase();
   const password = String(body.password || "");
-  const adminPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD;
-  if (!adminPassword) {
-    return send(res, 500, { ok: false, error: "ยังไม่ได้ตั้งค่า ADMIN_BOOTSTRAP_PASSWORD" });
-  }
-  if (email !== ADMIN_EMAIL || password !== adminPassword) {
+  if (email !== ADMIN_EMAIL || !password) {
     return send(res, 401, { ok: false, error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
   }
   const { url, serviceKey } = requireConfig();
-  await ensureAdmin(url, serviceKey, password);
+  const adminPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD;
+  if (adminPassword) {
+    if (password !== adminPassword) {
+      return send(res, 401, { ok: false, error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
+    }
+    await ensureAdmin(url, serviceKey, password);
+  }
   const token = await signIn(url, serviceKey, email, password);
+  if (token.user && roleOf(token.user) !== ADMIN_ROLE) {
+    return send(res, 403, { ok: false, error: "บัญชีนี้ไม่มีสิทธิ์แอดมิน" });
+  }
   await saveAuthEvent(req, "admin_login", token.user || { email, user_metadata: { role: ADMIN_ROLE } });
   return send(res, 200, { ok: true, session: toSession(token, { email }) });
 }
