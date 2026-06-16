@@ -1,7 +1,13 @@
 import { randomUUID } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
 import { type FAQRecord } from "@/lib/admin-content";
-import { getSupabaseConfig, json, requireAdmin, supabaseRequest } from "@/lib/supabase-rest";
+import {
+  getSupabaseConfig,
+  json,
+  requireAdmin,
+  saveContentAuditEvent,
+  supabaseRequest,
+} from "@/lib/supabase-rest";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 type FAQRow = {
@@ -95,10 +101,21 @@ export const Route = createFileRoute("/api/faqs")({
       },
       POST: async ({ request }) => {
         try {
-          await requireAdmin(request);
+          const user = await requireAdmin(request);
           const body = await request.json();
-          const rows = Array.isArray(body) ? body : body.faqs;
-          return json({ ok: true, ...(await saveFaqs(rows || [])) });
+          const rows = (Array.isArray(body) ? body : body.faqs) as FAQRow[] | undefined;
+          const faqs = (rows || []).map(normalizeFaq);
+          const result = await saveFaqs(faqs);
+          await saveContentAuditEvent({
+            request,
+            user,
+            action: "update",
+            tableName: "faqs",
+            recordId: "bulk",
+            summary: `Saved ${faqs.length} FAQ items`,
+            metadata: { ids: faqs.map((faq: FAQRecord) => faq.id).slice(0, 50) },
+          });
+          return json({ ok: true, ...result });
         } catch (error) {
           const message = friendlyErrorMessage(error, "บันทึก FAQ ไม่สำเร็จ");
           return json(
@@ -109,10 +126,19 @@ export const Route = createFileRoute("/api/faqs")({
       },
       DELETE: async ({ request }) => {
         try {
-          await requireAdmin(request);
+          const user = await requireAdmin(request);
           const id = new URL(request.url).searchParams.get("id");
           if (!id) return json({ ok: false, error: "Missing id" }, { status: 400 });
-          return json({ ok: true, ...(await deleteFaq(id)) });
+          const result = await deleteFaq(id);
+          await saveContentAuditEvent({
+            request,
+            user,
+            action: "delete",
+            tableName: "faqs",
+            recordId: id,
+            summary: `Deleted FAQ ${id}`,
+          });
+          return json({ ok: true, ...result });
         } catch (error) {
           const message = friendlyErrorMessage(error, "ลบ FAQ ไม่สำเร็จ");
           return json(

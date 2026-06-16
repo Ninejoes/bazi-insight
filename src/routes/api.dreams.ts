@@ -1,7 +1,13 @@
 import { randomUUID } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
 import { type DreamRecord } from "@/lib/admin-content";
-import { getSupabaseConfig, json, requireAdmin, supabaseRequest } from "@/lib/supabase-rest";
+import {
+  getSupabaseConfig,
+  json,
+  requireAdmin,
+  saveContentAuditEvent,
+  supabaseRequest,
+} from "@/lib/supabase-rest";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 type DreamRow = {
@@ -124,9 +130,12 @@ async function listDreams({
     throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
 
-  const response = await supabaseRequest(buildDreamQuery({ q, keyword, category, letter, page, limit }), {
-    headers: { Prefer: "count=exact" },
-  });
+  const response = await supabaseRequest(
+    buildDreamQuery({ q, keyword, category, letter, page, limit }),
+    {
+      headers: { Prefer: "count=exact" },
+    },
+  );
   if (!response) {
     throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
@@ -188,7 +197,10 @@ export const Route = createFileRoute("/api/dreams")({
           const letter = (url.searchParams.get("letter") || "").trim();
           const page = clampPage(url.searchParams.get("page"));
           const limit = clampLimit(url.searchParams.get("limit"));
-          return json({ ok: true, ...(await listDreams({ q, keyword, category, letter, page, limit })) });
+          return json({
+            ok: true,
+            ...(await listDreams({ q, keyword, category, letter, page, limit })),
+          });
         } catch (error) {
           return json(
             {
@@ -201,8 +213,19 @@ export const Route = createFileRoute("/api/dreams")({
       },
       POST: async ({ request }) => {
         try {
-          await requireAdmin(request);
-          return json({ ok: true, ...(await saveDream(await request.json())) });
+          const user = await requireAdmin(request);
+          const dream = normalizeDream(await request.json());
+          const result = await saveDream(dream);
+          await saveContentAuditEvent({
+            request,
+            user,
+            action: "update",
+            tableName: "dreams",
+            recordId: dream.id,
+            summary: dream.keyword,
+            metadata: { letter: dream.letter, category: dream.category },
+          });
+          return json({ ok: true, ...result });
         } catch (error) {
           const message = friendlyErrorMessage(error, "บันทึกคำฝันไม่สำเร็จ");
           return json(
@@ -213,10 +236,19 @@ export const Route = createFileRoute("/api/dreams")({
       },
       DELETE: async ({ request }) => {
         try {
-          await requireAdmin(request);
+          const user = await requireAdmin(request);
           const id = new URL(request.url).searchParams.get("id");
           if (!id) return json({ ok: false, error: "Missing id" }, { status: 400 });
-          return json({ ok: true, ...(await deleteDream(id)) });
+          const result = await deleteDream(id);
+          await saveContentAuditEvent({
+            request,
+            user,
+            action: "delete",
+            tableName: "dreams",
+            recordId: id,
+            summary: `Deleted dream ${id}`,
+          });
+          return json({ ok: true, ...result });
         } catch (error) {
           const message = friendlyErrorMessage(error, "ลบคำฝันไม่สำเร็จ");
           return json(

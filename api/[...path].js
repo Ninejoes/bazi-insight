@@ -111,6 +111,46 @@ async function saveAuthEvent(req, eventType, user = {}) {
   });
 }
 
+async function saveContentAuditEvent(req, user = {}, event = {}) {
+  try {
+    await rest("content_audit_events", {
+      method: "POST",
+      headers: { Prefer: "return=minimal" },
+      body: JSON.stringify({
+        actor_user_id: user.id || null,
+        actor_email: user.email || "",
+        actor_role: roleOf(user),
+        action: event.action || "update",
+        table_name: event.tableName || "",
+        record_id: String(event.recordId || "").slice(0, 160),
+        summary: String(event.summary || "").slice(0, 500),
+        metadata: event.metadata && typeof event.metadata === "object" ? event.metadata : {},
+        ip: clientIp(req),
+        user_agent: String(req.headers["user-agent"] || "").slice(0, 500),
+      }),
+    });
+  } catch (error) {
+    console.error("content audit log failed", error);
+  }
+}
+
+function normalizeAuditEvent(row = {}) {
+  return {
+    id: row.id,
+    actorUserId: row.actor_user_id,
+    actorEmail: row.actor_email || "",
+    actorRole: row.actor_role || "",
+    action: row.action || "",
+    tableName: row.table_name || "",
+    recordId: row.record_id || "",
+    summary: row.summary || "",
+    metadata: row.metadata || {},
+    ip: row.ip || "",
+    userAgent: row.user_agent || "",
+    createdAt: row.created_at || "",
+  };
+}
+
 function normalizeReading(row = {}) {
   const now = new Date().toISOString();
   return {
@@ -637,7 +677,7 @@ async function articles(req, res) {
     });
   }
   if (req.method === "POST") {
-    await requireAdmin(req);
+    const user = await requireAdmin(req);
     const article = normalizeArticle(await readBody(req));
     const result = await rest("articles?on_conflict=slug", {
       method: "POST",
@@ -646,6 +686,13 @@ async function articles(req, res) {
     });
     if (!result.ok) return sendRestError(res, result);
     const rows = Array.isArray(result.data) ? result.data : [];
+    await saveContentAuditEvent(req, user, {
+      action: "update",
+      tableName: "articles",
+      recordId: article.slug,
+      summary: article.title,
+      metadata: { category: article.category },
+    });
     return send(res, 200, {
       ok: true,
       source: "supabase",
@@ -653,11 +700,17 @@ async function articles(req, res) {
     });
   }
   if (req.method === "DELETE") {
-    await requireAdmin(req);
+    const user = await requireAdmin(req);
     const slug = new URL(req.url, "https://likhitfa.local").searchParams.get("slug");
     if (!slug) return send(res, 400, { ok: false, error: "Missing slug" });
     const result = await rest(`articles?slug=eq.${encodeURIComponent(slug)}`, { method: "DELETE" });
     if (!result.ok) return sendRestError(res, result);
+    await saveContentAuditEvent(req, user, {
+      action: "delete",
+      tableName: "articles",
+      recordId: slug,
+      summary: `Deleted article ${slug}`,
+    });
     return send(res, 200, { ok: true, source: "supabase" });
   }
   return send(res, 405, { ok: false, error: "Method not allowed" });
@@ -722,7 +775,7 @@ async function dreams(req, res) {
     });
   }
   if (req.method === "POST") {
-    await requireAdmin(req);
+    const user = await requireAdmin(req);
     const dream = normalizeDream(await readBody(req));
     const result = await rest("dreams?on_conflict=id", {
       method: "POST",
@@ -731,6 +784,13 @@ async function dreams(req, res) {
     });
     if (!result.ok) return sendRestError(res, result);
     const rows = Array.isArray(result.data) ? result.data : [];
+    await saveContentAuditEvent(req, user, {
+      action: "update",
+      tableName: "dreams",
+      recordId: dream.id,
+      summary: dream.keyword,
+      metadata: { letter: dream.letter, category: dream.category },
+    });
     return send(res, 200, {
       ok: true,
       source: "supabase",
@@ -738,11 +798,17 @@ async function dreams(req, res) {
     });
   }
   if (req.method === "DELETE") {
-    await requireAdmin(req);
+    const user = await requireAdmin(req);
     const id = new URL(req.url, "https://likhitfa.local").searchParams.get("id");
     if (!id) return send(res, 400, { ok: false, error: "Missing id" });
     const result = await rest(`dreams?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
     if (!result.ok) return sendRestError(res, result);
+    await saveContentAuditEvent(req, user, {
+      action: "delete",
+      tableName: "dreams",
+      recordId: id,
+      summary: `Deleted dream ${id}`,
+    });
     return send(res, 200, { ok: true, source: "supabase" });
   }
   return send(res, 405, { ok: false, error: "Method not allowed" });
@@ -807,9 +873,10 @@ async function faqs(req, res) {
     return send(res, 200, { ok: true, source: "supabase", faqs: rows.map(normalizeFaq) });
   }
   if (req.method === "POST") {
-    await requireAdmin(req);
+    const user = await requireAdmin(req);
     const body = await readBody(req);
-    const rows = (Array.isArray(body) ? body : body.faqs || []).map(faqToRow);
+    const faqs = (Array.isArray(body) ? body : body.faqs || []).map(normalizeFaq);
+    const rows = faqs.map(faqToRow);
     const result = await rest("faqs?on_conflict=id", {
       method: "POST",
       headers: { Prefer: "resolution=merge-duplicates,return=representation" },
@@ -817,14 +884,27 @@ async function faqs(req, res) {
     });
     if (!result.ok) return sendRestError(res, result);
     const saved = Array.isArray(result.data) ? result.data : [];
+    await saveContentAuditEvent(req, user, {
+      action: "update",
+      tableName: "faqs",
+      recordId: "bulk",
+      summary: `Saved ${faqs.length} FAQ items`,
+      metadata: { ids: faqs.map((faq) => faq.id).slice(0, 50) },
+    });
     return send(res, 200, { ok: true, source: "supabase", faqs: saved.map(normalizeFaq) });
   }
   if (req.method === "DELETE") {
-    await requireAdmin(req);
+    const user = await requireAdmin(req);
     const id = new URL(req.url, "https://likhitfa.local").searchParams.get("id");
     if (!id) return send(res, 400, { ok: false, error: "Missing id" });
     const result = await rest(`faqs?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
     if (!result.ok) return sendRestError(res, result);
+    await saveContentAuditEvent(req, user, {
+      action: "delete",
+      tableName: "faqs",
+      recordId: id,
+      summary: `Deleted FAQ ${id}`,
+    });
     return send(res, 200, { ok: true, source: "supabase" });
   }
   return send(res, 405, { ok: false, error: "Method not allowed" });
@@ -846,7 +926,7 @@ async function siteContent(req, res) {
     return send(res, 200, { ok: true, source: "supabase", content: normalizeContent(rows[0]) });
   }
   if (req.method === "POST") {
-    await requireAdmin(req);
+    const user = await requireAdmin(req);
     const content = normalizeContent(await readBody(req));
     const result = await rest("site_content?on_conflict=id", {
       method: "POST",
@@ -855,6 +935,13 @@ async function siteContent(req, res) {
     });
     if (!result.ok) return sendRestError(res, result);
     const rows = Array.isArray(result.data) ? result.data : [];
+    await saveContentAuditEvent(req, user, {
+      action: "update",
+      tableName: "site_content",
+      recordId: "main",
+      summary: "Updated site content",
+      metadata: { sections: Object.keys(content) },
+    });
     return send(res, 200, {
       ok: true,
       source: "supabase",
@@ -862,6 +949,56 @@ async function siteContent(req, res) {
     });
   }
   return send(res, 405, { ok: false, error: "Method not allowed" });
+}
+
+async function auditEvents(req, res) {
+  if (req.method !== "GET") return send(res, 405, { ok: false, error: "Method not allowed" });
+  await requireAdmin(req);
+
+  const url = new URL(req.url, "https://likhitfa.local");
+  const page = clampPage(url.searchParams.get("page"));
+  const limit = Math.min(clampLimit(url.searchParams.get("limit")), 100);
+  const offset = (page - 1) * limit;
+  const tableName = (url.searchParams.get("table") || "").trim();
+  const action = (url.searchParams.get("action") || "").trim();
+  const q = (url.searchParams.get("q") || "").trim();
+  const params = new URLSearchParams({
+    select: "*",
+    order: "created_at.desc",
+    limit: String(limit),
+    offset: String(offset),
+  });
+
+  if (tableName && tableName !== "all") params.set("table_name", `eq.${tableName}`);
+  if (action && action !== "all") params.set("action", `eq.${action}`);
+  if (q) {
+    const pattern = `*${q.replace(/[,*()]/g, " ")}*`;
+    params.set(
+      "or",
+      `(${[
+        `actor_email.ilike.${pattern}`,
+        `record_id.ilike.${pattern}`,
+        `summary.ilike.${pattern}`,
+        `ip.ilike.${pattern}`,
+      ].join(",")})`,
+    );
+  }
+
+  const result = await rest(`content_audit_events?${params.toString()}`, {
+    headers: { Prefer: "count=exact" },
+  });
+  if (!result.ok) return sendRestError(res, result);
+  const rows = Array.isArray(result.data) ? result.data : [];
+  const total = parseTotal(result.headers.get("content-range"), rows.length);
+  return send(res, 200, {
+    ok: true,
+    source: "supabase",
+    events: rows.map(normalizeAuditEvent),
+    page,
+    limit,
+    total,
+    totalPages: Math.max(1, Math.ceil(total / limit)),
+  });
 }
 
 function normalizeMessage(row = {}) {
@@ -1092,6 +1229,7 @@ export default async function handler(req, res) {
     if (route === "dreams") return await dreams(req, res);
     if (route === "faqs") return await faqs(req, res);
     if (route === "site-content") return await siteContent(req, res);
+    if (route === "audit-events") return await auditEvents(req, res);
     if (route === "contact-messages") return await contactMessages(req, res);
     if (route === "reading-history") return await readingHistory(req, res);
     if (route === "leads") return await leads(req, res);

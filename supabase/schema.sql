@@ -65,6 +65,33 @@ create table if not exists public.auth_events (
 create index if not exists auth_events_user_id_idx on public.auth_events (user_id);
 create index if not exists auth_events_created_at_idx on public.auth_events (created_at desc);
 
+create table if not exists public.content_audit_events (
+  id uuid primary key default gen_random_uuid(),
+  actor_user_id uuid references public.users(id) on delete set null,
+  actor_email text not null default '',
+  actor_role text not null default 'Admin',
+  action text not null,
+  table_name text not null,
+  record_id text not null default '',
+  summary text not null default '',
+  metadata jsonb not null default '{}'::jsonb,
+  ip text not null default '',
+  user_agent text not null default '',
+  created_at timestamptz not null default now(),
+  constraint content_audit_events_actor_role_check check (actor_role in ('Admin', 'User')),
+  constraint content_audit_events_action_check check (action in ('create', 'update', 'delete')),
+  constraint content_audit_events_table_name_check check (
+    table_name in ('articles', 'dreams', 'faqs', 'site_content')
+  )
+);
+
+create index if not exists content_audit_events_created_at_idx
+  on public.content_audit_events (created_at desc);
+create index if not exists content_audit_events_table_record_idx
+  on public.content_audit_events (table_name, record_id);
+create index if not exists content_audit_events_actor_email_idx
+  on public.content_audit_events (lower(actor_email));
+
 create table if not exists public.reading_history (
   id text primary key,
   user_id uuid references public.users(id) on delete set null,
@@ -395,6 +422,7 @@ create index if not exists leads_source_idx on public.leads (source);
 alter table public.articles enable row level security;
 alter table public.users enable row level security;
 alter table public.auth_events enable row level security;
+alter table public.content_audit_events enable row level security;
 alter table public.reading_history enable row level security;
 alter table public.dreams enable row level security;
 alter table public.faqs enable row level security;
@@ -419,6 +447,13 @@ create policy "service role manages users"
 drop policy if exists "service role manages auth events" on public.auth_events;
 create policy "service role manages auth events"
   on public.auth_events
+  for all
+  using (auth.role() = 'service_role')
+  with check (auth.role() = 'service_role');
+
+drop policy if exists "service role manages content audit events" on public.content_audit_events;
+create policy "service role manages content audit events"
+  on public.content_audit_events
   for all
   using (auth.role() = 'service_role')
   with check (auth.role() = 'service_role');

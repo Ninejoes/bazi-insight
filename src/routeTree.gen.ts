@@ -44,6 +44,7 @@ import { Route as ApiFaqsRouteImport } from './routes/api.faqs'
 import { Route as ApiDreamsRouteImport } from './routes/api.dreams'
 import { Route as ApiDashboardRouteImport } from './routes/api.dashboard'
 import { Route as ApiContactMessagesRouteImport } from './routes/api.contact-messages'
+import { Route as ApiAuditEventsRouteImport } from './routes/api.audit-events'
 import { Route as ApiArticlesRouteImport } from './routes/api.articles'
 import { Route as ApiAdminUsersRouteImport } from './routes/api.admin-users'
 import { Route as ApiAdminSessionRouteImport } from './routes/api.admin-session'
@@ -53,6 +54,7 @@ import { Route as AdminMessagesRouteImport } from './routes/admin.messages'
 import { Route as AdminHelpRouteImport } from './routes/admin.help'
 import { Route as AdminDreamsRouteImport } from './routes/admin.dreams'
 import { Route as AdminContactRouteImport } from './routes/admin.contact'
+import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminArticlesRouteImport } from './routes/admin.articles'
 
 const TarotRoute = TarotRouteImport.update({
@@ -230,6 +232,11 @@ const ApiContactMessagesRoute = ApiContactMessagesRouteImport.update({
   path: '/api/contact-messages',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuditEventsRoute = ApiAuditEventsRouteImport.update({
+  id: '/api/audit-events',
+  path: '/api/audit-events',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiArticlesRoute = ApiArticlesRouteImport.update({
   id: '/api/articles',
   path: '/api/articles',
@@ -275,6 +282,11 @@ const AdminContactRoute = AdminContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAuditRoute = AdminAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminArticlesRoute = AdminArticlesRouteImport.update({
   id: '/articles',
   path: '/articles',
@@ -297,6 +309,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/tarot': typeof TarotRouteWithChildren
   '/admin/articles': typeof AdminArticlesRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/contact': typeof AdminContactRoute
   '/admin/dreams': typeof AdminDreamsRoute
   '/admin/help': typeof AdminHelpRoute
@@ -306,6 +319,7 @@ export interface FileRoutesByFullPath {
   '/api/admin-session': typeof ApiAdminSessionRoute
   '/api/admin-users': typeof ApiAdminUsersRoute
   '/api/articles': typeof ApiArticlesRoute
+  '/api/audit-events': typeof ApiAuditEventsRoute
   '/api/contact-messages': typeof ApiContactMessagesRoute
   '/api/dashboard': typeof ApiDashboardRoute
   '/api/dreams': typeof ApiDreamsRoute
@@ -339,6 +353,7 @@ export interface FileRoutesByTo {
   '/lottery': typeof LotteryRoute
   '/register': typeof RegisterRoute
   '/admin/articles': typeof AdminArticlesRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/contact': typeof AdminContactRoute
   '/admin/dreams': typeof AdminDreamsRoute
   '/admin/help': typeof AdminHelpRoute
@@ -348,6 +363,7 @@ export interface FileRoutesByTo {
   '/api/admin-session': typeof ApiAdminSessionRoute
   '/api/admin-users': typeof ApiAdminUsersRoute
   '/api/articles': typeof ApiArticlesRoute
+  '/api/audit-events': typeof ApiAuditEventsRoute
   '/api/contact-messages': typeof ApiContactMessagesRoute
   '/api/dashboard': typeof ApiDashboardRoute
   '/api/dreams': typeof ApiDreamsRoute
@@ -387,6 +403,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/tarot': typeof TarotRouteWithChildren
   '/admin/articles': typeof AdminArticlesRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/contact': typeof AdminContactRoute
   '/admin/dreams': typeof AdminDreamsRoute
   '/admin/help': typeof AdminHelpRoute
@@ -396,6 +413,7 @@ export interface FileRoutesById {
   '/api/admin-session': typeof ApiAdminSessionRoute
   '/api/admin-users': typeof ApiAdminUsersRoute
   '/api/articles': typeof ApiArticlesRoute
+  '/api/audit-events': typeof ApiAuditEventsRoute
   '/api/contact-messages': typeof ApiContactMessagesRoute
   '/api/dashboard': typeof ApiDashboardRoute
   '/api/dreams': typeof ApiDreamsRoute
@@ -436,6 +454,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/tarot'
     | '/admin/articles'
+    | '/admin/audit'
     | '/admin/contact'
     | '/admin/dreams'
     | '/admin/help'
@@ -445,6 +464,7 @@ export interface FileRouteTypes {
     | '/api/admin-session'
     | '/api/admin-users'
     | '/api/articles'
+    | '/api/audit-events'
     | '/api/contact-messages'
     | '/api/dashboard'
     | '/api/dreams'
@@ -478,6 +498,7 @@ export interface FileRouteTypes {
     | '/lottery'
     | '/register'
     | '/admin/articles'
+    | '/admin/audit'
     | '/admin/contact'
     | '/admin/dreams'
     | '/admin/help'
@@ -487,6 +508,7 @@ export interface FileRouteTypes {
     | '/api/admin-session'
     | '/api/admin-users'
     | '/api/articles'
+    | '/api/audit-events'
     | '/api/contact-messages'
     | '/api/dashboard'
     | '/api/dreams'
@@ -525,6 +547,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/tarot'
     | '/admin/articles'
+    | '/admin/audit'
     | '/admin/contact'
     | '/admin/dreams'
     | '/admin/help'
@@ -534,6 +557,7 @@ export interface FileRouteTypes {
     | '/api/admin-session'
     | '/api/admin-users'
     | '/api/articles'
+    | '/api/audit-events'
     | '/api/contact-messages'
     | '/api/dashboard'
     | '/api/dreams'
@@ -576,6 +600,7 @@ export interface RootRouteChildren {
   ApiAdminSessionRoute: typeof ApiAdminSessionRoute
   ApiAdminUsersRoute: typeof ApiAdminUsersRoute
   ApiArticlesRoute: typeof ApiArticlesRoute
+  ApiAuditEventsRoute: typeof ApiAuditEventsRoute
   ApiContactMessagesRoute: typeof ApiContactMessagesRoute
   ApiDashboardRoute: typeof ApiDashboardRoute
   ApiDreamsRoute: typeof ApiDreamsRoute
@@ -836,6 +861,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiContactMessagesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/audit-events': {
+      id: '/api/audit-events'
+      path: '/api/audit-events'
+      fullPath: '/api/audit-events'
+      preLoaderRoute: typeof ApiAuditEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/articles': {
       id: '/api/articles'
       path: '/api/articles'
@@ -899,6 +931,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminContactRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/audit': {
+      id: '/admin/audit'
+      path: '/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AdminAuditRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/articles': {
       id: '/admin/articles'
       path: '/articles'
@@ -911,6 +950,7 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminArticlesRoute: typeof AdminArticlesRoute
+  AdminAuditRoute: typeof AdminAuditRoute
   AdminContactRoute: typeof AdminContactRoute
   AdminDreamsRoute: typeof AdminDreamsRoute
   AdminHelpRoute: typeof AdminHelpRoute
@@ -921,6 +961,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminArticlesRoute: AdminArticlesRoute,
+  AdminAuditRoute: AdminAuditRoute,
   AdminContactRoute: AdminContactRoute,
   AdminDreamsRoute: AdminDreamsRoute,
   AdminHelpRoute: AdminHelpRoute,
@@ -1003,6 +1044,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminSessionRoute: ApiAdminSessionRoute,
   ApiAdminUsersRoute: ApiAdminUsersRoute,
   ApiArticlesRoute: ApiArticlesRoute,
+  ApiAuditEventsRoute: ApiAuditEventsRoute,
   ApiContactMessagesRoute: ApiContactMessagesRoute,
   ApiDashboardRoute: ApiDashboardRoute,
   ApiDreamsRoute: ApiDreamsRoute,

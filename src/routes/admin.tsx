@@ -21,6 +21,7 @@ const nav = [
   { to: "/admin/users", label: "ผู้ใช้งาน", icon: "♟" },
   { to: "/admin/messages", label: "ข้อความ", icon: "✉" },
   { to: "/admin/contact", label: "ติดต่อ / เกี่ยวกับเรา", icon: "✉" },
+  { to: "/admin/audit", label: "Audit Log", icon: "!" },
   { to: "/admin/help", label: "ศูนย์ช่วยเหลือ", icon: "?" },
 ] as const;
 

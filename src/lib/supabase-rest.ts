@@ -4,9 +4,20 @@ const ADMIN_EMAIL = "admin@gmail.com";
 const ADMIN_ROLE = "Admin";
 
 type SupabaseUser = {
+  id?: string;
   email?: string;
   user_metadata?: Record<string, unknown>;
   app_metadata?: Record<string, unknown>;
+};
+
+type ContentAuditInput = {
+  request: Request;
+  user?: SupabaseUser;
+  action: "create" | "update" | "delete";
+  tableName: "articles" | "dreams" | "faqs" | "site_content";
+  recordId: string;
+  summary?: string;
+  metadata?: Record<string, unknown>;
 };
 
 export function getSupabaseConfig() {
@@ -54,6 +65,44 @@ export async function supabaseRequest(path: string, init?: RequestInit) {
   return response;
 }
 
+function clientIp(request: Request) {
+  return (request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown")
+    .split(",")[0]
+    .trim()
+    .slice(0, 80);
+}
+
+export async function saveContentAuditEvent({
+  request,
+  user,
+  action,
+  tableName,
+  recordId,
+  summary = "",
+  metadata = {},
+}: ContentAuditInput) {
+  try {
+    await supabaseRequest("content_audit_events", {
+      method: "POST",
+      headers: { Prefer: "return=minimal" },
+      body: JSON.stringify({
+        actor_user_id: user?.id || null,
+        actor_email: user?.email || "",
+        actor_role: user ? userRole(user) : "Admin",
+        action,
+        table_name: tableName,
+        record_id: recordId,
+        summary: summary.slice(0, 500),
+        metadata,
+        ip: clientIp(request),
+        user_agent: (request.headers.get("user-agent") || "").slice(0, 500),
+      }),
+    });
+  } catch (error) {
+    console.error("content audit log failed", error);
+  }
+}
+
 function readBearer(request: Request) {
   const authorization = request.headers.get("Authorization") || "";
   const match = authorization.match(/^Bearer\s+(.+)$/i);
@@ -89,4 +138,6 @@ export async function requireAdmin(request: Request) {
   if (user.email?.toLowerCase() !== ADMIN_EMAIL || userRole(user) !== ADMIN_ROLE) {
     throw new Error("บัญชีนี้ไม่มีสิทธิ์แอดมิน");
   }
+
+  return user;
 }

@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { seo } from "@/lib/seo";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { adminAuthHeaders } from "@/lib/admin-auth";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { DreamRecord as Dream } from "@/lib/admin-content";
 
 export const Route = createFileRoute("/admin/dreams")({
@@ -21,6 +21,8 @@ const letters = "กขคงจฉชซญดตถทนบปผฝพฟภ
 function AdminDreams() {
   const [items, setItems] = useState<Dream[]>([]);
   const [filterLetter, setFilterLetter] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
@@ -31,6 +33,14 @@ function AdminDreams() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setPage(1);
+      setQuery(search.trim());
+    }, 350);
+    return () => window.clearTimeout(timeout);
+  }, [search]);
+
+  useEffect(() => {
     let mounted = true;
 
     async function loadDreams() {
@@ -39,6 +49,7 @@ function AdminDreams() {
         page: String(page),
         limit: String(pageSize),
       });
+      if (query) params.set("q", query);
       if (filterLetter) params.set("letter", filterLetter);
       const response = await fetch(`/api/dreams?${params.toString()}`);
       const data = await response.json().catch(() => ({}));
@@ -61,13 +72,14 @@ function AdminDreams() {
     return () => {
       mounted = false;
     };
-  }, [filterLetter, page, pageSize]);
+  }, [filterLetter, page, pageSize, query]);
 
   const reload = async () => {
     const params = new URLSearchParams({
       page: String(page),
       limit: String(pageSize),
     });
+    if (query) params.set("q", query);
     if (filterLetter) params.set("letter", filterLetter);
     const response = await fetch(`/api/dreams?${params.toString()}`);
     const data = await response.json().catch(() => ({}));
@@ -114,6 +126,12 @@ function AdminDreams() {
 
   const currentStart = total ? (page - 1) * pageSize + 1 : 0;
   const currentEnd = Math.min(page * pageSize, total);
+  const pageNumbers = useMemo(() => {
+    const pages = new Set([1, totalPages, page - 2, page - 1, page, page + 1, page + 2]);
+    return Array.from(pages)
+      .filter((item) => item >= 1 && item <= totalPages)
+      .sort((a, b) => a - b);
+  }, [page, totalPages]);
 
   return (
     <div className="space-y-6">
@@ -131,6 +149,30 @@ function AdminDreams() {
       </div>
 
       <section className="glass rounded-2xl p-4">
+        <div className="mb-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+          <label className="block">
+            <span className="mb-2 block text-xs text-muted-foreground">
+              ค้นหาจากฐานข้อมูล Supabase
+            </span>
+            <input
+              className="input-styled"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="ค้นหาคำฝัน หมวดหมู่ คำทำนาย เลขเด็ด หรือคำแนะนำ"
+            />
+          </label>
+          <button
+            className="rounded-xl border border-gold/20 px-4 py-3 text-sm text-gold hover:bg-gold/10"
+            onClick={() => {
+              setSearch("");
+              setQuery("");
+              setFilterLetter(null);
+              setPage(1);
+            }}
+          >
+            ล้างตัวกรอง
+          </button>
+        </div>
         <div className="text-xs text-muted-foreground mb-2">กรองตามอักษร ก-ฮ</div>
         <div className="flex flex-wrap gap-1.5">
           <button
@@ -172,6 +214,11 @@ function AdminDreams() {
           ) : (
             "กำลังแสดงคำทำนายฝันทุกหมวดอักษร"
           )}{" "}
+          {query ? (
+            <>
+              ที่ค้นหา <span className="text-gold">{query}</span>{" "}
+            </>
+          ) : null}
           • {currentStart.toLocaleString()}-{currentEnd.toLocaleString()} จาก{" "}
           {total.toLocaleString()} รายการ
         </div>
@@ -185,7 +232,7 @@ function AdminDreams() {
               setPage(1);
             }}
           >
-            {[10, 20, 50, 100].map((size) => (
+            {[10, 20].map((size) => (
               <option key={size} value={size}>
                 {size} รายการ
               </option>
@@ -256,6 +303,21 @@ function AdminDreams() {
           <div className="text-xs text-muted-foreground">
             หน้า <span className="text-gold">{page.toLocaleString()}</span> /{" "}
             {totalPages.toLocaleString()}
+          </div>
+          <div className="flex flex-wrap justify-center gap-1">
+            {pageNumbers.map((item) => (
+              <button
+                key={item}
+                className={`min-w-9 rounded-lg border px-3 py-2 text-xs ${
+                  item === page
+                    ? "border-gold bg-gold/15 text-gold"
+                    : "border-gold/20 text-muted-foreground hover:text-gold"
+                }`}
+                onClick={() => setPage(item)}
+              >
+                {item.toLocaleString()}
+              </button>
+            ))}
           </div>
           <button
             className="rounded-xl border border-gold/20 px-4 py-2 text-muted-foreground disabled:cursor-not-allowed disabled:opacity-40 hover:text-gold"

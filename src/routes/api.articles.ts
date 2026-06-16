@@ -1,5 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { type Article } from "@/lib/articles";
+import {
+  json,
+  requireAdmin,
+  saveContentAuditEvent,
+  supabaseRequest,
+  getSupabaseConfig,
+} from "@/lib/supabase-rest";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 type ArticleRow = {
@@ -23,37 +30,6 @@ type ArticleRow = {
   canonicalUrl?: string;
   content: string[] | string;
 };
-
-type SupabaseUser = {
-  email?: string;
-  user_metadata?: Record<string, unknown>;
-  app_metadata?: Record<string, unknown>;
-};
-
-const ADMIN_EMAIL = "admin@gmail.com";
-
-function json(body: unknown, init?: ResponseInit) {
-  return Response.json(body, {
-    ...init,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "Authorization, Content-Type",
-      ...(init?.headers || {}),
-    },
-  });
-}
-
-function getSupabaseConfig() {
-  const url = (
-    process.env.SUPABASE_URL ||
-    process.env.VITE_SUPABASE_URL ||
-    process.env.NEXT_PUBLIC_SUPABASE_URL
-  )?.replace(/\/$/, "");
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
-  if (!url || !serviceKey) return null;
-  return { url, serviceKey };
-}
 
 function normalizeArticle(row: ArticleRow): Article {
   const content = Array.isArray(row.content)
@@ -105,65 +81,6 @@ function toSupabaseRow(article: Article) {
     content: article.content,
     updated_at: new Date().toISOString(),
   };
-}
-
-async function supabaseRequest(path: string, init?: RequestInit) {
-  const config = getSupabaseConfig();
-  if (!config) return null;
-
-  const response = await fetch(`${config.url}/rest/v1/${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      apikey: config.serviceKey,
-      Authorization: `Bearer ${config.serviceKey}`,
-      ...(init?.headers || {}),
-    },
-  });
-
-  if (!response.ok) {
-    const detail = await response.text().catch(() => "");
-    throw new Error(friendlyErrorMessage(detail, "เชื่อมต่อบทความไม่สำเร็จ"));
-  }
-
-  return response;
-}
-
-function readBearer(request: Request) {
-  const authorization = request.headers.get("Authorization") || "";
-  const match = authorization.match(/^Bearer\s+(.+)$/i);
-  return match?.[1] || "";
-}
-
-function userRole(user: SupabaseUser) {
-  const appRole = user.app_metadata?.role;
-  const userMetadataRole = user.user_metadata?.role;
-  return appRole === "Admin" || userMetadataRole === "Admin" ? "Admin" : "User";
-}
-
-async function requireAdmin(request: Request) {
-  const config = getSupabaseConfig();
-  if (!config) {
-    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
-  }
-
-  const accessToken = readBearer(request);
-  if (!accessToken) throw new Error("ต้องเข้าสู่ระบบแอดมินก่อนแก้ไขบทความ");
-
-  const response = await fetch(`${config.url}/auth/v1/user`, {
-    headers: {
-      "Content-Type": "application/json",
-      apikey: config.serviceKey,
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-
-  if (!response.ok) throw new Error("session แอดมินไม่ถูกต้องหรือหมดอายุ");
-
-  const user = (await response.json().catch(() => ({}))) as SupabaseUser;
-  if (user.email?.toLowerCase() !== ADMIN_EMAIL || userRole(user) !== "Admin") {
-    throw new Error("บัญชีนี้ไม่มีสิทธิ์จัดการบทความ");
-  }
 }
 
 function clampPage(value: string | null) {
@@ -310,9 +227,19 @@ export const Route = createFileRoute("/api/articles")({
       },
       POST: async ({ request }) => {
         try {
-          await requireAdmin(request);
+          const user = await requireAdmin(request);
           const article = normalizeArticle((await request.json()) as ArticleRow);
-          return json({ ok: true, ...(await saveArticle(article)) });
+          const result = await saveArticle(article);
+          await saveContentAuditEvent({
+            request,
+            user,
+            action: "update",
+            tableName: "articles",
+            recordId: article.slug,
+            summary: article.title,
+            metadata: { category: article.category },
+          });
+          return json({ ok: true, ...result });
         } catch (error) {
           const message = friendlyErrorMessage(error, "บันทึกบทความไม่สำเร็จ");
           return json(
@@ -326,9 +253,19 @@ export const Route = createFileRoute("/api/articles")({
       },
       PUT: async ({ request }) => {
         try {
-          await requireAdmin(request);
+          const user = await requireAdmin(request);
           const article = normalizeArticle((await request.json()) as ArticleRow);
-          return json({ ok: true, ...(await saveArticle(article)) });
+          const result = await saveArticle(article);
+          await saveContentAuditEvent({
+            request,
+            user,
+            action: "update",
+            tableName: "articles",
+            recordId: article.slug,
+            summary: article.title,
+            metadata: { category: article.category },
+          });
+          return json({ ok: true, ...result });
         } catch (error) {
           const message = friendlyErrorMessage(error, "บันทึกบทความไม่สำเร็จ");
           return json(
@@ -342,11 +279,20 @@ export const Route = createFileRoute("/api/articles")({
       },
       DELETE: async ({ request }) => {
         try {
-          await requireAdmin(request);
+          const user = await requireAdmin(request);
           const url = new URL(request.url);
           const slug = url.searchParams.get("slug");
           if (!slug) return json({ ok: false, error: "Missing slug" }, { status: 400 });
-          return json({ ok: true, ...(await deleteArticle(slug)) });
+          const result = await deleteArticle(slug);
+          await saveContentAuditEvent({
+            request,
+            user,
+            action: "delete",
+            tableName: "articles",
+            recordId: slug,
+            summary: `Deleted article ${slug}`,
+          });
+          return json({ ok: true, ...result });
         } catch (error) {
           const message = friendlyErrorMessage(error, "ลบบทความไม่สำเร็จ");
           return json(
