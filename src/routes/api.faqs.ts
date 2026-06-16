@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
 import { type FAQRecord } from "@/lib/admin-content";
-import { getSupabaseConfig, json, supabaseRequest } from "@/lib/supabase-rest";
+import { getSupabaseConfig, json, requireAdmin, supabaseRequest } from "@/lib/supabase-rest";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 type FAQRow = {
@@ -95,25 +95,29 @@ export const Route = createFileRoute("/api/faqs")({
       },
       POST: async ({ request }) => {
         try {
+          await requireAdmin(request);
           const body = await request.json();
           const rows = Array.isArray(body) ? body : body.faqs;
           return json({ ok: true, ...(await saveFaqs(rows || [])) });
         } catch (error) {
+          const message = friendlyErrorMessage(error, "บันทึก FAQ ไม่สำเร็จ");
           return json(
-            { ok: false, error: friendlyErrorMessage(error, "บันทึก FAQ ไม่สำเร็จ") },
-            { status: 502 },
+            { ok: false, error: message },
+            { status: message.includes("แอดมิน") || message.includes("session") ? 401 : 502 },
           );
         }
       },
       DELETE: async ({ request }) => {
         try {
+          await requireAdmin(request);
           const id = new URL(request.url).searchParams.get("id");
           if (!id) return json({ ok: false, error: "Missing id" }, { status: 400 });
           return json({ ok: true, ...(await deleteFaq(id)) });
         } catch (error) {
+          const message = friendlyErrorMessage(error, "ลบ FAQ ไม่สำเร็จ");
           return json(
-            { ok: false, error: friendlyErrorMessage(error, "ลบ FAQ ไม่สำเร็จ") },
-            { status: 502 },
+            { ok: false, error: message },
+            { status: message.includes("แอดมิน") || message.includes("session") ? 401 : 502 },
           );
         }
       },

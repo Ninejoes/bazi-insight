@@ -3,6 +3,7 @@ import { seo } from "@/lib/seo";
 import { useEffect, useState } from "react";
 import { type FAQRecord as FAQ } from "@/lib/admin-content";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
+import { adminAuthHeaders } from "@/lib/admin-auth";
 
 export const Route = createFileRoute("/admin/help")({
   head: () =>
@@ -58,7 +59,7 @@ function AdminHelp() {
     const normalized = next.map((faq, index) => ({ ...faq, sortOrder: index + 1 }));
     const response = await fetch("/api/faqs", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...adminAuthHeaders() },
       body: JSON.stringify({ faqs: normalized }),
     });
     const data = await response.json().catch(() => ({}));
@@ -73,6 +74,7 @@ function AdminHelp() {
   const removeFaq = async (id: string) => {
     const response = await fetch(`/api/faqs?id=${encodeURIComponent(id)}`, {
       method: "DELETE",
+      headers: adminAuthHeaders(),
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.ok) {

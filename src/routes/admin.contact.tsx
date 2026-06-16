@@ -3,6 +3,7 @@ import { seo } from "@/lib/seo";
 import { useEffect, useState } from "react";
 import { siteContentSeed, type SiteContent } from "@/lib/admin-content";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
+import { adminAuthHeaders } from "@/lib/admin-auth";
 
 export const Route = createFileRoute("/admin/contact")({
   head: () =>
@@ -56,7 +57,7 @@ function AdminContact() {
   const saveContent = async (next: SiteContent, message: string) => {
     const response = await fetch("/api/site-content", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...adminAuthHeaders() },
       body: JSON.stringify(next),
     });
     const data = await response.json().catch(() => ({}));

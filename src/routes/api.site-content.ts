@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { siteContentSeed, type SiteContent } from "@/lib/admin-content";
-import { getSupabaseConfig, json, supabaseRequest } from "@/lib/supabase-rest";
+import { getSupabaseConfig, json, requireAdmin, supabaseRequest } from "@/lib/supabase-rest";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 type SiteContentRow = {
@@ -76,15 +76,17 @@ export const Route = createFileRoute("/api/site-content")({
       },
       POST: async ({ request }) => {
         try {
+          await requireAdmin(request);
           const body = normalizeContent(await request.json());
           return json({ ok: true, ...(await saveContent(body)) });
         } catch (error) {
+          const message = friendlyErrorMessage(error, "บันทึกข้อมูลเว็บไซต์ไม่สำเร็จ");
           return json(
             {
               ok: false,
-              error: friendlyErrorMessage(error, "บันทึกข้อมูลเว็บไซต์ไม่สำเร็จ"),
+              error: message,
             },
-            { status: 502 },
+            { status: message.includes("แอดมิน") || message.includes("session") ? 401 : 502 },
           );
         }
       },

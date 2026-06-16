@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
 import { type DreamRecord } from "@/lib/admin-content";
-import { getSupabaseConfig, json, supabaseRequest } from "@/lib/supabase-rest";
+import { getSupabaseConfig, json, requireAdmin, supabaseRequest } from "@/lib/supabase-rest";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 type DreamRow = {
@@ -201,23 +201,27 @@ export const Route = createFileRoute("/api/dreams")({
       },
       POST: async ({ request }) => {
         try {
+          await requireAdmin(request);
           return json({ ok: true, ...(await saveDream(await request.json())) });
         } catch (error) {
+          const message = friendlyErrorMessage(error, "บันทึกคำฝันไม่สำเร็จ");
           return json(
-            { ok: false, error: friendlyErrorMessage(error, "บันทึกคำฝันไม่สำเร็จ") },
-            { status: 502 },
+            { ok: false, error: message },
+            { status: message.includes("แอดมิน") || message.includes("session") ? 401 : 502 },
           );
         }
       },
       DELETE: async ({ request }) => {
         try {
+          await requireAdmin(request);
           const id = new URL(request.url).searchParams.get("id");
           if (!id) return json({ ok: false, error: "Missing id" }, { status: 400 });
           return json({ ok: true, ...(await deleteDream(id)) });
         } catch (error) {
+          const message = friendlyErrorMessage(error, "ลบคำฝันไม่สำเร็จ");
           return json(
-            { ok: false, error: friendlyErrorMessage(error, "ลบคำฝันไม่สำเร็จ") },
-            { status: 502 },
+            { ok: false, error: message },
+            { status: message.includes("แอดมิน") || message.includes("session") ? 401 : 502 },
           );
         }
       },

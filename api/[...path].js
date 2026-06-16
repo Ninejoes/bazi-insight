@@ -687,6 +687,7 @@ async function dreams(req, res) {
     });
   }
   if (req.method === "POST") {
+    await requireAdmin(req);
     const dream = normalizeDream(await readBody(req));
     const result = await rest("dreams?on_conflict=id", {
       method: "POST",
@@ -702,6 +703,7 @@ async function dreams(req, res) {
     });
   }
   if (req.method === "DELETE") {
+    await requireAdmin(req);
     const id = new URL(req.url, "https://likhitfa.local").searchParams.get("id");
     if (!id) return send(res, 400, { ok: false, error: "Missing id" });
     const result = await rest(`dreams?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
@@ -770,6 +772,7 @@ async function faqs(req, res) {
     return send(res, 200, { ok: true, source: "supabase", faqs: rows.map(normalizeFaq) });
   }
   if (req.method === "POST") {
+    await requireAdmin(req);
     const body = await readBody(req);
     const rows = (Array.isArray(body) ? body : body.faqs || []).map(faqToRow);
     const result = await rest("faqs?on_conflict=id", {
@@ -782,6 +785,7 @@ async function faqs(req, res) {
     return send(res, 200, { ok: true, source: "supabase", faqs: saved.map(normalizeFaq) });
   }
   if (req.method === "DELETE") {
+    await requireAdmin(req);
     const id = new URL(req.url, "https://likhitfa.local").searchParams.get("id");
     if (!id) return send(res, 400, { ok: false, error: "Missing id" });
     const result = await rest(`faqs?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
@@ -807,6 +811,7 @@ async function siteContent(req, res) {
     return send(res, 200, { ok: true, source: "supabase", content: normalizeContent(rows[0]) });
   }
   if (req.method === "POST") {
+    await requireAdmin(req);
     const content = normalizeContent(await readBody(req));
     const result = await rest("site_content?on_conflict=id", {
       method: "POST",

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { seo } from "@/lib/seo";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
+import { adminAuthHeaders } from "@/lib/admin-auth";
 import { useEffect, useState } from "react";
 import type { DreamRecord as Dream } from "@/lib/admin-content";
 
@@ -85,7 +86,7 @@ function AdminDreams() {
   const saveDream = async (dream: Dream, message: string) => {
     const response = await fetch("/api/dreams", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...adminAuthHeaders() },
       body: JSON.stringify(dream),
     });
     const data = await response.json().catch(() => ({}));
@@ -100,6 +101,7 @@ function AdminDreams() {
   const removeDream = async (id: string) => {
     const response = await fetch(`/api/dreams?id=${encodeURIComponent(id)}`, {
       method: "DELETE",
+      headers: adminAuthHeaders(),
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.ok) {

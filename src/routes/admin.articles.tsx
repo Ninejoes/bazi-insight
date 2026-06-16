@@ -6,10 +6,9 @@ import {
 } from "@/lib/article-categories";
 import { seo } from "@/lib/seo";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
+import { adminAuthHeaders } from "@/lib/admin-auth";
 import { useRef, useState, useEffect } from "react";
 import type { Article } from "@/lib/articles";
-
-const ADMIN_SESSION_KEY = "likhitfa-admin-session-v2";
 
 export const Route = createFileRoute("/admin/articles")({
   head: () =>
@@ -21,17 +20,6 @@ export const Route = createFileRoute("/admin/articles")({
     }),
   component: AdminArticles,
 });
-
-function adminAuthHeaders(): Record<string, string> {
-  try {
-    const raw = window.localStorage.getItem(ADMIN_SESSION_KEY);
-    if (!raw) return {};
-    const session = JSON.parse(raw) as { accessToken?: string };
-    return session.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {};
-  } catch {
-    return {};
-  }
-}
 
 function AdminArticles() {
   const [items, setItems] = useState<Article[]>([]);
