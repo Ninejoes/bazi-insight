@@ -9,6 +9,8 @@ import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { useRef, useState, useEffect } from "react";
 import type { Article } from "@/lib/articles";
 
+const ADMIN_SESSION_KEY = "likhitfa-admin-session-v2";
+
 export const Route = createFileRoute("/admin/articles")({
   head: () =>
     seo({
@@ -19,6 +21,17 @@ export const Route = createFileRoute("/admin/articles")({
     }),
   component: AdminArticles,
 });
+
+function adminAuthHeaders(): Record<string, string> {
+  try {
+    const raw = window.localStorage.getItem(ADMIN_SESSION_KEY);
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { accessToken?: string };
+    return session.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {};
+  } catch {
+    return {};
+  }
+}
 
 function AdminArticles() {
   const [items, setItems] = useState<Article[]>([]);
@@ -68,7 +81,7 @@ function AdminArticles() {
     try {
       const response = await fetch("/api/articles", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...adminAuthHeaders() },
         body: JSON.stringify(article),
       });
       const data = await response.json().catch(() => ({}));
@@ -92,6 +105,7 @@ function AdminArticles() {
     try {
       const response = await fetch(`/api/articles?slug=${encodeURIComponent(slug)}`, {
         method: "DELETE",
+        headers: adminAuthHeaders(),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data.ok) {

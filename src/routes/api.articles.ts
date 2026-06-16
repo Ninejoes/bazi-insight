@@ -24,13 +24,21 @@ type ArticleRow = {
   content: string[] | string;
 };
 
+type SupabaseUser = {
+  email?: string;
+  user_metadata?: Record<string, unknown>;
+  app_metadata?: Record<string, unknown>;
+};
+
+const ADMIN_EMAIL = "admin@gmail.com";
+
 function json(body: unknown, init?: ResponseInit) {
   return Response.json(body, {
     ...init,
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Headers": "Authorization, Content-Type",
       ...(init?.headers || {}),
     },
   });
@@ -119,6 +127,43 @@ async function supabaseRequest(path: string, init?: RequestInit) {
   }
 
   return response;
+}
+
+function readBearer(request: Request) {
+  const authorization = request.headers.get("Authorization") || "";
+  const match = authorization.match(/^Bearer\s+(.+)$/i);
+  return match?.[1] || "";
+}
+
+function userRole(user: SupabaseUser) {
+  const appRole = user.app_metadata?.role;
+  const userMetadataRole = user.user_metadata?.role;
+  return appRole === "Admin" || userMetadataRole === "Admin" ? "Admin" : "User";
+}
+
+async function requireAdmin(request: Request) {
+  const config = getSupabaseConfig();
+  if (!config) {
+    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
+  }
+
+  const accessToken = readBearer(request);
+  if (!accessToken) throw new Error("ต้องเข้าสู่ระบบแอดมินก่อนแก้ไขบทความ");
+
+  const response = await fetch(`${config.url}/auth/v1/user`, {
+    headers: {
+      "Content-Type": "application/json",
+      apikey: config.serviceKey,
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) throw new Error("session แอดมินไม่ถูกต้องหรือหมดอายุ");
+
+  const user = (await response.json().catch(() => ({}))) as SupabaseUser;
+  if (user.email?.toLowerCase() !== ADMIN_EMAIL || userRole(user) !== "Admin") {
+    throw new Error("บัญชีนี้ไม่มีสิทธิ์จัดการบทความ");
+  }
 }
 
 function clampPage(value: string | null) {
@@ -265,45 +310,51 @@ export const Route = createFileRoute("/api/articles")({
       },
       POST: async ({ request }) => {
         try {
+          await requireAdmin(request);
           const article = normalizeArticle((await request.json()) as ArticleRow);
           return json({ ok: true, ...(await saveArticle(article)) });
         } catch (error) {
+          const message = friendlyErrorMessage(error, "บันทึกบทความไม่สำเร็จ");
           return json(
             {
               ok: false,
-              error: friendlyErrorMessage(error, "บันทึกบทความไม่สำเร็จ"),
+              error: message,
             },
-            { status: 502 },
+            { status: message.includes("แอดมิน") || message.includes("session") ? 401 : 502 },
           );
         }
       },
       PUT: async ({ request }) => {
         try {
+          await requireAdmin(request);
           const article = normalizeArticle((await request.json()) as ArticleRow);
           return json({ ok: true, ...(await saveArticle(article)) });
         } catch (error) {
+          const message = friendlyErrorMessage(error, "บันทึกบทความไม่สำเร็จ");
           return json(
             {
               ok: false,
-              error: friendlyErrorMessage(error, "บันทึกบทความไม่สำเร็จ"),
+              error: message,
             },
-            { status: 502 },
+            { status: message.includes("แอดมิน") || message.includes("session") ? 401 : 502 },
           );
         }
       },
       DELETE: async ({ request }) => {
         try {
+          await requireAdmin(request);
           const url = new URL(request.url);
           const slug = url.searchParams.get("slug");
           if (!slug) return json({ ok: false, error: "Missing slug" }, { status: 400 });
           return json({ ok: true, ...(await deleteArticle(slug)) });
         } catch (error) {
+          const message = friendlyErrorMessage(error, "ลบบทความไม่สำเร็จ");
           return json(
             {
               ok: false,
-              error: friendlyErrorMessage(error, "ลบบทความไม่สำเร็จ"),
+              error: message,
             },
-            { status: 502 },
+            { status: message.includes("แอดมิน") || message.includes("session") ? 401 : 502 },
           );
         }
       },
