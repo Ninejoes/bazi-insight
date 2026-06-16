@@ -41,7 +41,7 @@ function DreamDetail() {
       const loaded = await loadDreamBySlug(slug);
       if (!mounted) return;
       if (!loaded) {
-        setError("ไม่พบคำทำนายฝันนี้จาก Supabase");
+        setError("ไม่พบคำทำนายฝันนี้");
         setLoading(false);
         return;
       }

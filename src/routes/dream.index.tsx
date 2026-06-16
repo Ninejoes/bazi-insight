@@ -230,8 +230,8 @@ function DreamPage() {
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {activeQuery
-                    ? `ค้นหาจากฐานข้อมูล Supabase พบ ${total.toLocaleString("th-TH")} รายการ`
-                    : "โหลดจากฐานข้อมูลทีละ 20 รายการ กรองหมวดและตัวอักษรจาก API โดยตรง"}
+                    ? `พบคำทำนายที่เกี่ยวข้อง ${total.toLocaleString("th-TH")} รายการ`
+                    : "แสดงคำทำนายทีละ 20 รายการ เลือกดูตามหมวดหรืออักษรขึ้นต้นได้"}
                 </p>
               </div>
               {activeQuery ? (
@@ -248,11 +248,11 @@ function DreamPage() {
             </div>
             {loading ? (
               <div className="glass-strong rounded-3xl p-6 text-sm text-muted-foreground">
-                กำลังโหลดข้อมูลจาก Supabase...
+                กำลังค้นหาคำทำนายฝัน...
               </div>
             ) : dreams.length === 0 ? (
               <div className="glass-strong rounded-3xl p-6 text-sm text-muted-foreground">
-                ไม่พบข้อมูลคำฝันจาก Supabase
+                ไม่พบคำทำนายที่ตรงกับคำค้น ลองใช้คำอื่นหรือเลือกหมวดใกล้เคียง
               </div>
             ) : (
               <>
