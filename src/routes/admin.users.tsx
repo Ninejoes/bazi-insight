@@ -46,6 +46,7 @@ function AdminUsers() {
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState("");
   const [editing, setEditing] = useState<U | null>(null);
+  const [adding, setAdding] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState("");
 
@@ -98,6 +99,35 @@ function AdminUsers() {
     }
   };
 
+  const createUser = async (payload: {
+    name: string;
+    email: string;
+    password: string;
+    role: Role;
+    status: UserStatus;
+  }) => {
+    setSavingId("new");
+    setError("");
+    try {
+      const response = await fetch("/api/admin-users", {
+        method: "POST",
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) {
+        throw new Error(friendlyErrorMessage(data.error, "สร้างผู้ใช้งานไม่สำเร็จ"));
+      }
+      await loadUsers();
+      setAdding(false);
+      notify("เพิ่มผู้ใช้งานแล้ว");
+    } catch (createError) {
+      setError(friendlyErrorMessage(createError, "สร้างผู้ใช้งานไม่สำเร็จ"));
+    } finally {
+      setSavingId("");
+    }
+  };
+
   const deleteUser = async (user: U) => {
     if (user.email === "admin@gmail.com") {
       notify("ไม่สามารถลบบัญชีแอดมินหลักได้");
@@ -139,11 +169,19 @@ function AdminUsers() {
         </div>
       ) : null}
 
-      <div>
-        <h1 className="font-display text-3xl text-foreground">จัดการผู้ใช้งาน</h1>
-        <p className="text-sm text-muted-foreground">
-          อ่าน แก้ไข และลบผู้ใช้งานจริงจาก public.users และ Supabase Auth
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="font-display text-3xl text-foreground">จัดการผู้ใช้งาน</h1>
+          <p className="text-sm text-muted-foreground">
+            อ่าน แก้ไข และลบผู้ใช้งานจริงจาก public.users และ Supabase Auth
+          </p>
+        </div>
+        <button
+          onClick={() => setAdding(true)}
+          className="rounded-xl bg-gradient-gold px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-gold"
+        >
+          + เพิ่มผู้ใช้งาน
+        </button>
       </div>
 
       <section className="grid gap-3 md:grid-cols-4">
@@ -256,6 +294,128 @@ function AdminUsers() {
           onSave={saveUser}
         />
       ) : null}
+
+      {adding ? (
+        <CreateUserEditor
+          saving={savingId === "new"}
+          onClose={() => setAdding(false)}
+          onSave={createUser}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function CreateUserEditor({
+  saving,
+  onClose,
+  onSave,
+}: {
+  saving: boolean;
+  onClose: () => void;
+  onSave: (payload: {
+    name: string;
+    email: string;
+    password: string;
+    role: Role;
+    status: UserStatus;
+  }) => void | Promise<void>;
+}) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState<Role>("User");
+  const [status, setStatus] = useState<UserStatus>("Active");
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur"
+      onClick={onClose}
+    >
+      <form
+        className="glass-strong w-full max-w-lg rounded-3xl p-6 shadow-elegant"
+        onClick={(event) => event.stopPropagation()}
+        onSubmit={(event) => {
+          event.preventDefault();
+          void onSave({
+            name: name.trim(),
+            email: email.trim(),
+            password,
+            role,
+            status,
+          });
+        }}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="font-display text-2xl text-foreground">เพิ่มผู้ใช้งาน</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              สร้างบัญชีใน Supabase Auth และซิงก์เข้า public.users
+            </p>
+          </div>
+          <button type="button" onClick={onClose} className="text-2xl text-muted-foreground">
+            ×
+          </button>
+        </div>
+        <div className="mt-5 space-y-3">
+          <input
+            className="input-styled"
+            placeholder="ชื่อผู้ใช้"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+          />
+          <input
+            className="input-styled"
+            type="email"
+            placeholder="อีเมล"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
+          <input
+            className="input-styled"
+            type="password"
+            placeholder="รหัสผ่านอย่างน้อย 8 ตัวอักษร"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            minLength={8}
+            required
+          />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <select
+              className="input-styled"
+              value={role}
+              onChange={(event) => setRole(event.target.value as Role)}
+            >
+              <option>User</option>
+              <option>Admin</option>
+            </select>
+            <select
+              className="input-styled"
+              value={status}
+              onChange={(event) => setStatus(event.target.value as UserStatus)}
+            >
+              <option>Active</option>
+              <option>Suspended</option>
+            </select>
+          </div>
+        </div>
+        <div className="mt-6 flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl border border-gold/20 px-5 py-2 text-sm"
+          >
+            ยกเลิก
+          </button>
+          <button
+            disabled={saving}
+            className="rounded-xl bg-gradient-gold px-6 py-2 text-sm font-semibold text-primary-foreground shadow-gold disabled:cursor-wait disabled:opacity-60"
+          >
+            {saving ? "กำลังสร้าง..." : "เพิ่มผู้ใช้งาน"}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
@@ -332,7 +492,11 @@ function UserEditor({
           ) : null}
         </div>
         <div className="mt-6 flex justify-end gap-2">
-          <button type="button" onClick={onClose} className="rounded-xl border border-gold/20 px-5 py-2 text-sm">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl border border-gold/20 px-5 py-2 text-sm"
+          >
             ยกเลิก
           </button>
           <button

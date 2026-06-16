@@ -492,6 +492,99 @@ async function adminUsers(req, res) {
     return send(res, 200, { ok: true, source: "supabase-public-users", users });
   }
 
+  if (req.method === "POST") {
+    const body = await readBody(req);
+    const email = String(body.email || "")
+      .trim()
+      .toLowerCase();
+    const password = String(body.password || "");
+    const name = String(body.name || email || "User").trim().slice(0, 160);
+    const role = body.role === ADMIN_ROLE ? ADMIN_ROLE : "User";
+    const status = body.status === "Suspended" || body.status === "disabled" ? "disabled" : "active";
+
+    if (!email || !email.includes("@")) {
+      return send(res, 400, { ok: false, error: "กรุณากรอกอีเมลให้ถูกต้อง" });
+    }
+    if (!password || password.length < 8) {
+      return send(res, 400, { ok: false, error: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร" });
+    }
+    if (email === ADMIN_EMAIL) {
+      return send(res, 400, { ok: false, error: "บัญชีแอดมินหลักมีอยู่แล้ว" });
+    }
+
+    const { url, serviceKey } = requireConfig();
+    const existing = await findAuthUser(url, serviceKey, email);
+    if (existing) {
+      return send(res, 409, { ok: false, error: "อีเมลนี้มีบัญชีอยู่แล้ว" });
+    }
+
+    const authResponse = await fetch(`${url}/auth/v1/admin/users`, {
+      method: "POST",
+      headers: headers(serviceKey),
+      body: JSON.stringify({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: { name, role, displayName: name },
+        app_metadata: { role },
+      }),
+    });
+    if (!authResponse.ok) {
+      const detail = await readText(authResponse);
+      return send(res, 200, {
+        ok: false,
+        error: `Supabase Auth create failed ${authResponse.status}: ${detail}`,
+      });
+    }
+
+    const authUser = await authResponse.json().catch(() => ({}));
+    const id = authUser.id || authUser.user?.id;
+    if (!id) {
+      return send(res, 200, { ok: false, error: "สร้างบัญชีแล้วแต่ไม่พบ user id จาก Supabase Auth" });
+    }
+
+    if (status === "disabled") {
+      await fetch(`${url}/auth/v1/admin/users/${encodeURIComponent(id)}`, {
+        method: "PUT",
+        headers: headers(serviceKey),
+        body: JSON.stringify({ ban_duration: "876000h" }),
+      }).catch(() => null);
+    }
+
+    const publicResult = await rest("users?on_conflict=id", {
+      method: "POST",
+      headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+      body: JSON.stringify({
+        id,
+        email,
+        name,
+        role,
+        status,
+        provider: "email",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }),
+    });
+    if (!publicResult.ok) return sendRestError(res, publicResult);
+
+    const rows = Array.isArray(publicResult.data) ? publicResult.data : [];
+    const saved = rows[0] || { id, email, name, role, status };
+    return send(res, 200, {
+      ok: true,
+      source: "supabase-public-users",
+      user: {
+        id: saved.id,
+        email: saved.email || email,
+        name: saved.name || name,
+        role: saved.role || role,
+        status: saved.status === "disabled" ? "Suspended" : "Active",
+        joined: String(saved.created_at || "").slice(0, 10),
+        createdAt: saved.created_at,
+        provider: saved.provider || "email",
+      },
+    });
+  }
+
   if (req.method === "PATCH") {
     const body = await readBody(req);
     const id = String(body.id || "").trim();
