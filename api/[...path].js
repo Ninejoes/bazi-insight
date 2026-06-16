@@ -600,6 +600,7 @@ async function articles(req, res) {
     });
   }
   if (req.method === "POST") {
+    await requireAdmin(req);
     const article = normalizeArticle(await readBody(req));
     const result = await rest("articles?on_conflict=slug", {
       method: "POST",
@@ -615,6 +616,7 @@ async function articles(req, res) {
     });
   }
   if (req.method === "DELETE") {
+    await requireAdmin(req);
     const slug = new URL(req.url, "https://likhitfa.local").searchParams.get("slug");
     if (!slug) return send(res, 400, { ok: false, error: "Missing slug" });
     const result = await rest(`articles?slug=eq.${encodeURIComponent(slug)}`, { method: "DELETE" });
