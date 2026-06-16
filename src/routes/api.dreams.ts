@@ -21,6 +21,9 @@ type DreamRow = {
   advice?: string;
 };
 
+const BLOCKED_DREAM_IDS = new Set(["9cc47d6f-0f65-4c3a-86ed-cbcb98e36622"]);
+const BLOCKED_DREAM_CATEGORIES = new Set(["developer"]);
+
 function normalizeDream(row: DreamRow): DreamRecord {
   const keyword = String(row.keyword || "").trim();
   return {
@@ -73,6 +76,7 @@ function buildDreamQuery({
   letter,
   page,
   limit,
+  includeBlocked,
 }: {
   q: string;
   keyword: string;
@@ -80,6 +84,7 @@ function buildDreamQuery({
   letter: string;
   page: number;
   limit: number;
+  includeBlocked: boolean;
 }) {
   const offset = (page - 1) * limit;
   const params = new URLSearchParams({
@@ -88,6 +93,15 @@ function buildDreamQuery({
     limit: String(limit),
     offset: String(offset),
   });
+
+  if (!includeBlocked) {
+    for (const id of BLOCKED_DREAM_IDS) params.set("id", `neq.${id}`);
+    if (!category) {
+      for (const blockedCategory of BLOCKED_DREAM_CATEGORIES) {
+        params.set("category", `neq.${blockedCategory}`);
+      }
+    }
+  }
 
   if (keyword) {
     params.set("keyword", `eq.${keyword}`);
@@ -125,13 +139,14 @@ async function listDreams({
   letter = "",
   page = 1,
   limit = 20,
+  includeBlocked = false,
 } = {}) {
   if (!getSupabaseConfig()) {
     throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
 
   const response = await supabaseRequest(
-    buildDreamQuery({ q, keyword, category, letter, page, limit }),
+    buildDreamQuery({ q, keyword, category, letter, page, limit, includeBlocked }),
     {
       headers: { Prefer: "count=exact" },
     },
@@ -197,9 +212,18 @@ export const Route = createFileRoute("/api/dreams")({
           const letter = (url.searchParams.get("letter") || "").trim();
           const page = clampPage(url.searchParams.get("page"));
           const limit = clampLimit(url.searchParams.get("limit"));
+          let includeBlocked = false;
+          if (url.searchParams.get("includeBlocked") === "1") {
+            try {
+              await requireAdmin(request);
+              includeBlocked = true;
+            } catch {
+              includeBlocked = false;
+            }
+          }
           return json({
             ok: true,
-            ...(await listDreams({ q, keyword, category, letter, page, limit })),
+            ...(await listDreams({ q, keyword, category, letter, page, limit, includeBlocked })),
           });
         } catch (error) {
           return json(

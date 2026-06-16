@@ -24,6 +24,8 @@ import {
 } from "./_supabase.js";
 
 const rateLimitBuckets = new Map();
+const BLOCKED_DREAM_IDS = new Set(["9cc47d6f-0f65-4c3a-86ed-cbcb98e36622"]);
+const BLOCKED_DREAM_CATEGORIES = new Set(["developer"]);
 
 async function rest(path, init = {}) {
   try {
@@ -758,7 +760,16 @@ async function dreams(req, res) {
     const letter = (url.searchParams.get("letter") || "").trim();
     const page = clampPage(url.searchParams.get("page"));
     const limit = clampLimit(url.searchParams.get("limit"));
-    const result = await rest(buildDreamQuery({ q, keyword, category, letter, page, limit }), {
+    let includeBlocked = false;
+    if (url.searchParams.get("includeBlocked") === "1") {
+      try {
+        await requireAdmin(req);
+        includeBlocked = true;
+      } catch {
+        includeBlocked = false;
+      }
+    }
+    const result = await rest(buildDreamQuery({ q, keyword, category, letter, page, limit, includeBlocked }), {
       headers: { Prefer: "count=exact" },
     });
     if (!result.ok) return sendRestError(res, result);
@@ -831,7 +842,7 @@ function parseTotal(contentRange, fallback) {
   return Number.parseInt(total, 10);
 }
 
-function buildDreamQuery({ q, keyword, category, letter, page, limit }) {
+function buildDreamQuery({ q, keyword, category, letter, page, limit, includeBlocked = false }) {
   const offset = (page - 1) * limit;
   const params = new URLSearchParams({
     select: "*",
@@ -839,6 +850,15 @@ function buildDreamQuery({ q, keyword, category, letter, page, limit }) {
     limit: String(limit),
     offset: String(offset),
   });
+
+  if (!includeBlocked) {
+    for (const id of BLOCKED_DREAM_IDS) params.set("id", `neq.${id}`);
+    if (!category) {
+      for (const blockedCategory of BLOCKED_DREAM_CATEGORIES) {
+        params.set("category", `neq.${blockedCategory}`);
+      }
+    }
+  }
 
   if (keyword) {
     params.set("keyword", `eq.${keyword}`);

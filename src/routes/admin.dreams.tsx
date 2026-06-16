@@ -48,10 +48,13 @@ function AdminDreams() {
       const params = new URLSearchParams({
         page: String(page),
         limit: String(pageSize),
+        includeBlocked: "1",
       });
       if (query) params.set("q", query);
       if (filterLetter) params.set("letter", filterLetter);
-      const response = await fetch(`/api/dreams?${params.toString()}`);
+      const response = await fetch(`/api/dreams?${params.toString()}`, {
+        headers: adminAuthHeaders(),
+      });
       const data = await response.json().catch(() => ({}));
       if (mounted && data.ok) {
         setItems(data.dreams || []);
@@ -78,10 +81,13 @@ function AdminDreams() {
     const params = new URLSearchParams({
       page: String(page),
       limit: String(pageSize),
+      includeBlocked: "1",
     });
     if (query) params.set("q", query);
     if (filterLetter) params.set("letter", filterLetter);
-    const response = await fetch(`/api/dreams?${params.toString()}`);
+    const response = await fetch(`/api/dreams?${params.toString()}`, {
+      headers: adminAuthHeaders(),
+    });
     const data = await response.json().catch(() => ({}));
     if (data.ok) {
       setItems(data.dreams || []);
