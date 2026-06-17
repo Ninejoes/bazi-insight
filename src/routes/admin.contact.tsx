@@ -16,6 +16,19 @@ export const Route = createFileRoute("/admin/contact")({
   component: AdminContact,
 });
 
+function normalizeSiteContent(value?: Partial<SiteContent>): SiteContent {
+  const about = (value?.about || {}) as Partial<SiteContent["about"]>;
+  const contact = (value?.contact || {}) as Partial<SiteContent["contact"]>;
+  return {
+    about: {
+      ...siteContentSeed.about,
+      ...about,
+      story: Array.isArray(about.story) ? about.story : siteContentSeed.about.story,
+    },
+    contact: { ...siteContentSeed.contact, ...contact },
+  };
+}
+
 function AdminContact() {
   const [notice, setNotice] = useState("");
   const [content, setContent] = useState<SiteContent>(siteContentSeed);
@@ -35,7 +48,7 @@ function AdminContact() {
       }
 
       if (mounted && data.ok) {
-        setContent(data.content || siteContentSeed);
+        setContent(normalizeSiteContent(data.content));
         setNotice(
           data.error
             ? friendlyErrorMessage(data.error, "เชื่อมต่อข้อมูลเว็บไซต์ไม่ได้")
@@ -65,7 +78,7 @@ function AdminContact() {
       setNotice(friendlyErrorMessage(data.error, "บันทึกข้อมูลเว็บไซต์ไม่สำเร็จ"));
       return;
     }
-    setContent(data.content || next);
+    setContent(normalizeSiteContent(data.content || next));
     setNotice(message);
   };
 

@@ -1034,10 +1034,39 @@ async function faqs(req, res) {
   return send(res, 405, { ok: false, error: "Method not allowed" });
 }
 
+const siteContentDefaults = {
+  about: {
+    title: "ลิขิตฟ้า · ศาสตร์โบราณในมือคุณ",
+    description:
+      "Likhitfa เกิดจากความตั้งใจที่จะนำศาสตร์ดูดวงตะวันออกอันลึกซึ้ง — ปาจื้อ ไพ่ทาโรต์ และทำนายฝัน — มาถ่ายทอดในรูปแบบที่เข้าใจง่ายและสวยงามสำหรับคนยุคใหม่",
+    story: [
+      "จุดเริ่มต้นของลิขิตฟ้ามาจากบทสนทนาเล็กๆ ระหว่างนักออกแบบ นักพัฒนา และอาจารย์ดูดวงจีนรุ่นใหม่ ที่เชื่อว่าศาสตร์การดูดวงไม่ควรน่ากลัวหรือยากเกินไป",
+      "เราจึงสร้างประสบการณ์ที่ผสานความสวยงาม ความแม่นยำ และการเข้าถึงได้ของยุคดิจิทัล เพื่อให้ทุกคนสามารถทำความรู้จักตัวเองผ่านสายตาของศาสตร์ที่สืบทอดมานานหลายพันปี",
+    ],
+    vision: "ทำให้ศาสตร์การดูดวงเป็นเครื่องมือที่ใช้ทบทวนตัวเองได้ทุกวัน เข้าถึงง่ายและใช้งานสนุก",
+    mission: "ส่งมอบประสบการณ์ดูดวงที่งดงาม น่าเชื่อถือ และมีจริยธรรมในทุกการตีความ",
+  },
+  contact: {
+    email: "hello@likhitfa.com",
+    phone: "02-123-4567",
+    line: "@likhitfa",
+    facebook: "facebook.com/likhitfa",
+    address: "ชั้น 12 อาคารฟ้าลิขิต ถ.สุขุมวิท กรุงเทพฯ 10110",
+    hoursWeekday: "จันทร์ - ศุกร์ · 09:00 - 18:00",
+    hoursSaturday: "เสาร์ · 10:00 - 16:00",
+  },
+};
+
 function normalizeContent(row = {}) {
+  const about = row.about && typeof row.about === "object" ? row.about : {};
+  const contact = row.contact && typeof row.contact === "object" ? row.contact : {};
   return {
-    about: row.about || {},
-    contact: row.contact || {},
+    about: {
+      ...siteContentDefaults.about,
+      ...about,
+      story: Array.isArray(about.story) ? about.story : siteContentDefaults.about.story,
+    },
+    contact: { ...siteContentDefaults.contact, ...contact },
   };
 }
 

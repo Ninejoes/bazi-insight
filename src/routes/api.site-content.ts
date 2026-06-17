@@ -16,9 +16,15 @@ type SiteContentRow = {
 };
 
 function normalizeContent(row?: SiteContentRow | Partial<SiteContent>): SiteContent {
+  const about = (row?.about || {}) as Partial<SiteContent["about"]>;
+  const contact = (row?.contact || {}) as Partial<SiteContent["contact"]>;
   return {
-    about: { ...siteContentSeed.about, ...(row?.about || {}) },
-    contact: { ...siteContentSeed.contact, ...(row?.contact || {}) },
+    about: {
+      ...siteContentSeed.about,
+      ...about,
+      story: Array.isArray(about.story) ? about.story : siteContentSeed.about.story,
+    },
+    contact: { ...siteContentSeed.contact, ...contact },
   };
 }
 
