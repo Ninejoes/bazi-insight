@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { type DreamRecord } from "@/lib/admin-content";
@@ -17,10 +17,11 @@ export const Route = createFileRoute("/dream/$slug")({
       keywords: ["ทำนายฝัน", `ฝันเห็น${decodeURIComponent(params.slug)}`, "เลขเด็ดความฝัน"],
     });
   },
-  loader: async ({ params }) => ({
-    slug: params.slug,
-    dream: await loadDreamBySlug(params.slug),
-  }),
+  loader: async ({ params }) => {
+    const dream = await loadDreamBySlug(params.slug);
+    if (!dream) throw notFound();
+    return { slug: params.slug, dream };
+  },
   component: DreamDetail,
 });
 
@@ -141,7 +142,12 @@ function DreamDetail() {
             </p>
             <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {related.map((item) => (
-                <Link key={item.id} to="/dream/$slug" params={{ slug: item.keyword }} className="group">
+                <Link
+                  key={item.id}
+                  to="/dream/$slug"
+                  params={{ slug: item.keyword }}
+                  className="group"
+                >
                   <article className="rounded-2xl border border-border bg-card/40 p-4 transition hover:border-gold/50 hover:bg-gold/5">
                     <div className="text-[10px] text-gold/80">{item.category}</div>
                     <h3 className="mt-1 font-display text-xl text-foreground group-hover:text-gold">
@@ -162,11 +168,21 @@ function DreamDetail() {
   );
 }
 
-function InfoCard({ title, value, large = false }: { title: string; value: string; large?: boolean }) {
+function InfoCard({
+  title,
+  value,
+  large = false,
+}: {
+  title: string;
+  value: string;
+  large?: boolean;
+}) {
   return (
     <div className="rounded-2xl border border-border bg-card/40 p-5">
       <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{title}</div>
-      <div className={`mt-2 text-gold ${large ? "font-display text-3xl" : "text-lg font-semibold"}`}>
+      <div
+        className={`mt-2 text-gold ${large ? "font-display text-3xl" : "text-lg font-semibold"}`}
+      >
         {value}
       </div>
     </div>
@@ -207,10 +223,13 @@ function applyClientDreamSeo(dream: DreamRecord) {
   const metadata = dreamSeo(dream);
   const title = metadata.meta.find((item) => "title" in item)?.title || `ฝันเห็น${dream.keyword}`;
   const description = `ฝันเห็น${dream.keyword} หมายถึงอะไร อ่านคำทำนาย เลขเด็ด ${dream.numbers || "ที่เกี่ยวข้อง"} ช่วงเวลาฝัน และวิธีแก้เคล็ด`;
-  const canonical = `${window.location.origin}/dream/${encodeURIComponent(dream.keyword)}`;
+  const canonical = `${siteUrl}/dream/${encodeURIComponent(dream.keyword)}`;
   document.title = title;
   setMeta("description", description);
-  setMeta("keywords", [`ทำนายฝัน`, `ฝันเห็น${dream.keyword}`, "เลขเด็ดความฝัน", dream.category].join(", "));
+  setMeta(
+    "keywords",
+    [`ทำนายฝัน`, `ฝันเห็น${dream.keyword}`, "เลขเด็ดความฝัน", dream.category].join(", "),
+  );
   setProperty("og:title", title);
   setProperty("og:description", description);
   setProperty("og:url", canonical);

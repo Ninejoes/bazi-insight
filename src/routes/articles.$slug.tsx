@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { type Article } from "@/lib/articles";
@@ -20,10 +20,11 @@ export const Route = createFileRoute("/articles/$slug")({
       keywords: ["บทความดูดวง", "Likhitfa"],
     });
   },
-  loader: async ({ params }) => ({
-    slug: params.slug,
-    article: await loadArticleBySlug(params.slug),
-  }),
+  loader: async ({ params }) => {
+    const article = await loadArticleBySlug(params.slug);
+    if (!article) throw notFound();
+    return { slug: params.slug, article };
+  },
   notFoundComponent: () => (
     <div className="min-h-screen flex items-center justify-center text-center">
       <div>
@@ -184,7 +185,7 @@ function applyClientArticleSeo(article: Article) {
   const metadata = articleSeo(article);
   const title = metadata.meta.find((item) => "title" in item)?.title || article.title;
   const description = article.seoDescription || article.excerpt;
-  const canonical = article.canonicalUrl || `${window.location.origin}/articles/${article.slug}`;
+  const canonical = `${siteUrl}/articles/${encodeURIComponent(article.slug)}`;
   const image = absoluteImage(article.cover);
   document.title = title;
   setMeta("description", description);
@@ -219,7 +220,7 @@ function articleSeo(article: Article) {
     title: article.seoTitle || article.title,
     description: article.seoDescription || article.excerpt,
     path: `/articles/${article.slug}`,
-    canonicalUrl: article.canonicalUrl || `${siteUrl}/articles/${article.slug}`,
+    canonicalUrl: `${siteUrl}/articles/${encodeURIComponent(article.slug)}`,
     image: absoluteImage(article.cover),
     type: "article",
     keywords: article.keywords || ["บทความดูดวง", article.category, article.title],
@@ -272,7 +273,9 @@ function ArticleBlock({ text }: { text: string }) {
     );
   }
   if (text.startsWith("### ")) {
-    return <h3 className="pt-2 text-xl font-semibold text-foreground">{renderInline(text.slice(4))}</h3>;
+    return (
+      <h3 className="pt-2 text-xl font-semibold text-foreground">{renderInline(text.slice(4))}</h3>
+    );
   }
   if (text.trim() === "---") {
     return <hr className="my-6 border-gold/20" />;

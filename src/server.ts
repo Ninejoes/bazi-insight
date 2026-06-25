@@ -91,10 +91,14 @@ function withHtmlNoStore(response: Response) {
   const contentType = response.headers.get("content-type") || "";
   if (!contentType.includes("text/html")) return response;
 
+  const headers = noStoreHeaders(response.headers);
+  if (response.status === 404 || response.status === 410) {
+    headers.set("X-Robots-Tag", "noindex, follow");
+  }
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
-    headers: noStoreHeaders(response.headers),
+    headers,
   });
 }
 
@@ -133,9 +137,9 @@ async function loadArticlesForSitemap() {
 async function loadDreamsForSitemap() {
   if (!getSupabaseConfig()) return undefined;
 
-  const rows = await loadSupabaseSitemapRows<{ keyword?: string }>({
+  const rows = await loadSupabaseSitemapRows<{ keyword?: string; updated_at?: string }>({
     table: "dreams",
-    select: "keyword",
+    select: "keyword,updated_at",
     order: "keyword.asc",
   });
 
@@ -143,7 +147,7 @@ async function loadDreamsForSitemap() {
     ?.map((row): SitemapDream | null => {
       const keyword = String(row.keyword || "").trim();
       if (!keyword) return null;
-      return { keyword };
+      return { keyword, updatedAt: String(row.updated_at || "") };
     })
     .filter((row): row is SitemapDream => Boolean(row));
 }

@@ -4,7 +4,7 @@ import { siteUrl } from "./seo";
 import { tarotCategories } from "./tarot-cards";
 
 export type SitemapArticle = Pick<Article, "slug" | "date">;
-export type SitemapDream = Pick<DreamRecord, "keyword">;
+export type SitemapDream = Pick<DreamRecord, "keyword"> & { updatedAt?: string };
 
 type SitemapEntry = {
   loc: string;
@@ -38,7 +38,7 @@ function normalizeSiteUrl(url = siteUrl) {
 }
 
 function normalizeDate(value?: string) {
-  if (!value) return new Date().toISOString().slice(0, 10);
+  if (!value) return undefined;
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return value.slice(0, 10);
   return parsed.toISOString().slice(0, 10);
@@ -54,10 +54,8 @@ function dedupeEntries(entries: SitemapEntry[]) {
 }
 
 export function publicSitemapEntries(articles: SitemapArticle[] = [], dreams: SitemapDream[] = []) {
-  const today = new Date().toISOString().slice(0, 10);
   const tarotRoutes = tarotCategories.map((category) => ({
     loc: `/tarot/${category.slug}`,
-    lastmod: today,
     changefreq: "weekly" as const,
     priority: category.slug === "daily" ? "0.8" : "0.7",
   }));
@@ -69,31 +67,30 @@ export function publicSitemapEntries(articles: SitemapArticle[] = [], dreams: Si
   }));
   const dreamRoutes = dreams.map((dream) => ({
     loc: `/dream/${encodeURIComponent(dream.keyword)}`,
-    lastmod: today,
+    lastmod: normalizeDate(dream.updatedAt),
     changefreq: "weekly" as const,
     priority: "0.7",
   }));
 
-  return dedupeEntries([
-    ...basePublicRoutes.map((entry) => ({ ...entry, lastmod: today })),
-    ...tarotRoutes,
-    ...articleRoutes,
-    ...dreamRoutes,
-  ]);
+  return dedupeEntries([...basePublicRoutes, ...tarotRoutes, ...articleRoutes, ...dreamRoutes]);
 }
 
-export function buildSitemapXml(articles: SitemapArticle[] = [], url = siteUrl, dreams: SitemapDream[] = []) {
+export function buildSitemapXml(
+  articles: SitemapArticle[] = [],
+  url = siteUrl,
+  dreams: SitemapDream[] = [],
+) {
   const origin = normalizeSiteUrl(url);
   const entries = publicSitemapEntries(articles, dreams);
   const body = entries
-    .map(
-      (entry) => `  <url>
+    .map((entry) => {
+      const lastmod = normalizeDate(entry.lastmod);
+      return `  <url>
     <loc>${xmlEscape(`${origin}${entry.loc}`)}</loc>
-    <lastmod>${xmlEscape(normalizeDate(entry.lastmod))}</lastmod>
-    <changefreq>${entry.changefreq}</changefreq>
+${lastmod ? `    <lastmod>${xmlEscape(lastmod)}</lastmod>\n` : ""}    <changefreq>${entry.changefreq}</changefreq>
     <priority>${entry.priority}</priority>
-  </url>`,
-    )
+  </url>`;
+    })
     .join("\n");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
