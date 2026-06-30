@@ -23,6 +23,13 @@ type LotteryApiResponse = {
   error?: string;
   mode?: "latest" | "result";
   date?: LotteryDrawDate;
+  latestDate?: LotteryDrawDate;
+  latestIsoDate?: string;
+  nextDraw?: LotteryDrawDate;
+  source?: "cache" | "glo";
+  cachedAt?: string;
+  pdfUrl?: string | null;
+  youtubeUrl?: string | null;
   data?: LotteryResultData;
   history?: LotteryHistoryItem[];
   frequency?: LotteryFrequencyMap;
@@ -67,6 +74,9 @@ function LotteryPage() {
   const [resultLabel, setResultLabel] = useState("");
   const [history, setHistory] = useState<LotteryHistoryItem[]>([]);
   const [frequency, setFrequency] = useState<LotteryFrequencyMap | null>(null);
+  const [nextDraw, setNextDraw] = useState<LotteryDrawDate | null>(null);
+  const [dataSource, setDataSource] = useState("");
+  const [cachedAt, setCachedAt] = useState("");
   const [freqMode, setFreqMode] = useState<LotteryFrequencyMode>("last2");
   const [selectedPrize, setSelectedPrize] = useState(lotteryPrizes.length - 1);
   const [loading, setLoading] = useState("");
@@ -77,7 +87,10 @@ function LotteryPage() {
     () => frequency || (history.length ? buildLotteryFrequency(history) : null),
     [frequency, history],
   );
-  const predictions = useMemo(() => makePredictions(effectiveFrequency, seed), [effectiveFrequency, seed]);
+  const predictions = useMemo(
+    () => makePredictions(effectiveFrequency, seed),
+    [effectiveFrequency, seed],
+  );
 
   useEffect(() => {
     const applyHashTab = () => {
@@ -87,6 +100,11 @@ function LotteryPage() {
     applyHashTab();
     window.addEventListener("hashchange", applyHashTab);
     return () => window.removeEventListener("hashchange", applyHashTab);
+  }, []);
+
+  useEffect(() => {
+    void loadLatestResult();
+    void loadStats(36, { silent: true });
   }, []);
 
   async function loadResult() {
@@ -101,6 +119,9 @@ function LotteryPage() {
       }
       setResult(data.data);
       setResultDate(data.date);
+      setNextDraw(data.nextDraw || null);
+      setDataSource(formatDataSource(data.source));
+      setCachedAt(data.cachedAt || "");
       setResultLabel(data.date ? `งวดประจำวันที่ ${thaiLotteryDate(data.date)}` : "งวดที่เลือก");
     } catch (loadError) {
       setError(friendlyErrorMessage(loadError, "โหลดผลรางวัลไม่สำเร็จ"));
@@ -120,7 +141,12 @@ function LotteryPage() {
       }
       setResult(data.data);
       setResultDate(data.date || null);
-      setResultLabel(data.date ? `งวดประจำวันที่ ${thaiLotteryDate(data.date)}` : "ผลรางวัลงวดล่าสุด");
+      setNextDraw(data.nextDraw || null);
+      setDataSource(formatDataSource(data.source));
+      setCachedAt(data.cachedAt || "");
+      setResultLabel(
+        data.date ? `งวดประจำวันที่ ${thaiLotteryDate(data.date)}` : "ผลรางวัลงวดล่าสุด",
+      );
     } catch (loadError) {
       setError(friendlyErrorMessage(loadError, "โหลดผลรางวัลงวดล่าสุดไม่สำเร็จ"));
     } finally {
@@ -128,8 +154,8 @@ function LotteryPage() {
     }
   }
 
-  async function loadStats(limit = 24) {
-    setError("");
+  async function loadStats(limit = 24, options: { silent?: boolean } = {}) {
+    if (!options.silent) setError("");
     setLoading("stats");
     try {
       const response = await fetch(`/api/lottery?mode=history&limit=${limit}`);
@@ -139,9 +165,12 @@ function LotteryPage() {
       }
       setHistory(data.history || []);
       setFrequency(data.frequency || null);
+      setNextDraw(data.nextDraw || null);
+      setDataSource(formatDataSource(data.source));
+      setCachedAt(data.cachedAt || "");
       if (!(data.history || []).length) throw new Error("ยังไม่มีข้อมูลย้อนหลังจาก GLO");
     } catch (loadError) {
-      setError(friendlyErrorMessage(loadError, "โหลดสถิติไม่สำเร็จ"));
+      if (!options.silent) setError(friendlyErrorMessage(loadError, "โหลดสถิติไม่สำเร็จ"));
     } finally {
       setLoading("");
     }
@@ -168,7 +197,8 @@ function LotteryPage() {
               เลขเด็ด<span className="text-gradient-gold italic">ลิขิตฟ้า</span>
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-              ตรวจผลรางวัล ดูสถิติย้อนหลัง อ่านความน่าจะเป็น และสุ่มเลขจากข้อมูลจริงเพื่อใช้เป็นแนวทางอย่างมีสติ
+              ตรวจผลรางวัล ดูสถิติย้อนหลัง อ่านความน่าจะเป็น
+              และสุ่มเลขจากข้อมูลจริงเพื่อใช้เป็นแนวทางอย่างมีสติ
             </p>
           </div>
         </section>
@@ -208,6 +238,9 @@ function LotteryPage() {
               loading={loading === "result" || loading === "latest"}
               onLoad={loadResult}
               onLoadLatest={loadLatestResult}
+              nextDraw={nextDraw}
+              dataSource={dataSource}
+              cachedAt={cachedAt}
             />
           )}
           {activeTab === "stats" && (
@@ -218,6 +251,9 @@ function LotteryPage() {
               setFreqMode={setFreqMode}
               loading={loading === "stats"}
               onLoad={() => loadStats(24)}
+              nextDraw={nextDraw}
+              dataSource={dataSource}
+              cachedAt={cachedAt}
             />
           )}
           {activeTab === "probability" && (
@@ -227,6 +263,8 @@ function LotteryPage() {
             <PredictPanel
               predictions={predictions}
               hasStats={Boolean(effectiveFrequency)}
+              historyCount={history.length}
+              nextDraw={nextDraw}
               loading={loading === "stats"}
               onRandom={() => setSeed((value) => value + 1)}
               onLoadStats={loadStatsAndPredict}
@@ -235,8 +273,9 @@ function LotteryPage() {
         </section>
 
         <div className="mt-10 rounded-2xl border border-gold/10 bg-card/30 p-5 text-center text-xs leading-relaxed text-muted-foreground">
-          ข้อมูลผลรางวัลดึงผ่าน API จากสำนักงานสลากกินแบ่งรัฐบาลเท่าที่ระบบเข้าถึงได้
-          ส่วนการทำนายเป็นการสุ่มเพื่อความบันเทิงและการวิเคราะห์สถิติ ไม่ใช่การรับประกันผลรางวัล
+          ข้อมูลผลรางวัลดึงผ่าน API จากสำนักงานสลากกินแบ่งรัฐบาลเท่าที่ระบบเข้าถึงได้ และเก็บ cache
+          ไว้ในระบบเพื่อให้หน้าเว็บเร็วและไม่ต้องดึงข้อมูลทุกครั้ง
+          ส่วนการทำนายเป็นการวิเคราะห์เชิงสถิติและความบันเทิง ไม่ใช่การรับประกันผลรางวัล
         </div>
       </main>
       <SiteFooter />
@@ -253,6 +292,9 @@ function ResultPanel({
   loading,
   onLoad,
   onLoadLatest,
+  nextDraw,
+  dataSource,
+  cachedAt,
 }: {
   drawDate: LotteryDrawDate;
   setDrawDate: (value: LotteryDrawDate) => void;
@@ -262,6 +304,9 @@ function ResultPanel({
   loading: boolean;
   onLoad: () => void;
   onLoadLatest: () => void;
+  nextDraw: LotteryDrawDate | null;
+  dataSource: string;
+  cachedAt: string;
 }) {
   const years = Array.from({ length: 6 }, (_, i) => String(new Date().getFullYear() - i));
   return (
@@ -269,7 +314,15 @@ function ResultPanel({
       <div className="glass-strong h-fit rounded-3xl p-6 shadow-elegant">
         <div className="text-[11px] uppercase tracking-wider text-gold/80">Official Result</div>
         <h2 className="mt-2 font-display text-3xl text-foreground">ผลรางวัล</h2>
-        <p className="mt-2 text-sm text-muted-foreground">เลือกงวดที่ต้องการแล้วดึงข้อมูลผ่าน API ของระบบ</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          ระบบโหลดงวดล่าสุดจากฐานข้อมูลที่เก็บไว้ก่อน และค่อยดึงสดเมื่อเลือกงวดที่ยังไม่มีใน cache
+        </p>
+        {nextDraw && (
+          <div className="mt-4 rounded-2xl border border-gold/20 bg-gold/5 p-4 text-sm">
+            <div className="text-xs text-muted-foreground">รอผลงวดถัดไป</div>
+            <div className="mt-1 font-display text-2xl text-gold">{thaiLotteryDate(nextDraw)}</div>
+          </div>
+        )}
         <div className="mt-5 grid gap-3">
           <SelectBox
             label="วันที่ออก"
@@ -293,7 +346,10 @@ function ResultPanel({
             label="ปี"
             value={drawDate.year}
             onChange={(year) => setDrawDate({ ...drawDate, year })}
-            options={years.map((year) => ({ value: year, label: `${Number(year) + 543} (${year})` }))}
+            options={years.map((year) => ({
+              value: year,
+              label: `${Number(year) + 543} (${year})`,
+            }))}
           />
           <button
             type="button"
@@ -319,21 +375,35 @@ function ResultPanel({
           <>
             <div className="mb-5 flex items-center gap-2 text-xs text-muted-foreground">
               <span className="h-1.5 w-1.5 rounded-full bg-gold" />
-              {resultLabel || (resultDate ? `งวดประจำวันที่ ${thaiLotteryDate(resultDate)}` : "ผลรางวัล")}
+              {resultLabel ||
+                (resultDate ? `งวดประจำวันที่ ${thaiLotteryDate(resultDate)}` : "ผลรางวัล")}
             </div>
+            {(dataSource || cachedAt) && (
+              <div className="mb-5 rounded-2xl border border-border bg-card/30 px-4 py-3 text-xs text-muted-foreground">
+                {dataSource && <span>แหล่งข้อมูล: {dataSource}</span>}
+                {cachedAt && <span> · อัปเดต cache: {formatCacheTime(cachedAt)}</span>}
+              </div>
+            )}
             <div className="space-y-3">
               {lotteryPrizeRows.map((row) => {
                 const numbers = result[row.key]?.number || [];
                 if (!numbers.length) return null;
                 return (
-                  <div key={row.key} className="grid gap-3 rounded-2xl border border-border bg-card/35 p-4 md:grid-cols-[180px_1fr]">
+                  <div
+                    key={row.key}
+                    className="grid gap-3 rounded-2xl border border-border bg-card/35 p-4 md:grid-cols-[180px_1fr]"
+                  >
                     <div>
                       <div className="text-sm font-semibold text-foreground">{row.label}</div>
                       <div className="text-xs text-muted-foreground">{row.sub}</div>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {numbers.map((item, index) => (
-                        <NumberTag key={`${row.key}-${index}`} value={item.value} emphasis={row.emphasis} />
+                        <NumberTag
+                          key={`${row.key}-${index}`}
+                          value={item.value}
+                          emphasis={row.emphasis}
+                        />
                       ))}
                     </div>
                   </div>
@@ -342,7 +412,10 @@ function ResultPanel({
             </div>
           </>
         ) : (
-          <EmptyState title="ยังไม่มีผลรางวัล" body="เลือกงวดและกดดูผลรางวัลเพื่อดึงข้อมูลจาก API" />
+          <EmptyState
+            title="กำลังรอข้อมูลผลรางวัล"
+            body="ระบบจะโหลดงวดล่าสุดจาก cache ให้อัตโนมัติ หากยังไม่ขึ้นให้กดผลรางวัลงวดล่าสุด"
+          />
         )}
       </div>
     </div>
@@ -356,6 +429,9 @@ function StatsPanel({
   setFreqMode,
   loading,
   onLoad,
+  nextDraw,
+  dataSource,
+  cachedAt,
 }: {
   history: LotteryHistoryItem[];
   frequency: LotteryFrequencyMap | null;
@@ -363,6 +439,9 @@ function StatsPanel({
   setFreqMode: (mode: LotteryFrequencyMode) => void;
   loading: boolean;
   onLoad: () => void;
+  nextDraw: LotteryDrawDate | null;
+  dataSource: string;
+  cachedAt: string;
 }) {
   const sorted = Object.entries(frequency?.[freqMode] || {}).sort((a, b) => b[1] - a[1]);
   const maxCount = sorted[0]?.[1] || 1;
@@ -373,7 +452,16 @@ function StatsPanel({
           <div>
             <div className="text-[11px] uppercase tracking-wider text-gold/80">Frequency</div>
             <h2 className="mt-2 font-display text-3xl text-foreground">สถิติเลขที่ออกบ่อย</h2>
-            <p className="mt-2 text-sm text-muted-foreground">คำนวณจากข้อมูลย้อนหลังที่ดึงจาก API</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              คำนวณจากผลย้อนหลังจริงที่เก็บไว้ในระบบ {history.length ? `${history.length} งวด` : ""}
+              {nextDraw ? ` · รอผลงวด ${thaiLotteryDate(nextDraw)}` : ""}
+            </p>
+            {(dataSource || cachedAt) && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                {dataSource ? `แหล่งข้อมูล: ${dataSource}` : ""}
+                {cachedAt ? ` · cache ล่าสุด ${formatCacheTime(cachedAt)}` : ""}
+              </p>
+            )}
           </div>
           <button
             type="button"
@@ -403,7 +491,10 @@ function StatsPanel({
         {sorted.length ? (
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
             {sorted.slice(0, 64).map(([number, count], index) => (
-              <div key={number} className="rounded-2xl border border-border bg-card/40 p-3 text-center">
+              <div
+                key={number}
+                className="rounded-2xl border border-border bg-card/40 p-3 text-center"
+              >
                 <div className="font-mono text-lg font-semibold text-gold">{number}</div>
                 <div className="mt-1 text-[10px] text-muted-foreground">ออก {count} ครั้ง</div>
                 <div className="mt-2 h-1 overflow-hidden rounded-full bg-background/60">
@@ -417,7 +508,10 @@ function StatsPanel({
             ))}
           </div>
         ) : (
-          <EmptyState title="ยังไม่มีสถิติ" body="กดโหลดสถิติเพื่อดึงข้อมูลย้อนหลังและคำนวณความถี่" />
+          <EmptyState
+            title="กำลังรอสถิติ"
+            body="ระบบโหลดสถิติจาก cache ให้อัตโนมัติ หากยังไม่ขึ้นให้กดโหลดสถิติ"
+          />
         )}
       </div>
 
@@ -426,8 +520,13 @@ function StatsPanel({
         {history.length ? (
           <div className="mt-5 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             {history.slice(0, 12).map((item) => (
-              <div key={`${item.date.date}-${item.date.month}-${item.date.year}`} className="rounded-2xl border border-border bg-card/40 p-4">
-                <div className="text-xs text-muted-foreground">งวด {thaiLotteryDate(item.date)}</div>
+              <div
+                key={`${item.date.date}-${item.date.month}-${item.date.year}`}
+                className="rounded-2xl border border-border bg-card/40 p-4"
+              >
+                <div className="text-xs text-muted-foreground">
+                  งวด {thaiLotteryDate(item.date)}
+                </div>
                 <div className="mt-2 font-mono text-2xl font-semibold tracking-widest text-gold">
                   {item.data.first?.number?.[0]?.value || "------"}
                 </div>
@@ -456,8 +555,11 @@ function ProbabilityPanel({
   const selected = lotteryPrizes[selectedPrize];
   const probability = selected.winners / selected.combinations;
   const odds = Math.round(selected.combinations / selected.winners);
-  const expectedValue = probability * Number(selected.amount.replace(/,/g, "")) - (1 - probability) * 80;
-  const maxProb = lotteryPrizes[lotteryPrizes.length - 1].winners / lotteryPrizes[lotteryPrizes.length - 1].combinations;
+  const expectedValue =
+    probability * Number(selected.amount.replace(/,/g, "")) - (1 - probability) * 80;
+  const maxProb =
+    lotteryPrizes[lotteryPrizes.length - 1].winners /
+    lotteryPrizes[lotteryPrizes.length - 1].combinations;
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
@@ -502,7 +604,10 @@ function ProbabilityPanel({
           {lotteryPrizes.map((prize) => {
             const prob = prize.winners / prize.combinations;
             return (
-              <div key={prize.key} className="grid grid-cols-[100px_1fr_90px] items-center gap-3 text-xs">
+              <div
+                key={prize.key}
+                className="grid grid-cols-[100px_1fr_90px] items-center gap-3 text-xs"
+              >
                 <span className="text-muted-foreground">{prize.label}</span>
                 <div className="h-2 overflow-hidden rounded-full bg-card">
                   <div
@@ -525,12 +630,16 @@ function ProbabilityPanel({
 function PredictPanel({
   predictions,
   hasStats,
+  historyCount,
+  nextDraw,
   loading,
   onRandom,
   onLoadStats,
 }: {
   predictions: { first: string; last3: string; last2: string }[];
   hasStats: boolean;
+  historyCount: number;
+  nextDraw: LotteryDrawDate | null;
   loading: boolean;
   onRandom: () => void;
   onLoadStats: () => void;
@@ -543,12 +652,17 @@ function PredictPanel({
           <h2 className="mt-2 font-display text-3xl text-foreground">เลขเด็ดงวดหน้า</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             {hasStats
-              ? "สุ่มโดยถ่วงน้ำหนักจากสถิติย้อนหลังที่โหลดจาก API"
-              : "สุ่มแบบทั่วไป กดดึงสถิติเพื่อใช้ข้อมูลย้อนหลังถ่วงน้ำหนัก"}
+              ? `วิเคราะห์จากข้อมูลย้อนหลังจริง ${historyCount.toLocaleString("th-TH")} งวด แล้วถ่วงน้ำหนักตามเลขที่ออกบ่อย`
+              : "กำลังรอฐานข้อมูลย้อนหลัง กดดึงสถิติเพื่อใช้ข้อมูลจริงถ่วงน้ำหนัก"}
+            {nextDraw ? ` · สำหรับรอผลงวด ${thaiLotteryDate(nextDraw)}` : ""}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={onRandom} className="rounded-2xl bg-gradient-gold px-5 py-3 text-sm font-semibold text-primary-foreground shadow-gold">
+          <button
+            type="button"
+            onClick={onRandom}
+            className="rounded-2xl bg-gradient-gold px-5 py-3 text-sm font-semibold text-primary-foreground shadow-gold"
+          >
             สุ่มใหม่
           </button>
           <button
@@ -566,7 +680,9 @@ function PredictPanel({
           <div
             key={`${item.first}-${index}`}
             className={`rounded-3xl border p-5 text-center ${
-              index === 0 ? "border-gold/50 bg-gradient-gold-soft shadow-gold" : "border-border bg-card/40"
+              index === 0
+                ? "border-gold/50 bg-gradient-gold-soft shadow-gold"
+                : "border-border bg-card/40"
             }`}
           >
             <div className="text-[10px] uppercase tracking-wider text-gold/80">
@@ -583,7 +699,8 @@ function PredictPanel({
         ))}
       </div>
       <p className="mt-5 border-t border-gold/10 pt-4 text-xs leading-relaxed text-muted-foreground">
-        เครื่องมือนี้ใช้เพื่อความบันเทิงและการดูแนวโน้มเชิงสถิติเท่านั้น ความน่าจะเป็นจริงของตัวเลขแต่ละชุดยังเป็นการสุ่ม
+        เครื่องมือนี้ใช้เพื่อความบันเทิงและการดูแนวโน้มเชิงสถิติเท่านั้น
+        ความน่าจะเป็นจริงของตัวเลขแต่ละชุดยังเป็นการสุ่ม
         ควรใช้เงินอย่างมีขอบเขตและไม่ฝากความหวังทั้งหมดไว้กับการเสี่ยงโชค
       </p>
     </div>
@@ -604,7 +721,11 @@ function SelectBox({
   return (
     <label className="grid gap-1 text-sm">
       <span className="text-xs text-muted-foreground">{label}</span>
-      <select className="input-styled" value={value} onChange={(event) => onChange(event.target.value)}>
+      <select
+        className="input-styled"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
@@ -623,7 +744,9 @@ function NumberTag({ value, emphasis }: { value: string; emphasis?: "first" | "n
         ? "border-rose-300/40 bg-rose-400/10 text-rose-100"
         : "border-border bg-card/60 text-foreground";
   return (
-    <span className={`rounded-xl border px-4 py-2 font-mono text-lg font-semibold tracking-[0.12em] ${className}`}>
+    <span
+      className={`rounded-xl border px-4 py-2 font-mono text-lg font-semibold tracking-[0.12em] ${className}`}
+    >
       {value}
     </span>
   );
@@ -638,11 +761,21 @@ function EmptyState({ title, body }: { title: string; body: string }) {
   );
 }
 
-function StatBox({ label, value, danger = false }: { label: string; value: string; danger?: boolean }) {
+function StatBox({
+  label,
+  value,
+  danger = false,
+}: {
+  label: string;
+  value: string;
+  danger?: boolean;
+}) {
   return (
     <div className="rounded-2xl border border-border bg-card/40 p-4">
       <div className="text-xs text-muted-foreground">{label}</div>
-      <div className={`mt-1 font-display text-2xl ${danger ? "text-rose-200" : "text-gold"}`}>{value}</div>
+      <div className={`mt-1 font-display text-2xl ${danger ? "text-rose-200" : "text-gold"}`}>
+        {value}
+      </div>
     </div>
   );
 }
@@ -655,11 +788,36 @@ function formatProbability(probability: number) {
 }
 
 function makePredictions(frequency: LotteryFrequencyMap | null, seed: number) {
+  const hotLast2 = rankedNumbers(frequency?.last2, 2);
+  const hotLast3 = rankedNumbers(frequency?.last3b, 3);
+  const hotFirst = rankedNumbers(frequency?.first, 6);
   return Array.from({ length: 5 }, (_, index) => ({
-    first: weightedPick(frequency?.first, 6, seed + index * 17),
-    last3: weightedPick(frequency?.last3b, 3, seed + index * 23),
-    last2: weightedPick(frequency?.last2, 2, seed + index * 31),
+    first: blendCandidate(hotFirst, frequency?.first, 6, seed + index * 17),
+    last3: blendCandidate(hotLast3, frequency?.last3b, 3, seed + index * 23),
+    last2: blendCandidate(hotLast2, frequency?.last2, 2, seed + index * 31),
   }));
+}
+
+function rankedNumbers(freqMap: Record<string, number> | undefined, digits: number) {
+  if (!freqMap) return [];
+  return Object.entries(freqMap)
+    .filter(([number]) => number.length === digits)
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([number]) => number);
+}
+
+function blendCandidate(
+  hotNumbers: string[],
+  freqMap: Record<string, number> | undefined,
+  digits: number,
+  seed: number,
+) {
+  if (!hotNumbers.length) return weightedPick(freqMap, digits, seed);
+  const main = hotNumbers[Math.abs(seed) % Math.min(hotNumbers.length, 12)];
+  const companion = weightedPick(freqMap, digits, seed * 3 + 7);
+  if (digits === 2) return main;
+  if (digits === 3) return `${main.slice(0, 1)}${companion.slice(-2)}`.padStart(3, "0").slice(-3);
+  return `${main.slice(0, 3)}${companion.slice(-3)}`.padStart(6, "0").slice(-6);
 }
 
 function weightedPick(freqMap: Record<string, number> | undefined, digits: number, seed: number) {
@@ -683,4 +841,22 @@ function pseudoNumber(seed: number, digits: number) {
 function seeded(seed: number) {
   const x = Math.sin(seed * 999) * 10_000;
   return x - Math.floor(x);
+}
+
+function formatDataSource(source?: string) {
+  if (source === "cache") return "ฐานข้อมูลที่เก็บไว้ในระบบ";
+  if (source === "glo") return "สำนักงานสลากกินแบ่งรัฐบาล (ดึงสด)";
+  return "";
+}
+
+function formatCacheTime(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString("th-TH", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }

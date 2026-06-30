@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import lotteryCache from "./lottery-cache.js";
 import {
   ADMIN_EMAIL,
   ADMIN_NAME,
@@ -169,7 +170,10 @@ function normalizeReading(row = {}) {
   return {
     id: String(row.id || randomUUID()).slice(0, 80),
     user_id: row.user_id || row.userId || null,
-    email: String(row.email || "").trim().toLowerCase().slice(0, 160),
+    email: String(row.email || "")
+      .trim()
+      .toLowerCase()
+      .slice(0, 160),
     type: String(row.type || "ปาจื้อ").slice(0, 40),
     title: String(row.title || "ผลดูดวง").slice(0, 200),
     result: String(row.result || "").slice(0, 1000),
@@ -187,7 +191,9 @@ function toPublicReading(row = {}) {
     type: reading.type,
     title: reading.title,
     result: reading.result,
-    date: String(reading.created_at || "").replace("T", " ").slice(0, 16),
+    date: String(reading.created_at || "")
+      .replace("T", " ")
+      .slice(0, 16),
     input: reading.input,
     output: reading.output,
     createdAt: reading.created_at,
@@ -280,6 +286,49 @@ function buildLotteryFrequency(history = []) {
   return frequency;
 }
 
+function lotteryDrawKey(date = {}) {
+  return `${date.year}-${date.month}-${date.date}`;
+}
+
+function getCachedLotteryHistory(limit = 24) {
+  return [...(lotteryCache.history || [])]
+    .sort((a, b) => lotteryDrawKey(b.date).localeCompare(lotteryDrawKey(a.date)))
+    .slice(0, limit);
+}
+
+function findCachedLotteryDraw(date = {}) {
+  const key = lotteryDrawKey(date);
+  return (lotteryCache.history || []).find((item) => lotteryDrawKey(item.date) === key) || null;
+}
+
+function getLatestCachedLotteryDraw() {
+  return findCachedLotteryDraw(lotteryCache.latestDate) || getCachedLotteryHistory(1)[0] || null;
+}
+
+function getNextLotteryDrawDate(from = new Date()) {
+  const cursor =
+    from instanceof Date
+      ? new Date(from)
+      : new Date(
+          Number.parseInt(from.year, 10),
+          Number.parseInt(from.month, 10) - 1,
+          Number.parseInt(from.date, 10),
+          12,
+        );
+  cursor.setHours(12, 0, 0, 0);
+  if (cursor.getDate() < 16) {
+    cursor.setDate(16);
+  } else {
+    cursor.setMonth(cursor.getMonth() + 1);
+    cursor.setDate(1);
+  }
+  return {
+    date: String(cursor.getDate()).padStart(2, "0"),
+    month: String(cursor.getMonth() + 1).padStart(2, "0"),
+    year: String(cursor.getFullYear()),
+  };
+}
+
 function extractLotteryData(payload = {}) {
   return (
     payload?.response?.result?.data ||
@@ -301,8 +350,12 @@ function cleanLotteryDraw(input = {}) {
   const yearNumber = Number.parseInt(String(input.year || now.getFullYear()), 10);
   return {
     date,
-    month: String(Number.isFinite(monthNumber) ? Math.min(12, Math.max(1, monthNumber)) : now.getMonth() + 1).padStart(2, "0"),
-    year: String(Number.isFinite(yearNumber) ? Math.min(2099, Math.max(2020, yearNumber)) : now.getFullYear()),
+    month: String(
+      Number.isFinite(monthNumber) ? Math.min(12, Math.max(1, monthNumber)) : now.getMonth() + 1,
+    ).padStart(2, "0"),
+    year: String(
+      Number.isFinite(yearNumber) ? Math.min(2099, Math.max(2020, yearNumber)) : now.getFullYear(),
+    ),
   };
 }
 
@@ -337,12 +390,30 @@ async function lottery(req, res) {
   const url = new URL(req.url || "/", "https://likhitfa.local");
   const body = req.method === "POST" ? await readBody(req) : {};
   const mode = String(body.mode || url.searchParams.get("mode") || "result");
+  const forceLive = String(body.live || url.searchParams.get("live") || "") === "1";
 
   if (mode === "history") {
     const limit = Math.min(
       36,
-      Math.max(1, Number.parseInt(String(body.limit || url.searchParams.get("limit") || "12"), 10) || 12),
+      Math.max(
+        1,
+        Number.parseInt(String(body.limit || url.searchParams.get("limit") || "12"), 10) || 12,
+      ),
     );
+    if (!forceLive && lotteryCache.history?.length) {
+      const history = getCachedLotteryHistory(limit);
+      return send(res, 200, {
+        ok: true,
+        source: "cache",
+        cachedAt: lotteryCache.generatedAt,
+        latestDate: lotteryCache.latestDate,
+        latestIsoDate: lotteryCache.latestIsoDate,
+        nextDraw: getNextLotteryDrawDate(lotteryCache.latestDate),
+        mode: "history",
+        history,
+        frequency: buildLotteryFrequency(history),
+      });
+    }
     const draws = getRecentLotteryDraws(limit);
     const settled = await Promise.allSettled(
       draws.map(async (date) => {
@@ -352,9 +423,7 @@ async function lottery(req, res) {
         return { date, data };
       }),
     );
-    const history = settled
-      .filter((item) => item.status === "fulfilled")
-      .map((item) => item.value);
+    const history = settled.filter((item) => item.status === "fulfilled").map((item) => item.value);
     return send(res, 200, {
       ok: true,
       source: "glo",
@@ -365,10 +434,34 @@ async function lottery(req, res) {
   }
 
   if (mode === "latest") {
+    if (!forceLive) {
+      const latest = getLatestCachedLotteryDraw();
+      if (latest) {
+        return send(res, 200, {
+          ok: true,
+          source: "cache",
+          cachedAt: lotteryCache.generatedAt,
+          latestDate: lotteryCache.latestDate,
+          latestIsoDate: lotteryCache.latestIsoDate,
+          nextDraw: getNextLotteryDrawDate(lotteryCache.latestDate),
+          mode: "latest",
+          date: latest.date,
+          data: latest.data,
+          pdfUrl: latest.pdfUrl,
+          youtubeUrl: latest.youtubeUrl,
+        });
+      }
+    }
     const payload = await postGloLottery(GLO_LATEST_ENDPOINT, {});
     const data = normalizeLotteryData(extractLotteryData(payload));
     if (!hasLotteryData(data)) throw new Error("ไม่พบผลรางวัลงวดล่าสุดจาก GLO");
-    return send(res, 200, { ok: true, source: "glo", mode: "latest", data, rawDate: payload?.response?.result?.date || null });
+    return send(res, 200, {
+      ok: true,
+      source: "glo",
+      mode: "latest",
+      data,
+      rawDate: payload?.response?.result?.date || null,
+    });
   }
 
   const draw = cleanLotteryDraw({
@@ -376,6 +469,22 @@ async function lottery(req, res) {
     month: body.month || url.searchParams.get("month"),
     year: body.year || url.searchParams.get("year"),
   });
+  if (!forceLive) {
+    const cached = findCachedLotteryDraw(draw);
+    if (cached) {
+      return send(res, 200, {
+        ok: true,
+        source: "cache",
+        cachedAt: lotteryCache.generatedAt,
+        mode: "result",
+        date: cached.date,
+        nextDraw: getNextLotteryDrawDate(lotteryCache.latestDate),
+        data: cached.data,
+        pdfUrl: cached.pdfUrl,
+        youtubeUrl: cached.youtubeUrl,
+      });
+    }
+  }
   const payload = await postGloLottery(GLO_RESULT_ENDPOINT, draw);
   const data = normalizeLotteryData(extractLotteryData(payload));
   if (!hasLotteryData(data)) throw new Error("ไม่พบผลรางวัลงวดนี้จาก GLO");
@@ -448,7 +557,11 @@ async function adminLogin(req, res) {
   if (token.user && roleOf(token.user) !== ADMIN_ROLE) {
     return send(res, 403, { ok: false, error: "บัญชีนี้ไม่มีสิทธิ์แอดมิน" });
   }
-  await saveAuthEvent(req, "admin_login", token.user || { email, user_metadata: { role: ADMIN_ROLE } });
+  await saveAuthEvent(
+    req,
+    "admin_login",
+    token.user || { email, user_metadata: { role: ADMIN_ROLE } },
+  );
   return send(res, 200, { ok: true, session: toSession(token, { email }) });
 }
 
@@ -498,9 +611,12 @@ async function adminUsers(req, res) {
       .trim()
       .toLowerCase();
     const password = String(body.password || "");
-    const name = String(body.name || email || "User").trim().slice(0, 160);
+    const name = String(body.name || email || "User")
+      .trim()
+      .slice(0, 160);
     const role = body.role === ADMIN_ROLE ? ADMIN_ROLE : "User";
-    const status = body.status === "Suspended" || body.status === "disabled" ? "disabled" : "active";
+    const status =
+      body.status === "Suspended" || body.status === "disabled" ? "disabled" : "active";
 
     if (!email || !email.includes("@")) {
       return send(res, 400, { ok: false, error: "กรุณากรอกอีเมลให้ถูกต้อง" });
@@ -540,7 +656,10 @@ async function adminUsers(req, res) {
     const authUser = await authResponse.json().catch(() => ({}));
     const id = authUser.id || authUser.user?.id;
     if (!id) {
-      return send(res, 200, { ok: false, error: "สร้างบัญชีแล้วแต่ไม่พบ user id จาก Supabase Auth" });
+      return send(res, 200, {
+        ok: false,
+        error: "สร้างบัญชีแล้วแต่ไม่พบ user id จาก Supabase Auth",
+      });
     }
 
     if (status === "disabled") {
@@ -591,7 +710,9 @@ async function adminUsers(req, res) {
     const email = String(body.email || "")
       .trim()
       .toLowerCase();
-    const name = String(body.name || email || "User").trim().slice(0, 160);
+    const name = String(body.name || email || "User")
+      .trim()
+      .slice(0, 160);
     const isPrimaryAdmin = email === ADMIN_EMAIL;
     const role = isPrimaryAdmin ? ADMIN_ROLE : body.role === ADMIN_ROLE ? ADMIN_ROLE : "User";
     const status = isPrimaryAdmin
@@ -873,9 +994,12 @@ async function dreams(req, res) {
         includeBlocked = false;
       }
     }
-    const result = await rest(buildDreamQuery({ q, keyword, category, letter, page, limit, includeBlocked }), {
-      headers: { Prefer: "count=exact" },
-    });
+    const result = await rest(
+      buildDreamQuery({ q, keyword, category, letter, page, limit, includeBlocked }),
+      {
+        headers: { Prefer: "count=exact" },
+      },
+    );
     if (!result.ok) return sendRestError(res, result);
     const rows = Array.isArray(result.data) ? result.data : [];
     const total = parseTotal(result.headers.get("content-range"), rows.length);
@@ -1338,14 +1462,15 @@ async function dashboard(res) {
     const range = result.headers.get("content-range") || "";
     return Number(range.split("/")[1] || 0);
   };
-  const [users, articlesCount, dreamsCount, leadsCount, messagesCount, historyCount] = await Promise.all([
-    countTable("users"),
-    countTable("articles"),
-    countTable("dreams"),
-    countTable("leads"),
-    countTable("contact_messages"),
-    countTable("reading_history"),
-  ]);
+  const [users, articlesCount, dreamsCount, leadsCount, messagesCount, historyCount] =
+    await Promise.all([
+      countTable("users"),
+      countTable("articles"),
+      countTable("dreams"),
+      countTable("leads"),
+      countTable("contact_messages"),
+      countTable("reading_history"),
+    ]);
   return send(res, 200, {
     ok: true,
     source: "supabase",

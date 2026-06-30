@@ -1,12 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
   buildLotteryFrequency,
+  findCachedLotteryDraw,
+  getCachedLotteryHistory,
+  getLatestCachedLotteryDraw,
+  getNextLotteryDrawDate,
   getRecentLotteryDraws,
   hasLotteryData,
   normalizeLotteryData,
   type LotteryDrawDate,
   type LotteryHistoryItem,
 } from "@/lib/lottery";
+import { lotteryCache } from "@/data/lottery-cache";
 import { json } from "@/lib/supabase-rest";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
 
@@ -21,8 +26,12 @@ function cleanDrawDate(input: Partial<LotteryDrawDate>): LotteryDrawDate {
 
   return {
     date,
-    month: String(Number.isFinite(monthNumber) ? Math.min(12, Math.max(1, monthNumber)) : now.getMonth() + 1).padStart(2, "0"),
-    year: String(Number.isFinite(yearNumber) ? Math.min(2099, Math.max(2020, yearNumber)) : now.getFullYear()),
+    month: String(
+      Number.isFinite(monthNumber) ? Math.min(12, Math.max(1, monthNumber)) : now.getMonth() + 1,
+    ).padStart(2, "0"),
+    year: String(
+      Number.isFinite(yearNumber) ? Math.min(2099, Math.max(2020, yearNumber)) : now.getFullYear(),
+    ),
   };
 }
 
@@ -78,8 +87,24 @@ async function fetchHistory(limit: number) {
     draws.map(async (date) => ({ date, data: await fetchLotteryResult(date) })),
   );
   return settled
-    .filter((item): item is PromiseFulfilledResult<LotteryHistoryItem> => item.status === "fulfilled")
+    .filter(
+      (item): item is PromiseFulfilledResult<LotteryHistoryItem> => item.status === "fulfilled",
+    )
     .map((item) => item.value);
+}
+
+function cachedHistoryPayload(limit: number) {
+  const history = getCachedLotteryHistory(lotteryCache, limit);
+  return {
+    ok: true,
+    source: "cache",
+    cachedAt: lotteryCache.generatedAt,
+    latestDate: lotteryCache.latestDate,
+    latestIsoDate: lotteryCache.latestIsoDate,
+    nextDraw: getNextLotteryDrawDate(lotteryCache.latestDate),
+    history,
+    frequency: buildLotteryFrequency(history),
+  };
 }
 
 export const Route = createFileRoute("/api/lottery")({
@@ -90,8 +115,27 @@ export const Route = createFileRoute("/api/lottery")({
         try {
           const url = new URL(request.url);
           const mode = url.searchParams.get("mode") || "result";
+          const forceLive = url.searchParams.get("live") === "1";
 
           if (mode === "latest") {
+            if (!forceLive) {
+              const latest = getLatestCachedLotteryDraw(lotteryCache);
+              if (latest) {
+                return json({
+                  ok: true,
+                  source: "cache",
+                  cachedAt: lotteryCache.generatedAt,
+                  mode: "latest",
+                  date: latest.date,
+                  latestDate: lotteryCache.latestDate,
+                  latestIsoDate: lotteryCache.latestIsoDate,
+                  nextDraw: getNextLotteryDrawDate(lotteryCache.latestDate),
+                  data: latest.data,
+                  pdfUrl: latest.pdfUrl,
+                  youtubeUrl: latest.youtubeUrl,
+                });
+              }
+            }
             const data = await fetchLatestLotteryResult();
             return json({ ok: true, source: "glo", mode: "latest", data });
           }
@@ -101,10 +145,14 @@ export const Route = createFileRoute("/api/lottery")({
               36,
               Math.max(1, Number.parseInt(url.searchParams.get("limit") || "12", 10) || 12),
             );
+            if (!forceLive && lotteryCache.history.length) {
+              return json(cachedHistoryPayload(limit));
+            }
             const history = await fetchHistory(limit);
             return json({
               ok: true,
               source: "glo",
+              nextDraw: getNextLotteryDrawDate(history[0]?.date || new Date()),
               history,
               frequency: buildLotteryFrequency(history),
             });
@@ -115,6 +163,22 @@ export const Route = createFileRoute("/api/lottery")({
             month: url.searchParams.get("month") || undefined,
             year: url.searchParams.get("year") || undefined,
           });
+          if (!forceLive) {
+            const cached = findCachedLotteryDraw(lotteryCache, date);
+            if (cached) {
+              return json({
+                ok: true,
+                source: "cache",
+                cachedAt: lotteryCache.generatedAt,
+                mode: "result",
+                date: cached.date,
+                nextDraw: getNextLotteryDrawDate(lotteryCache.latestDate),
+                data: cached.data,
+                pdfUrl: cached.pdfUrl,
+                youtubeUrl: cached.youtubeUrl,
+              });
+            }
+          }
           const data = await fetchLotteryResult(date);
           return json({ ok: true, source: "glo", date, data });
         } catch (error) {
