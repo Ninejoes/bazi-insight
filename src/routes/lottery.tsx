@@ -51,6 +51,23 @@ const freqLabels: Record<LotteryFrequencyMode, string> = {
 
 const LOTTERY_HISTORY_LIMIT = 120;
 
+type LotteryPredictionItem = {
+  number: string;
+  count: number;
+  modelScore: number;
+  observedRate: number;
+  reason: string;
+};
+
+type LotteryPredictionGroup = {
+  key: LotteryFrequencyMode;
+  label: string;
+  digits: number;
+  baselineOdds: string;
+  sampleSize: number;
+  items: LotteryPredictionItem[];
+};
+
 export const Route = createFileRoute("/lottery")({
   head: () =>
     seo({
@@ -90,8 +107,8 @@ function LotteryPage() {
     [frequency, history],
   );
   const predictions = useMemo(
-    () => makePredictions(effectiveFrequency, seed),
-    [effectiveFrequency, seed],
+    () => makePredictionGroups(effectiveFrequency, history, seed),
+    [effectiveFrequency, history, seed],
   );
 
   useEffect(() => {
@@ -639,7 +656,7 @@ function PredictPanel({
   onRandom,
   onLoadStats,
 }: {
-  predictions: { first: string; last3: string; last2: string }[];
+  predictions: LotteryPredictionGroup[];
   hasStats: boolean;
   historyCount: number;
   nextDraw: LotteryDrawDate | null;
@@ -678,25 +695,69 @@ function PredictPanel({
           </button>
         </div>
       </div>
-      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        {predictions.map((item, index) => (
-          <div
-            key={`${item.first}-${index}`}
-            className={`rounded-3xl border p-5 text-center ${
-              index === 0
-                ? "border-gold/50 bg-gradient-gold-soft shadow-gold"
-                : "border-border bg-card/40"
-            }`}
-          >
-            <div className="text-[10px] uppercase tracking-wider text-gold/80">
-              {index === 0 ? "แนะนำ" : `ชุด ${index + 1}`}
+      <div className="mt-6 grid gap-4 xl:grid-cols-2">
+        {predictions.map((group) => (
+          <div key={group.key} className="rounded-3xl border border-border bg-card/35 p-5">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <div className="text-[10px] uppercase tracking-[0.25em] text-gold/70">
+                  Prediction Band
+                </div>
+                <h3 className="mt-1 font-display text-2xl text-foreground">{group.label}</h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  วิเคราะห์จาก {group.sampleSize.toLocaleString("th-TH")} งวด ·
+                  โอกาสจริงโดยฐานรางวัล {group.baselineOdds}
+                </p>
+              </div>
+              <div className="rounded-full border border-gold/20 bg-gold/5 px-3 py-1 text-[11px] text-gold">
+                Top 3
+              </div>
             </div>
-            <div className="mt-3 font-mono text-3xl font-semibold tracking-[0.15em] text-foreground">
-              {item.first}
-            </div>
-            <div className="mt-2 text-xs text-muted-foreground">
-              ท้าย 3: <span className="font-mono text-gold">{item.last3}</span> · ท้าย 2:{" "}
-              <span className="font-mono text-gold">{item.last2}</span>
+
+            <div className="mt-5 space-y-3">
+              {group.items.map((item, index) => (
+                <div
+                  key={`${group.key}-${item.number}-${index}`}
+                  className={`rounded-2xl border p-4 ${
+                    index === 0
+                      ? "border-gold/50 bg-gradient-gold-soft"
+                      : "border-border bg-background/20"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-full border border-gold/30 bg-gold/10 font-mono text-xs text-gold">
+                        #{index + 1}
+                      </span>
+                      <span className="font-mono text-3xl font-semibold tracking-[0.16em] text-foreground">
+                        {item.number}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-display text-2xl text-gold">{item.modelScore}%</div>
+                      <div className="text-[10px] text-muted-foreground">คะแนนคาดการณ์</div>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-background/70">
+                    <div
+                      className="h-full rounded-full bg-gradient-gold"
+                      style={{ width: `${item.modelScore}%` }}
+                    />
+                  </div>
+
+                  <div className="mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
+                    <div>
+                      พบในข้อมูลย้อนหลัง <span className="font-mono text-gold">{item.count}</span>{" "}
+                      ครั้ง · อัตราพบ{" "}
+                      <span className="font-mono text-gold">
+                        {(item.observedRate * 100).toFixed(2)}%
+                      </span>
+                    </div>
+                    <div className="sm:text-right">{item.reason}</div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         ))}
@@ -790,51 +851,176 @@ function formatProbability(probability: number) {
   return `${pct.toFixed(8)}%`;
 }
 
-function makePredictions(frequency: LotteryFrequencyMap | null, seed: number) {
-  const hotLast2 = rankedNumbers(frequency?.last2, 2);
-  const hotLast3 = rankedNumbers(frequency?.last3b, 3);
-  const hotFirst = rankedNumbers(frequency?.first, 6);
-  return Array.from({ length: 5 }, (_, index) => ({
-    first: blendCandidate(hotFirst, frequency?.first, 6, seed + index * 17),
-    last3: blendCandidate(hotLast3, frequency?.last3b, 3, seed + index * 23),
-    last2: blendCandidate(hotLast2, frequency?.last2, 2, seed + index * 31),
-  }));
+function makePredictionGroups(
+  frequency: LotteryFrequencyMap | null,
+  history: LotteryHistoryItem[],
+  seed: number,
+): LotteryPredictionGroup[] {
+  const sampleSize = Math.max(history.length, 1);
+  return [
+    {
+      key: "first",
+      label: "รางวัลที่ 1",
+      digits: 6,
+      baselineOdds: "ประมาณ 1 ใน 1,000,000",
+      sampleSize,
+      items: buildFirstPrizePredictions(history, frequency?.first, seed),
+    },
+    {
+      key: "last3f",
+      label: "เลขหน้า 3 ตัว",
+      digits: 3,
+      baselineOdds: "ประมาณ 1 ใน 500",
+      sampleSize,
+      items: buildExactPrizePredictions(frequency?.last3f, sampleSize, 3, seed + 11),
+    },
+    {
+      key: "last3b",
+      label: "เลขท้าย 3 ตัว",
+      digits: 3,
+      baselineOdds: "ประมาณ 1 ใน 500",
+      sampleSize,
+      items: buildExactPrizePredictions(frequency?.last3b, sampleSize, 3, seed + 23),
+    },
+    {
+      key: "last2",
+      label: "เลขท้าย 2 ตัว",
+      digits: 2,
+      baselineOdds: "ประมาณ 1 ใน 100",
+      sampleSize,
+      items: buildExactPrizePredictions(frequency?.last2, sampleSize, 2, seed + 37),
+    },
+  ];
 }
 
-function rankedNumbers(freqMap: Record<string, number> | undefined, digits: number) {
-  if (!freqMap) return [];
-  return Object.entries(freqMap)
-    .filter(([number]) => number.length === digits)
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-    .map(([number]) => number);
-}
-
-function blendCandidate(
-  hotNumbers: string[],
+function buildExactPrizePredictions(
   freqMap: Record<string, number> | undefined,
+  sampleSize: number,
   digits: number,
   seed: number,
-) {
-  if (!hotNumbers.length) return weightedPick(freqMap, digits, seed);
-  const main = hotNumbers[Math.abs(seed) % Math.min(hotNumbers.length, 12)];
-  const companion = weightedPick(freqMap, digits, seed * 3 + 7);
-  if (digits === 2) return main;
-  if (digits === 3) return `${main.slice(0, 1)}${companion.slice(-2)}`.padStart(3, "0").slice(-3);
-  return `${main.slice(0, 3)}${companion.slice(-3)}`.padStart(6, "0").slice(-6);
+): LotteryPredictionItem[] {
+  const entries = Object.entries(freqMap || {})
+    .filter(([number]) => number.length === digits)
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+
+  const topEntries = entries.length
+    ? entries.slice(0, 12)
+    : Array.from({ length: 12 }, (_, index) => [pseudoNumber(seed + index, digits), 0] as const);
+  const maxCount = Math.max(...topEntries.map(([, count]) => count), 1);
+
+  return topEntries
+    .map(([number, count], index) => {
+      const jitter = seeded(seed + index * 13) * 3;
+      const hotness = count / maxCount;
+      const modelScore = clampScore(46 + hotness * 34 + (1 - index / 12) * 10 + jitter);
+      return {
+        number,
+        count,
+        modelScore,
+        observedRate: count / sampleSize,
+        reason:
+          count > 0
+            ? `ถ่วงน้ำหนักจากความถี่อันดับ ${index + 1} ในกลุ่ม ${digits} หลัก`
+            : "ใช้สูตรกระจายเลขเมื่อข้อมูลซ้ำยังไม่มากพอ",
+      };
+    })
+    .sort((a, b) => b.modelScore - a.modelScore || b.count - a.count)
+    .slice(0, 3);
 }
 
-function weightedPick(freqMap: Record<string, number> | undefined, digits: number, seed: number) {
-  if (!freqMap || !Object.keys(freqMap).length) {
-    return pseudoNumber(seed, digits);
+function buildFirstPrizePredictions(
+  history: LotteryHistoryItem[],
+  freqMap: Record<string, number> | undefined,
+  seed: number,
+): LotteryPredictionItem[] {
+  const exactEntries = Object.entries(freqMap || {})
+    .filter(([number]) => number.length === 6)
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+
+  const positionalDigits = buildDigitPositionProfile(history);
+  const candidates = new Map<string, { count: number; reason: string }>();
+
+  exactEntries.slice(0, 6).forEach(([number, count], index) => {
+    candidates.set(number, {
+      count,
+      reason:
+        count > 1
+          ? `เคยออกซ้ำ ${count} ครั้งในฐานข้อมูลย้อนหลัง`
+          : `อิงรางวัลที่ 1 ย้อนหลังและจัดอันดับตามความใกล้รูปแบบเลข #${index + 1}`,
+    });
+  });
+
+  Array.from({ length: 9 }, (_, index) => makeProfileCandidate(positionalDigits, seed + index * 19))
+    .filter(Boolean)
+    .forEach((number, index) => {
+      if (!candidates.has(number)) {
+        candidates.set(number, {
+          count: freqMap?.[number] || 0,
+          reason: `ประกอบจาก digit profile รางวัลที่ 1 ย้อนหลังชุดที่ ${index + 1}`,
+        });
+      }
+    });
+
+  const entries = [...candidates.entries()].slice(0, 12);
+  const maxScoreBase = Math.max(
+    ...entries.map(([number]) => scoreNumberByProfile(number, positionalDigits)),
+    1,
+  );
+
+  return entries
+    .map(([number, meta], index) => {
+      const profileScore = scoreNumberByProfile(number, positionalDigits) / maxScoreBase;
+      const repeatBonus = Math.min(meta.count, 2) * 6;
+      const jitter = seeded(seed + index * 29) * 3;
+      return {
+        number,
+        count: meta.count,
+        modelScore: clampScore(45 + profileScore * 38 + repeatBonus + jitter),
+        observedRate: meta.count / Math.max(history.length, 1),
+        reason: meta.reason,
+      };
+    })
+    .sort((a, b) => b.modelScore - a.modelScore || b.count - a.count)
+    .slice(0, 3);
+}
+
+function buildDigitPositionProfile(history: LotteryHistoryItem[]) {
+  const profile = Array.from({ length: 6 }, () =>
+    Object.fromEntries(Array.from({ length: 10 }, (_, digit) => [String(digit), 0])),
+  ) as Record<string, number>[];
+
+  for (const item of history) {
+    const first = item.data.first?.number?.[0]?.value;
+    if (!first || first.length !== 6) continue;
+    first.split("").forEach((digit, index) => {
+      profile[index][digit] = (profile[index][digit] || 0) + 1;
+    });
   }
-  const entries = Object.entries(freqMap);
-  const total = entries.reduce((sum, [, count]) => sum + count, 0);
-  let cursor = (seeded(seed) * total) % total;
-  for (const [number, count] of entries) {
-    cursor -= count;
-    if (cursor <= 0) return number;
-  }
-  return entries[0][0];
+
+  return profile;
+}
+
+function makeProfileCandidate(profile: Record<string, number>[], seed: number) {
+  if (!profile.length) return pseudoNumber(seed, 6);
+  return profile
+    .map((position, index) => {
+      const ranked = Object.entries(position).sort(
+        (a, b) => b[1] - a[1] || a[0].localeCompare(b[0]),
+      );
+      const pool = ranked.slice(0, 5);
+      return pool[Math.floor(seeded(seed + index * 7) * pool.length)]?.[0] || "0";
+    })
+    .join("")
+    .padStart(6, "0")
+    .slice(-6);
+}
+
+function scoreNumberByProfile(number: string, profile: Record<string, number>[]) {
+  return number.split("").reduce((sum, digit, index) => sum + (profile[index]?.[digit] || 0), 0);
+}
+
+function clampScore(value: number) {
+  return Math.max(35, Math.min(96, Math.round(value)));
 }
 
 function pseudoNumber(seed: number, digits: number) {
