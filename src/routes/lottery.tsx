@@ -68,6 +68,15 @@ type LotteryPredictionGroup = {
   items: LotteryPredictionItem[];
 };
 
+type LotteryDataSummary = {
+  latestDate: LotteryDrawDate | null;
+  nextDraw: LotteryDrawDate | null;
+  historyCount: number;
+  historyLimit: number;
+  dataSource: string;
+  cachedAt: string;
+};
+
 export const Route = createFileRoute("/lottery")({
   head: () =>
     seo({
@@ -90,6 +99,7 @@ function LotteryPage() {
   });
   const [result, setResult] = useState<LotteryResultData | null>(null);
   const [resultDate, setResultDate] = useState<LotteryDrawDate | null>(null);
+  const [latestKnownDate, setLatestKnownDate] = useState<LotteryDrawDate | null>(null);
   const [resultLabel, setResultLabel] = useState("");
   const [history, setHistory] = useState<LotteryHistoryItem[]>([]);
   const [frequency, setFrequency] = useState<LotteryFrequencyMap | null>(null);
@@ -109,6 +119,17 @@ function LotteryPage() {
   const predictions = useMemo(
     () => makePredictionGroups(effectiveFrequency, history, seed),
     [effectiveFrequency, history, seed],
+  );
+  const dataSummary = useMemo<LotteryDataSummary>(
+    () => ({
+      latestDate: latestKnownDate || history[0]?.date || null,
+      nextDraw,
+      historyCount: history.length,
+      historyLimit: LOTTERY_HISTORY_LIMIT,
+      dataSource,
+      cachedAt,
+    }),
+    [cachedAt, dataSource, history, latestKnownDate, nextDraw],
   );
 
   useEffect(() => {
@@ -138,6 +159,7 @@ function LotteryPage() {
       }
       setResult(data.data);
       setResultDate(data.date);
+      setLatestKnownDate(data.latestDate || latestKnownDate || history[0]?.date || null);
       setNextDraw(data.nextDraw || null);
       setDataSource(formatDataSource(data.source));
       setCachedAt(data.cachedAt || "");
@@ -160,6 +182,7 @@ function LotteryPage() {
       }
       setResult(data.data);
       setResultDate(data.date || null);
+      setLatestKnownDate(data.latestDate || data.date || null);
       setNextDraw(data.nextDraw || null);
       setDataSource(formatDataSource(data.source));
       setCachedAt(data.cachedAt || "");
@@ -183,6 +206,7 @@ function LotteryPage() {
         throw new Error(friendlyErrorMessage(data.error, "โหลดสถิติไม่สำเร็จ"));
       }
       setHistory(data.history || []);
+      setLatestKnownDate(data.latestDate || data.history?.[0]?.date || null);
       setFrequency(data.frequency || null);
       setNextDraw(data.nextDraw || null);
       setDataSource(formatDataSource(data.source));
@@ -221,6 +245,8 @@ function LotteryPage() {
             </p>
           </div>
         </section>
+
+        <LotteryDataSummaryCard summary={dataSummary} />
 
         <section className="mt-8 grid gap-3 md:grid-cols-4">
           {tabs.map((tab) => (
@@ -276,13 +302,18 @@ function LotteryPage() {
             />
           )}
           {activeTab === "probability" && (
-            <ProbabilityPanel selectedPrize={selectedPrize} setSelectedPrize={setSelectedPrize} />
+            <ProbabilityPanel
+              selectedPrize={selectedPrize}
+              setSelectedPrize={setSelectedPrize}
+              summary={dataSummary}
+            />
           )}
           {activeTab === "predict" && (
             <PredictPanel
               predictions={predictions}
               hasStats={Boolean(effectiveFrequency)}
               historyCount={history.length}
+              summary={dataSummary}
               nextDraw={nextDraw}
               loading={loading === "stats"}
               onRandom={() => setSeed((value) => value + 1)}
@@ -441,6 +472,55 @@ function ResultPanel({
   );
 }
 
+function LotteryDataSummaryCard({ summary }: { summary: LotteryDataSummary }) {
+  const latest = summary.latestDate ? thaiLotteryDate(summary.latestDate) : "กำลังโหลดงวดล่าสุด";
+  const next = summary.nextDraw ? thaiLotteryDate(summary.nextDraw) : "รอข้อมูลจากระบบ";
+  const source = summary.dataSource || "ฐานข้อมูลกลางของระบบ";
+  const cachedAt = summary.cachedAt ? formatCacheTime(summary.cachedAt) : "กำลังตรวจสอบ";
+
+  return (
+    <section className="mt-6 rounded-3xl border border-gold/15 bg-card/35 p-5 shadow-elegant">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.25em] text-gold/75">
+            Unified Lottery Dataset
+          </div>
+          <h2 className="mt-1 font-display text-2xl text-foreground">
+            ฐานข้อมูลที่ใช้คำนวณร่วมกัน
+          </h2>
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+            ผลรางวัล สถิติ ความน่าจะเป็น และคำทำนายทั้งหมดอ้างอิงฐานข้อมูลเดียวกัน
+            เพื่อให้ตัวเลขในทุกแท็บสัมพันธ์กัน ไม่ใช่แยกคำนวณคนละชุด
+          </p>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2 lg:min-w-[620px] lg:grid-cols-4">
+          <SummaryPill label="งวดล่าสุด" value={latest} />
+          <SummaryPill label="รอผลงวด" value={next} />
+          <SummaryPill
+            label="ข้อมูลย้อนหลัง"
+            value={
+              summary.historyCount
+                ? `${summary.historyCount.toLocaleString("th-TH")} งวด / สูงสุด ${summary.historyLimit.toLocaleString("th-TH")}`
+                : "กำลังโหลดสถิติ"
+            }
+          />
+          <SummaryPill label="แหล่งข้อมูล" value={source} sub={`cache ${cachedAt}`} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SummaryPill({ label, value, sub }: { label: string; value: string; sub?: string }) {
+  return (
+    <div className="rounded-2xl border border-border bg-background/25 px-4 py-3">
+      <div className="text-[10px] text-muted-foreground">{label}</div>
+      <div className="mt-1 text-sm font-semibold text-foreground">{value}</div>
+      {sub && <div className="mt-1 truncate text-[10px] text-gold/70">{sub}</div>}
+    </div>
+  );
+}
+
 function StatsPanel({
   history,
   frequency,
@@ -568,9 +648,11 @@ function StatsPanel({
 function ProbabilityPanel({
   selectedPrize,
   setSelectedPrize,
+  summary,
 }: {
   selectedPrize: number;
   setSelectedPrize: (index: number) => void;
+  summary: LotteryDataSummary;
 }) {
   const selected = lotteryPrizes[selectedPrize];
   const probability = selected.winners / selected.combinations;
@@ -586,6 +668,13 @@ function ProbabilityPanel({
       <div className="glass-strong rounded-3xl p-6 shadow-elegant">
         <div className="text-[11px] uppercase tracking-wider text-gold/80">Probability</div>
         <h2 className="mt-2 font-display text-3xl text-foreground">ความน่าจะเป็นที่แท้จริง</h2>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          ส่วนนี้แสดงโอกาสจริงตามจำนวนชุดรางวัลของสลาก แล้วใช้ฐานข้อมูลกลางเดียวกับหน้าสถิติย้อนหลัง{" "}
+          {summary.historyCount
+            ? `${summary.historyCount.toLocaleString("th-TH")} งวด`
+            : "ที่กำลังโหลด"}
+          เพื่อให้ผู้ใช้แยกได้ชัดระหว่าง “โอกาสถูกรางวัลจริง” กับ “คะแนนคาดการณ์”
+        </p>
         <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {lotteryPrizes.map((prize, index) => (
             <button
@@ -611,6 +700,12 @@ function ProbabilityPanel({
       <div className="glass-strong rounded-3xl p-6 shadow-elegant">
         <h3 className="font-display text-2xl text-foreground">{selected.label}</h3>
         <p className="mt-1 text-sm text-muted-foreground">รางวัล {selected.amount} บาท</p>
+        {summary.nextDraw && (
+          <div className="mt-3 rounded-2xl border border-gold/15 bg-gold/5 px-4 py-3 text-xs text-muted-foreground">
+            ใช้ประกอบการอ่านงวดถัดไป {thaiLotteryDate(summary.nextDraw)} · ข้อมูลจาก{" "}
+            {summary.dataSource || "ฐานข้อมูลกลาง"}
+          </div>
+        )}
         <div className="mt-5 grid gap-3">
           <StatBox label="ความน่าจะเป็น" value={formatProbability(probability)} />
           <StatBox label="ใบที่ต้องซื้อเฉลี่ย" value={`${odds.toLocaleString("th-TH")} ใบ`} />
@@ -651,6 +746,7 @@ function PredictPanel({
   predictions,
   hasStats,
   historyCount,
+  summary,
   nextDraw,
   loading,
   onRandom,
@@ -659,6 +755,7 @@ function PredictPanel({
   predictions: LotteryPredictionGroup[];
   hasStats: boolean;
   historyCount: number;
+  summary: LotteryDataSummary;
   nextDraw: LotteryDrawDate | null;
   loading: boolean;
   onRandom: () => void;
@@ -675,6 +772,11 @@ function PredictPanel({
               ? `วิเคราะห์จากข้อมูลย้อนหลังจริงสูงสุด 5 ปี (${historyCount.toLocaleString("th-TH")} งวด) แล้วถ่วงน้ำหนักตามเลขที่ออกบ่อย`
               : "กำลังรอฐานข้อมูลย้อนหลัง กดดึงสถิติเพื่อใช้ข้อมูลจริงถ่วงน้ำหนัก"}
             {nextDraw ? ` · สำหรับรอผลงวด ${thaiLotteryDate(nextDraw)}` : ""}
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            ใช้ฐานเดียวกับแท็บผลรางวัลและสถิติ: งวดล่าสุด{" "}
+            {summary.latestDate ? thaiLotteryDate(summary.latestDate) : "กำลังโหลด"} · cache{" "}
+            {summary.cachedAt ? formatCacheTime(summary.cachedAt) : "กำลังตรวจสอบ"}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -705,7 +807,7 @@ function PredictPanel({
                 </div>
                 <h3 className="mt-1 font-display text-2xl text-foreground">{group.label}</h3>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  วิเคราะห์จาก {group.sampleSize.toLocaleString("th-TH")} งวด ·
+                  วิเคราะห์จากฐานเดียวกัน {group.sampleSize.toLocaleString("th-TH")} งวด ·
                   โอกาสจริงโดยฐานรางวัล {group.baselineOdds}
                 </p>
               </div>
