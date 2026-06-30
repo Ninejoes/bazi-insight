@@ -142,7 +142,7 @@ export const Route = createFileRoute("/api/lottery")({
 
           if (mode === "history") {
             const limit = Math.min(
-              36,
+              120,
               Math.max(1, Number.parseInt(url.searchParams.get("limit") || "12", 10) || 12),
             );
             if (!forceLive && lotteryCache.history.length) {

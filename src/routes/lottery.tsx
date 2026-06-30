@@ -49,6 +49,8 @@ const freqLabels: Record<LotteryFrequencyMode, string> = {
   first: "รางวัลที่ 1",
 };
 
+const LOTTERY_HISTORY_LIMIT = 120;
+
 export const Route = createFileRoute("/lottery")({
   head: () =>
     seo({
@@ -104,7 +106,7 @@ function LotteryPage() {
 
   useEffect(() => {
     void loadLatestResult();
-    void loadStats(36, { silent: true });
+    void loadStats(LOTTERY_HISTORY_LIMIT, { silent: true });
   }, []);
 
   async function loadResult() {
@@ -154,7 +156,7 @@ function LotteryPage() {
     }
   }
 
-  async function loadStats(limit = 24, options: { silent?: boolean } = {}) {
+  async function loadStats(limit = LOTTERY_HISTORY_LIMIT, options: { silent?: boolean } = {}) {
     if (!options.silent) setError("");
     setLoading("stats");
     try {
@@ -177,7 +179,7 @@ function LotteryPage() {
   }
 
   async function loadStatsAndPredict() {
-    if (!effectiveFrequency) await loadStats(24);
+    if (!effectiveFrequency) await loadStats(LOTTERY_HISTORY_LIMIT);
     setSeed((value) => value + 1);
   }
 
@@ -197,7 +199,7 @@ function LotteryPage() {
               เลขเด็ด<span className="text-gradient-gold italic">ลิขิตฟ้า</span>
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-              ตรวจผลรางวัล ดูสถิติย้อนหลัง อ่านความน่าจะเป็น
+              ตรวจผลรางวัล ดูสถิติย้อนหลังสูงสุด 5 ปี อ่านความน่าจะเป็น
               และสุ่มเลขจากข้อมูลจริงเพื่อใช้เป็นแนวทางอย่างมีสติ
             </p>
           </div>
@@ -250,7 +252,7 @@ function LotteryPage() {
               freqMode={freqMode}
               setFreqMode={setFreqMode}
               loading={loading === "stats"}
-              onLoad={() => loadStats(24)}
+              onLoad={() => loadStats(LOTTERY_HISTORY_LIMIT)}
               nextDraw={nextDraw}
               dataSource={dataSource}
               cachedAt={cachedAt}
@@ -453,7 +455,8 @@ function StatsPanel({
             <div className="text-[11px] uppercase tracking-wider text-gold/80">Frequency</div>
             <h2 className="mt-2 font-display text-3xl text-foreground">สถิติเลขที่ออกบ่อย</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              คำนวณจากผลย้อนหลังจริงที่เก็บไว้ในระบบ {history.length ? `${history.length} งวด` : ""}
+              คำนวณจากผลย้อนหลังจริงสูงสุด 5 ปีที่เก็บไว้ในระบบ{" "}
+              {history.length ? `${history.length.toLocaleString("th-TH")} งวด` : ""}
               {nextDraw ? ` · รอผลงวด ${thaiLotteryDate(nextDraw)}` : ""}
             </p>
             {(dataSource || cachedAt) && (
@@ -652,7 +655,7 @@ function PredictPanel({
           <h2 className="mt-2 font-display text-3xl text-foreground">เลขเด็ดงวดหน้า</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             {hasStats
-              ? `วิเคราะห์จากข้อมูลย้อนหลังจริง ${historyCount.toLocaleString("th-TH")} งวด แล้วถ่วงน้ำหนักตามเลขที่ออกบ่อย`
+              ? `วิเคราะห์จากข้อมูลย้อนหลังจริงสูงสุด 5 ปี (${historyCount.toLocaleString("th-TH")} งวด) แล้วถ่วงน้ำหนักตามเลขที่ออกบ่อย`
               : "กำลังรอฐานข้อมูลย้อนหลัง กดดึงสถิติเพื่อใช้ข้อมูลจริงถ่วงน้ำหนัก"}
             {nextDraw ? ` · สำหรับรอผลงวด ${thaiLotteryDate(nextDraw)}` : ""}
           </p>

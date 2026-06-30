@@ -66,7 +66,7 @@ function drawKey(draw) {
   return `${draw.year}-${draw.month}-${draw.date}`;
 }
 
-function getRecentLotteryDraws(limit = 48, from = new Date()) {
+function getRecentLotteryDraws(limit = 120, from = new Date()) {
   const draws = [];
   const cursor = new Date(from);
   cursor.setHours(12, 0, 0, 0);
@@ -142,7 +142,7 @@ async function fetchDraw(draw) {
 }
 
 async function main() {
-  const limit = Number.parseInt(process.argv[2] || "48", 10) || 48;
+  const limit = Number.parseInt(process.argv[2] || "120", 10) || 120;
   const latest = await fetchLatestDraw();
   const draws = getRecentLotteryDraws(limit, new Date(`${latest.isoDate}T12:00:00+07:00`));
   const history = [];

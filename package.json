@@ -8,7 +8,7 @@
     "build": "vite build && node scripts/sanitize-vercel-output.mjs",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
-    "lottery:update-cache": "node scripts/update-lottery-cache.mjs 48",
+    "lottery:update-cache": "node scripts/update-lottery-cache.mjs 120",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write ."

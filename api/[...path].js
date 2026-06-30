@@ -394,7 +394,7 @@ async function lottery(req, res) {
 
   if (mode === "history") {
     const limit = Math.min(
-      36,
+      120,
       Math.max(
         1,
         Number.parseInt(String(body.limit || url.searchParams.get("limit") || "12"), 10) || 12,
