@@ -87,13 +87,36 @@ function noStoreHeaders(headers?: HeadersInit) {
   return next;
 }
 
-function withHtmlNoStore(response: Response) {
+function injectNoindexIntoErrorHtml(html: string) {
+  const withoutCanonical = html.replace(
+    /<link\b(?=[^>]*\brel=["']canonical["'])[^>]*>\s*/gi,
+    "",
+  );
+  const noindexMeta = '<meta name="robots" content="noindex,follow"/>';
+
+  if (/<meta\b(?=[^>]*\bname=["']robots["'])[^>]*>/i.test(withoutCanonical)) {
+    return withoutCanonical.replace(
+      /<meta\b(?=[^>]*\bname=["']robots["'])[^>]*>/i,
+      noindexMeta,
+    );
+  }
+
+  return withoutCanonical.replace(/<head([^>]*)>/i, `<head$1>${noindexMeta}`);
+}
+
+async function withHtmlNoStore(response: Response) {
   const contentType = response.headers.get("content-type") || "";
   if (!contentType.includes("text/html")) return response;
 
   const headers = noStoreHeaders(response.headers);
   if (response.status === 404 || response.status === 410) {
     headers.set("X-Robots-Tag", "noindex, follow");
+    const html = await response.text();
+    return new Response(injectNoindexIntoErrorHtml(html), {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
   }
   return new Response(response.body, {
     status: response.status,

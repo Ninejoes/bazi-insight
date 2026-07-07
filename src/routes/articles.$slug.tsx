@@ -17,6 +17,7 @@ export const Route = createFileRoute("/articles/$slug")({
       description: "บทความดูดวงจาก Likhitfa",
       path: `/articles/${params.slug}`,
       type: "article",
+      noindex: true,
       keywords: ["บทความดูดวง", "Likhitfa"],
     });
   },

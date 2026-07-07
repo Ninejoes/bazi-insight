@@ -19,6 +19,7 @@ export const Route = createFileRoute("/tarot/$type")({
       title: `${c?.title ?? "ไพ่ยิปซี"} Tarot Reading`,
       description: c?.tagline ?? "ดูดวงไพ่ยิปซีพร้อมคำแปลและคำแนะนำเฉพาะหมวด",
       path: `/tarot/${params.type}`,
+      noindex: !c,
       keywords: ["ไพ่ยิปซี", "Tarot", c?.title ?? "ดูดวงไพ่", c?.titleEn ?? "tarot reading"],
     });
   },

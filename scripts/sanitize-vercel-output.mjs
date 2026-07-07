@@ -13,6 +13,19 @@ if (config.overrides && !Object.keys(config.overrides).length) {
   delete config.overrides;
 }
 
+const serverRoutes = [
+  { src: "/sitemap\\.xml", dest: "/__server" },
+  { src: "/robots\\.txt", dest: "/__server" },
+];
+
+const routes = Array.isArray(config.routes) ? config.routes : [];
+config.routes = [
+  ...serverRoutes.filter(
+    (route) => !routes.some((existing) => existing.src === route.src && existing.dest === route.dest),
+  ),
+  ...routes,
+];
+
 await writeFile(outputConfigPath, `${JSON.stringify(config, null, 2)}\n`);
 
 for (const entry of await readdir(functionsPath, { withFileTypes: true })) {

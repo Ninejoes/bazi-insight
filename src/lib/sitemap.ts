@@ -18,6 +18,7 @@ const basePublicRoutes: SitemapEntry[] = [
   { loc: "/bazi", changefreq: "weekly", priority: "0.9" },
   { loc: "/tarot", changefreq: "weekly", priority: "0.9" },
   { loc: "/dream", changefreq: "weekly", priority: "0.9" },
+  { loc: "/lottery", changefreq: "daily", priority: "0.8" },
   { loc: "/articles", changefreq: "weekly", priority: "0.8" },
   { loc: "/about", changefreq: "monthly", priority: "0.6" },
   { loc: "/contact", changefreq: "monthly", priority: "0.6" },

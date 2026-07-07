@@ -17,6 +17,7 @@ const urls = [
   { loc: "/tarot/study", changefreq: "weekly", priority: "0.7" },
   { loc: "/tarot/luck", changefreq: "weekly", priority: "0.7" },
   { loc: "/dream", changefreq: "weekly", priority: "0.9" },
+  { loc: "/lottery", changefreq: "daily", priority: "0.8" },
   { loc: "/articles", changefreq: "weekly", priority: "0.8" },
   { loc: "/articles/bazi-101", changefreq: "weekly", priority: "0.7" },
   { loc: "/articles/tarot-spread-beginner", changefreq: "weekly", priority: "0.7" },

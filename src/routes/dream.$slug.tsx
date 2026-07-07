@@ -14,6 +14,7 @@ export const Route = createFileRoute("/dream/$slug")({
       title: `ฝันเห็น${decodeURIComponent(params.slug)}`,
       description: `ดูคำทำนายฝันเห็น${decodeURIComponent(params.slug)} เลขเด็ด ช่วงเวลาฝัน และวิธีแก้เคล็ด`,
       path: `/dream/${encodeURIComponent(params.slug)}`,
+      noindex: true,
       keywords: ["ทำนายฝัน", `ฝันเห็น${decodeURIComponent(params.slug)}`, "เลขเด็ดความฝัน"],
     });
   },
@@ -22,6 +23,18 @@ export const Route = createFileRoute("/dream/$slug")({
     if (!dream) throw notFound();
     return { slug: params.slug, dream };
   },
+  notFoundComponent: () => (
+    <div className="min-h-screen">
+      <SiteHeader subtitle="ทำนายฝัน" subtitleCn="解夢" />
+      <main className="mx-auto max-w-4xl px-6 pt-16 pb-12 text-center">
+        <h1 className="font-display text-4xl text-gold">ไม่พบคำทำนายฝัน</h1>
+        <Link to="/dream" className="mt-4 inline-block text-sm text-gold underline">
+          กลับไปค้นหาคำทำนายฝัน
+        </Link>
+      </main>
+      <SiteFooter />
+    </div>
+  ),
   component: DreamDetail,
 });
 
