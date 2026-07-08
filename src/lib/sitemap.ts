@@ -13,6 +13,14 @@ type SitemapEntry = {
   priority: string;
 };
 
+export type SitemapFile = {
+  path: string;
+  xml: string;
+  urlCount: number;
+};
+
+const sitemapChunkSize = 5000;
+
 const basePublicRoutes: SitemapEntry[] = [
   { loc: "/", changefreq: "weekly", priority: "1.0" },
   { loc: "/bazi", changefreq: "weekly", priority: "0.9" },
@@ -54,35 +62,57 @@ function dedupeEntries(entries: SitemapEntry[]) {
   });
 }
 
-export function publicSitemapEntries(articles: SitemapArticle[] = [], dreams: SitemapDream[] = []) {
+function encodePathSegment(value: string) {
+  return encodeURIComponent(value.trim());
+}
+
+function chunkEntries(entries: SitemapEntry[], size = sitemapChunkSize) {
+  const chunks: SitemapEntry[][] = [];
+  for (let index = 0; index < entries.length; index += size) {
+    chunks.push(entries.slice(index, index + size));
+  }
+  return chunks;
+}
+
+export function staticSitemapEntries() {
   const tarotRoutes = tarotCategories.map((category) => ({
     loc: `/tarot/${category.slug}`,
     changefreq: "weekly" as const,
     priority: category.slug === "daily" ? "0.8" : "0.7",
   }));
+  return dedupeEntries([...basePublicRoutes, ...tarotRoutes]);
+}
+
+export function articleSitemapEntries(articles: SitemapArticle[] = []) {
   const articleRoutes = articles.map((article) => ({
-    loc: `/articles/${article.slug}`,
+    loc: `/articles/${encodePathSegment(article.slug)}`,
     lastmod: normalizeDate(article.date),
     changefreq: "weekly" as const,
     priority: "0.7",
   }));
+  return dedupeEntries(articleRoutes);
+}
+
+export function dreamSitemapEntries(dreams: SitemapDream[] = []) {
   const dreamRoutes = dreams.map((dream) => ({
-    loc: `/dream/${encodeURIComponent(dream.keyword)}`,
+    loc: `/dream/${encodePathSegment(dream.keyword)}`,
     lastmod: normalizeDate(dream.updatedAt),
     changefreq: "weekly" as const,
     priority: "0.7",
   }));
-
-  return dedupeEntries([...basePublicRoutes, ...tarotRoutes, ...articleRoutes, ...dreamRoutes]);
+  return dedupeEntries(dreamRoutes);
 }
 
-export function buildSitemapXml(
-  articles: SitemapArticle[] = [],
-  url = siteUrl,
-  dreams: SitemapDream[] = [],
-) {
+export function publicSitemapEntries(articles: SitemapArticle[] = [], dreams: SitemapDream[] = []) {
+  return dedupeEntries([
+    ...staticSitemapEntries(),
+    ...articleSitemapEntries(articles),
+    ...dreamSitemapEntries(dreams),
+  ]);
+}
+
+export function buildUrlsetXml(entries: SitemapEntry[], url = siteUrl) {
   const origin = normalizeSiteUrl(url);
-  const entries = publicSitemapEntries(articles, dreams);
   const body = entries
     .map((entry) => {
       const lastmod = normalizeDate(entry.lastmod);
@@ -99,4 +129,63 @@ ${lastmod ? `    <lastmod>${xmlEscape(lastmod)}</lastmod>\n` : ""}    <changefre
 ${body}
 </urlset>
 `;
+}
+
+export function buildSitemapIndexXml(files: Pick<SitemapFile, "path">[], url = siteUrl) {
+  const origin = normalizeSiteUrl(url);
+  const lastmod = new Date().toISOString().slice(0, 10);
+  const body = files
+    .map(
+      (file) => `  <sitemap>
+    <loc>${xmlEscape(`${origin}${file.path}`)}</loc>
+    <lastmod>${xmlEscape(lastmod)}</lastmod>
+  </sitemap>`,
+    )
+    .join("\n");
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${body}
+</sitemapindex>
+`;
+}
+
+export function buildSitemapFiles(
+  articles: SitemapArticle[] = [],
+  url = siteUrl,
+  dreams: SitemapDream[] = [],
+) {
+  const files: SitemapFile[] = [
+    {
+      path: "/sitemap-static.xml",
+      xml: buildUrlsetXml(staticSitemapEntries(), url),
+      urlCount: staticSitemapEntries().length,
+    },
+  ];
+
+  chunkEntries(articleSitemapEntries(articles)).forEach((entries, index) => {
+    files.push({
+      path: `/sitemap-articles-${index + 1}.xml`,
+      xml: buildUrlsetXml(entries, url),
+      urlCount: entries.length,
+    });
+  });
+
+  chunkEntries(dreamSitemapEntries(dreams)).forEach((entries, index) => {
+    files.push({
+      path: `/sitemap-dreams-${index + 1}.xml`,
+      xml: buildUrlsetXml(entries, url),
+      urlCount: entries.length,
+    });
+  });
+
+  return files;
+}
+
+export function buildSitemapXml(
+  articles: SitemapArticle[] = [],
+  url = siteUrl,
+  dreams: SitemapDream[] = [],
+) {
+  return buildUrlsetXml(publicSitemapEntries(articles, dreams), url);
 }

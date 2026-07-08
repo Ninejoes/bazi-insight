@@ -2,7 +2,13 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
-import { buildSitemapXml, type SitemapArticle, type SitemapDream } from "./lib/sitemap";
+import {
+  buildSitemapFiles,
+  buildSitemapIndexXml,
+  type SitemapArticle,
+  type SitemapDream,
+  type SitemapFile,
+} from "./lib/sitemap";
 import { siteUrl } from "./lib/seo";
 import { getSupabaseConfig, supabaseRequest } from "./lib/supabase-rest";
 
@@ -11,8 +17,8 @@ type ServerEntry = {
 };
 
 let serverEntryPromise: Promise<ServerEntry> | undefined;
-let sitemapCache: { xml: string; expiresAt: number } | undefined;
-let sitemapRefreshPromise: Promise<string> | undefined;
+let sitemapCache: { files: Map<string, string>; expiresAt: number } | undefined;
+let sitemapRefreshPromise: Promise<Map<string, string>> | undefined;
 
 const sitemapCacheMs = 60 * 60 * 1000;
 const sitemapPageLimit = 1000;
@@ -177,30 +183,48 @@ async function loadDreamsForSitemap() {
 
 async function buildFreshSitemapXml() {
   const [articles, dreams] = await Promise.all([loadArticlesForSitemap(), loadDreamsForSitemap()]);
-  return buildSitemapXml(articles, siteUrl, dreams);
+  const sitemapFiles = buildSitemapFiles(articles, siteUrl, dreams);
+  return buildSitemapFileMap(sitemapFiles);
 }
 
-async function getCachedSitemapXml() {
+function buildSitemapFileMap(sitemapFiles: SitemapFile[]) {
+  const files = new Map<string, string>();
+  files.set("/sitemap.xml", buildSitemapIndexXml(sitemapFiles, siteUrl));
+  for (const sitemapFile of sitemapFiles) {
+    files.set(sitemapFile.path, sitemapFile.xml);
+  }
+  return files;
+}
+
+async function getCachedSitemapFiles() {
   const now = Date.now();
-  if (sitemapCache && sitemapCache.expiresAt > now) return sitemapCache.xml;
+  if (sitemapCache && sitemapCache.expiresAt > now) return sitemapCache.files;
 
   if (!sitemapRefreshPromise) {
     sitemapRefreshPromise = buildFreshSitemapXml()
-      .then((xml) => {
-        sitemapCache = { xml, expiresAt: Date.now() + sitemapCacheMs };
-        return xml;
+      .then((files) => {
+        sitemapCache = { files, expiresAt: Date.now() + sitemapCacheMs };
+        return files;
       })
       .finally(() => {
         sitemapRefreshPromise = undefined;
       });
   }
 
-  if (sitemapCache) return sitemapCache.xml;
+  if (sitemapCache) return sitemapCache.files;
   return sitemapRefreshPromise;
 }
 
-async function sitemapResponse() {
-  return new Response(await getCachedSitemapXml(), { headers: xmlHeaders() });
+async function sitemapResponse(pathname: string) {
+  const files = await getCachedSitemapFiles();
+  const xml = files.get(pathname);
+  if (!xml) {
+    return new Response("Sitemap not found", {
+      status: 404,
+      headers: textHeaders({ "X-Robots-Tag": "noindex, follow" }),
+    });
+  }
+  return new Response(xml, { headers: xmlHeaders() });
 }
 
 function robotsResponse() {
@@ -231,7 +255,9 @@ export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const url = new URL(request.url);
-      if (url.pathname === "/sitemap.xml") return sitemapResponse();
+      if (url.pathname === "/sitemap.xml" || /^\/sitemap-[\w-]+\.xml$/.test(url.pathname)) {
+        return sitemapResponse(url.pathname);
+      }
       if (url.pathname === "/robots.txt") return robotsResponse();
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);

@@ -15,6 +15,7 @@ if (config.overrides && !Object.keys(config.overrides).length) {
 
 const serverRoutes = [
   { src: "/sitemap\\.xml", dest: "/__server" },
+  { src: "/sitemap-[\\w-]+\\.xml", dest: "/__server" },
   { src: "/robots\\.txt", dest: "/__server" },
 ];
 
