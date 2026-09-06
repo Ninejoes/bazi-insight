@@ -1,6 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
-import { tarotCategories } from "@/lib/tarot-cards";
 import { clearUserSession, readStoredUserSession, type UserSession } from "@/lib/user-session";
 
 interface SiteHeaderProps {
@@ -36,10 +35,9 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
   const path = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const [openMobile, setOpenMobile] = useState(false);
-  const [tarotOpen, setTarotOpen] = useState(false);
-  const [numbersOpen, setNumbersOpen] = useState(false);
-  const [auspiciousOpen, setAuspiciousOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
+  const [servicesOpen, setServicesOpen] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
   const [userSession, setUserSession] = useState<UserSession | null>(null);
 
   const isActive = (prefix: string) => (prefix === "/" ? path === "/" : path.startsWith(prefix));
@@ -65,7 +63,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
   return (
     <header className="relative z-30 border-b border-gold/10 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 md:px-8">
-        <Link to="/" className="group flex items-center gap-3">
+        <Link to="/" className="group flex items-center gap-3 shrink-0">
           <BrandMark size={42} />
           <div className="leading-tight">
             <div className="text-[10px] tracking-[0.3em] text-gold/80">LIKHITFA</div>
@@ -82,231 +80,385 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
         </Link>
 
         {showNav && (
-          <nav className="hidden items-center gap-1 xl:flex">
+          <nav className="hidden items-center gap-1.5 lg:flex">
+            {/* 1. หน้าหลัก */}
             <NavLink to="/" active={path === "/"}>
               หน้าหลัก
             </NavLink>
-            <NavLink to="/bazi" active={isActive("/bazi")}>
-              ปาจื้อ
-            </NavLink>
 
-            {/* ไพ่ยิปซี */}
+            {/* 2. บริการดูดวง Mega-Menu */}
             <div
               className="relative"
-              onMouseEnter={() => setTarotOpen(true)}
-              onMouseLeave={() => setTarotOpen(false)}
-            >
-              <NavLink to="/tarot" active={isActive("/tarot")}>
-                ไพ่ยิปซี <span className="ml-0.5 text-[10px] opacity-70">▾</span>
-              </NavLink>
-              {tarotOpen && (
-                <div className="absolute left-1/2 top-full z-40 w-[28rem] -translate-x-1/2 pt-2">
-                  <div className="glass-strong overflow-hidden rounded-2xl p-3 shadow-elegant">
-                    <Link
-                      to="/tarot"
-                      className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium text-foreground hover:bg-gold/10 hover:text-gold"
-                    >
-                      <span>หน้าไพ่ยิปซีทั้งหมด</span>
-                      <span className="text-gold/60">→</span>
-                    </Link>
-                    <div className="my-1 h-px bg-gold/10" />
-                    <DropdownSection title="ดูดวงตามช่วงเวลา">
-                      {tarotCategories.slice(0, 3).map((c) => (
-                        <DropdownLink key={c.slug} slug={c.slug} icon={c.icon} title={c.title} />
-                      ))}
-                    </DropdownSection>
-                    <DropdownSection title="การดูดวงแบบเฉพาะเจาะจง">
-                      <div className="grid grid-cols-2 gap-1">
-                        {tarotCategories.slice(3).map((c) => (
-                          <DropdownLink key={c.slug} slug={c.slug} icon={c.icon} title={c.title} />
-                        ))}
-                      </div>
-                    </DropdownSection>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <NavLink to="/dream" active={isActive("/dream")}>
-              ทำนายฝัน
-            </NavLink>
-
-            {/* ศาสตร์ตัวเลข & ชื่อ */}
-            <div
-              className="relative"
-              onMouseEnter={() => setNumbersOpen(true)}
-              onMouseLeave={() => setNumbersOpen(false)}
+              onMouseEnter={() => setServicesOpen(true)}
+              onMouseLeave={() => setServicesOpen(false)}
             >
               <button
                 type="button"
-                className={`relative rounded-full px-3 py-2 text-sm transition-all ${
-                  isActive("/phone-analysis") || isActive("/name-analysis") || isActive("/lottery")
-                    ? "bg-gold/10 text-gold"
+                className={`relative flex items-center gap-1 rounded-full px-3.5 py-2 text-sm transition-all ${
+                  isActive("/bazi") || isActive("/tarot") || isActive("/dream") || isActive("/siamsi")
+                    ? "bg-gold/10 text-gold font-medium"
                     : "text-muted-foreground hover:text-gold"
                 }`}
               >
-                ตัวเลข & ชื่อ <span className="ml-0.5 text-[10px] opacity-70">▾</span>
+                <span>บริการดูดวง</span>
+                <span className={`text-[10px] transition-transform duration-200 ${servicesOpen ? "rotate-180 text-gold" : "opacity-70"}`}>▾</span>
               </button>
-              {numbersOpen && (
-                <div className="absolute left-1/2 top-full z-40 w-72 -translate-x-1/2 pt-2">
-                  <div className="glass-strong overflow-hidden rounded-2xl p-3 shadow-elegant">
-                    <Link
-                      to="/phone-analysis"
-                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-foreground hover:bg-gold/10 hover:text-gold"
-                    >
-                      <span className="text-lg">📱</span>
-                      <div>
-                        <div className="font-medium">เช็คเบอร์มงคล</div>
-                        <div className="text-[10px] text-muted-foreground">วิเคราะห์คู่เลข 7 คู่ & ผลรวม</div>
+              {servicesOpen && (
+                <div className="absolute left-1/2 top-full z-50 w-[32rem] -translate-x-1/2 pt-2">
+                  <div className="glass-strong overflow-hidden rounded-2xl border border-gold/20 p-4 shadow-elegant backdrop-blur-xl">
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* คอลัมน์ 1: ชะตาชีวิต & ไพ่ */}
+                      <div className="space-y-1">
+                        <div className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-gold/70">
+                          ศาสตร์ชะตาชีวิต & ไพ่
+                        </div>
+                        <Link
+                          to="/bazi"
+                          className="group flex items-start gap-2.5 rounded-xl p-2.5 transition hover:bg-gold/10"
+                        >
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-lg text-gold group-hover:scale-110 transition-transform">
+                            🔮
+                          </span>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
+                              ปาจื้อ 八字
+                            </div>
+                            <div className="text-[11px] leading-tight text-muted-foreground">
+                              ดวงจีน 4 เสา วิเคราะห์ธาตุประจำตัวและวัฏจักรชีวิต
+                            </div>
+                          </div>
+                        </Link>
+                        <Link
+                          to="/tarot"
+                          className="group flex items-start gap-2.5 rounded-xl p-2.5 transition hover:bg-gold/10"
+                        >
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-lg text-gold group-hover:scale-110 transition-transform">
+                            🃏
+                          </span>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
+                              ไพ่ยิปซีพยากรณ์
+                            </div>
+                            <div className="text-[11px] leading-tight text-muted-foreground">
+                              สำรับ 78 ใบ ความรัก การงาน การเงิน เซลติกครอส
+                            </div>
+                          </div>
+                        </Link>
                       </div>
-                    </Link>
-                    <Link
-                      to="/name-analysis"
-                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-foreground hover:bg-gold/10 hover:text-gold"
-                    >
-                      <span className="text-lg">✍️</span>
-                      <div>
-                        <div className="font-medium">วิเคราะห์ชื่อ-นามสกุล</div>
-                        <div className="text-[10px] text-muted-foreground">เลขศาสตร์พลังดาว & ทักษาปกรณ์</div>
+
+                      {/* คอลัมน์ 2: จิตสัมผัส & เสี่ยงทาย */}
+                      <div className="space-y-1">
+                        <div className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-gold/70">
+                          จิตสัมผัส & เสี่ยงทาย
+                        </div>
+                        <Link
+                          to="/dream"
+                          className="group flex items-start gap-2.5 rounded-xl p-2.5 transition hover:bg-gold/10"
+                        >
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-lg text-gold group-hover:scale-110 transition-transform">
+                            🌙
+                          </span>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
+                              ทำนายฝันมงคล
+                            </div>
+                            <div className="text-[11px] leading-tight text-muted-foreground">
+                              ถอดรหัสลางบอกเหตุความฝัน พร้อมเลขเด็ดแม่นยำ
+                            </div>
+                          </div>
+                        </Link>
+                        <Link
+                          to="/siamsi"
+                          className="group flex items-start gap-2.5 rounded-xl p-2.5 transition hover:bg-gold/10"
+                        >
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-lg text-gold group-hover:scale-110 transition-transform">
+                            🎋
+                          </span>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
+                              เซียมซีออนไลน์ 28 ใบ
+                            </div>
+                            <div className="text-[11px] leading-tight text-muted-foreground">
+                              เขย่าติ้วเสี่ยงทาย หลวงพ่อโสธร เจ้าพ่อเสือ
+                            </div>
+                          </div>
+                        </Link>
                       </div>
-                    </Link>
-                    <Link
-                      to="/lottery"
-                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-foreground hover:bg-gold/10 hover:text-gold"
-                    >
-                      <span className="text-lg">🎰</span>
-                      <div>
-                        <div className="font-medium">หวย & เลขเด็ด</div>
-                        <div className="text-[10px] text-muted-foreground">ตรวจผลหวย สถิติ & ทำนาย</div>
+                    </div>
+
+                    {/* Tarot Quick Links footer */}
+                    <div className="mt-3 border-t border-gold/10 pt-2.5">
+                      <div className="flex items-center justify-between px-2 text-[11px] text-muted-foreground">
+                        <span className="text-gold/70 font-medium">ดูดวงด่วน:</span>
+                        <div className="flex items-center gap-1.5">
+                          <Link to="/tarot/$type" params={{ type: "daily" }} className="rounded-md bg-gold/10 px-2 py-0.5 text-[11px] text-gold hover:bg-gold/20">รายวัน</Link>
+                          <Link to="/tarot/$type" params={{ type: "love" }} className="rounded-md bg-gold/10 px-2 py-0.5 text-[11px] text-gold hover:bg-gold/20">ความรัก</Link>
+                          <Link to="/tarot/$type" params={{ type: "finance" }} className="rounded-md bg-gold/10 px-2 py-0.5 text-[11px] text-gold hover:bg-gold/20">การเงิน</Link>
+                          <Link to="/tarot" className="text-[11px] text-gold/80 hover:text-gold ml-1">ทั้งหมด →</Link>
+                        </div>
                       </div>
-                    </Link>
+                    </div>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* เสริมดวง & ฤกษ์มงคล */}
+            {/* 3. เสริมดวง & ตัวเลข 2-Column Menu */}
             <div
               className="relative"
-              onMouseEnter={() => setAuspiciousOpen(true)}
-              onMouseLeave={() => setAuspiciousOpen(false)}
+              onMouseEnter={() => setToolsOpen(true)}
+              onMouseLeave={() => setToolsOpen(false)}
             >
               <button
                 type="button"
-                className={`relative rounded-full px-3 py-2 text-sm transition-all ${
+                className={`relative flex items-center gap-1 rounded-full px-3.5 py-2 text-sm transition-all ${
+                  isActive("/phone-analysis") ||
+                  isActive("/name-analysis") ||
+                  isActive("/lottery") ||
                   isActive("/lucky-colors") ||
                   isActive("/auspicious-calendar") ||
                   isActive("/tai-sui") ||
-                  isActive("/siamsi") ||
                   isActive("/wallpaper")
-                    ? "bg-gold/10 text-gold"
+                    ? "bg-gold/10 text-gold font-medium"
                     : "text-muted-foreground hover:text-gold"
                 }`}
               >
-                เสริมดวง & ฤกษ์ <span className="ml-0.5 text-[10px] opacity-70">▾</span>
+                <span>เสริมดวง & ตัวเลข</span>
+                <span className={`text-[10px] transition-transform duration-200 ${toolsOpen ? "rotate-180 text-gold" : "opacity-70"}`}>▾</span>
               </button>
-              {auspiciousOpen && (
-                <div className="absolute left-1/2 top-full z-40 w-80 -translate-x-1/2 pt-2">
-                  <div className="glass-strong overflow-hidden rounded-2xl p-3 shadow-elegant">
-                    <Link
-                      to="/lucky-colors"
-                      className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-foreground hover:bg-gold/10 hover:text-gold"
-                    >
-                      <span className="text-lg">🎨</span>
-                      <div>
-                        <div className="font-medium">สีเสื้อมงคลประจำวัน</div>
-                        <div className="text-[10px] text-muted-foreground">ตารางสีเสริมงาน เงิน รัก กาลกิณี</div>
+              {toolsOpen && (
+                <div className="absolute left-1/2 top-full z-50 w-[38rem] -translate-x-1/2 pt-2">
+                  <div className="glass-strong overflow-hidden rounded-2xl border border-gold/20 p-4 shadow-elegant backdrop-blur-xl">
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Col 1: ศาสตร์ตัวเลข & ชื่อ */}
+                      <div className="space-y-1.5 border-r border-gold/10 pr-4">
+                        <div className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-gold/70">
+                          ศาสตร์ตัวเลข & ชื่อมงคล
+                        </div>
+                        <Link
+                          to="/phone-analysis"
+                          className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
+                        >
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
+                            📱
+                          </span>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
+                              เช็คเบอร์มงคล
+                            </div>
+                            <div className="text-[11px] text-muted-foreground">
+                              วิเคราะห์คู่เลข 7 คู่ & ผลรวมคู่มงคล
+                            </div>
+                          </div>
+                        </Link>
+                        <Link
+                          to="/name-analysis"
+                          className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
+                        >
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
+                            ✍️
+                          </span>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
+                              วิเคราะห์ชื่อ-นามสกุล
+                            </div>
+                            <div className="text-[11px] text-muted-foreground">
+                              เลขศาสตร์พลังดาว & ทักษาปกรณ์
+                            </div>
+                          </div>
+                        </Link>
+                        <Link
+                          to="/lottery"
+                          className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
+                        >
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
+                            🎰
+                          </span>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
+                              หวย & สถิติเลขเด็ด
+                            </div>
+                            <div className="text-[11px] text-muted-foreground">
+                              ตรวจผลสลากกินแบ่ง สถิติ & ทำนายเลข
+                            </div>
+                          </div>
+                        </Link>
                       </div>
-                    </Link>
-                    <Link
-                      to="/auspicious-calendar"
-                      className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-foreground hover:bg-gold/10 hover:text-gold"
-                    >
-                      <span className="text-lg">📅</span>
-                      <div>
-                        <div className="font-medium">ปฏิทินฤกษ์มงคล 2569</div>
-                        <div className="text-[10px] text-muted-foreground">วันธงชัย ฤกษ์ออกรถ บ้านใหม่ เปิดร้าน</div>
+
+                      {/* Col 2: ฤกษ์ & เสริมมงคล */}
+                      <div className="space-y-1.5">
+                        <div className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-gold/70">
+                          ฤกษ์มงคล & สายมู
+                        </div>
+                        <Link
+                          to="/lucky-colors"
+                          className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
+                        >
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
+                            🎨
+                          </span>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
+                              สีเสื้อมงคลประจำวัน
+                            </div>
+                            <div className="text-[11px] text-muted-foreground">
+                              ตารางสีงาน เงิน รัก และสีกาลกิณี
+                            </div>
+                          </div>
+                        </Link>
+                        <Link
+                          to="/auspicious-calendar"
+                          className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
+                        >
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
+                            📅
+                          </span>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
+                              ปฏิทินฤกษ์มงคล 2569
+                            </div>
+                            <div className="text-[11px] text-muted-foreground">
+                              วันธงชัย ฤกษ์ออกรถ บ้านใหม่ เปิดร้าน
+                            </div>
+                          </div>
+                        </Link>
+                        <Link
+                          to="/tai-sui"
+                          className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
+                        >
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
+                            🧧
+                          </span>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
+                              ตรวจปีชง 2569 & แก้ชง
+                            </div>
+                            <div className="text-[11px] text-muted-foreground">
+                              เช็คปีชงมะเมีย วัดแก้ชง และบทสวด
+                            </div>
+                          </div>
+                        </Link>
+                        <Link
+                          to="/wallpaper"
+                          className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
+                        >
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
+                            🖼️
+                          </span>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
+                              วอลเปเปอร์สายมู 5 ธาตุ
+                            </div>
+                            <div className="text-[11px] text-muted-foreground">
+                              ดาวน์โหลดภาพ HD จาก NineJoe Studio
+                            </div>
+                          </div>
+                        </Link>
                       </div>
-                    </Link>
-                    <Link
-                      to="/tai-sui"
-                      className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-foreground hover:bg-gold/10 hover:text-gold"
-                    >
-                      <span className="text-lg">🧧</span>
-                      <div>
-                        <div className="font-medium">ตรวจปีชง 2569 & วิธีแก้ชง</div>
-                        <div className="text-[10px] text-muted-foreground">เช็คปีมะเมีย วัดแก้ชง และบทสวด</div>
-                      </div>
-                    </Link>
-                    <Link
-                      to="/siamsi"
-                      className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-foreground hover:bg-gold/10 hover:text-gold"
-                    >
-                      <span className="text-lg">🎋</span>
-                      <div>
-                        <div className="font-medium">เซียมซีออนไลน์ 28 ใบ</div>
-                        <div className="text-[10px] text-muted-foreground">เขย่าติ้วเสี่ยงทาย เจ้าพ่อเสือ หลวงพ่อโสธร</div>
-                      </div>
-                    </Link>
-                    <Link
-                      to="/wallpaper"
-                      className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-foreground hover:bg-gold/10 hover:text-gold"
-                    >
-                      <span className="text-lg">📱</span>
-                      <div>
-                        <div className="font-medium">วอลเปเปอร์สายมูตามธาตุ</div>
-                        <div className="text-[10px] text-muted-foreground">ดาวน์โหลดวอลเปเปอร์ 5 ธาตุปาจื้อ HD ฟรี</div>
-                      </div>
-                    </Link>
+                    </div>
+
+                    {/* NineJoe Featured Banner at bottom */}
+                    <div className="mt-3 border-t border-gold/10 pt-2.5">
+                      <a
+                        href="https://ninejoe.online/collections"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between rounded-xl bg-gold/10 px-3 py-2 text-xs font-medium text-gold hover:bg-gold/20 transition"
+                      >
+                        <span className="flex items-center gap-1.5">
+                          <span>⚡</span>
+                          <span>ชมคอลเลกชันวอลเปเปอร์มงคลกว่า 109+ ภาพ ที่ NineJoe Studio</span>
+                        </span>
+                        <span className="text-[10px]">เปิดดู ↗</span>
+                      </a>
+                    </div>
                   </div>
                 </div>
               )}
             </div>
 
+            {/* 4. บทความ */}
             <NavLink to="/articles" active={isActive("/articles")}>
               บทความ
             </NavLink>
 
+            {/* 5. เกี่ยวกับเรา Dropdown */}
             <div
               className="relative"
-              onMouseEnter={() => setMoreOpen(true)}
-              onMouseLeave={() => setMoreOpen(false)}
+              onMouseEnter={() => setAboutOpen(true)}
+              onMouseLeave={() => setAboutOpen(false)}
             >
               <button
                 type="button"
-                className={`relative rounded-full px-3 py-2 text-sm transition-all ${
-                  isActive("/about") || isActive("/help")
-                    ? "bg-gold/10 text-gold"
+                className={`relative flex items-center gap-1 rounded-full px-3.5 py-2 text-sm transition-all ${
+                  isActive("/about") || isActive("/contact") || isActive("/help")
+                    ? "bg-gold/10 text-gold font-medium"
                     : "text-muted-foreground hover:text-gold"
                 }`}
               >
-                เพิ่มเติม <span className="ml-0.5 text-[10px] opacity-70">▾</span>
+                <span>เกี่ยวกับเรา</span>
+                <span className={`text-[10px] transition-transform duration-200 ${aboutOpen ? "rotate-180 text-gold" : "opacity-70"}`}>▾</span>
               </button>
-              {moreOpen && (
-                <div className="absolute right-0 top-full z-40 w-48 pt-2">
-                  <div className="glass-strong overflow-hidden rounded-2xl p-2 shadow-elegant">
+              {aboutOpen && (
+                <div className="absolute right-0 top-full z-50 w-64 pt-2">
+                  <div className="glass-strong overflow-hidden rounded-2xl border border-gold/20 p-2.5 shadow-elegant backdrop-blur-xl">
                     <Link
                       to="/about"
-                      className="block rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-gold/10 hover:text-gold"
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground hover:bg-gold/10 hover:text-gold transition"
                     >
-                      เกี่ยวกับเรา
+                      <span className="text-base text-gold/80">🏛️</span>
+                      <div>
+                        <div className="font-medium leading-tight">เกี่ยวกับ Likhitfa</div>
+                        <div className="text-[10px] text-muted-foreground">พันธกิจและทีมงาน</div>
+                      </div>
                     </Link>
                     <Link
                       to="/contact"
-                      className="block rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-gold/10 hover:text-gold"
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground hover:bg-gold/10 hover:text-gold transition"
                     >
-                      ติดต่อเรา
+                      <span className="text-base text-gold/80">✉️</span>
+                      <div>
+                        <div className="font-medium leading-tight">ติดต่อเรา</div>
+                        <div className="text-[10px] text-muted-foreground">สอบถาม & ปรึกษา</div>
+                      </div>
                     </Link>
-                    <div className="my-1 h-px bg-gold/10" />
+                    <Link
+                      to="/help"
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground hover:bg-gold/10 hover:text-gold transition"
+                    >
+                      <span className="text-base text-gold/80">❓</span>
+                      <div>
+                        <div className="font-medium leading-tight">ศูนย์ช่วยเหลือ</div>
+                        <div className="text-[10px] text-muted-foreground">คำถามที่พบบ่อย (FAQ)</div>
+                      </div>
+                    </Link>
+
+                    <div className="my-1.5 h-px bg-gold/10" />
+
+                    <div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-gold/70">
+                      พาร์ตเนอร์สตูดิโอ
+                    </div>
                     <a
                       href="https://ninejoe.online"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-gold hover:bg-gold/10"
+                      className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-gold hover:bg-gold/10 transition"
                     >
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-2">
                         <span>⚡</span>
                         <span>NineJoe.online</span>
+                      </div>
+                      <span className="text-[10px] opacity-70">↗</span>
+                    </a>
+                    <a
+                      href="https://ninejoe.online/collections"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-gold hover:bg-gold/10 transition"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>🎨</span>
+                        <span>NineJoe Collections</span>
                       </div>
                       <span className="text-[10px] opacity-70">↗</span>
                     </a>
@@ -314,18 +466,6 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                 </div>
               )}
             </div>
-
-            {/* NineJoe.online Menu Button */}
-            <a
-              href="https://ninejoe.online"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="relative flex items-center gap-1.5 rounded-full border border-gold/30 bg-gold/10 px-3.5 py-1.5 text-xs font-semibold text-gold shadow-gold transition-all hover:scale-105 hover:bg-gold hover:text-primary-foreground"
-              title="ไปที่เว็บไซต์ NineJoe.online — UX/UI Design, AI Prompts & Creative Resources"
-            >
-              <span>NineJoe.online</span>
-              <span className="text-[10px] opacity-80">↗</span>
-            </a>
           </nav>
         )}
 
@@ -393,29 +533,36 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
       </div>
 
       {showNav && openMobile && (
-        <div className="xl:hidden">
-          <div className="mx-4 mb-4 max-h-[80vh] overflow-y-auto rounded-2xl border border-gold/15 bg-card/95 p-3 backdrop-blur shadow-2xl">
+        <div className="lg:hidden">
+          <div className="mx-4 mb-4 max-h-[80vh] overflow-y-auto rounded-2xl border border-gold/15 bg-card/95 p-3.5 backdrop-blur shadow-2xl">
             <MobileLink to="/" onClick={closeMobile}>
               หน้าหลัก
             </MobileLink>
+
+            {/* Group 1: บริการดูดวง */}
+            <div className="my-2 h-px bg-gold/10" />
+            <MobileGroupTitle>🔮 บริการดูดวง</MobileGroupTitle>
             <MobileLink to="/bazi" onClick={closeMobile}>
-              ปาจื้อ 八字
+              ปาจื้อ 八字 (ดวงจีน 4 เสา)
             </MobileLink>
             <MobileLink to="/tarot" onClick={closeMobile}>
-              ไพ่ยิปซี
+              🃏 ไพ่ยิปซีพยากรณ์
             </MobileLink>
-            <div className="ml-3 border-l border-gold/15 pl-3">
-              <MobileGroupTitle>ดูดวงตามช่วงเวลา</MobileGroupTitle>
-              {tarotCategories.slice(0, 3).map((c) => (
-                <MobileTarotLink key={c.slug} slug={c.slug} icon={c.icon} title={c.title} onClick={closeMobile} />
-              ))}
+            <div className="ml-3 border-l border-gold/15 pl-3 space-y-0.5">
+              <MobileTarotLink slug="daily" icon="☀️" title="ดวงรายวัน" onClick={closeMobile} />
+              <MobileTarotLink slug="love" icon="💖" title="ความรัก & คู่ครอง" onClick={closeMobile} />
+              <MobileTarotLink slug="finance" icon="💰" title="การเงิน & โชคลาภ" onClick={closeMobile} />
             </div>
             <MobileLink to="/dream" onClick={closeMobile}>
-              ทำนายฝัน
+              🌙 ทำนายฝันแม่นยำ & เลขเด็ด
+            </MobileLink>
+            <MobileLink to="/siamsi" onClick={closeMobile}>
+              🎋 เซียมซีออนไลน์ 28 ใบ
             </MobileLink>
 
+            {/* Group 2: เสริมดวง & ตัวเลข */}
             <div className="my-2 h-px bg-gold/10" />
-            <MobileGroupTitle>ศาสตร์ตัวเลข & ชื่อ</MobileGroupTitle>
+            <MobileGroupTitle>✨ เสริมดวง & ตัวเลข</MobileGroupTitle>
             <MobileLink to="/phone-analysis" onClick={closeMobile}>
               📱 เช็คเบอร์มงคล
             </MobileLink>
@@ -423,11 +570,8 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
               ✍️ วิเคราะห์ชื่อ-นามสกุล
             </MobileLink>
             <MobileLink to="/lottery" onClick={closeMobile}>
-              🎰 หวย & เลขเด็ด
+              🎰 หวย & เลขเด็ดสำนักดัง
             </MobileLink>
-
-            <div className="my-2 h-px bg-gold/10" />
-            <MobileGroupTitle>เสริมดวง & ฤกษ์มงคล</MobileGroupTitle>
             <MobileLink to="/lucky-colors" onClick={closeMobile}>
               🎨 สีเสื้อมงคลประจำวัน
             </MobileLink>
@@ -437,41 +581,49 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
             <MobileLink to="/tai-sui" onClick={closeMobile}>
               🧧 ตรวจปีชง 2569 & แก้ชง
             </MobileLink>
-            <MobileLink to="/siamsi" onClick={closeMobile}>
-              🎋 เซียมซีออนไลน์ 28 ใบ
-            </MobileLink>
             <MobileLink to="/wallpaper" onClick={closeMobile}>
-              📱 วอลเปเปอร์สายมู 5 ธาตุ
+              🖼️ วอลเปเปอร์สายมู 5 ธาตุ
             </MobileLink>
 
+            {/* Group 3: ข้อมูล & สตูดิโอ */}
             <div className="my-2 h-px bg-gold/10" />
+            <MobileGroupTitle>📚 ข้อมูล & พาร์ตเนอร์</MobileGroupTitle>
             <MobileLink to="/articles" onClick={closeMobile}>
-              บทความดูดวง
+              📖 บทความดูดวง
             </MobileLink>
             <MobileLink to="/about" onClick={closeMobile}>
-              เกี่ยวกับเรา
+              🏛️ เกี่ยวกับเรา
             </MobileLink>
             <MobileLink to="/contact" onClick={closeMobile}>
-              ติดต่อเรา
+              ✉️ ติดต่อเรา
             </MobileLink>
             <MobileLink to="/help" onClick={closeMobile}>
-              ศูนย์ช่วยเหลือ
+              ❓ ศูนย์ช่วยเหลือ (FAQ)
             </MobileLink>
 
-            <div className="my-2 h-px bg-gold/10" />
-            <a
-              href="https://ninejoe.online"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={closeMobile}
-              className="flex items-center justify-between rounded-xl border border-gold/40 bg-gold/15 px-4 py-2.5 text-sm font-semibold text-gold shadow-gold transition hover:bg-gold hover:text-primary-foreground"
-            >
-              <div className="flex items-center gap-2">
-                <span>⚡</span>
-                <span>NineJoe.online สตูดิโอ</span>
-              </div>
-              <span className="text-xs">↗</span>
-            </a>
+            <div className="my-2.5 h-px bg-gold/10" />
+            <div className="grid grid-cols-2 gap-2">
+              <a
+                href="https://ninejoe.online"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={closeMobile}
+                className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/40 bg-gold/10 px-3 py-2 text-xs font-semibold text-gold shadow-gold hover:bg-gold hover:text-primary-foreground transition"
+              >
+                <span>⚡ NineJoe</span>
+                <span className="text-[10px]">↗</span>
+              </a>
+              <a
+                href="https://ninejoe.online/collections"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={closeMobile}
+                className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/40 bg-gold/10 px-3 py-2 text-xs font-semibold text-gold shadow-gold hover:bg-gold hover:text-primary-foreground transition"
+              >
+                <span>🎨 Wallpapers</span>
+                <span className="text-[10px]">↗</span>
+              </a>
+            </div>
             <div className="my-2 h-px bg-gold/10" />
             {userSession ? (
               <div className="grid gap-2 p-1">
@@ -517,42 +669,6 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
   );
 }
 
-function DropdownSection({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <div className="py-1.5">
-      <div className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-gold/65">
-        {title}
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function DropdownLink({ slug, icon, title }: { slug: string; icon: string; title: string }) {
-  return (
-    <Link
-      to="/tarot/$type"
-      params={{ type: slug }}
-      className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-gold/10 hover:text-gold"
-    >
-      <span className="text-base text-gold/80">{icon}</span>
-      <span>{title}</span>
-    </Link>
-  );
-}
-
-function LotteryDropdownLink({ hash, label }: { hash: string; label: string }) {
-  return (
-    <a
-      href={`/lottery#${hash}`}
-      className="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-gold/10 hover:text-gold"
-    >
-      <span>{label}</span>
-      <span className="text-gold/50">→</span>
-    </a>
-  );
-}
-
 function MobileGroupTitle({ children }: { children: ReactNode }) {
   return <div className="px-3 pt-2 pb-1 text-[10px] tracking-[0.2em] text-gold/60">{children}</div>;
 }
@@ -578,26 +694,6 @@ function MobileTarotLink({
       <span className="text-gold/70">{icon}</span>
       {title}
     </Link>
-  );
-}
-
-function MobileHashLink({
-  href,
-  onClick,
-  children,
-}: {
-  href: string;
-  onClick: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <a
-      href={href}
-      onClick={onClick}
-      className="block rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-gold/10 hover:text-gold"
-    >
-      {children}
-    </a>
   );
 }
 
