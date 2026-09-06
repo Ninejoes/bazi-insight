@@ -122,10 +122,10 @@ const quickTools = [
   },
   {
     href: "/wallpaper",
-    badge: "NineJoe x Likhitfa",
+    badge: "Spiritual Art · NineJoe",
     badgeCn: "图",
     title: "วอลเปเปอร์สายมู & มงคลพรีเมียม",
-    tagline: "คอลเลกชันมงคล NineJoe & ยันต์ 5 ธาตุ",
+    tagline: "Spiritual Art องค์เทพเจ้า & ยันต์ 5 ธาตุ",
     desc: "รวมวอลเปเปอร์ 9:16 ระดับ HD ไฉ่ซิงเอี้ย ท้าวเวสสุวรรณ พระแม่ลักษมี พระพิฆเนศ และยันต์ 5 ธาตุปาจื้อ ดาวน์โหลดฟรี",
     iconBg: "from-yellow-400/20 to-amber-500/10",
     borderGlow: "group-hover:border-yellow-400/40",

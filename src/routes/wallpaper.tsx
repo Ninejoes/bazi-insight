@@ -14,9 +14,9 @@ import {
 export const Route = createFileRoute("/wallpaper")({
   head: () =>
     seo({
-      title: "วอลเปเปอร์สายมู วอลเปเปอร์มงคลลิขสิทธิ์ NineJoe & วอลเปเปอร์ 5 ธาตุปาจื้อ ดาวน์โหลดฟรี",
+      title: "วอลเปเปอร์สายมู มงคลพรีเมียม Spiritual Art NineJoe & ยันต์ 5 ธาตุปาจื้อ ดาวน์โหลดฟรี",
       description:
-        "ดาวน์โหลดวอลเปเปอร์สายมูระดับพรีเมียมจาก NineJoe Collections (เทพเจ้าไฉ่ซิงเอี้ย, ท้าวเวสสุวรรณ, พระแม่ลักษมี, พระพิฆเนศ, ปลาคาร์ฟมงคล) พร้อมระบบสร้างวอลเปเปอร์เสริมดวง 5 ธาตุปาจื้อสลักชื่อเฉพาะบุคคล ภาพคมชัดระดับ Ultra HD 9:16 ฟรี",
+        "ดาวน์โหลดวอลเปเปอร์สายมูระดับพรีเมียมเฉพาะหมวดหมู่ Spiritual Art จาก NineJoe Collections (เทพเจ้าไฉ่ซิงเอี้ย, ท้าวเวสสุวรรณ, พระแม่ลักษมี, พระพิฆเนศ, ปลาคาร์ฟมงคล) คมชัดระดับ Ultra HD 9:16 ฟรี",
       path: "/wallpaper",
       canonicalUrl: `${siteUrl}/wallpaper`,
       keywords: [
@@ -113,8 +113,7 @@ type FilterKey =
   | "lakshmi"
   | "ganesha"
   | "koi"
-  | "spiritual"
-  | "creative";
+  | "spiritual";
 
 const FILTER_BUTTONS: { key: FilterKey; label: string; icon: string }[] = [
   { key: "all", label: "ทั้งหมด", icon: "✨" },
@@ -123,8 +122,7 @@ const FILTER_BUTTONS: { key: FilterKey; label: string; icon: string }[] = [
   { key: "lakshmi", label: "พระแม่ลักษมี", icon: "🌸" },
   { key: "ganesha", label: "พระพิฆเนศ", icon: "🐘" },
   { key: "koi", label: "ปลาคาร์ฟมงคล", icon: "🐟" },
-  { key: "spiritual", label: "สายมูทั้งหมด", icon: "🌟" },
-  { key: "creative", label: "Creative Art", icon: "🎨" },
+  { key: "spiritual", label: "มงคลอื่นๆ", icon: "🌟" },
 ];
 
 function WallpaperPage() {
@@ -140,7 +138,7 @@ function WallpaperPage() {
   const [ownerName, setOwnerName] = useState("");
   const [customDownloading, setCustomDownloading] = useState(false);
 
-  // โหลดคอลเลกชันสดจาก NineJoe (Supabase)
+  // โหลดคอลเลกชันสดจาก NineJoe (Supabase) เฉพาะหมวด Spiritual Art
   useEffect(() => {
     let mounted = true;
     fetchNineJoeCollections().then((data) => {
@@ -161,11 +159,7 @@ function WallpaperPage() {
     return allWallpapers.filter((item) => {
       // กรองตามหมวด
       if (filterKey === "all") {
-        // แสดงทั้งหมด
-      } else if (filterKey === "spiritual") {
-        if (item.deityGroup === "creative") return false;
-      } else if (filterKey === "creative") {
-        if (item.deityGroup !== "creative") return false;
+        // แสดงทั้งหมดในหมวด Spiritual Art
       } else {
         if (item.deityGroup !== filterKey) return false;
       }
@@ -184,7 +178,7 @@ function WallpaperPage() {
     });
   }, [allWallpapers, filterKey, searchQuery]);
 
-  // สถิติตัวเลขแต่ละหมวด
+  // สถิติตัวเลขแต่ละหมวด (เฉพาะ Spiritual Art)
   const counts = useMemo(() => {
     return {
       all: allWallpapers.length,
@@ -193,8 +187,7 @@ function WallpaperPage() {
       lakshmi: allWallpapers.filter((w) => w.deityGroup === "lakshmi").length,
       ganesha: allWallpapers.filter((w) => w.deityGroup === "ganesha").length,
       koi: allWallpapers.filter((w) => w.deityGroup === "koi").length,
-      spiritual: allWallpapers.filter((w) => w.deityGroup !== "creative").length,
-      creative: allWallpapers.filter((w) => w.deityGroup === "creative").length,
+      spiritual: allWallpapers.filter((w) => w.deityGroup === "spiritual").length,
     };
   }, [allWallpapers]);
 
@@ -334,7 +327,7 @@ function WallpaperPage() {
           </div>
           <div className="relative z-10">
             <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/5 px-4 py-1 text-[11px] tracking-wider text-gold">
-              <span className="font-cn">开运壁纸</span> · ลิขสิทธิ์แท้ร่วมกับ{" "}
+              <span className="font-cn">开运壁纸</span> · เฉพาะหมวดหมู่ Spiritual Art ลิขสิทธิ์แท้จาก{" "}
               <a
                 href="https://ninejoe.online/collections"
                 target="_blank"
@@ -345,11 +338,11 @@ function WallpaperPage() {
               </a>
             </div>
             <h1 className="mt-4 font-display text-3xl text-foreground md:text-5xl">
-              วอลเปเปอร์สายมู <span className="text-gradient-gold italic">มงคลพรีเมียม</span>
+              วอลเปเปอร์สายมู <span className="text-gradient-gold italic">Spiritual Art มงคลพรีเมียม</span>
             </h1>
             <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground md:text-base">
               รวมวอลเปเปอร์สายมู องค์เทพเจ้า และภาพมงคลระดับ Ultra HD สำหรับหน้าจอมือถือ (9:16)
-              ดึงภาพจริงจากคอลเลกชัน{" "}
+              คัดสรรเฉพาะหมวดหมู่ <strong>Spiritual Art</strong> ลิขสิทธิ์แท้จาก{" "}
               <a
                 href="https://ninejoe.online/collections"
                 target="_blank"
@@ -358,7 +351,7 @@ function WallpaperPage() {
               >
                 NineJoe Collections
               </a>{" "}
-              พร้อมดาวน์โหลดฟรี และระบบสร้างวอลเปเปอร์ยันต์ 5 ธาตุปาจื้อสลักชื่อเฉพาะบุคคล
+              (ไฉ่ซิงเอี้ย, ท้าวเวสสุวรรณ, พระแม่ลักษมี, พระพิฆเนศ, ปลาคาร์ฟมงคล) ดาวน์โหลดฟรี และระบบสร้างวอลเปเปอร์ยันต์ 5 ธาตุปาจื้อสลักชื่อเฉพาะบุคคล
             </p>
 
             {/* แท็บสลับโหมด */}
@@ -372,7 +365,7 @@ function WallpaperPage() {
                 }`}
               >
                 <span>🌟</span>
-                <span>คอลเลกชัน NineJoe ({allWallpapers.length} ภาพ HD)</span>
+                <span>คอลเลกชัน Spiritual Art ({allWallpapers.length} ภาพ HD)</span>
               </button>
               <button
                 onClick={() => setActiveTab("custom")}

@@ -35,7 +35,7 @@ export interface NineJoeWallpaperItem {
   downloadUrl: string;
   altText: string;
   tags: string[];
-  deityGroup: "caishen" | "vessavana" | "lakshmi" | "ganesha" | "koi" | "spiritual" | "creative";
+  deityGroup: "caishen" | "vessavana" | "lakshmi" | "ganesha" | "koi" | "spiritual";
   deityLabel: string;
 }
 
@@ -60,8 +60,13 @@ export function classifyDeityGroup(
   if (combined.includes("vessavana") || combined.includes("เวสสุวรรณ") || combined.includes("ท้าวเวส")) {
     return { group: "vessavana", label: "🛡️ ท้าวเวสสุวรรณ (คุ้มครอง & บารมี)" };
   }
-  if (combined.includes("lakshmi") || combined.includes("ลักษมี")) {
-    return { group: "lakshmi", label: "🌸 พระแม่ลักษมี (ความรัก & มั่งคั่ง)" };
+  if (
+    combined.includes("lakshmi") ||
+    combined.includes("ลักษมี") ||
+    combined.includes("goddess of fortune") ||
+    combined.includes("fortune goddess")
+  ) {
+    return { group: "lakshmi", label: "🌸 พระแม่ลักษมี & พระแม่ประทานทรัพย์ (ความรัก & มั่งคั่ง)" };
   }
   if (combined.includes("ganesha") || combined.includes("พิฆเนศ") || combined.includes("คเณศ")) {
     return { group: "ganesha", label: "🐘 พระพิฆเนศ (ปัญญา & สำเร็จ)" };
@@ -69,16 +74,18 @@ export function classifyDeityGroup(
   if (combined.includes("koi") || combined.includes("คาร์ฟ") || combined.includes("ปลาคราฟ")) {
     return { group: "koi", label: "🐟 ปลาคาร์ฟมงคล (อุดมสมบูรณ์)" };
   }
-  if (category.includes("Spiritual") || combined.includes("goddess") || combined.includes("fortune")) {
-    return { group: "spiritual", label: "🌟 มงคล & สิ่งศักดิ์สิทธิ์" };
-  }
-  return { group: "creative", label: "🎨 Creative & Anime Art" };
+  return { group: "spiritual", label: "🌟 มงคล & สิ่งศักดิ์สิทธิ์" };
 }
 
 export function flattenWallpapers(collections: NineJoeCollection[]): NineJoeWallpaperItem[] {
   const items: NineJoeWallpaperItem[] = [];
 
-  for (const c of collections) {
+  // กรองเฉพาะหมวด Spiritual Art เท่านั้นตามความต้องการ
+  const spiritualCollections = collections.filter((c) =>
+    (c.category || "").toLowerCase().includes("spiritual")
+  );
+
+  for (const c of spiritualCollections) {
     const { group, label } = classifyDeityGroup(c.title, c.category, c.tags);
     const images = Array.isArray(c.collection_images) && c.collection_images.length > 0
       ? c.collection_images.slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
@@ -93,7 +100,7 @@ export function flattenWallpapers(collections: NineJoeCollection[]): NineJoeWall
         collectionId: c.id,
         collectionSlug: c.slug,
         collectionTitle: c.title,
-        collectionCategory: c.category || "General",
+        collectionCategory: c.category || "🌟 Spiritual Art",
         description: c.description || "",
         imageUrl: imgUrl,
         thumbnailUrl: img.thumbnail_url || imgUrl,
@@ -106,14 +113,7 @@ export function flattenWallpapers(collections: NineJoeCollection[]): NineJoeWall
     });
   }
 
-  // เรียงลำดับ: เอาสายมู (Spiritual Art) ขึ้นก่อนเสมอ
-  return items.sort((a, b) => {
-    const aIsSpiritual = a.deityGroup !== "creative";
-    const bIsSpiritual = b.deityGroup !== "creative";
-    if (aIsSpiritual && !bIsSpiritual) return -1;
-    if (!aIsSpiritual && bIsSpiritual) return 1;
-    return 0;
-  });
+  return items;
 }
 
 export async function fetchNineJoeCollections(): Promise<NineJoeCollection[]> {
@@ -123,7 +123,8 @@ export async function fetchNineJoeCollections(): Promise<NineJoeCollection[]> {
   }
 
   try {
-    const url = `${SUPABASE_URL}/rest/v1/collections?select=id,slug,title,description,category,cover_image,tags,updated_at,collection_images(image_url,thumbnail_url,download_url,alt_text,sort_order)&status=eq.published&order=created_at.desc`;
+    // ดึงเฉพาะหมวด Spiritual Art จาก NineJoe Supabase โดยตรง
+    const url = `${SUPABASE_URL}/rest/v1/collections?select=id,slug,title,description,category,cover_image,tags,updated_at,collection_images(image_url,thumbnail_url,download_url,alt_text,sort_order)&category=ilike.*Spiritual*&status=eq.published&order=created_at.desc`;
     const res = await fetch(url, {
       headers: {
         apikey: SUPABASE_ANON_KEY,
@@ -137,9 +138,12 @@ export async function fetchNineJoeCollections(): Promise<NineJoeCollection[]> {
 
     const data = (await res.json()) as NineJoeCollection[];
     if (Array.isArray(data) && data.length > 0) {
-      memoryCache = data;
+      const spiritualOnly = data.filter((c) =>
+        (c.category || "").toLowerCase().includes("spiritual")
+      );
+      memoryCache = spiritualOnly;
       lastFetchTime = now;
-      return data;
+      return spiritualOnly;
     }
   } catch (err) {
     console.warn("Failed to fetch live NineJoe collections, using fallback seed:", err);
@@ -278,15 +282,37 @@ export const FALLBACK_COLLECTIONS: NineJoeCollection[] = [
     ],
   },
   {
-    id: "a523edd7-edb3-4742-96d2-eede8f818763",
-    slug: "void-requiem-anime-wallpapers",
-    title: "Void Requiem Anime Wallpapers",
-    category: "🎨 Creative Art",
-    description: "อนิเมะนัวร์ลักชูรี ธีมสีดำ-ทองคำ (Black & Gold) ผสานสตรีทแวร์และความพรีเมียมอันลึกลับ",
-    cover_image: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1779988065/ChatGPT_Image_28_%E0%B8%9E.%E0%B8%84._2569_21_29_35_wwqdfp.png",
-    tags: ["anime", "noir", "luxury", "black", "gold", "cyberpunk"],
+    id: "ce984c2b-b563-4976-a4c0-b12f76813373",
+    slug: "cute-ganesha-premium-wallpapers-collection",
+    title: "Cute Ganesha Premium Wallpapers Collection",
+    category: "🌟 Spiritual Art",
+    description: "วอลเปเปอร์พระพิฆเนศ ลักชูรีพาสเทล 3D ศักดิ์สิทธิ์ เสริมความสำเร็จ ปัญญา ความมั่งคั่ง และเมตตามหานิยม",
+    cover_image: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780753189/ChatGPT_Image_6_%E0%B8%A1%E0%B8%B4.%E0%B8%A2._2569_20_38_15_uo28kb.png",
+    tags: ["ganesha", "cute ganesha", "wallpaper", "spiritual", "prosperity", "wealth", "luxury", "3d art"],
     collection_images: [
-      { image_url: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1779988065/ChatGPT_Image_28_%E0%B8%9E.%E0%B8%84._2569_21_29_35_wwqdfp.png", sort_order: 0 },
+      { image_url: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780753189/ChatGPT_Image_6_%E0%B8%A1%E0%B8%B4.%E0%B8%A2._2569_20_38_15_uo28kb.png", sort_order: 0 },
+      { image_url: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780753205/ChatGPT_Image_6_%E0%B8%A1%E0%B8%B4.%E0%B8%A2._2569_20_38_21_ob42q0.png", sort_order: 1 },
+      { image_url: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780753187/ChatGPT_Image_6_%E0%B8%A1%E0%B8%B4.%E0%B8%A2._2569_20_38_24_lfx53e.png", sort_order: 2 },
+      { image_url: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780753187/ChatGPT_Image_6_%E0%B8%A1%E0%B8%B4.%E0%B8%A2._2569_20_38_27_m3dyai.png", sort_order: 3 },
+      { image_url: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780753186/ChatGPT_Image_6_%E0%B8%A1%E0%B8%B4.%E0%B8%A2._2569_20_38_29_fkdlpz.png", sort_order: 4 },
+    ],
+  },
+  {
+    id: "7a84bf1e-ecec-4e32-8581-eb140c3f2498",
+    slug: "cute-ganesha-wallpapers-6-auspicious-color-collection",
+    title: "Cute Ganesha Wallpapers – 6 Auspicious Color Collection",
+    category: "🌟 Spiritual Art",
+    description: "พระพิฆเนศ 6 สีมงคลประจำวันเกิด เสริมดวงชะตารอบด้าน ค้าขายคล่อง การงานราบรื่น ปัดเป่าอุปสรรคทั้งปวง",
+    cover_image: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780644605/ChatGPT_Image_5_%E0%B8%A1%E0%B8%B4.%E0%B8%A2._2569_14_28_14_yc2vys.png",
+    tags: ["ganesha", "lucky colors", "auspicious", "wallpaper", "spiritual", "success"],
+    collection_images: [
+      { image_url: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780644605/ChatGPT_Image_5_%E0%B8%A1%E0%B8%B4.%E0%B8%A2._2569_14_28_14_yc2vys.png", sort_order: 0 },
+      { image_url: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780644605/ChatGPT_Image_5_%E0%B8%A1%E0%B8%B4.%E0%B8%A2._2569_14_27_53_am1zaf.png", sort_order: 1 },
+      { image_url: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780644605/ChatGPT_Image_5_%E0%B8%A1%E0%B8%B4.%E0%B8%A2._2569_14_27_50_xntmtf.png", sort_order: 2 },
+      { image_url: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780644605/ChatGPT_Image_5_%E0%B8%A1%E0%B8%B4.%E0%B8%A2._2569_14_27_57_r4s5dj.png", sort_order: 3 },
+      { image_url: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780644605/ChatGPT_Image_5_%E0%B8%A1%E0%B8%B4.%E0%B8%A2._2569_14_27_55_pv9ei8.png", sort_order: 4 },
+      { image_url: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780644606/ChatGPT_Image_5_%E0%B8%A1%E0%B8%B4.%E0%B8%A2._2569_14_27_48_gyczc2.png", sort_order: 5 },
+      { image_url: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780644605/ChatGPT_Image_5_%E0%B8%A1%E0%B8%B4.%E0%B8%A2._2569_14_28_12_ruop2m.png", sort_order: 6 },
     ],
   },
 ];
