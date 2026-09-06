@@ -1,7 +1,9 @@
 import { friendlyErrorMessage } from "./friendly-error";
 
-const ADMIN_EMAIL = "admin@gmail.com";
-const ADMIN_ROLE = "Admin";
+export function getAdminEmail() {
+  return (process.env.ADMIN_EMAIL || "admin@gmail.com").trim().toLowerCase();
+}
+export const ADMIN_ROLE = "Admin";
 
 type SupabaseUser = {
   id?: string;
@@ -135,7 +137,7 @@ export async function requireAdmin(request: Request) {
   if (!response.ok) throw new Error("session แอดมินไม่ถูกต้องหรือหมดอายุ");
 
   const user = (await response.json().catch(() => ({}))) as SupabaseUser;
-  if (user.email?.toLowerCase() !== ADMIN_EMAIL || userRole(user) !== ADMIN_ROLE) {
+  if (user.email?.toLowerCase() !== getAdminEmail() || userRole(user) !== ADMIN_ROLE) {
     throw new Error("บัญชีนี้ไม่มีสิทธิ์แอดมิน");
   }
 

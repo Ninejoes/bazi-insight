@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-export const ADMIN_EMAIL = "admin@gmail.com";
+export const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "admin@gmail.com").trim().toLowerCase();
 export const ADMIN_NAME = "Admin";
 export const ADMIN_ROLE = "Admin";
 
@@ -65,7 +65,12 @@ export async function supabaseRequest(path, init = {}) {
   return response;
 }
 
-export function send(res, status, body) {
+export function send(res, status, body, cacheControl) {
+  if (cacheControl) {
+    res.setHeader("Cache-Control", cacheControl);
+    res.removeHeader("Pragma");
+    res.removeHeader("Expires");
+  }
   res.status(status).json(body);
 }
 
@@ -76,6 +81,10 @@ export function cors(res, methods = "GET, POST, PUT, DELETE, OPTIONS") {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
   res.setHeader("Pragma", "no-cache");
   res.setHeader("Expires", "0");
+}
+
+export function publicCacheHeader(maxAge = 60, sMaxAge = 86400, swr = 604800) {
+  return `public, max-age=${maxAge}, s-maxage=${sMaxAge}, stale-while-revalidate=${swr}`;
 }
 
 export function roleOf(user = {}) {

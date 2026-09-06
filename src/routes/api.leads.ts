@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 type LeadPayload = {
   id?: string;
@@ -73,6 +74,17 @@ export const Route = createFileRoute("/api/leads")({
       OPTIONS: async () => json(null, { status: 204 }),
       POST: async ({ request }) => {
         try {
+          const rateLimit = checkRateLimit(request, "leads", 10, 10 * 60 * 1000);
+          if (!rateLimit.allowed) {
+            return json(
+              {
+                ok: false,
+                error: `ส่งข้อมูลบ่อยเกินไป กรุณารอ ${rateLimit.waitSeconds} วินาทีแล้วลองใหม่อีกครั้ง`,
+              },
+              { status: 429 },
+            );
+          }
+
           const lead = sanitizeLead(await request.json().catch(() => ({})));
           await saveToSupabase(lead);
           return json({

@@ -108,8 +108,7 @@ createServer(async (req, res) => {
     }
 
     if (url.pathname === "/api/leads" && req.method === "GET") {
-      const leads = await readJson(leadsFile, []);
-      send(res, 200, JSON.stringify({ ok: true, leads }));
+      send(res, 403, JSON.stringify({ ok: false, error: "Forbidden: leads export requires admin authentication" }));
       return;
     }
 

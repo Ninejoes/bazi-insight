@@ -1,9 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
-import { getSupabaseConfig, json, supabaseRequest } from "@/lib/supabase-rest";
-
-const ADMIN_EMAIL = "admin@gmail.com";
+import { getAdminEmail, getSupabaseConfig, json, supabaseRequest } from "@/lib/supabase-rest";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 type ContactMessage = {
   id?: string;
@@ -57,7 +56,7 @@ async function requireAdmin(request: Request) {
   if (!response.ok) throw new Error("session แอดมินไม่ถูกต้องหรือหมดอายุ");
 
   const user = (await response.json().catch(() => ({}))) as SupabaseUser;
-  if (user.email?.toLowerCase() !== ADMIN_EMAIL || userRole(user) !== "Admin") {
+  if (user.email?.toLowerCase() !== getAdminEmail() || userRole(user) !== "Admin") {
     throw new Error("บัญชีนี้ไม่มีสิทธิ์แอดมิน");
   }
 }
@@ -166,6 +165,16 @@ export const Route = createFileRoute("/api/contact-messages")({
       },
       POST: async ({ request }) => {
         try {
+          const rateLimit = checkRateLimit(request, "contact-message", 5, 10 * 60 * 1000);
+          if (!rateLimit.allowed) {
+            return json(
+              {
+                ok: false,
+                error: `ส่งข้อความบ่อยเกินไป กรุณารอ ${rateLimit.waitSeconds} วินาทีแล้วลองใหม่อีกครั้ง`,
+              },
+              { status: 429 },
+            );
+          }
           return json({
             ok: true,
             source: "supabase",

@@ -113,11 +113,12 @@ function buildArticleQuery({
   page: number;
   limit: number;
 }) {
-  const offset = (page - 1) * limit;
+  const effectiveLimit = slug ? 1 : limit;
+  const offset = slug ? 0 : (page - 1) * limit;
   const params = new URLSearchParams({
     select: "*",
     order: "date.desc",
-    limit: String(limit),
+    limit: String(effectiveLimit),
     offset: String(offset),
   });
 
@@ -150,8 +151,9 @@ async function listArticles({ slug = "", q = "", category = "", page = 1, limit 
     throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
 
+  const preferHeader = slug ? "return=representation" : "count=exact";
   const response = await supabaseRequest(buildArticleQuery({ slug, q, category, page, limit }), {
-    headers: { Prefer: "count=exact" },
+    headers: { Prefer: preferHeader },
   });
   if (!response) {
     throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
@@ -211,10 +213,18 @@ export const Route = createFileRoute("/api/articles")({
           const category = (url.searchParams.get("category") || "").trim();
           const page = clampPage(url.searchParams.get("page"));
           const limit = clampLimit(url.searchParams.get("limit"));
-          return json({
-            ok: true,
-            ...(await listArticles({ slug, q, category, page, limit })),
-          });
+          return json(
+            {
+              ok: true,
+              ...(await listArticles({ slug, q, category, page, limit })),
+            },
+            {
+              headers: {
+                "Cache-Control":
+                  "public, max-age=60, s-maxage=86400, stale-while-revalidate=604800",
+              },
+            },
+          );
         } catch (error) {
           return json(
             {

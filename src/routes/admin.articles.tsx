@@ -28,6 +28,10 @@ function AdminArticles() {
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(true);
   const [savingAction, setSavingAction] = useState("");
+  const [autoGenerating, setAutoGenerating] = useState(false);
+  const [showAutoModal, setShowAutoModal] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState<"auto" | "morning" | "forenoon" | "noon" | "afternoon" | "evening">("auto");
+  const [forceOverwrite, setForceOverwrite] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -108,20 +112,160 @@ function AdminArticles() {
     }
   };
 
+  const handleAutoGenerate = async () => {
+    setAutoGenerating(true);
+    setNotice("");
+    try {
+      const response = await fetch("/api/cron/auto-article", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...adminAuthHeaders() },
+        body: JSON.stringify({
+          slot: selectedSlot,
+          force: forceOverwrite,
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok || !data.result) {
+        setNotice(friendlyErrorMessage(data.error, "สร้างบทความอัตโนมัติไม่สำเร็จ"));
+        return;
+      }
+      await reload();
+      const actionText =
+        data.result.action === "created"
+          ? "สร้างบทความใหม่สำเร็จ"
+          : data.result.action === "updated"
+            ? "อัปเดตบทความสำเร็จ"
+            : "มีบทความรอบนี้อยู่แล้ว (ข้ามการสร้างเพื่อไม่ให้ซ้ำซ้อน)";
+      const modeText =
+        data.result.mode === "gemini" ? "✨ ผ่าน AI Gemini ฟรี" : "🔮 ผ่านระบบคำนวณสถิติ/โหราศาสตร์ในตัว";
+      const msg = `${actionText} (${data.result.title}) [${modeText}]`;
+      setNotice(msg);
+      setShowAutoModal(false);
+      window.alert(msg);
+    } catch {
+      setNotice("เชื่อมต่อ API สร้างบทความไม่สำเร็จ");
+    } finally {
+      setAutoGenerating(false);
+    }
+  };
+
   return (
     <div className="min-w-0 space-y-6">
       <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
           <h1 className="truncate font-display text-3xl text-foreground">จัดการบทความ</h1>
-          <p className="text-sm text-muted-foreground">เพิ่ม แก้ไข และเผยแพร่บทความ</p>
+          <p className="text-sm text-muted-foreground">เพิ่ม แก้ไข เผยแพร่ และสร้างบทความเลขเด็ดอัตโนมัติ</p>
         </div>
-        <button
-          onClick={() => setCreating(true)}
-          className="shrink-0 rounded-xl bg-gradient-gold px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-gold"
-        >
-          + เพิ่มบทความ
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowAutoModal(true)}
+            className="shrink-0 inline-flex items-center gap-1.5 rounded-xl border border-gold/40 bg-gold/10 px-4 py-2.5 text-sm font-semibold text-gold transition-colors hover:bg-gold/20"
+          >
+            <span>✨</span> เขียนบทความเลขเด็ด AI
+          </button>
+          <button
+            type="button"
+            onClick={() => setCreating(true)}
+            className="shrink-0 rounded-xl bg-gradient-gold px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-gold"
+          >
+            + เพิ่มบทความ
+          </button>
+        </div>
       </div>
+
+      {showAutoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <div className="glass-strong w-full max-w-lg rounded-3xl border border-gold/30 p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="font-display text-xl text-foreground flex items-center gap-2">
+                <span>✨</span> สร้างบทความเลขเด็ดอัตโนมัติ (AI)
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowAutoModal(false)}
+                className="text-muted-foreground hover:text-foreground text-sm"
+              >
+                ✕ ปิด
+              </button>
+            </div>
+
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              ระบบจะสร้างบทความหมวด &quot;เลขเด็ด&quot; พร้อมหัวข้อ ภาพปก การวิเคราะห์ตัวเลข และ SEO ครบถ้วน โดยใช้งาน <strong>AI Gemini ฟรี</strong> หรือระบบคำนวณสถิติ/โหราศาสตร์ในตัว
+            </p>
+
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground">เลือกรอบเวลาที่ต้องการสร้าง:</label>
+              <div className="grid grid-cols-1 gap-2">
+                {[
+                  { value: "auto", label: "อัตโนมัติ (ตามเวลาปัจจุบัน)" },
+                  { value: "morning", label: "รอบเช้า 07:00 น. (เลขมงคลเปิดวัน & เลขกำลังวัน)" },
+                  { value: "forenoon", label: "รอบสาย 10:00 น. (เลขปฏิทินจีน & เซียมซีมงคล)" },
+                  { value: "noon", label: "รอบเที่ยง 12:00 น. (สถิติหวย & แนวทาง 2 ตัว 3 ตัว)" },
+                  { value: "afternoon", label: "รอบบ่าย 15:00 น. (เลขเด่นสำนักดัง & ปริศนาตัวเลข)" },
+                  { value: "evening", label: "รอบเย็น 18:00 น. (สรุปเลขเด่นโค้งสุดท้าย & เลขทำนายฝัน)" },
+                ].map((slot) => (
+                  <label
+                    key={slot.value}
+                    className={`flex items-center gap-3 rounded-xl border p-3 text-xs cursor-pointer transition-colors ${
+                      selectedSlot === slot.value
+                        ? "border-gold bg-gold/15 text-foreground font-medium"
+                        : "border-gold/10 bg-card/40 text-muted-foreground hover:border-gold/30"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="slot"
+                      value={slot.value}
+                      checked={selectedSlot === slot.value}
+                      onChange={() => setSelectedSlot(slot.value as typeof selectedSlot)}
+                      className="accent-amber-400"
+                    />
+                    <span>{slot.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer pt-1">
+              <input
+                type="checkbox"
+                checked={forceOverwrite}
+                onChange={(e) => setForceOverwrite(e.target.checked)}
+                className="rounded accent-amber-400"
+              />
+              <span>บังคับเขียนทับบทความเดิม (กรณีมีบทความในรอบนี้อยู่แล้ว)</span>
+            </label>
+
+            <div className="flex justify-end gap-2 pt-3 border-t border-gold/10">
+              <button
+                type="button"
+                disabled={autoGenerating}
+                onClick={() => setShowAutoModal(false)}
+                className="rounded-xl border border-gold/20 px-4 py-2 text-xs font-medium text-muted-foreground hover:bg-card/40"
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                disabled={autoGenerating}
+                onClick={handleAutoGenerate}
+                className="rounded-xl bg-gradient-gold px-5 py-2 text-xs font-semibold text-primary-foreground shadow-gold disabled:opacity-50 flex items-center gap-2"
+              >
+                {autoGenerating ? (
+                  <>
+                    <span className="inline-block animate-spin">⏳</span> กำลังสร้างบทความ...
+                  </>
+                ) : (
+                  <>
+                    <span>✨</span> เริ่มสร้างบทความทันที
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {notice ? (
         <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-200">

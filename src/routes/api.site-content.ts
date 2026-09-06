@@ -75,7 +75,15 @@ export const Route = createFileRoute("/api/site-content")({
       OPTIONS: async () => json(null, { status: 204 }),
       GET: async () => {
         try {
-          return json({ ok: true, ...(await loadContent()) });
+          return json(
+            { ok: true, ...(await loadContent()) },
+            {
+              headers: {
+                "Cache-Control":
+                  "public, max-age=60, s-maxage=86400, stale-while-revalidate=604800",
+              },
+            },
+          );
         } catch (error) {
           return json(
             {

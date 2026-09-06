@@ -79,18 +79,13 @@ function ArticleDetail() {
     let mounted = true;
 
     async function loadRelated() {
-      const response = await fetch("/api/articles");
+      const response = await fetch(
+        `/api/articles?category=${encodeURIComponent(currentArticle.category)}&limit=4`,
+      );
       const data = await response.json().catch(() => ({}));
       if (!mounted || !response.ok || !data.ok) return;
       const all = (data.articles || []) as Article[];
-      setRelated(
-        all
-          .filter(
-            (item) =>
-              item.slug !== currentArticle.slug && item.category === currentArticle.category,
-          )
-          .slice(0, 3),
-      );
+      setRelated(all.filter((item) => item.slug !== currentArticle.slug).slice(0, 3));
     }
 
     void loadRelated();

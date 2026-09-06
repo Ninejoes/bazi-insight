@@ -139,8 +139,9 @@ export const Route = createFileRoute("/api/reading-history")({
           const body = normalizeReading((await request.json().catch(() => ({}))) as ReadingRow);
           const row = {
             ...body,
-            user_id: user?.id || body.user_id || null,
-            email: user?.email || body.email || "",
+            id: user ? body.id : randomUUID(),
+            user_id: user ? user.id : null,
+            email: user ? user.email || "" : "",
             updated_at: new Date().toISOString(),
           };
           const rows = (await supabaseRest(config.url, config.serviceKey, "reading_history?on_conflict=id", {

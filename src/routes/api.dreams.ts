@@ -86,11 +86,12 @@ function buildDreamQuery({
   limit: number;
   includeBlocked: boolean;
 }) {
-  const offset = (page - 1) * limit;
+  const effectiveLimit = keyword ? 1 : limit;
+  const offset = keyword ? 0 : (page - 1) * limit;
   const params = new URLSearchParams({
     select: "*",
     order: "keyword.asc",
-    limit: String(limit),
+    limit: String(effectiveLimit),
     offset: String(offset),
   });
 
@@ -145,10 +146,11 @@ async function listDreams({
     throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
 
+  const preferHeader = keyword ? "return=representation" : "count=estimated";
   const response = await supabaseRequest(
     buildDreamQuery({ q, keyword, category, letter, page, limit, includeBlocked }),
     {
-      headers: { Prefer: "count=exact" },
+      headers: { Prefer: preferHeader },
     },
   );
   if (!response) {
@@ -221,10 +223,20 @@ export const Route = createFileRoute("/api/dreams")({
               includeBlocked = false;
             }
           }
-          return json({
-            ok: true,
-            ...(await listDreams({ q, keyword, category, letter, page, limit, includeBlocked })),
-          });
+          const cacheHeaders = includeBlocked
+            ? { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" }
+            : {
+                "Cache-Control":
+                  "public, max-age=60, s-maxage=86400, stale-while-revalidate=604800",
+              };
+
+          return json(
+            {
+              ok: true,
+              ...(await listDreams({ q, keyword, category, letter, page, limit, includeBlocked })),
+            },
+            { headers: cacheHeaders },
+          );
         } catch (error) {
           return json(
             {

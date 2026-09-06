@@ -117,27 +117,40 @@ export const Route = createFileRoute("/api/lottery")({
           const mode = url.searchParams.get("mode") || "result";
           const forceLive = url.searchParams.get("live") === "1";
 
+          const lotteryCacheHeaders = forceLive
+            ? { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" }
+            : {
+                "Cache-Control":
+                  "public, max-age=120, s-maxage=1800, stale-while-revalidate=86400",
+              };
+
           if (mode === "latest") {
             if (!forceLive) {
               const latest = getLatestCachedLotteryDraw(lotteryCache);
               if (latest) {
-                return json({
-                  ok: true,
-                  source: "cache",
-                  cachedAt: lotteryCache.generatedAt,
-                  mode: "latest",
-                  date: latest.date,
-                  latestDate: lotteryCache.latestDate,
-                  latestIsoDate: lotteryCache.latestIsoDate,
-                  nextDraw: getNextLotteryDrawDate(lotteryCache.latestDate),
-                  data: latest.data,
-                  pdfUrl: latest.pdfUrl,
-                  youtubeUrl: latest.youtubeUrl,
-                });
+                return json(
+                  {
+                    ok: true,
+                    source: "cache",
+                    cachedAt: lotteryCache.generatedAt,
+                    mode: "latest",
+                    date: latest.date,
+                    latestDate: lotteryCache.latestDate,
+                    latestIsoDate: lotteryCache.latestIsoDate,
+                    nextDraw: getNextLotteryDrawDate(lotteryCache.latestDate),
+                    data: latest.data,
+                    pdfUrl: latest.pdfUrl,
+                    youtubeUrl: latest.youtubeUrl,
+                  },
+                  { headers: lotteryCacheHeaders },
+                );
               }
             }
             const data = await fetchLatestLotteryResult();
-            return json({ ok: true, source: "glo", mode: "latest", data });
+            return json(
+              { ok: true, source: "glo", mode: "latest", data },
+              { headers: lotteryCacheHeaders },
+            );
           }
 
           if (mode === "history") {
@@ -146,16 +159,19 @@ export const Route = createFileRoute("/api/lottery")({
               Math.max(1, Number.parseInt(url.searchParams.get("limit") || "12", 10) || 12),
             );
             if (!forceLive && lotteryCache.history.length) {
-              return json(cachedHistoryPayload(limit));
+              return json(cachedHistoryPayload(limit), { headers: lotteryCacheHeaders });
             }
             const history = await fetchHistory(limit);
-            return json({
-              ok: true,
-              source: "glo",
-              nextDraw: getNextLotteryDrawDate(history[0]?.date || new Date()),
-              history,
-              frequency: buildLotteryFrequency(history),
-            });
+            return json(
+              {
+                ok: true,
+                source: "glo",
+                nextDraw: getNextLotteryDrawDate(history[0]?.date || new Date()),
+                history,
+                frequency: buildLotteryFrequency(history),
+              },
+              { headers: lotteryCacheHeaders },
+            );
           }
 
           const date = cleanDrawDate({
@@ -166,21 +182,24 @@ export const Route = createFileRoute("/api/lottery")({
           if (!forceLive) {
             const cached = findCachedLotteryDraw(lotteryCache, date);
             if (cached) {
-              return json({
-                ok: true,
-                source: "cache",
-                cachedAt: lotteryCache.generatedAt,
-                mode: "result",
-                date: cached.date,
-                nextDraw: getNextLotteryDrawDate(lotteryCache.latestDate),
-                data: cached.data,
-                pdfUrl: cached.pdfUrl,
-                youtubeUrl: cached.youtubeUrl,
-              });
+              return json(
+                {
+                  ok: true,
+                  source: "cache",
+                  cachedAt: lotteryCache.generatedAt,
+                  mode: "result",
+                  date: cached.date,
+                  nextDraw: getNextLotteryDrawDate(lotteryCache.latestDate),
+                  data: cached.data,
+                  pdfUrl: cached.pdfUrl,
+                  youtubeUrl: cached.youtubeUrl,
+                },
+                { headers: lotteryCacheHeaders },
+              );
             }
           }
           const data = await fetchLotteryResult(date);
-          return json({ ok: true, source: "glo", date, data });
+          return json({ ok: true, source: "glo", date, data }, { headers: lotteryCacheHeaders });
         } catch (error) {
           return json(
             {

@@ -76,7 +76,9 @@ function DreamDetail() {
     let mounted = true;
 
     async function loadRelated() {
-      const response = await fetch(`/api/dreams?q=${encodeURIComponent(currentDream.category)}`);
+      const response = await fetch(
+        `/api/dreams?category=${encodeURIComponent(currentDream.category)}&limit=9`,
+      );
       const data = await response.json().catch(() => ({}));
       if (!mounted || !response.ok || !data.ok) return;
       const all = (data.dreams || []) as DreamRecord[];

@@ -91,7 +91,15 @@ export const Route = createFileRoute("/api/faqs")({
       OPTIONS: async () => json(null, { status: 204 }),
       GET: async () => {
         try {
-          return json({ ok: true, ...(await listFaqs()) });
+          return json(
+            { ok: true, ...(await listFaqs()) },
+            {
+              headers: {
+                "Cache-Control":
+                  "public, max-age=60, s-maxage=86400, stale-while-revalidate=604800",
+              },
+            },
+          );
         } catch (error) {
           return json(
             { ok: false, error: friendlyErrorMessage(error, "โหลด FAQ ไม่สำเร็จ") },

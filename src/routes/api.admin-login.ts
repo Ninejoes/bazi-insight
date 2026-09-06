@@ -1,8 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
+import { getAdminEmail } from "@/lib/supabase-rest";
+import { checkRateLimit } from "@/lib/rate-limit";
 
-const ADMIN_EMAIL = "admin@gmail.com";
 const ADMIN_NAME = "Admin";
 const ADMIN_ROLE = "Admin";
 
@@ -17,13 +18,35 @@ type SupabaseUsersResponse = {
   users?: SupabaseUser[];
 };
 
-function json(body: unknown, init?: ResponseInit) {
+function getAllowedOrigin(request?: Request): string {
+  if (!request) return "";
+  const origin = request.headers.get("origin") || "";
+  if (!origin) return "";
+  if (
+    /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
+    /^https?:\/\/([a-z0-9-]+\.)?likhitfa\.online$/.test(origin) ||
+    /^https?:\/\/([a-z0-9-]+\.)?vercel\.app$/.test(origin)
+  ) {
+    return origin;
+  }
+  return "";
+}
+
+function json(body: unknown, init?: ResponseInit, request?: Request) {
+  const origin = getAllowedOrigin(request);
+  const corsHeaders: Record<string, string> = {
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+  };
+  if (origin) {
+    corsHeaders["Access-Control-Allow-Origin"] = origin;
+    corsHeaders["Vary"] = "Origin";
+  }
+
   return Response.json(body, {
     ...init,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
+      ...corsHeaders,
       ...(init?.headers || {}),
     },
   });
@@ -150,7 +173,8 @@ async function signInWithSupabase(email: string, password: string) {
 
   const data = await response.json().catch(() => ({}));
   const role = data.user?.app_metadata?.role || data.user?.user_metadata?.role;
-  if (data.user?.email?.toLowerCase() !== ADMIN_EMAIL || role !== ADMIN_ROLE) {
+  const adminEmail = getAdminEmail();
+  if (data.user?.email?.toLowerCase() !== adminEmail || role !== ADMIN_ROLE) {
     throw new Error("บัญชีนี้ไม่มีสิทธิ์แอดมิน");
   }
 
@@ -170,9 +194,21 @@ async function signInWithSupabase(email: string, password: string) {
 export const Route = createFileRoute("/api/admin-login")({
   server: {
     handlers: {
-      OPTIONS: async () => json(null, { status: 204 }),
+      OPTIONS: async ({ request }) => json(null, { status: 204 }, request),
       POST: async ({ request }) => {
         try {
+          const rateLimit = checkRateLimit(request, "admin-login", 5, 15 * 60 * 1000);
+          if (!rateLimit.allowed) {
+            return json(
+              {
+                ok: false,
+                error: `คุณพยายามเข้าสู่ระบบบ่อยเกินไป กรุณารอ ${rateLimit.waitSeconds} วินาทีแล้วลองใหม่อีกครั้ง`,
+              },
+              { status: 429 },
+              request,
+            );
+          }
+
           const body = (await request.json().catch(() => ({}))) as {
             email?: string;
             password?: string;
@@ -181,20 +217,25 @@ export const Route = createFileRoute("/api/admin-login")({
             .trim()
             .toLowerCase();
           const password = String(body.password || "");
+          const adminEmail = getAdminEmail();
 
-          if (email !== ADMIN_EMAIL || !password) {
-            return json({ ok: false, error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" }, { status: 401 });
+          if (email !== adminEmail || !password) {
+            return json({ ok: false, error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" }, { status: 401 }, request);
           }
           const adminPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD;
           if (adminPassword && password !== adminPassword) {
-            return json({ ok: false, error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" }, { status: 401 });
+            return json({ ok: false, error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" }, { status: 401 }, request);
           }
 
           const supabaseSession = await signInWithSupabase(email, password);
-          return json({
-            ok: true,
-            session: supabaseSession,
-          });
+          return json(
+            {
+              ok: true,
+              session: supabaseSession,
+            },
+            undefined,
+            request,
+          );
         } catch (error) {
           return json(
             {
@@ -202,6 +243,7 @@ export const Route = createFileRoute("/api/admin-login")({
               error: friendlyErrorMessage(error, "ไม่สามารถเข้าสู่ระบบแอดมินได้"),
             },
             { status: 500 },
+            request,
           );
         }
       },

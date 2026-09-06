@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { seo } from "@/lib/seo";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
+import { adminAuthHeaders } from "@/lib/admin-auth";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/admin/")({
@@ -47,7 +48,9 @@ function AdminDashboard() {
     let mounted = true;
 
     async function loadDashboard() {
-      const response = await fetch("/api/dashboard");
+      const response = await fetch("/api/dashboard", {
+        headers: adminAuthHeaders(),
+      });
       const result = await response.json().catch(() => ({}));
       if (!mounted) return;
       if (!response.ok || !result.ok) {

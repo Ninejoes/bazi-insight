@@ -45,7 +45,7 @@ function readAdminSession() {
     const isExpired = session.expiresAt
       ? new Date(session.expiresAt).getTime() <= Date.now()
       : false;
-    if (isExpired || session.email !== "admin@gmail.com" || session.role !== "Admin") {
+    if (isExpired || !session.email || session.role !== "Admin") {
       window.localStorage.removeItem(ADMIN_SESSION_KEY);
       return null;
     }

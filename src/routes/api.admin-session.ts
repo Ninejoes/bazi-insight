@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
-
-const ADMIN_EMAIL = "admin@gmail.com";
+import { getAdminEmail } from "@/lib/supabase-rest";
 
 type SupabaseUser = {
   email?: string;
@@ -9,13 +8,35 @@ type SupabaseUser = {
   app_metadata?: Record<string, unknown>;
 };
 
-function json(body: unknown, init?: ResponseInit) {
+function getAllowedOrigin(request?: Request): string {
+  if (!request) return "";
+  const origin = request.headers.get("origin") || "";
+  if (!origin) return "";
+  if (
+    /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
+    /^https?:\/\/([a-z0-9-]+\.)?likhitfa\.online$/.test(origin) ||
+    /^https?:\/\/([a-z0-9-]+\.)?vercel\.app$/.test(origin)
+  ) {
+    return origin;
+  }
+  return "";
+}
+
+function json(body: unknown, init?: ResponseInit, request?: Request) {
+  const origin = getAllowedOrigin(request);
+  const corsHeaders: Record<string, string> = {
+    "Access-Control-Allow-Methods": "GET, OPTIONS",
+    "Access-Control-Allow-Headers": "Authorization, Content-Type",
+  };
+  if (origin) {
+    corsHeaders["Access-Control-Allow-Origin"] = origin;
+    corsHeaders["Vary"] = "Origin";
+  }
+
   return Response.json(body, {
     ...init,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Authorization, Content-Type",
+      ...corsHeaders,
       ...(init?.headers || {}),
     },
   });
@@ -58,7 +79,7 @@ async function verifySupabaseAdmin(url: string, serviceKey: string, accessToken:
   if (!response.ok) throw new Error("session แอดมินไม่ถูกต้องหรือหมดอายุ");
 
   const user = (await response.json().catch(() => ({}))) as SupabaseUser;
-  if (user.email?.toLowerCase() !== ADMIN_EMAIL || userRole(user) !== "Admin") {
+  if (user.email?.toLowerCase() !== getAdminEmail() || userRole(user) !== "Admin") {
     throw new Error("บัญชีนี้ไม่มีสิทธิ์แอดมิน");
   }
 
@@ -72,7 +93,7 @@ async function verifySupabaseAdmin(url: string, serviceKey: string, accessToken:
 export const Route = createFileRoute("/api/admin-session")({
   server: {
     handlers: {
-      OPTIONS: async () => json(null, { status: 204 }),
+      OPTIONS: async ({ request }) => json(null, { status: 204 }, request),
       GET: async ({ request }) => {
         try {
           const config = getSupabaseConfig();
@@ -82,10 +103,14 @@ export const Route = createFileRoute("/api/admin-session")({
             );
           }
 
-          return json({
-            ok: true,
-            session: await verifySupabaseAdmin(config.url, config.serviceKey, readBearer(request)),
-          });
+          return json(
+            {
+              ok: true,
+              session: await verifySupabaseAdmin(config.url, config.serviceKey, readBearer(request)),
+            },
+            undefined,
+            request,
+          );
         } catch (error) {
           return json(
             {
@@ -93,6 +118,7 @@ export const Route = createFileRoute("/api/admin-session")({
               error: friendlyErrorMessage(error, "session แอดมินไม่ถูกต้อง"),
             },
             { status: 401 },
+            request,
           );
         }
       },

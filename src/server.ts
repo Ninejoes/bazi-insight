@@ -21,7 +21,7 @@ let sitemapCache: { files: Map<string, string>; expiresAt: number } | undefined;
 let sitemapRefreshPromise: Promise<Map<string, string>> | undefined;
 
 const sitemapCacheMs = 60 * 60 * 1000;
-const sitemapPageLimit = 1000;
+const sitemapPageLimit = 2500;
 
 async function getServerEntry(): Promise<ServerEntry> {
   if (!serverEntryPromise) {
@@ -85,11 +85,19 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   });
 }
 
+function applySecurityHeaders(headers: Headers) {
+  headers.set("X-Frame-Options", "DENY");
+  headers.set("X-Content-Type-Options", "nosniff");
+  headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+}
+
 function noStoreHeaders(headers?: HeadersInit) {
   const next = new Headers(headers);
   next.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
   next.set("Pragma", "no-cache");
   next.set("Expires", "0");
+  applySecurityHeaders(next);
   return next;
 }
 
@@ -110,12 +118,39 @@ function injectNoindexIntoErrorHtml(html: string) {
   return withoutCanonical.replace(/<head([^>]*)>/i, `<head$1>${noindexMeta}`);
 }
 
-async function withHtmlNoStore(response: Response) {
-  const contentType = response.headers.get("content-type") || "";
-  if (!contentType.includes("text/html")) return response;
+function isPrivateRoute(pathname: string) {
+  return (
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/profile") ||
+    pathname === "/login" ||
+    pathname === "/register"
+  );
+}
 
-  const headers = noStoreHeaders(response.headers);
+function publicSsrHeaders(headers?: HeadersInit) {
+  const next = new Headers(headers);
+  next.set(
+    "Cache-Control",
+    "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400",
+  );
+  applySecurityHeaders(next);
+  return next;
+}
+
+async function withHtmlCache(response: Response, pathname: string) {
+  const contentType = response.headers.get("content-type") || "";
+  if (!contentType.includes("text/html")) {
+    const headers = new Headers(response.headers);
+    applySecurityHeaders(headers);
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
+  }
+
   if (response.status === 404 || response.status === 410) {
+    const headers = noStoreHeaders(response.headers);
     headers.set("X-Robots-Tag", "noindex, follow");
     const html = await response.text();
     return new Response(injectNoindexIntoErrorHtml(html), {
@@ -124,24 +159,39 @@ async function withHtmlNoStore(response: Response) {
       headers,
     });
   }
+
+  if (response.status >= 400 || isPrivateRoute(pathname)) {
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: noStoreHeaders(response.headers),
+    });
+  }
+
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
-    headers,
+    headers: publicSsrHeaders(response.headers),
   });
 }
 
 function xmlHeaders(headers?: HeadersInit) {
   const next = new Headers(headers);
   next.set("Content-Type", "application/xml; charset=utf-8");
-  next.set("Cache-Control", "public, max-age=300, s-maxage=300, stale-while-revalidate=86400");
+  next.set(
+    "Cache-Control",
+    "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
+  );
   return next;
 }
 
 function textHeaders(headers?: HeadersInit) {
   const next = new Headers(headers);
   next.set("Content-Type", "text/plain; charset=utf-8");
-  next.set("Cache-Control", "public, max-age=300, s-maxage=300, stale-while-revalidate=86400");
+  next.set(
+    "Cache-Control",
+    "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
+  );
   return next;
 }
 
@@ -261,7 +311,7 @@ export default {
       if (url.pathname === "/robots.txt") return robotsResponse();
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return withHtmlNoStore(await normalizeCatastrophicSsrResponse(response));
+      return withHtmlCache(await normalizeCatastrophicSsrResponse(response), url.pathname);
     } catch (error) {
       console.error(error);
       return new Response(renderErrorPage(), {

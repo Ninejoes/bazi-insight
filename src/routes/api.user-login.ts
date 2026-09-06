@@ -6,6 +6,7 @@ import {
   userRole,
 } from "@/lib/supabase-auth";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 function json(body: unknown, init?: ResponseInit) {
   return Response.json(body, {
@@ -25,6 +26,17 @@ export const Route = createFileRoute("/api/user-login")({
       OPTIONS: async () => json(null, { status: 204 }),
       POST: async ({ request }) => {
         try {
+          const rateLimit = checkRateLimit(request, "user-login", 10, 15 * 60 * 1000);
+          if (!rateLimit.allowed) {
+            return json(
+              {
+                ok: false,
+                error: `คุณพยายามเข้าสู่ระบบบ่อยเกินไป กรุณารอ ${rateLimit.waitSeconds} วินาทีแล้วลองใหม่อีกครั้ง`,
+              },
+              { status: 429 },
+            );
+          }
+
           const body = (await request.json().catch(() => ({}))) as {
             email?: string;
             password?: string;

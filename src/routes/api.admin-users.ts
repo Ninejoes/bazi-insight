@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
-
-const ADMIN_EMAIL = "admin@gmail.com";
+import { getAdminEmail } from "@/lib/supabase-rest";
 
 type SupabaseUser = {
   id?: string;
@@ -22,13 +21,35 @@ type PublicUserRow = {
   created_at?: string;
 };
 
-function json(body: unknown, init?: ResponseInit) {
+function getAllowedOrigin(request?: Request): string {
+  if (!request) return "";
+  const origin = request.headers.get("origin") || "";
+  if (!origin) return "";
+  if (
+    /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
+    /^https?:\/\/([a-z0-9-]+\.)?likhitfa\.online$/.test(origin) ||
+    /^https?:\/\/([a-z0-9-]+\.)?vercel\.app$/.test(origin)
+  ) {
+    return origin;
+  }
+  return "";
+}
+
+function json(body: unknown, init?: ResponseInit, request?: Request) {
+  const origin = getAllowedOrigin(request);
+  const corsHeaders: Record<string, string> = {
+    "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Authorization, Content-Type",
+  };
+  if (origin) {
+    corsHeaders["Access-Control-Allow-Origin"] = origin;
+    corsHeaders["Vary"] = "Origin";
+  }
+
   return Response.json(body, {
     ...init,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "Authorization, Content-Type",
+      ...corsHeaders,
       ...(init?.headers || {}),
     },
   });
@@ -76,7 +97,7 @@ async function requireAdmin(url: string, serviceKey: string, accessToken: string
 
   const user = (await response.json().catch(() => ({}))) as SupabaseUser;
   const role = userRole(user);
-  if (user.email?.toLowerCase() !== ADMIN_EMAIL || role !== "Admin") {
+  if (user.email?.toLowerCase() !== getAdminEmail() || role !== "Admin") {
     throw new Error("บัญชีนี้ไม่มีสิทธิ์แอดมิน");
   }
 }
@@ -130,7 +151,7 @@ async function createUser(url: string, serviceKey: string, payload: Record<strin
 
   if (!email || !email.includes("@")) throw new Error("กรุณากรอกอีเมลให้ถูกต้อง");
   if (!password || password.length < 8) throw new Error("รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร");
-  if (email === ADMIN_EMAIL) throw new Error("บัญชีแอดมินหลักมีอยู่แล้ว");
+  if (email === getAdminEmail()) throw new Error("บัญชีแอดมินหลักมีอยู่แล้ว");
 
   const existing = await findAuthUser(url, serviceKey, email);
   if (existing) throw new Error("อีเมลนี้มีบัญชีอยู่แล้ว");
@@ -203,7 +224,7 @@ async function createUser(url: string, serviceKey: string, payload: Record<strin
 export const Route = createFileRoute("/api/admin-users")({
   server: {
     handlers: {
-      OPTIONS: async () => json(null, { status: 204 }),
+      OPTIONS: async ({ request }) => json(null, { status: 204 }, request),
       GET: async ({ request }) => {
         try {
           const config = getSupabaseConfig();
@@ -214,11 +235,15 @@ export const Route = createFileRoute("/api/admin-users")({
           }
 
           await requireAdmin(config.url, config.serviceKey, readBearer(request));
-          return json({
-            ok: true,
-            source: "supabase-public-users",
-            users: await listPublicUsers(config.url, config.serviceKey),
-          });
+          return json(
+            {
+              ok: true,
+              source: "supabase-public-users",
+              users: await listPublicUsers(config.url, config.serviceKey),
+            },
+            undefined,
+            request,
+          );
         } catch (error) {
           return json(
             {
@@ -226,6 +251,7 @@ export const Route = createFileRoute("/api/admin-users")({
               error: friendlyErrorMessage(error, "โหลดผู้ใช้งานไม่สำเร็จ"),
             },
             { status: 401 },
+            request,
           );
         }
       },
@@ -239,11 +265,15 @@ export const Route = createFileRoute("/api/admin-users")({
           }
 
           await requireAdmin(config.url, config.serviceKey, readBearer(request));
-          return json({
-            ok: true,
-            source: "supabase-public-users",
-            user: await createUser(config.url, config.serviceKey, await request.json()),
-          });
+          return json(
+            {
+              ok: true,
+              source: "supabase-public-users",
+              user: await createUser(config.url, config.serviceKey, await request.json()),
+            },
+            undefined,
+            request,
+          );
         } catch (error) {
           return json(
             {
@@ -251,6 +281,7 @@ export const Route = createFileRoute("/api/admin-users")({
               error: friendlyErrorMessage(error, "สร้างผู้ใช้งานไม่สำเร็จ"),
             },
             { status: 400 },
+            request,
           );
         }
       },

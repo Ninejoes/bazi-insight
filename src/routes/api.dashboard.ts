@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { json, supabaseRequest, getSupabaseConfig } from "@/lib/supabase-rest";
+import { json, supabaseRequest, getSupabaseConfig, requireAdmin } from "@/lib/supabase-rest";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
 
 type Kpi = { label: string; value: string; delta: string };
@@ -150,16 +150,18 @@ export const Route = createFileRoute("/api/dashboard")({
   server: {
     handlers: {
       OPTIONS: async () => json(null, { status: 204 }),
-      GET: async () => {
+      GET: async ({ request }) => {
         try {
+          await requireAdmin(request);
           return json({ ok: true, ...(await loadDashboard()) });
         } catch (error) {
+          const message = friendlyErrorMessage(error, "โหลดแดชบอร์ดไม่สำเร็จ");
           return json(
             {
               ok: false,
-              error: friendlyErrorMessage(error, "โหลดแดชบอร์ดไม่สำเร็จ"),
+              error: message,
             },
-            { status: 502 },
+            { status: message.includes("แอดมิน") || message.includes("session") ? 401 : 502 },
           );
         }
       },

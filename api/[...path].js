@@ -13,6 +13,7 @@ import {
   normalizeArticle,
   normalizeDream,
   normalizeFaq,
+  publicCacheHeader,
   readBody,
   readText,
   requireAdmin,
@@ -23,6 +24,7 @@ import {
   toSession,
   verifyUser,
 } from "./_supabase.js";
+import { generateLuckyNumberArticle } from "./_auto_article.js";
 
 const rateLimitBuckets = new Map();
 const BLOCKED_DREAM_IDS = new Set(["9cc47d6f-0f65-4c3a-86ed-cbcb98e36622"]);
@@ -400,6 +402,7 @@ async function lottery(req, res) {
         Number.parseInt(String(body.limit || url.searchParams.get("limit") || "12"), 10) || 12,
       ),
     );
+    const lotteryCacheControl = forceLive ? undefined : publicCacheHeader(120, 1800, 86400);
     if (!forceLive && lotteryCache.history?.length) {
       const history = getCachedLotteryHistory(limit);
       return send(res, 200, {
@@ -412,7 +415,7 @@ async function lottery(req, res) {
         mode: "history",
         history,
         frequency: buildLotteryFrequency(history),
-      });
+      }, lotteryCacheControl);
     }
     const draws = getRecentLotteryDraws(limit);
     const settled = await Promise.allSettled(
@@ -430,8 +433,10 @@ async function lottery(req, res) {
       mode: "history",
       history,
       frequency: buildLotteryFrequency(history),
-    });
+    }, lotteryCacheControl);
   }
+
+  const lotteryCacheControl = forceLive ? undefined : publicCacheHeader(120, 1800, 86400);
 
   if (mode === "latest") {
     if (!forceLive) {
@@ -449,7 +454,7 @@ async function lottery(req, res) {
           data: latest.data,
           pdfUrl: latest.pdfUrl,
           youtubeUrl: latest.youtubeUrl,
-        });
+        }, lotteryCacheControl);
       }
     }
     const payload = await postGloLottery(GLO_LATEST_ENDPOINT, {});
@@ -461,7 +466,7 @@ async function lottery(req, res) {
       mode: "latest",
       data,
       rawDate: payload?.response?.result?.date || null,
-    });
+    }, lotteryCacheControl);
   }
 
   const draw = cleanLotteryDraw({
@@ -482,13 +487,13 @@ async function lottery(req, res) {
         data: cached.data,
         pdfUrl: cached.pdfUrl,
         youtubeUrl: cached.youtubeUrl,
-      });
+      }, lotteryCacheControl);
     }
   }
   const payload = await postGloLottery(GLO_RESULT_ENDPOINT, draw);
   const data = normalizeLotteryData(extractLotteryData(payload));
   if (!hasLotteryData(data)) throw new Error("ไม่พบผลรางวัลงวดนี้จาก GLO");
-  return send(res, 200, { ok: true, source: "glo", mode: "result", date: draw, data });
+  return send(res, 200, { ok: true, source: "glo", mode: "result", date: draw, data }, lotteryCacheControl);
 }
 
 function pathName(req) {
@@ -536,7 +541,7 @@ async function ensureAdmin(url, serviceKey, password) {
 }
 
 async function adminLogin(req, res) {
-  requireRateLimit(req, "admin-login", 8, 15 * 60 * 1000);
+  requireRateLimit(req, "admin-login", 5, 15 * 60 * 1000);
   const body = await readBody(req);
   const email = String(body.email || "")
     .trim()
@@ -802,7 +807,7 @@ async function adminUsers(req, res) {
 }
 
 async function userRegister(req, res) {
-  requireRateLimit(req, "user-register", 8, 60 * 60 * 1000);
+  requireRateLimit(req, "user-register", 5, 60 * 60 * 1000);
   const body = await readBody(req);
   const email = String(body.email || "")
     .trim()
@@ -854,7 +859,7 @@ async function userRegister(req, res) {
 }
 
 async function userLogin(req, res) {
-  requireRateLimit(req, "user-login", 20, 15 * 60 * 1000);
+  requireRateLimit(req, "user-login", 10, 15 * 60 * 1000);
   const body = await readBody(req);
   const email = String(body.email || "")
     .trim()
@@ -887,8 +892,9 @@ async function articles(req, res) {
     const category = (url.searchParams.get("category") || "").trim();
     const page = clampPage(url.searchParams.get("page"));
     const limit = clampLimit(url.searchParams.get("limit"));
+    const preferHeader = slug ? "return=representation" : "count=exact";
     const result = await rest(buildArticleQuery({ slug, q, category, page, limit }), {
-      headers: { Prefer: "count=exact" },
+      headers: { Prefer: preferHeader },
     });
     if (!result.ok) return sendRestError(res, result);
     const rows = Array.isArray(result.data) ? result.data : [];
@@ -901,7 +907,7 @@ async function articles(req, res) {
       limit,
       total,
       totalPages: Math.max(1, Math.ceil(total / limit)),
-    });
+    }, publicCacheHeader());
   }
   if (req.method === "POST") {
     const user = await requireAdmin(req);
@@ -944,11 +950,12 @@ async function articles(req, res) {
 }
 
 function buildArticleQuery({ slug, q, category, page, limit }) {
-  const offset = (page - 1) * limit;
+  const effectiveLimit = slug ? 1 : limit;
+  const offset = slug ? 0 : (page - 1) * limit;
   const params = new URLSearchParams({
     select: "*",
     order: "date.desc",
-    limit: String(limit),
+    limit: String(effectiveLimit),
     offset: String(offset),
   });
 
@@ -994,15 +1001,17 @@ async function dreams(req, res) {
         includeBlocked = false;
       }
     }
+    const preferHeader = keyword ? "return=representation" : "count=estimated";
     const result = await rest(
       buildDreamQuery({ q, keyword, category, letter, page, limit, includeBlocked }),
       {
-        headers: { Prefer: "count=exact" },
+        headers: { Prefer: preferHeader },
       },
     );
     if (!result.ok) return sendRestError(res, result);
     const rows = Array.isArray(result.data) ? result.data : [];
     const total = parseTotal(result.headers.get("content-range"), rows.length);
+    const dreamCacheControl = includeBlocked ? undefined : publicCacheHeader();
     return send(res, 200, {
       ok: true,
       source: "supabase",
@@ -1011,7 +1020,7 @@ async function dreams(req, res) {
       limit,
       total,
       totalPages: Math.max(1, Math.ceil(total / limit)),
-    });
+    }, dreamCacheControl);
   }
   if (req.method === "POST") {
     const user = await requireAdmin(req);
@@ -1071,11 +1080,12 @@ function parseTotal(contentRange, fallback) {
 }
 
 function buildDreamQuery({ q, keyword, category, letter, page, limit, includeBlocked = false }) {
-  const offset = (page - 1) * limit;
+  const effectiveLimit = keyword ? 1 : limit;
+  const offset = keyword ? 0 : (page - 1) * limit;
   const params = new URLSearchParams({
     select: "*",
     order: "keyword.asc",
-    limit: String(limit),
+    limit: String(effectiveLimit),
     offset: String(offset),
   });
 
@@ -1118,7 +1128,7 @@ async function faqs(req, res) {
     const result = await rest("faqs?select=*&order=sort_order.asc");
     if (!result.ok) return sendRestError(res, result);
     const rows = Array.isArray(result.data) ? result.data : [];
-    return send(res, 200, { ok: true, source: "supabase", faqs: rows.map(normalizeFaq) });
+    return send(res, 200, { ok: true, source: "supabase", faqs: rows.map(normalizeFaq) }, publicCacheHeader());
   }
   if (req.method === "POST") {
     const user = await requireAdmin(req);
@@ -1200,7 +1210,7 @@ async function siteContent(req, res) {
     if (!result.ok) return sendRestError(res, result);
     const rows = Array.isArray(result.data) ? result.data : [];
     if (!rows[0]) throw new Error("ไม่พบข้อมูล site_content id=main ใน Supabase");
-    return send(res, 200, { ok: true, source: "supabase", content: normalizeContent(rows[0]) });
+    return send(res, 200, { ok: true, source: "supabase", content: normalizeContent(rows[0]) }, publicCacheHeader());
   }
   if (req.method === "POST") {
     const user = await requireAdmin(req);
@@ -1389,8 +1399,9 @@ async function readingHistory(req, res) {
     const payload = normalizeReading(await readBody(req));
     const row = {
       ...payload,
-      user_id: user?.id || payload.user_id || null,
-      email: user?.email || payload.email || "",
+      id: user ? payload.id : randomUUID(),
+      user_id: user ? user.id : null,
+      email: user ? user.email || "" : "",
       updated_at: new Date().toISOString(),
     };
     const result = await rest("reading_history?on_conflict=id", {
@@ -1422,6 +1433,7 @@ async function readingHistory(req, res) {
 
 async function leads(req, res) {
   if (req.method !== "POST") return send(res, 405, { ok: false, error: "Method not allowed" });
+  requireRateLimit(req, "leads", 10, 10 * 60 * 1000);
   const lead = normalizeLead(await readBody(req));
   const result = await rest("leads?on_conflict=id", {
     method: "POST",
@@ -1504,6 +1516,41 @@ async function dashboard(res) {
   });
 }
 
+async function cronAutoArticle(req, res) {
+  const url = new URL(req.url, "https://likhitfa.local");
+  const keyParam = url.searchParams.get("key") || "";
+  const authorization = req.headers.authorization || "";
+  const bearer = authorization.match(/^Bearer\s+(.+)$/i)?.[1] || "";
+  const cronSecret = process.env.CRON_SECRET || process.env.AUTO_ARTICLE_SECRET;
+
+  let authorized = false;
+  if (cronSecret && (keyParam === cronSecret || bearer === cronSecret)) {
+    authorized = true;
+  } else {
+    try {
+      await requireAdmin(req);
+      authorized = true;
+    } catch {
+      authorized = false;
+    }
+  }
+
+  if (!authorized) {
+    return send(res, 401, { ok: false, error: "Unauthorized: ต้องมี CRON_SECRET หรือ Session แอดมิน" });
+  }
+
+  const body = req.method === "POST" ? await readBody(req) : {};
+  const slot = body.slot || url.searchParams.get("slot") || "auto";
+  const force =
+    Boolean(body.force) ||
+    url.searchParams.get("force") === "true" ||
+    url.searchParams.get("force") === "1";
+  const targetDate = body.date || url.searchParams.get("date") || undefined;
+
+  const result = await generateLuckyNumberArticle({ slot, force, targetDate }, rest);
+  return send(res, 200, { ok: true, result });
+}
+
 export default async function handler(req, res) {
   cors(res);
   if (req.method === "OPTIONS") return res.status(204).end();
@@ -1525,7 +1572,13 @@ export default async function handler(req, res) {
     if (route === "reading-history") return await readingHistory(req, res);
     if (route === "leads") return await leads(req, res);
     if (route === "lottery") return await lottery(req, res);
-    if (route === "dashboard" && req.method === "GET") return await dashboard(res);
+    if (route === "dashboard" && req.method === "GET") {
+      await requireAdmin(req);
+      return await dashboard(res);
+    }
+    if (route === "cron/auto-article" || route === "cron-auto-article") {
+      return await cronAutoArticle(req, res);
+    }
     return send(res, 404, { ok: false, error: `Unknown API route: ${route}` });
   } catch (error) {
     return send(res, error?.statusCode || 200, {

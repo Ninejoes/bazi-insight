@@ -8,6 +8,8 @@ import {
   toUserSession,
 } from "@/lib/supabase-auth";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
+import { getAdminEmail } from "@/lib/supabase-rest";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 function json(body: unknown, init?: ResponseInit) {
   return Response.json(body, {
@@ -49,7 +51,7 @@ function validate(body: RegisterBody) {
   if (!body.email || !body.email.includes("@")) return "กรุณากรอกอีเมลให้ถูกต้อง";
   if (!body.password || body.password.length < 8) return "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร";
   if (!body.displayName && !body.firstName) return "กรุณากรอกชื่อหรือชื่อแสดง";
-  if (body.email === "admin@gmail.com") return "อีเมลนี้เป็นบัญชีแอดมิน ใช้สมัครสมาชิกทั่วไปไม่ได้";
+  if (body.email === getAdminEmail()) return "อีเมลนี้เป็นบัญชีแอดมิน ใช้สมัครสมาชิกทั่วไปไม่ได้";
   return "";
 }
 
@@ -90,6 +92,17 @@ export const Route = createFileRoute("/api/user-register")({
       OPTIONS: async () => json(null, { status: 204 }),
       POST: async ({ request }) => {
         try {
+          const rateLimit = checkRateLimit(request, "user-register", 5, 60 * 60 * 1000);
+          if (!rateLimit.allowed) {
+            return json(
+              {
+                ok: false,
+                error: `คุณสมัครสมาชิกบ่อยเกินไป กรุณารอ ${rateLimit.waitSeconds} วินาทีแล้วลองใหม่อีกครั้ง`,
+              },
+              { status: 429 },
+            );
+          }
+
           const body = normalizeBody(
             (await request.json().catch(() => ({}))) as Record<string, unknown>,
           );
