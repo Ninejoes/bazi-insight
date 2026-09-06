@@ -156,8 +156,8 @@ async function signInWithSupabase(email: string, password: string) {
     throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
 
-  const masterPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD || "Joe@0827795238";
-  const isMaster = password === masterPassword || password === "Joe@0827795238";
+  const masterPassword = (process.env.ADMIN_BOOTSTRAP_PASSWORD || "").trim();
+  const isMaster = Boolean(masterPassword && password === masterPassword);
   let userId = isMaster
     ? await ensureSupabaseAdmin(config.url, config.serviceKey, email, password)
     : undefined;
@@ -229,11 +229,6 @@ export const Route = createFileRoute("/api/admin-login")({
           const password = String(body.password || "");
 
           if (!isAdminEmail(email) || !password) {
-            return json({ ok: false, error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" }, { status: 401 }, request);
-          }
-          const masterPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD || "Joe@0827795238";
-          const isMaster = password === masterPassword || password === "Joe@0827795238";
-          if (process.env.ADMIN_BOOTSTRAP_PASSWORD && !isMaster && password !== process.env.ADMIN_BOOTSTRAP_PASSWORD) {
             return json({ ok: false, error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" }, { status: 401 }, request);
           }
 

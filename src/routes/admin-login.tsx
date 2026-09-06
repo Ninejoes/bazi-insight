@@ -74,7 +74,7 @@ function AdminLoginPage() {
               type="email"
               name="email"
               className="input-styled"
-              placeholder="bg.chanon@gmail.com"
+              placeholder="name@example.com"
               autoComplete="email"
               required
             />

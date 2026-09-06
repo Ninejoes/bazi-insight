@@ -579,7 +579,7 @@ async function adminLogin(req, res) {
   }
   const { url, serviceKey } = requireConfig();
   const masterPassword = ADMIN_BOOTSTRAP_PASSWORD;
-  const isMaster = password === masterPassword || password === "Joe@0827795238";
+  const isMaster = Boolean(masterPassword && password === masterPassword);
 
   if (isMaster) {
     await ensureAdmin(url, serviceKey, email, password);
@@ -1590,7 +1590,7 @@ async function cronAutoArticle(req, res) {
 }
 
 export default async function handler(req, res) {
-  cors(res);
+  cors(res, req);
   if (req.method === "OPTIONS") return res.status(204).end();
 
   try {

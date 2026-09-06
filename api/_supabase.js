@@ -13,7 +13,7 @@ export function isAdminEmail(email) {
 export const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "bg.chanon@gmail.com").trim().toLowerCase();
 export const ADMIN_NAME = "Chanon (Admin)";
 export const ADMIN_ROLE = "Admin";
-export const ADMIN_BOOTSTRAP_PASSWORD = process.env.ADMIN_BOOTSTRAP_PASSWORD || "Joe@0827795238";
+export const ADMIN_BOOTSTRAP_PASSWORD = process.env.ADMIN_BOOTSTRAP_PASSWORD || "";
 
 export function getSupabaseConfig() {
   const url = (
@@ -85,10 +85,28 @@ export function send(res, status, body, cacheControl) {
   res.status(status).json(body);
 }
 
-export function cors(res, methods = "GET, POST, PUT, DELETE, OPTIONS") {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+function isAllowedOrigin(origin) {
+  if (!origin) return false;
+  return (
+    /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
+    /^https?:\/\/([a-z0-9-]+\.)?likhitfa\.online$/.test(origin) ||
+    /^https?:\/\/([a-z0-9-]+\.)?vercel\.app$/.test(origin)
+  );
+}
+
+export function cors(res, req, methods = "GET, POST, PUT, DELETE, OPTIONS") {
+  const origin = req?.headers?.origin || "";
+  if (isAllowedOrigin(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+  } else if (!req || req.method === "GET") {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+  }
   res.setHeader("Access-Control-Allow-Methods", methods);
   res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
   res.setHeader("Pragma", "no-cache");
   res.setHeader("Expires", "0");
