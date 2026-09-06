@@ -2,23 +2,35 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo, siteUrl } from "@/lib/seo";
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  FALLBACK_COLLECTIONS,
+  fetchNineJoeCollections,
+  flattenWallpapers,
+  type NineJoeCollection,
+  type NineJoeWallpaperItem,
+} from "@/lib/ninejoe-collections";
 
 export const Route = createFileRoute("/wallpaper")({
   head: () =>
     seo({
-      title: "วอลเปเปอร์สายมู วอลเปเปอร์มงคลเฉพาะบุคคลตามธาตุปาจื้อ ดาวน์โหลดฟรี",
+      title: "วอลเปเปอร์สายมู วอลเปเปอร์มงคลลิขสิทธิ์ NineJoe & วอลเปเปอร์ 5 ธาตุปาจื้อ ดาวน์โหลดฟรี",
       description:
-        "ดาวน์โหลดวอลเปเปอร์สายมูเสริมดวงเฉพาะบุคคลตามธาตุปาจื้อ (ทอง น้ำ ไม้ ไฟ ดิน) เสริมการงาน การเงิน ความรัก โชคลาภ พร้อมอักษรมงคลจีนโบราณ ขนาดความละเอียดสูงสำหรับหน้าจอมือถือ",
+        "ดาวน์โหลดวอลเปเปอร์สายมูระดับพรีเมียมจาก NineJoe Collections (เทพเจ้าไฉ่ซิงเอี้ย, ท้าวเวสสุวรรณ, พระแม่ลักษมี, พระพิฆเนศ, ปลาคาร์ฟมงคล) พร้อมระบบสร้างวอลเปเปอร์เสริมดวง 5 ธาตุปาจื้อสลักชื่อเฉพาะบุคคล ภาพคมชัดระดับ Ultra HD 9:16 ฟรี",
       path: "/wallpaper",
       canonicalUrl: `${siteUrl}/wallpaper`,
       keywords: [
         "วอลเปเปอร์สายมู",
-        "วอลเปเปอร์เสริมดวง",
+        "วอลเปเปอร์มงคล ninejoe",
+        "ninejoe online collections",
+        "วอลเปเปอร์ไฉ่ซิงเอี้ย",
+        "วอลเปเปอร์ท้าวเวสสุวรรณ",
+        "วอลเปเปอร์พระแม่ลักษมี",
+        "วอลเปเปอร์พระพิฆเนศ",
+        "วอลเปเปอร์ปลาคาร์ฟ",
         "วอลเปเปอร์ปาจื้อ",
-        "วอลเปเปอร์มงคล",
-        "วอลเปเปอร์มือถือสายมู",
         "ภาพมงคลเสริมทรัพย์",
+        "วอลเปเปอร์มือถือ hd",
       ],
     }),
   component: WallpaperPage,
@@ -94,14 +106,125 @@ const ELEMENT_THEMES: ElementTheme[] = [
   },
 ];
 
+type FilterKey =
+  | "all"
+  | "caishen"
+  | "vessavana"
+  | "lakshmi"
+  | "ganesha"
+  | "koi"
+  | "spiritual"
+  | "creative";
+
+const FILTER_BUTTONS: { key: FilterKey; label: string; icon: string }[] = [
+  { key: "all", label: "ทั้งหมด", icon: "✨" },
+  { key: "caishen", label: "ไฉ่ซิงเอี้ย", icon: "💰" },
+  { key: "vessavana", label: "ท้าวเวสสุวรรณ", icon: "🛡️" },
+  { key: "lakshmi", label: "พระแม่ลักษมี", icon: "🌸" },
+  { key: "ganesha", label: "พระพิฆเนศ", icon: "🐘" },
+  { key: "koi", label: "ปลาคาร์ฟมงคล", icon: "🐟" },
+  { key: "spiritual", label: "สายมูทั้งหมด", icon: "🌟" },
+  { key: "creative", label: "Creative Art", icon: "🎨" },
+];
+
 function WallpaperPage() {
+  const [activeTab, setActiveTab] = useState<"ninejoe" | "custom">("ninejoe");
+  const [collections, setCollections] = useState<NineJoeCollection[]>(FALLBACK_COLLECTIONS);
+  const [filterKey, setFilterKey] = useState<FilterKey>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedWallpaper, setSelectedWallpaper] = useState<NineJoeWallpaperItem | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  // Custom BaZi Talisman Generator State
   const [selectedTheme, setSelectedTheme] = useState<ElementTheme>(ELEMENT_THEMES[0]);
   const [ownerName, setOwnerName] = useState("");
-  const [downloading, setDownloading] = useState(false);
-  const previewCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [customDownloading, setCustomDownloading] = useState(false);
 
-  const handleDownload = () => {
-    setDownloading(true);
+  // โหลดคอลเลกชันสดจาก NineJoe (Supabase)
+  useEffect(() => {
+    let mounted = true;
+    fetchNineJoeCollections().then((data) => {
+      if (mounted && data && data.length > 0) {
+        setCollections(data);
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // แปลงคอลเลกชันเป็นรายการวอลเปเปอร์เดี่ยว
+  const allWallpapers = useMemo(() => flattenWallpapers(collections), [collections]);
+
+  // กรองตาม Filter และ Search
+  const filteredWallpapers = useMemo(() => {
+    return allWallpapers.filter((item) => {
+      // กรองตามหมวด
+      if (filterKey === "all") {
+        // แสดงทั้งหมด
+      } else if (filterKey === "spiritual") {
+        if (item.deityGroup === "creative") return false;
+      } else if (filterKey === "creative") {
+        if (item.deityGroup !== "creative") return false;
+      } else {
+        if (item.deityGroup !== filterKey) return false;
+      }
+
+      // ค้นหาตามคำ
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchesTitle = item.collectionTitle.toLowerCase().includes(q);
+        const matchesDesc = item.description.toLowerCase().includes(q);
+        const matchesTags = item.tags.some((t) => t.toLowerCase().includes(q));
+        const matchesLabel = item.deityLabel.toLowerCase().includes(q);
+        if (!matchesTitle && !matchesDesc && !matchesTags && !matchesLabel) return false;
+      }
+
+      return true;
+    });
+  }, [allWallpapers, filterKey, searchQuery]);
+
+  // สถิติตัวเลขแต่ละหมวด
+  const counts = useMemo(() => {
+    return {
+      all: allWallpapers.length,
+      caishen: allWallpapers.filter((w) => w.deityGroup === "caishen").length,
+      vessavana: allWallpapers.filter((w) => w.deityGroup === "vessavana").length,
+      lakshmi: allWallpapers.filter((w) => w.deityGroup === "lakshmi").length,
+      ganesha: allWallpapers.filter((w) => w.deityGroup === "ganesha").length,
+      koi: allWallpapers.filter((w) => w.deityGroup === "koi").length,
+      spiritual: allWallpapers.filter((w) => w.deityGroup !== "creative").length,
+      creative: allWallpapers.filter((w) => w.deityGroup === "creative").length,
+    };
+  }, [allWallpapers]);
+
+  // ฟังก์ชันดาวน์โหลดรูปภาพ HD จาก Cloudinary
+  const handleDownloadWallpaper = async (item: NineJoeWallpaperItem) => {
+    try {
+      setDownloadingId(item.id);
+      const targetUrl = item.downloadUrl || item.imageUrl;
+      const res = await fetch(targetUrl);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      const ext = targetUrl.includes(".png") ? "png" : "jpg";
+      a.download = `ninejoe-wallpaper-${item.collectionSlug}-${item.id}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.warn("Direct blob download failed, opening direct image URL:", err);
+      window.open(item.downloadUrl || item.imageUrl, "_blank");
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
+  // ฟังก์ชันดาวน์โหลด Custom BaZi Canvas
+  const handleDownloadCustom = () => {
+    setCustomDownloading(true);
     try {
       const canvas = document.createElement("canvas");
       canvas.width = 1080;
@@ -195,7 +318,7 @@ function WallpaperPage() {
     } catch (err) {
       console.error(err);
     } finally {
-      setDownloading(false);
+      setCustomDownloading(false);
     }
   };
 
@@ -203,135 +326,420 @@ function WallpaperPage() {
     <div className="relative min-h-screen">
       <SiteHeader subtitle="วอลเปเปอร์สายมู" subtitleCn="壁纸" />
 
-      <main className="mx-auto max-w-5xl px-5 pt-10 pb-16">
+      <main className="mx-auto max-w-7xl px-4 pt-10 pb-20 sm:px-6">
         {/* Banner ส่วนหัว */}
-        <section className="glass-strong relative overflow-hidden rounded-3xl p-8 shadow-elegant md:p-10">
-          <div className="pointer-events-none absolute -right-6 -top-6 font-cn text-[150px] leading-none text-gold/[0.05]">
+        <section className="glass-strong relative overflow-hidden rounded-3xl p-6 shadow-elegant md:p-10">
+          <div className="pointer-events-none absolute -right-6 -top-6 font-cn text-[160px] leading-none text-gold/[0.05]">
             图
           </div>
           <div className="relative z-10">
-            <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/5 px-3.5 py-1 text-[11px] tracking-wider text-gold">
-              <span className="font-cn">开运壁纸</span> · วอลเปเปอร์สายมูเสริมดวงเฉพาะบุคคล
+            <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/5 px-4 py-1 text-[11px] tracking-wider text-gold">
+              <span className="font-cn">开运壁纸</span> · ลิขสิทธิ์แท้ร่วมกับ{" "}
+              <a
+                href="https://ninejoe.online/collections"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold underline hover:text-amber-300"
+              >
+                NineJoe.online
+              </a>
             </div>
             <h1 className="mt-4 font-display text-3xl text-foreground md:text-5xl">
-              วอลเปเปอร์สายมู <span className="text-gradient-gold italic">5 ธาตุปาจื้อ</span>
+              วอลเปเปอร์สายมู <span className="text-gradient-gold italic">มงคลพรีเมียม</span>
             </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-              ปรับสมดุลพลังงานชีวิตผ่านหน้าจอมือถือที่คุณเปิดดูวันละหลายร้อยครั้ง
-              เลือกธาตุที่ต้องการเสริมพลัง พร้อมตราประทับอักษรจีนมงคลโบราณ ดาวน์โหลดความละเอียดสูงฟรี
+            <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground md:text-base">
+              รวมวอลเปเปอร์สายมู องค์เทพเจ้า และภาพมงคลระดับ Ultra HD สำหรับหน้าจอมือถือ (9:16)
+              ดึงภาพจริงจากคอลเลกชัน{" "}
+              <a
+                href="https://ninejoe.online/collections"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gold underline hover:text-amber-300"
+              >
+                NineJoe Collections
+              </a>{" "}
+              พร้อมดาวน์โหลดฟรี และระบบสร้างวอลเปเปอร์ยันต์ 5 ธาตุปาจื้อสลักชื่อเฉพาะบุคคล
             </p>
+
+            {/* แท็บสลับโหมด */}
+            <div className="mt-8 flex flex-wrap gap-3">
+              <button
+                onClick={() => setActiveTab("ninejoe")}
+                className={`flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold transition-all ${
+                  activeTab === "ninejoe"
+                    ? "bg-gradient-gold text-primary-foreground shadow-gold"
+                    : "border border-gold/30 bg-card/40 text-muted-foreground hover:border-gold/60 hover:text-foreground"
+                }`}
+              >
+                <span>🌟</span>
+                <span>คอลเลกชัน NineJoe ({allWallpapers.length} ภาพ HD)</span>
+              </button>
+              <button
+                onClick={() => setActiveTab("custom")}
+                className={`flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold transition-all ${
+                  activeTab === "custom"
+                    ? "bg-gradient-gold text-primary-foreground shadow-gold"
+                    : "border border-gold/30 bg-card/40 text-muted-foreground hover:border-gold/60 hover:text-foreground"
+                }`}
+              >
+                <span>☯️</span>
+                <span>สร้างยันต์ 5 ธาตุปาจื้อ (สลักชื่อเฉพาะบุคคล)</span>
+              </button>
+            </div>
           </div>
         </section>
 
-        {/* แผงปรับแต่งและพรีวิว */}
-        <section className="mt-10 grid gap-8 md:grid-cols-[1.2fr_1fr]">
-          {/* ฝั่งซ้าย: ตัวเลือกปรับแต่ง */}
-          <div className="space-y-6">
-            <div className="glass-strong rounded-3xl p-6">
-              <h2 className="font-display text-xl text-foreground">1. เลือกธาตุปาจื้อที่ต้องการเสริม</h2>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {ELEMENT_THEMES.map((theme) => {
-                  const isSelected = selectedTheme.id === theme.id;
+        {/* แท็บ 1: คอลเลกชัน NineJoe */}
+        {activeTab === "ninejoe" && (
+          <section className="mt-10 space-y-8 animate-fade-up">
+            {/* แถบฟิลเตอร์และค้นหา */}
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              {/* ปุ่ม Filter Pills */}
+              <div className="flex flex-wrap gap-2">
+                {FILTER_BUTTONS.map((btn) => {
+                  const isSelected = filterKey === btn.key;
+                  const count = counts[btn.key];
                   return (
                     <button
-                      key={theme.id}
-                      onClick={() => setSelectedTheme(theme)}
-                      className={`flex flex-col items-start rounded-2xl border p-4 text-left transition-all ${
+                      key={btn.key}
+                      onClick={() => setFilterKey(btn.key)}
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all ${
                         isSelected
-                          ? "border-gold bg-gold/15 shadow-gold"
-                          : "border-border/60 bg-card/40 hover:border-gold/40"
+                          ? "border-gold bg-gold/20 text-gold shadow-gold"
+                          : "border-border/60 bg-card/40 text-muted-foreground hover:border-gold/40 hover:text-foreground"
                       }`}
                     >
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl">{theme.symbol}</span>
-                        <span className="font-display text-sm font-bold text-foreground">
-                          {theme.name}
-                        </span>
-                        <span className="font-cn text-xs text-gold">{theme.nameCn}</span>
-                      </div>
-                      <p className="mt-1.5 text-[11px] text-muted-foreground line-clamp-2">
-                        {theme.bestFor}
-                      </p>
+                      <span>{btn.icon}</span>
+                      <span>{btn.label}</span>
+                      <span className="ml-1 rounded-full bg-background/50 px-1.5 py-0.2 text-[10px] text-muted-foreground">
+                        {count}
+                      </span>
                     </button>
                   );
                 })}
               </div>
-            </div>
 
-            <div className="glass-strong rounded-3xl p-6">
-              <h2 className="font-display text-xl text-foreground">2. ใส่ชื่อหรือข้อความมงคล (ระบุหรือไม่ก็ได้)</h2>
-              <div className="mt-4">
+              {/* ช่องค้นหา */}
+              <div className="w-full sm:w-72">
                 <input
                   type="text"
-                  value={ownerName}
-                  onChange={(e) => setOwnerName(e.target.value)}
-                  placeholder="เช่น มหาเศรษฐีเงินล้าน, นภัสสร"
-                  maxLength={30}
-                  className="input-styled h-12 w-full text-sm"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="ค้นหา เช่น ไฉ่ซิงเอี้ย, ลักษมี, koi..."
+                  className="input-styled h-10 w-full text-xs"
                 />
               </div>
             </div>
 
-            <button
-              onClick={handleDownload}
-              disabled={downloading}
-              className="h-14 w-full rounded-2xl bg-gradient-gold text-base font-semibold text-primary-foreground shadow-gold transition hover:scale-[1.02] disabled:opacity-60"
-            >
-              {downloading ? "กำลังสร้างวอลเปเปอร์ HD..." : "📥 ดาวน์โหลดวอลเปเปอร์ HD (1080x1920)"}
-            </button>
-          </div>
-
-          {/* ฝั่งขวา: พรีวิวหน้าจอมือถือ 9:16 */}
-          <div className="flex flex-col items-center">
-            <div className="text-xs text-muted-foreground mb-3">ตัวอย่างหน้าจอมือถือ (9:16)</div>
-            <div
-              className="ornate-border relative aspect-[9/16] w-64 overflow-hidden rounded-[2.5rem] border-4 border-stone-800 p-5 text-center shadow-2xl"
-              style={{
-                background: `linear-gradient(180deg, ${selectedTheme.colors[0]} 0%, ${selectedTheme.colors[1]} 50%, ${selectedTheme.colors[2]} 100%)`,
-              }}
-            >
-              {/* ติ่งกล้องหน้ามือถือ */}
-              <div className="mx-auto mb-4 h-4 w-24 rounded-full bg-black/50" />
-
-              <div className="flex items-center justify-center gap-1 text-[8px] text-gold/80">
-                <span>LIKHITFA</span> · <span className="font-cn">ลิขิตฟ้า</span>
-              </div>
-
-              {/* ลายน้ำธาตุขนาดใหญ่ */}
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center font-cn text-[140px] text-gold/[0.04]">
-                {selectedTheme.nameCn}
-              </div>
-
-              {/* ตราประทับอักษรจีนมงคล */}
-              <div className="relative mt-24">
-                <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full border-2 border-gold/60 bg-gold/10 shadow-gold">
-                  <span className="font-cn text-3xl font-bold text-amber-200">
-                    {selectedTheme.blessingCn}
-                  </span>
-                </div>
-                <h4 className="mt-4 font-display text-sm font-bold text-foreground">
-                  {selectedTheme.blessingTh}
-                </h4>
-                <div
-                  className="mt-1 text-[10px] font-medium"
-                  style={{ color: selectedTheme.accent }}
+            {/* แกลเลอรีภาพวอลเปเปอร์ 9:16 */}
+            {filteredWallpapers.length === 0 ? (
+              <div className="glass-strong rounded-3xl p-12 text-center text-muted-foreground">
+                <p className="text-base">ไม่พบวอลเปเปอร์ที่ตรงกับคำค้นหา "{searchQuery}"</p>
+                <button
+                  onClick={() => {
+                    setFilterKey("all");
+                    setSearchQuery("");
+                  }}
+                  className="mt-4 text-xs text-gold underline"
                 >
-                  {selectedTheme.name}
-                </div>
+                  ล้างตัวกรองทั้งหมด
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                {filteredWallpapers.map((item) => {
+                  const isDownloading = downloadingId === item.id;
+                  return (
+                    <div
+                      key={item.id}
+                      className="group ornate-border relative flex flex-col overflow-hidden rounded-2xl glass-strong transition-all duration-300 hover:-translate-y-1 hover:shadow-gold"
+                    >
+                      {/* รูปภาพ 9:16 */}
+                      <div className="relative aspect-[9/16] w-full overflow-hidden bg-stone-950">
+                        <img
+                          src={item.imageUrl}
+                          alt={item.altText}
+                          loading="lazy"
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
 
-                {ownerName && (
-                  <div className="mt-3 text-[10px] italic text-amber-100">
-                    ดวงชะตาของคุณ {ownerName}
-                  </div>
-                )}
+                        {/* ป้ายเทพเจ้า / หมวดหมู่ มุมบนซ้าย */}
+                        <div className="pointer-events-none absolute left-2 top-2 z-10 max-w-[85%] truncate rounded-full border border-gold/30 bg-black/60 px-2 py-0.5 text-[9px] font-medium text-gold backdrop-blur-sm">
+                          {item.deityLabel}
+                        </div>
+
+                        {/* Overlay แอ็กชันเมื่อ Hover */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/60 p-3 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 group-hover:opacity-100">
+                          <button
+                            onClick={() => setSelectedWallpaper(item)}
+                            className="w-full rounded-xl border border-gold/40 bg-gold/20 py-2 text-center text-[11px] font-semibold text-gold transition hover:bg-gold hover:text-primary-foreground"
+                          >
+                            🔍 ขยายดูภาพ
+                          </button>
+                          <button
+                            onClick={() => handleDownloadWallpaper(item)}
+                            disabled={isDownloading}
+                            className="w-full rounded-xl bg-gradient-gold py-2 text-center text-[11px] font-semibold text-primary-foreground shadow-gold transition hover:scale-105 disabled:opacity-50"
+                          >
+                            {isDownloading ? "กำลังดาวน์โหลด..." : "📥 ดาวน์โหลด HD"}
+                          </button>
+                          <a
+                            href={`https://ninejoe.online/collections/${item.collectionSlug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-1 text-[10px] text-muted-foreground hover:text-gold hover:underline"
+                          >
+                            ดูที่ NineJoe.online ↗
+                          </a>
+                        </div>
+                      </div>
+
+                      {/* ชื่อคอลเลกชันและคำอธิบายย่อด้านล่าง */}
+                      <div className="p-3">
+                        <h3 className="truncate font-display text-xs font-medium text-foreground">
+                          {item.collectionTitle}
+                        </h3>
+                        <p className="mt-0.5 truncate text-[10px] text-muted-foreground">
+                          {item.description || item.collectionCategory}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* แบนเนอร์พาร์ทเนอร์ NineJoe */}
+            <div className="glass-strong mt-12 flex flex-col items-center justify-between gap-4 rounded-3xl border border-gold/20 p-6 sm:flex-row md:p-8">
+              <div className="space-y-1 text-center sm:text-left">
+                <div className="text-xs uppercase tracking-widest text-gold">
+                  Official Partner · NineJoe Creative Studio
+                </div>
+                <h3 className="font-display text-lg text-foreground">
+                  อยากได้วอลเปเปอร์และพรอมต์ AI คุณภาพสูงเพิ่มเติม?
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  เยี่ยมชมแหล่งรวมผลงานออกแบบ UX/UI Design, AI Prompts และ Creative Art คอลเลกชันเต็มได้ที่ NineJoe
+                </p>
+              </div>
+              <a
+                href="https://ninejoe.online/collections"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex shrink-0 items-center gap-2 rounded-2xl bg-gradient-gold px-6 py-3 text-xs font-bold text-primary-foreground shadow-gold transition hover:scale-105"
+              >
+                <span>สำรวจ NineJoe Collections</span>
+                <span>↗</span>
+              </a>
+            </div>
+          </section>
+        )}
+
+        {/* แท็บ 2: สร้างยันต์ 5 ธาตุปาจื้อ (สลักชื่อเฉพาะบุคคล) */}
+        {activeTab === "custom" && (
+          <section className="mt-10 grid gap-8 md:grid-cols-[1.2fr_1fr] animate-fade-up">
+            {/* ฝั่งซ้าย: ตัวเลือกปรับแต่ง */}
+            <div className="space-y-6">
+              <div className="glass-strong rounded-3xl p-6">
+                <h2 className="font-display text-xl text-foreground">1. เลือกธาตุปาจื้อที่ต้องการเสริม</h2>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  {ELEMENT_THEMES.map((theme) => {
+                    const isSelected = selectedTheme.id === theme.id;
+                    return (
+                      <button
+                        key={theme.id}
+                        onClick={() => setSelectedTheme(theme)}
+                        className={`flex flex-col items-start rounded-2xl border p-4 text-left transition-all ${
+                          isSelected
+                            ? "border-gold bg-gold/15 shadow-gold"
+                            : "border-border/60 bg-card/40 hover:border-gold/40"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">{theme.symbol}</span>
+                          <span className="font-display text-sm font-bold text-foreground">
+                            {theme.name}
+                          </span>
+                          <span className="font-cn text-xs text-gold">{theme.nameCn}</span>
+                        </div>
+                        <p className="mt-1.5 text-[11px] text-muted-foreground line-clamp-2">
+                          {theme.bestFor}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="absolute bottom-6 left-0 right-0 text-[8px] text-muted-foreground/60">
-                www.likhitfa.online
+              <div className="glass-strong rounded-3xl p-6">
+                <h2 className="font-display text-xl text-foreground">
+                  2. ใส่ชื่อหรือข้อความมงคล (ระบุหรือไม่ก็ได้)
+                </h2>
+                <div className="mt-4">
+                  <input
+                    type="text"
+                    value={ownerName}
+                    onChange={(e) => setOwnerName(e.target.value)}
+                    placeholder="เช่น มหาเศรษฐีเงินล้าน, นภัสสร"
+                    maxLength={30}
+                    className="input-styled h-12 w-full text-sm"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={handleDownloadCustom}
+                disabled={customDownloading}
+                className="h-14 w-full rounded-2xl bg-gradient-gold text-base font-semibold text-primary-foreground shadow-gold transition hover:scale-[1.02] disabled:opacity-60"
+              >
+                {customDownloading
+                  ? "กำลังสร้างวอลเปเปอร์ HD..."
+                  : "📥 ดาวน์โหลดวอลเปเปอร์ HD (1080x1920)"}
+              </button>
+            </div>
+
+            {/* ฝั่งขวา: พรีวิวหน้าจอมือถือ 9:16 */}
+            <div className="flex flex-col items-center">
+              <div className="text-xs text-muted-foreground mb-3">ตัวอย่างหน้าจอมือถือ (9:16)</div>
+              <div
+                className="ornate-border relative aspect-[9/16] w-64 overflow-hidden rounded-[2.5rem] border-4 border-stone-800 p-5 text-center shadow-2xl"
+                style={{
+                  background: `linear-gradient(180deg, ${selectedTheme.colors[0]} 0%, ${selectedTheme.colors[1]} 50%, ${selectedTheme.colors[2]} 100%)`,
+                }}
+              >
+                {/* ติ่งกล้องหน้ามือถือ */}
+                <div className="mx-auto mb-4 h-4 w-24 rounded-full bg-black/50" />
+
+                <div className="flex items-center justify-center gap-1 text-[8px] text-gold/80">
+                  <span>LIKHITFA</span> · <span className="font-cn">ลิขิตฟ้า</span>
+                </div>
+
+                {/* ลายน้ำธาตุขนาดใหญ่ */}
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center font-cn text-[140px] text-gold/[0.04]">
+                  {selectedTheme.nameCn}
+                </div>
+
+                {/* ตราประทับอักษรจีนมงคล */}
+                <div className="relative mt-24">
+                  <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full border-2 border-gold/60 bg-gold/10 shadow-gold">
+                    <span className="font-cn text-3xl font-bold text-amber-200">
+                      {selectedTheme.blessingCn}
+                    </span>
+                  </div>
+                  <h4 className="mt-4 font-display text-sm font-bold text-foreground">
+                    {selectedTheme.blessingTh}
+                  </h4>
+                  <div
+                    className="mt-1 text-[10px] font-medium"
+                    style={{ color: selectedTheme.accent }}
+                  >
+                    {selectedTheme.name}
+                  </div>
+
+                  {ownerName && (
+                    <div className="mt-3 text-[10px] italic text-amber-100">
+                      ดวงชะตาของคุณ {ownerName}
+                    </div>
+                  )}
+                </div>
+
+                <div className="absolute bottom-6 left-0 right-0 text-[8px] text-muted-foreground/60">
+                  www.likhitfa.online
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Modal Lightbox แสดงภาพขยาย */}
+        {selectedWallpaper && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md animate-fade-in"
+            onClick={() => setSelectedWallpaper(null)}
+          >
+            <div
+              className="ornate-border relative flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl glass-strong md:flex-row"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* ปุ่มปิด */}
+              <button
+                onClick={() => setSelectedWallpaper(null)}
+                className="absolute right-4 top-4 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-muted-foreground hover:text-white"
+              >
+                ✕
+              </button>
+
+              {/* ฝั่งซ้าย: รูปภาพ 9:16 เต็มตา */}
+              <div className="relative flex aspect-[9/16] w-full items-center justify-center bg-black/90 p-4 md:w-1/2">
+                <img
+                  src={selectedWallpaper.imageUrl}
+                  alt={selectedWallpaper.altText}
+                  className="max-h-full max-w-full rounded-xl object-contain shadow-2xl"
+                />
+              </div>
+
+              {/* ฝั่งขวา: รายละเอียดและปุ่มดาวน์โหลด */}
+              <div className="flex flex-1 flex-col justify-between p-6 md:p-8">
+                <div>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-xs text-gold">
+                    {selectedWallpaper.deityLabel}
+                  </div>
+
+                  <h2 className="mt-3 font-display text-2xl text-foreground">
+                    {selectedWallpaper.collectionTitle}
+                  </h2>
+
+                  <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                    {selectedWallpaper.description || "วอลเปเปอร์สายมูความละเอียดสูง เหมาะสำหรับตั้งเป็นภาพหน้าจอมือถือ (Lock Screen / Home Screen) เสริมความเป็นสิริมงคล โชคลาภ และความสำเร็จ"}
+                  </p>
+
+                  {/* แท็ก */}
+                  {selectedWallpaper.tags.length > 0 && (
+                    <div className="mt-4 flex flex-wrap gap-1.5">
+                      {selectedWallpaper.tags.slice(0, 6).map((tag, idx) => (
+                        <span
+                          key={idx}
+                          className="rounded-lg border border-border/60 bg-background/50 px-2 py-0.5 text-[10px] text-muted-foreground"
+                        >
+                          #{tag.replace(/^#/, "")}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="mt-6 rounded-xl border border-gold/10 bg-gold/5 p-3 text-[11px] text-gold/80">
+                    💡 <strong>คำแนะนำ:</strong> ภาพนี้มีอัตราส่วน 9:16 ออกแบบมาให้เข้ากับหน้าจอสมาร์ทโฟนทุกรุ่น ดาวน์โหลดแล้วสามารถกดตั้งค่าเป็นภาพพักหน้าจอได้ทันที
+                  </div>
+                </div>
+
+                <div className="mt-8 space-y-3">
+                  <button
+                    onClick={() => handleDownloadWallpaper(selectedWallpaper)}
+                    disabled={downloadingId === selectedWallpaper.id}
+                    className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-gold text-sm font-bold text-primary-foreground shadow-gold transition hover:scale-105 disabled:opacity-60"
+                  >
+                    <span>📥</span>
+                    <span>
+                      {downloadingId === selectedWallpaper.id
+                        ? "กำลังบันทึกภาพ..."
+                        : "ดาวน์โหลดภาพ HD ฟรี"}
+                    </span>
+                  </button>
+
+                  <a
+                    href={`https://ninejoe.online/collections/${selectedWallpaper.collectionSlug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-gold/30 text-xs font-semibold text-gold transition hover:bg-gold/10"
+                  >
+                    <span>ดูคอลเลกชันเต็มบน NineJoe.online</span>
+                    <span>↗</span>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
-        </section>
+        )}
       </main>
 
       <SiteFooter />
