@@ -24,7 +24,6 @@ async function verifyCronOrAdmin(request: Request): Promise<boolean> {
     }
   }
 
-  // Fallback: check if the request is from an authenticated admin
   try {
     await requireAdmin(request);
     return true;
@@ -33,7 +32,7 @@ async function verifyCronOrAdmin(request: Request): Promise<boolean> {
   }
 }
 
-export const Route = createFileRoute("/api/cron/auto-article")({
+export const Route = createFileRoute("/api/cron-auto-article")({
   server: {
     handlers: {
       OPTIONS: async () => json(null, { status: 204 }),

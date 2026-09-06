@@ -46,6 +46,8 @@ import { Route as ApiDashboardRouteImport } from './routes/api.dashboard'
 import { Route as ApiContactMessagesRouteImport } from './routes/api.contact-messages'
 import { Route as ApiAuditEventsRouteImport } from './routes/api.audit-events'
 import { Route as ApiArticlesRouteImport } from './routes/api.articles'
+import { Route as ApiAutoArticleRouteImport } from './routes/api.auto-article'
+import { Route as ApiCronAutoArticleRouteImport } from './routes/api.cron-auto-article'
 import { Route as ApiAdminUsersRouteImport } from './routes/api.admin-users'
 import { Route as ApiAdminSessionRouteImport } from './routes/api.admin-session'
 import { Route as ApiAdminLoginRouteImport } from './routes/api.admin-login'
@@ -242,6 +244,16 @@ const ApiArticlesRoute = ApiArticlesRouteImport.update({
   path: '/api/articles',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAutoArticleRoute = ApiAutoArticleRouteImport.update({
+  id: '/api/auto-article',
+  path: '/api/auto-article',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCronAutoArticleRoute = ApiCronAutoArticleRouteImport.update({
+  id: '/api/cron-auto-article',
+  path: '/api/cron-auto-article',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminUsersRoute = ApiAdminUsersRouteImport.update({
   id: '/api/admin-users',
   path: '/api/admin-users',
@@ -319,6 +331,8 @@ export interface FileRoutesByFullPath {
   '/api/admin-session': typeof ApiAdminSessionRoute
   '/api/admin-users': typeof ApiAdminUsersRoute
   '/api/articles': typeof ApiArticlesRoute
+  '/api/auto-article': typeof ApiAutoArticleRoute
+  '/api/cron-auto-article': typeof ApiCronAutoArticleRoute
   '/api/audit-events': typeof ApiAuditEventsRoute
   '/api/contact-messages': typeof ApiContactMessagesRoute
   '/api/dashboard': typeof ApiDashboardRoute
@@ -363,6 +377,8 @@ export interface FileRoutesByTo {
   '/api/admin-session': typeof ApiAdminSessionRoute
   '/api/admin-users': typeof ApiAdminUsersRoute
   '/api/articles': typeof ApiArticlesRoute
+  '/api/auto-article': typeof ApiAutoArticleRoute
+  '/api/cron-auto-article': typeof ApiCronAutoArticleRoute
   '/api/audit-events': typeof ApiAuditEventsRoute
   '/api/contact-messages': typeof ApiContactMessagesRoute
   '/api/dashboard': typeof ApiDashboardRoute
@@ -413,6 +429,8 @@ export interface FileRoutesById {
   '/api/admin-session': typeof ApiAdminSessionRoute
   '/api/admin-users': typeof ApiAdminUsersRoute
   '/api/articles': typeof ApiArticlesRoute
+  '/api/auto-article': typeof ApiAutoArticleRoute
+  '/api/cron-auto-article': typeof ApiCronAutoArticleRoute
   '/api/audit-events': typeof ApiAuditEventsRoute
   '/api/contact-messages': typeof ApiContactMessagesRoute
   '/api/dashboard': typeof ApiDashboardRoute
@@ -464,6 +482,8 @@ export interface FileRouteTypes {
     | '/api/admin-session'
     | '/api/admin-users'
     | '/api/articles'
+    | '/api/auto-article'
+    | '/api/cron-auto-article'
     | '/api/audit-events'
     | '/api/contact-messages'
     | '/api/dashboard'
@@ -508,6 +528,8 @@ export interface FileRouteTypes {
     | '/api/admin-session'
     | '/api/admin-users'
     | '/api/articles'
+    | '/api/auto-article'
+    | '/api/cron-auto-article'
     | '/api/audit-events'
     | '/api/contact-messages'
     | '/api/dashboard'
@@ -557,6 +579,8 @@ export interface FileRouteTypes {
     | '/api/admin-session'
     | '/api/admin-users'
     | '/api/articles'
+    | '/api/auto-article'
+    | '/api/cron-auto-article'
     | '/api/audit-events'
     | '/api/contact-messages'
     | '/api/dashboard'
@@ -1044,6 +1068,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminSessionRoute: ApiAdminSessionRoute,
   ApiAdminUsersRoute: ApiAdminUsersRoute,
   ApiArticlesRoute: ApiArticlesRoute,
+  ApiAutoArticleRoute: ApiAutoArticleRoute,
+  ApiCronAutoArticleRoute: ApiCronAutoArticleRoute,
   ApiAuditEventsRoute: ApiAuditEventsRoute,
   ApiContactMessagesRoute: ApiContactMessagesRoute,
   ApiDashboardRoute: ApiDashboardRoute,

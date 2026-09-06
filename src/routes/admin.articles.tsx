@@ -116,7 +116,7 @@ function AdminArticles() {
     setAutoGenerating(true);
     setNotice("");
     try {
-      const response = await fetch("/api/cron/auto-article", {
+      const response = await fetch("/api/auto-article", {
         method: "POST",
         headers: { "Content-Type": "application/json", ...adminAuthHeaders() },
         body: JSON.stringify({

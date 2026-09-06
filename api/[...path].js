@@ -1576,7 +1576,7 @@ export default async function handler(req, res) {
       await requireAdmin(req);
       return await dashboard(res);
     }
-    if (route === "cron/auto-article" || route === "cron-auto-article") {
+    if (route === "cron/auto-article" || route === "cron-auto-article" || route === "auto-article") {
       return await cronAutoArticle(req, res);
     }
     return send(res, 404, { ok: false, error: `Unknown API route: ${route}` });
