@@ -82,34 +82,102 @@ export const siteUrl = SITE_URL;
 export const siteName = SITE_NAME;
 export const defaultImage = DEFAULT_IMAGE;
 
-export function organizationJsonLd() {
-  return jsonLd({
+export function organizationSchema() {
+  return {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: SITE_NAME,
-    alternateName: ["Likhitfa", "ลิขิตฟ้า"],
+    alternateName: ["Likhitfa", "ลิขิตฟ้า", "Likhitfa ดูดวง โหราศาสตร์"],
     url: SITE_URL,
-    logo: DEFAULT_IMAGE,
+    logo: `${SITE_URL}/favicon.svg`,
+    image: DEFAULT_IMAGE,
+    description:
+      "แพลตฟอร์มดูดวงและโหราศาสตร์ครบวงจร ดูดวงปาจื้อ 4 เสา (BaZi), ดูดวงไพ่ยิปซี, ทำนายฝันแม่นยำ, สีเสื้อมงคลประจำวัน, ฤกษ์มงคล, วิเคราะห์เบอร์มงคล, ตรวจปีชง, เซียมซี และวอลเปเปอร์สายมูพรีเมียม NineJoe",
+    sameAs: ["https://ninejoe.online", "https://ninejoe.online/collections"],
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "customer support",
       availableLanguage: ["Thai"],
     },
-  });
+  };
 }
 
-export function websiteJsonLd() {
-  return jsonLd({
+export function organizationJsonLd() {
+  return jsonLd(organizationSchema());
+}
+
+export function websiteSchema() {
+  return {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: SITE_NAME,
     alternateName: "Likhitfa",
     url: SITE_URL,
     inLanguage: "th-TH",
+    description:
+      "เว็บดูดวงครบวงจรอันดับ 1 รวมศาสตร์พยากรณ์ชั้นสูง ดูดวงปาจื้อ 4 เสา ไพ่ยิปซี ทำนายฝัน สีเสื้อมงคล ปฏิทินฤกษ์ดี วิเคราะห์เบอร์มงคล แก้ปีชง เซียมซี และวอลเปเปอร์สายมู",
     potentialAction: {
       "@type": "SearchAction",
       target: `${SITE_URL}/articles?search={search_term_string}`,
       "query-input": "required name=search_term_string",
     },
-  });
+  };
+}
+
+export function websiteJsonLd() {
+  return jsonLd(websiteSchema());
+}
+
+export function breadcrumbSchema(items: Array<{ name: string; path: string }>) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: item.path.startsWith("http") ? item.path : `${SITE_URL}${item.path}`,
+    })),
+  };
+}
+
+export function webApplicationSchema({
+  name,
+  description,
+  path,
+}: {
+  name: string;
+  description: string;
+  path: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: `${name} — ${SITE_NAME}`,
+    url: `${SITE_URL}${path}`,
+    description,
+    applicationCategory: "LifestyleApplication",
+    operatingSystem: "All",
+    browserRequirements: "Requires JavaScript. Requires HTML5.",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "THB",
+    },
+  };
+}
+
+export function faqPageSchema(items: Array<{ question: string; answer: string }>) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  };
 }

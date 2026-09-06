@@ -12,7 +12,14 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { googleAnalyticsId, siteName, siteUrl } from "../lib/seo";
+import {
+  googleAnalyticsId,
+  googleSearchVerification,
+  organizationSchema,
+  siteName,
+  siteUrl,
+  websiteSchema,
+} from "../lib/seo";
 
 declare global {
   interface Window {
@@ -85,15 +92,35 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "author", content: "Likhitfa" },
+      { name: "author", content: "Likhitfa ลิขิตฟ้า" },
       { name: "theme-color", content: "#05080d" },
       { property: "og:site_name", content: siteName },
       { property: "og:url", content: siteUrl },
+      ...(googleSearchVerification
+        ? [{ name: "google-site-verification", content: googleSearchVerification }]
+        : []),
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
+      },
+      {
+        rel: "icon",
+        href: "/favicon.svg",
+        type: "image/svg+xml",
+      },
+      {
+        rel: "alternate icon",
+        href: "/favicon.ico",
+      },
+      {
+        rel: "apple-touch-icon",
+        href: "/favicon.svg",
+      },
+      {
+        rel: "manifest",
+        href: "/site.webmanifest",
       },
     ],
   }),
@@ -104,10 +131,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const orgSchemaJson = JSON.stringify(organizationSchema());
+  const siteSchemaJson = JSON.stringify(websiteSchema());
+
   return (
     <html lang="th">
       <head>
         <HeadContent />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: orgSchemaJson }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: siteSchemaJson }}
+        />
         <script async src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`} />
         <script
           dangerouslySetInnerHTML={{

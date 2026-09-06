@@ -12,13 +12,15 @@ export const Route = createFileRoute("/articles/$slug")({
       return articleSeo(article);
     }
 
+    const decodedSlug = decodeURIComponent(params.slug).replace(/[-_]/g, " ");
     return seo({
-      title: "บทความ",
-      description: "บทความดูดวงจาก Likhitfa",
+      title: `${decodedSlug} | บทความดูดวง โหราศาสตร์`,
+      description: `อ่านบทความเรื่อง ${decodedSlug} วิเคราะห์ดวงชะตา โหราศาสตร์ ฮวงจุ้ย และศาสตร์พยากรณ์แม่นยำจาก Likhitfa`,
       path: `/articles/${params.slug}`,
+      canonicalUrl: `${siteUrl}/articles/${encodeURIComponent(params.slug)}`,
       type: "article",
-      noindex: true,
-      keywords: ["บทความดูดวง", "Likhitfa"],
+      noindex: false,
+      keywords: [decodedSlug, "บทความดูดวง", "โหราศาสตร์", "ดวงชะตา", "Likhitfa"],
     });
   },
   loader: async ({ params }) => {
@@ -121,8 +123,67 @@ function ArticleDetail() {
 
   const a = article;
 
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: a.seoTitle || a.title,
+    description: a.seoDescription || a.excerpt,
+    image: absoluteImage(a.cover),
+    datePublished: a.date,
+    dateModified: a.date,
+    author: {
+      "@type": "Person",
+      name: a.author || "Likhitfa Editorial Team",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Likhitfa ลิขิตฟ้า",
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteUrl}/favicon.svg`,
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${siteUrl}/articles/${encodeURIComponent(a.slug)}`,
+    },
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "หน้าแรก",
+        item: siteUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "บทความ",
+        item: `${siteUrl}/articles`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: a.title,
+        item: `${siteUrl}/articles/${encodeURIComponent(a.slug)}`,
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <SiteHeader subtitle="บทความ" subtitleCn="文章" />
       <main className="mx-auto max-w-3xl px-6 pt-10 pb-12">
         <Link to="/articles" className="text-xs text-gold/80 hover:text-gold">

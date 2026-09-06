@@ -22,22 +22,22 @@ export type SitemapFile = {
 const sitemapChunkSize = 5000;
 
 const basePublicRoutes: SitemapEntry[] = [
-  { loc: "/", changefreq: "weekly", priority: "1.0" },
-  { loc: "/bazi", changefreq: "weekly", priority: "0.9" },
-  { loc: "/tarot", changefreq: "weekly", priority: "0.9" },
-  { loc: "/dream", changefreq: "weekly", priority: "0.9" },
-  { loc: "/lucky-colors", changefreq: "daily", priority: "0.9" },
-  { loc: "/auspicious-calendar", changefreq: "daily", priority: "0.9" },
-  { loc: "/phone-analysis", changefreq: "weekly", priority: "0.9" },
-  { loc: "/name-analysis", changefreq: "weekly", priority: "0.9" },
-  { loc: "/tai-sui", changefreq: "weekly", priority: "0.9" },
-  { loc: "/siamsi", changefreq: "daily", priority: "0.9" },
-  { loc: "/wallpaper", changefreq: "weekly", priority: "0.8" },
-  { loc: "/lottery", changefreq: "daily", priority: "0.8" },
-  { loc: "/articles", changefreq: "weekly", priority: "0.8" },
-  { loc: "/about", changefreq: "monthly", priority: "0.6" },
-  { loc: "/contact", changefreq: "monthly", priority: "0.6" },
-  { loc: "/help", changefreq: "monthly", priority: "0.6" },
+  { loc: "/", lastmod: "2026-09-06", changefreq: "weekly", priority: "1.0" },
+  { loc: "/bazi", lastmod: "2026-09-06", changefreq: "weekly", priority: "0.9" },
+  { loc: "/tarot", lastmod: "2026-09-06", changefreq: "weekly", priority: "0.9" },
+  { loc: "/dream", lastmod: "2026-09-06", changefreq: "weekly", priority: "0.9" },
+  { loc: "/lucky-colors", lastmod: "2026-09-06", changefreq: "daily", priority: "0.9" },
+  { loc: "/auspicious-calendar", lastmod: "2026-09-06", changefreq: "daily", priority: "0.9" },
+  { loc: "/phone-analysis", lastmod: "2026-09-06", changefreq: "weekly", priority: "0.9" },
+  { loc: "/name-analysis", lastmod: "2026-09-06", changefreq: "weekly", priority: "0.9" },
+  { loc: "/tai-sui", lastmod: "2026-09-06", changefreq: "weekly", priority: "0.9" },
+  { loc: "/siamsi", lastmod: "2026-09-06", changefreq: "daily", priority: "0.9" },
+  { loc: "/wallpaper", lastmod: "2026-09-06", changefreq: "weekly", priority: "0.8" },
+  { loc: "/lottery", lastmod: "2026-09-06", changefreq: "daily", priority: "0.8" },
+  { loc: "/articles", lastmod: "2026-09-06", changefreq: "weekly", priority: "0.8" },
+  { loc: "/about", lastmod: "2026-09-06", changefreq: "monthly", priority: "0.6" },
+  { loc: "/contact", lastmod: "2026-09-06", changefreq: "monthly", priority: "0.6" },
+  { loc: "/help", lastmod: "2026-09-06", changefreq: "monthly", priority: "0.6" },
 ];
 
 function xmlEscape(value: string) {
@@ -84,6 +84,7 @@ function chunkEntries(entries: SitemapEntry[], size = sitemapChunkSize) {
 export function staticSitemapEntries() {
   const tarotRoutes = tarotCategories.map((category) => ({
     loc: `/tarot/${category.slug}`,
+    lastmod: "2026-09-06",
     changefreq: "weekly" as const,
     priority: category.slug === "daily" ? "0.8" : "0.7",
   }));
@@ -93,7 +94,7 @@ export function staticSitemapEntries() {
 export function articleSitemapEntries(articles: SitemapArticle[] = []) {
   const articleRoutes = articles.map((article) => ({
     loc: `/articles/${encodePathSegment(article.slug)}`,
-    lastmod: normalizeDate(article.date),
+    lastmod: normalizeDate(article.date) || "2026-09-06",
     changefreq: "weekly" as const,
     priority: "0.7",
   }));
@@ -103,7 +104,7 @@ export function articleSitemapEntries(articles: SitemapArticle[] = []) {
 export function dreamSitemapEntries(dreams: SitemapDream[] = []) {
   const dreamRoutes = dreams.map((dream) => ({
     loc: `/dream/${encodePathSegment(dream.keyword)}`,
-    lastmod: normalizeDate(dream.updatedAt),
+    lastmod: normalizeDate(dream.updatedAt) || "2026-09-06",
     changefreq: "weekly" as const,
     priority: "0.7",
   }));
@@ -120,12 +121,14 @@ export function publicSitemapEntries(articles: SitemapArticle[] = [], dreams: Si
 
 export function buildUrlsetXml(entries: SitemapEntry[], url = siteUrl) {
   const origin = normalizeSiteUrl(url);
+  const fallbackLastmod = new Date().toISOString().slice(0, 10);
   const body = entries
     .map((entry) => {
-      const lastmod = normalizeDate(entry.lastmod);
+      const lastmod = normalizeDate(entry.lastmod) || fallbackLastmod;
       return `  <url>
     <loc>${xmlEscape(`${origin}${entry.loc}`)}</loc>
-${lastmod ? `    <lastmod>${xmlEscape(lastmod)}</lastmod>\n` : ""}    <changefreq>${entry.changefreq}</changefreq>
+    <lastmod>${xmlEscape(lastmod)}</lastmod>
+    <changefreq>${entry.changefreq}</changefreq>
     <priority>${entry.priority}</priority>
   </url>`;
     })

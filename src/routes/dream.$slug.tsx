@@ -10,12 +10,20 @@ export const Route = createFileRoute("/dream/$slug")({
     const dream = (ctx as { loaderData?: { dream?: DreamRecord | null } }).loaderData?.dream;
     if (dream) return dreamSeo(dream);
 
+    const decodedKeyword = decodeURIComponent(params.slug);
     return seo({
-      title: `ฝันเห็น${decodeURIComponent(params.slug)}`,
-      description: `ดูคำทำนายฝันเห็น${decodeURIComponent(params.slug)} เลขเด็ด ช่วงเวลาฝัน และวิธีแก้เคล็ด`,
+      title: `ทำนายฝันเห็น${decodedKeyword} แปลว่าอะไร เลขเด็ดนำโชค`,
+      description: `ดูคำทำนายฝันเห็น${decodedKeyword} ฝันเห็น${decodedKeyword}หมายถึงอะไร พร้อมเลขเด็ดงวดนี้ ช่วงเวลาฝันบอกเหตุ และวิธีแก้เคล็ดตามตำราโบราณ`,
       path: `/dream/${encodeURIComponent(params.slug)}`,
-      noindex: true,
-      keywords: ["ทำนายฝัน", `ฝันเห็น${decodeURIComponent(params.slug)}`, "เลขเด็ดความฝัน"],
+      canonicalUrl: `${siteUrl}/dream/${encodeURIComponent(params.slug)}`,
+      noindex: false,
+      keywords: [
+        `ฝันเห็น${decodedKeyword}`,
+        `ทำนายฝัน${decodedKeyword}`,
+        `เลขเด็ดฝันเห็น${decodedKeyword}`,
+        "ทำนายฝัน",
+        "เลขเด็ดงวดนี้",
+      ],
     });
   },
   loader: async ({ params }) => {
@@ -118,8 +126,56 @@ function DreamDetail() {
     );
   }
 
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "หน้าแรก",
+        item: siteUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "ทำนายฝัน",
+        item: `${siteUrl}/dream`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: `ฝันเห็น${dream.keyword}`,
+        item: `${siteUrl}/dream/${encodeURIComponent(dream.keyword)}`,
+      },
+    ],
+  };
+
+  const dreamFaqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: `ฝันเห็น${dream.keyword} แปลว่าอะไร หมายถึงอะไร?`,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: `${dream.meaning} เลขเด็ดนำโชค: ${dream.numbers || "ไม่ระบุ"} ช่วงเวลาฝัน: ${dream.time || "ไม่ระบุ"}`,
+        },
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(dreamFaqSchema) }}
+      />
       <SiteHeader subtitle="ทำนายฝัน" subtitleCn="解夢" />
       <main className="mx-auto max-w-5xl px-6 pt-10 pb-12">
         <Link to="/dream" className="text-xs text-gold/80 hover:text-gold">

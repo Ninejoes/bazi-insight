@@ -1,0 +1,21 @@
+﻿{
+  "name": "Likhitfa ลิขิตฟ้า — ศาสตร์ดูดวงระดับพรีเมียม",
+  "short_name": "Likhitfa",
+  "description": "ดูดวงออนไลน์แม่นยำ ปาจื้อ ไพ่ยิปซี ทำนายฝัน สีเสื้อมงคล ฤกษ์มงคล 2569",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#05080d",
+  "theme_color": "#05080d",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/og-image.jpg",
+      "sizes": "1200x630",
+      "type": "image/jpeg"
+    }
+  ]
+}
