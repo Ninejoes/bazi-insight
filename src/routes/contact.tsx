@@ -45,11 +45,33 @@ function ContactPage() {
   }, []);
 
   const channels = [
-    { icon: "✉", label: "อีเมล", value: contact?.email, link: `mailto:${contact?.email || ""}` },
-    { icon: "☎", label: "โทรศัพท์", value: contact?.phone, link: `tel:${contact?.phone || ""}` },
-    { icon: "✦", label: "Line Official", value: contact?.line, link: "#" },
-    { icon: "✉", label: "ที่อยู่", value: contact?.address },
-  ];
+    {
+      icon: "✉",
+      label: "อีเมล",
+      value: contact?.email || "bg.chanon@gmail.com",
+      link: `mailto:${contact?.email || "bg.chanon@gmail.com"}`,
+    },
+    contact?.phone && contact.phone.trim() !== "-" && contact.phone.trim() !== ""
+      ? { icon: "☎", label: "โทรศัพท์", value: contact.phone, link: `tel:${contact.phone}` }
+      : null,
+    contact?.line && contact.line.trim() !== "-" && contact.line.trim() !== ""
+      ? {
+          icon: "✦",
+          label: "Line Official",
+          value: contact.line,
+          link: `https://line.me/ti/p/${contact.line.replace(/^@/, "")}`,
+        }
+      : null,
+    contact?.address && contact.address.trim() !== "-" && contact.address.trim() !== ""
+      ? { icon: "📍", label: "ที่อยู่", value: contact.address, link: undefined }
+      : null,
+    {
+      icon: "⚡",
+      label: "พาร์ทเนอร์สตูดิโอ",
+      value: "NineJoe.online — UX/UI Design, AI Prompts & วอลเปเปอร์",
+      link: "https://ninejoe.online",
+    },
+  ].filter(Boolean) as { icon: string; label: string; value: string; link?: string }[];
 
   return (
     <div className="min-h-screen">
