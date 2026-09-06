@@ -6,6 +6,7 @@ import { type ContactContent } from "@/lib/admin-content";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { useEffect, useState, type ReactNode } from "react";
 import { Mail, Phone, MessageSquare, MapPin, Zap } from "lucide-react";
+import { SecurityShield } from "@/components/security-shield";
 
 export const Route = createFileRoute("/contact")({
   head: () =>
@@ -23,6 +24,8 @@ function ContactPage() {
   const [contact, setContact] = useState<ContactContent | null>(null);
   const [notice, setNotice] = useState("");
   const [loadError, setLoadError] = useState("");
+  const [verifiedData, setVerifiedData] = useState<{ token: string; renderedAt: number } | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -49,8 +52,8 @@ function ContactPage() {
     {
       icon: <Mail className="h-5 w-5" />,
       label: "อีเมล",
-      value: contact?.email || "bg.chanon@gmail.com",
-      link: `mailto:${contact?.email || "bg.chanon@gmail.com"}`,
+      value: contact?.email || "contact@likhitfa.online",
+      link: `mailto:${contact?.email || "contact@likhitfa.online"}`,
     },
     contact?.phone && contact.phone.trim() !== "-" && contact.phone.trim() !== ""
       ? { icon: <Phone className="h-5 w-5" />, label: "โทรศัพท์", value: contact.phone, link: `tel:${contact.phone}` }
@@ -93,24 +96,41 @@ function ContactPage() {
             <form
               onSubmit={async (e) => {
                 e.preventDefault();
+                if (!verifiedData) {
+                  setNotice("กรุณาคลิกยืนยันความปลอดภัย (Likhitfa Shield) ด้านล่างก่อนส่งข้อความ");
+                  return;
+                }
+                setSubmitting(true);
+                setNotice("");
                 const form = new FormData(e.currentTarget);
-                const response = await fetch("/api/contact-messages", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    name: form.get("name"),
-                    email: form.get("email"),
-                    subject: form.get("subject"),
-                    message: form.get("message"),
-                  }),
-                });
-                const data = await response.json().catch(() => ({}));
-                setNotice(
-                  data.ok
-                    ? "ส่งข้อความแล้ว ทีมงานจะติดต่อกลับ"
-                    : friendlyErrorMessage(data.error, "ส่งข้อความไม่สำเร็จ"),
-                );
-                if (data.ok) e.currentTarget.reset();
+                try {
+                  const response = await fetch("/api/contact-messages", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      name: form.get("name"),
+                      email: form.get("email"),
+                      subject: form.get("subject"),
+                      message: form.get("message"),
+                      _hp_website: form.get("_hp_website") || "",
+                      _hp_company: form.get("_hp_company") || "",
+                      _rendered_at: verifiedData.renderedAt,
+                      _shield_token: verifiedData.token,
+                    }),
+                  });
+                  const data = await response.json().catch(() => ({}));
+                  setSubmitting(false);
+                  if (data.ok) {
+                    setNotice("ส่งข้อความเรียบร้อยแล้ว ทีมงานจะติดต่อกลับโดยเร็วที่สุด");
+                    setVerifiedData(null);
+                    e.currentTarget.reset();
+                  } else {
+                    setNotice(friendlyErrorMessage(data.error, "ส่งข้อความไม่สำเร็จ"));
+                  }
+                } catch {
+                  setSubmitting(false);
+                  setNotice("เกิดข้อผิดพลาดในการส่งข้อความ กรุณาลองใหม่อีกครั้ง");
+                }
               }}
               className="mt-5 space-y-4"
             >
@@ -131,8 +151,19 @@ function ContactPage() {
                 placeholder="ข้อความ"
                 required
               />
-              <button className="w-full rounded-xl bg-gradient-gold py-3 text-sm font-semibold text-primary-foreground shadow-gold">
-                ส่งข้อความ
+
+              <SecurityShield onVerify={setVerifiedData} />
+
+              <button
+                type="submit"
+                disabled={submitting || !verifiedData}
+                className="w-full rounded-xl bg-gradient-gold py-3 text-sm font-semibold text-primary-foreground shadow-gold transition hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                {submitting
+                  ? "กำลังส่งข้อความ..."
+                  : !verifiedData
+                    ? "กรุณายืนยันความปลอดภัยก่อนส่งข้อความ"
+                    : "ส่งข้อความ"}
               </button>
             </form>
           </div>

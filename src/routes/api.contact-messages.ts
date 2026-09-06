@@ -94,6 +94,43 @@ function validateMessage(message: Required<ContactMessage>) {
   return "";
 }
 
+function validateAntiBotSubmission(request: Request, body: Record<string, unknown>) {
+  // 1. Honeypot traps
+  const honeypotKeys = ["_hp_website", "_hp_company", "_hp_phone", "website", "company"];
+  for (const key of honeypotKeys) {
+    if (body[key] && String(body[key]).trim().length > 0) {
+      return { isBot: true, silentDrop: true };
+    }
+  }
+
+  // 2. Suspicious automated tool user-agent
+  const ua = (request.headers.get("user-agent") || "").toLowerCase();
+  if (!ua || ua.startsWith("curl/") || ua.startsWith("python-requests") || ua.startsWith("scrapy")) {
+    return { isBot: true, error: "การเข้าถึงถูกปฏิเสธ (Automated tool detected)" };
+  }
+
+  // 3. Timing verification
+  if (body._rendered_at) {
+    const elapsed = Date.now() - Number(body._rendered_at);
+    if (elapsed < 1500) {
+      return { isBot: true, error: "ส่งข้อความเร็วเกินไป กรุณารอสักครู่แล้วลองใหม่อีกครั้ง" };
+    }
+  }
+
+  return { isBot: false };
+}
+
+function detectSpamContent(text: string) {
+  if (/[а-яА-ЯёЁ]{4,}/.test(text)) return true;
+  const linkMatches = text.toLowerCase().match(/https?:\/\/|www\./g);
+  if (linkMatches && linkMatches.length > 2) return true;
+  const spamWords = ["casino", "slot88", "viagra", "cialis", "crypto giveaway", "airdrop bonus"];
+  for (const w of spamWords) {
+    if (text.toLowerCase().includes(w)) return true;
+  }
+  return false;
+}
+
 async function listMessages() {
   const response = await supabaseRequest(
     "contact_messages?select=*&order=created_at.desc&limit=200",
@@ -175,10 +212,36 @@ export const Route = createFileRoute("/api/contact-messages")({
               { status: 429 },
             );
           }
+
+          const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
+
+          // Anti-bot check
+          const botCheck = validateAntiBotSubmission(request, body);
+          if (botCheck.isBot) {
+            if (botCheck.silentDrop) {
+              return json({
+                ok: true,
+                source: "shield-filtered",
+                message: { id: randomUUID(), name: String(body.name || ""), status: "filtered" },
+              });
+            }
+            return json({ ok: false, error: botCheck.error || "ระบบตรวจพบการส่งอัตโนมัติ" }, { status: 400 });
+          }
+
+          // Spam filter
+          const text = `${String(body.subject || "")} ${String(body.message || "")}`;
+          if (detectSpamContent(text)) {
+            return json({
+              ok: true,
+              source: "shield-filtered",
+              message: { id: randomUUID(), name: String(body.name || ""), status: "filtered" },
+            });
+          }
+
           return json({
             ok: true,
             source: "supabase",
-            message: await saveMessage(await request.json()),
+            message: await saveMessage(body as ContactMessage),
           });
         } catch (error) {
           return json(

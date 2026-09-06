@@ -102,6 +102,108 @@ function requireRateLimit(req, scope, limit, windowMs) {
   }
 }
 
+const recentSubmissions = new Map();
+
+function checkDuplicateSubmission(fingerprint, windowMs = 3 * 60 * 1000) {
+  const now = Date.now();
+  for (const [k, v] of recentSubmissions.entries()) {
+    if (v.expiresAt < now) recentSubmissions.delete(k);
+  }
+  const existing = recentSubmissions.get(fingerprint);
+  if (existing && existing.expiresAt > now) {
+    return true;
+  }
+  recentSubmissions.set(fingerprint, { expiresAt: now + windowMs });
+  return false;
+}
+
+function validateAntiBotSubmission(req, body, options = {}) {
+  const { minTimeMs = 1500, maxTimeMs = 3 * 60 * 60 * 1000 } = options;
+
+  // 1. Honeypot check: trap invisible decoy inputs
+  const honeypotKeys = ["_hp_website", "_hp_company", "_hp_phone", "website", "company"];
+  for (const key of honeypotKeys) {
+    if (body[key] && String(body[key]).trim().length > 0) {
+      return { isBot: true, reason: "honeypot", silentDrop: true };
+    }
+  }
+
+  // 2. Headless scraping bot user-agents
+  const userAgent = String(req.headers["user-agent"] || "").toLowerCase();
+  if (
+    !userAgent ||
+    userAgent.startsWith("curl/") ||
+    userAgent.startsWith("python-requests") ||
+    userAgent.startsWith("scrapy") ||
+    userAgent.startsWith("aiohttp")
+  ) {
+    return { isBot: true, reason: "automated_ua", error: "การเข้าถึงถูกปฏิเสธ (Automated tool detected)" };
+  }
+
+  // 3. Timing verification
+  if (body._rendered_at) {
+    const renderedAt = Number(body._rendered_at);
+    if (!Number.isNaN(renderedAt)) {
+      const elapsed = Date.now() - renderedAt;
+      if (elapsed < minTimeMs) {
+        return { isBot: true, reason: "too_fast", error: "ส่งข้อความเร็วเกินไป กรุณารอสักครู่แล้วลองใหม่" };
+      }
+      if (elapsed > maxTimeMs) {
+        return { isBot: true, reason: "expired", error: "เซสชันหมดอายุ กรุณารีเฟรชหน้าเว็บและส่งใหม่" };
+      }
+    }
+  }
+
+  // 4. Client Security Shield Token (if present)
+  if (body._shield_token) {
+    try {
+      const decoded = JSON.parse(Buffer.from(body._shield_token, "base64").toString("utf-8"));
+      if (!decoded.t || Date.now() - decoded.t > maxTimeMs) {
+        return { isBot: true, reason: "invalid_token", error: "โทเค็นความปลอดภัยหมดอายุ กรุณายืนยันตัวตนใหม่" };
+      }
+    } catch {
+      return { isBot: true, reason: "corrupt_token", error: "โทเค็นความปลอดภัยไม่ถูกต้อง" };
+    }
+  }
+
+  return { isBot: false };
+}
+
+function detectSpamContent(text = "") {
+  const combined = String(text || "").toLowerCase();
+
+  // Cyrillic letters blast (common in automated contact form spambots)
+  if (/[а-яА-ЯёЁ]{4,}/.test(text)) {
+    return { isSpam: true, reason: "cyrillic_spambot" };
+  }
+
+  // Link spamming: more than 2 URLs
+  const linkMatches = combined.match(/https?:\/\/|www\./g);
+  if (linkMatches && linkMatches.length > 2) {
+    return { isSpam: true, reason: "link_bombing" };
+  }
+
+  // Common high-risk spam keywords
+  const spamKeywords = [
+    "casino", "slot online", "slot88", "poker", "baccarat",
+    "viagra", "cialis", "crypto giveaway", "airdrop bonus",
+    "seo ranking service", "backlink service", "t.me/joinchat",
+    "telegram @", "whatsapp investment", "dating site"
+  ];
+  for (const kw of spamKeywords) {
+    if (combined.includes(kw)) {
+      return { isSpam: true, reason: "keyword_trigger" };
+    }
+  }
+
+  // Repetitive nonsense characters
+  if (/(.)\1{9,}/.test(combined)) {
+    return { isSpam: true, reason: "character_flood" };
+  }
+
+  return { isSpam: false };
+}
+
 async function saveAuthEvent(req, eventType, user = {}) {
   await rest("auth_events", {
     method: "POST",
@@ -847,6 +949,15 @@ async function adminUsers(req, res) {
 async function userRegister(req, res) {
   requireRateLimit(req, "user-register", 5, 60 * 60 * 1000);
   const body = await readBody(req);
+
+  const botCheck = validateAntiBotSubmission(req, body, { minTimeMs: 1500 });
+  if (botCheck.isBot) {
+    if (botCheck.silentDrop) {
+      return send(res, 200, { ok: true, session: { email: String(body.email || ""), name: "User", role: "User" } });
+    }
+    return send(res, 400, { ok: false, error: botCheck.error || "การสมัครสมาชิกล้มเหลว (ระบบปฏิเสธการร้องขออัตโนมัติ)" });
+  }
+
   const email = String(body.email || "")
     .trim()
     .toLowerCase();
@@ -1373,11 +1484,46 @@ async function contactMessages(req, res) {
     return send(res, 200, { ok: true, source: "supabase", messages: rows.map(normalizeMessage) });
   }
   if (req.method === "POST") {
-    requireRateLimit(req, "contact-messages", 10, 15 * 60 * 1000);
-    const message = normalizeMessage(await readBody(req));
+    requireRateLimit(req, "contact-messages", 5, 15 * 60 * 1000);
+    const body = await readBody(req);
+
+    // 1. Anti-Bot validation (Honeypot, User-Agent, Timing, Shield Token)
+    const botCheck = validateAntiBotSubmission(req, body, { minTimeMs: 1500 });
+    if (botCheck.isBot) {
+      if (botCheck.silentDrop) {
+        // Silent drop: fool spambots into thinking message was delivered without polluting database
+        return send(res, 200, {
+          ok: true,
+          source: "shield-filtered",
+          message: { id: randomUUID(), name: body.name || "", status: "filtered" },
+        });
+      }
+      return send(res, 400, { ok: false, error: botCheck.error || "ระบบตรวจพบการส่งข้อมูลอัตโนมัติ การส่งถูกปฏิเสธ" });
+    }
+
+    const message = normalizeMessage(body);
     if (!message.name || !message.email.includes("@") || !message.subject || !message.message) {
       return send(res, 400, { ok: false, error: "กรุณากรอกข้อมูลติดต่อให้ครบ" });
     }
+
+    // 2. Spam Content Filtering (Cyrillic blasts, excessive links, spam triggers)
+    const spamCheck = detectSpamContent(`${message.subject} ${message.message}`);
+    if (spamCheck.isSpam) {
+      // Silent sinkhole drop
+      return send(res, 200, {
+        ok: true,
+        source: "shield-filtered",
+        message: { id: randomUUID(), name: message.name, status: "filtered" },
+      });
+    }
+
+    // 3. Duplicate Flooding Check
+    const ip = clientIp(req);
+    const msgFingerprint = `${ip}:${message.email}:${message.subject.slice(0, 30)}:${message.message.slice(0, 40)}`;
+    if (checkDuplicateSubmission(msgFingerprint, 3 * 60 * 1000)) {
+      return send(res, 429, { ok: false, error: "คุณได้ส่งข้อความนี้ไปแล้ว กรุณารอสักครู่ก่อนส่งซ้ำ" });
+    }
+
     const result = await rest("contact_messages", {
       method: "POST",
       headers: { Prefer: "return=representation" },
@@ -1472,7 +1618,15 @@ async function readingHistory(req, res) {
 async function leads(req, res) {
   if (req.method !== "POST") return send(res, 405, { ok: false, error: "Method not allowed" });
   requireRateLimit(req, "leads", 10, 10 * 60 * 1000);
-  const lead = normalizeLead(await readBody(req));
+  const body = await readBody(req);
+  const botCheck = validateAntiBotSubmission(req, body, { minTimeMs: 1000 });
+  if (botCheck.isBot) {
+    if (botCheck.silentDrop) {
+      return send(res, 200, { ok: true, source: "shield-filtered", lead: {} });
+    }
+    return send(res, 400, { ok: false, error: botCheck.error || "ระบบปฏิเสธการส่งข้อมูลอัตโนมัติ" });
+  }
+  const lead = normalizeLead(body);
   const result = await rest("leads?on_conflict=id", {
     method: "POST",
     headers: { Prefer: "resolution=merge-duplicates,return=representation" },

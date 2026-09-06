@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo } from "@/lib/seo";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { storeUserSession, type UserSession } from "@/lib/user-session";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
 
@@ -24,6 +24,7 @@ function RegisterPage() {
   const [pdpa, setPdpa] = useState(false);
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
+  const renderTimeRef = useRef<number>(Date.now());
 
   return (
     <div className="min-h-screen">
@@ -58,6 +59,8 @@ function RegisterPage() {
                 birthDate: form.get("birthDate"),
                 gender: form.get("gender"),
                 password,
+                _hp_company: form.get("_hp_company") || "",
+                _rendered_at: renderTimeRef.current,
               }),
             });
             const data = (await response.json().catch(() => ({}))) as {
@@ -75,6 +78,11 @@ function RegisterPage() {
           }}
           className="glass-strong mt-8 space-y-5 rounded-3xl p-7 shadow-elegant"
         >
+          {/* Invisible honeypot for trapping automated spambots */}
+          <div className="sr-only" aria-hidden="true" style={{ position: "absolute", left: "-9999px", opacity: 0, pointerEvents: "none" }}>
+            <input name="_hp_company" type="text" tabIndex={-1} autoComplete="off" defaultValue="" />
+          </div>
+
           {notice ? (
             <div className="rounded-2xl border border-rose-400/25 bg-rose-400/10 px-4 py-3 text-sm text-rose-100">
               {notice}
