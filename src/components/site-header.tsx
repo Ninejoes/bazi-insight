@@ -95,7 +95,14 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
               <button
                 type="button"
                 className={`relative flex items-center gap-1 rounded-full px-3.5 py-2 text-sm transition-all ${
-                  isActive("/bazi") || isActive("/tarot") || isActive("/dream") || isActive("/siamsi")
+                  isActive("/bazi") ||
+                  isActive("/tarot") ||
+                  isActive("/dream") ||
+                  isActive("/siamsi") ||
+                  isActive("/life-graph") ||
+                  isActive("/love-compatibility") ||
+                  isActive("/zodiac") ||
+                  isActive("/daily-hub")
                     ? "bg-gold/10 text-gold font-medium"
                     : "text-muted-foreground hover:text-gold"
                 }`}
@@ -104,19 +111,19 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                 <span className={`text-[10px] transition-transform duration-200 ${servicesOpen ? "rotate-180 text-gold" : "opacity-70"}`}>▾</span>
               </button>
               {servicesOpen && (
-                <div className="absolute left-1/2 top-full z-50 w-[32rem] -translate-x-1/2 pt-2">
+                <div className="absolute left-1/2 top-full z-50 w-[36rem] -translate-x-1/2 pt-2">
                   <div className="glass-strong overflow-hidden rounded-2xl border border-gold/20 p-4 shadow-elegant backdrop-blur-xl">
                     <div className="grid grid-cols-2 gap-3">
                       {/* คอลัมน์ 1: ชะตาชีวิต & ไพ่ */}
                       <div className="space-y-1">
                         <div className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-gold/70">
-                          ศาสตร์ชะตาชีวิต & ไพ่
+                          ศาสตร์ชะตาชีวิต & ราศี
                         </div>
                         <Link
                           to="/bazi"
-                          className="group flex items-start gap-2.5 rounded-xl p-2.5 transition hover:bg-gold/10"
+                          className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
                         >
-                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-lg text-gold group-hover:scale-110 transition-transform">
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
                             🔮
                           </span>
                           <div>
@@ -124,15 +131,47 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                               ปาจื้อ 八字
                             </div>
                             <div className="text-[11px] leading-tight text-muted-foreground">
-                              ดวงจีน 4 เสา วิเคราะห์ธาตุประจำตัวและวัฏจักรชีวิต
+                              ดวงจีน 4 เสา วิเคราะห์ธาตุและวัยจร
+                            </div>
+                          </div>
+                        </Link>
+                        <Link
+                          to="/life-graph"
+                          className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
+                        >
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
+                            📈
+                          </span>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
+                              กราฟชีวิต 12 เรือน
+                            </div>
+                            <div className="text-[11px] leading-tight text-muted-foreground">
+                              พล็อตเส้นกราฟชีวิต & ช่วงอายุทองคำ
+                            </div>
+                          </div>
+                        </Link>
+                        <Link
+                          to="/zodiac"
+                          className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
+                        >
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
+                            ♈
+                          </span>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
+                              ดูดวง 12 ราศี 2569
+                            </div>
+                            <div className="text-[11px] leading-tight text-muted-foreground">
+                              เจาะลึก 4 ด้าน งาน เงิน รัก สุขภาพ
                             </div>
                           </div>
                         </Link>
                         <Link
                           to="/tarot"
-                          className="group flex items-start gap-2.5 rounded-xl p-2.5 transition hover:bg-gold/10"
+                          className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
                         >
-                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-lg text-gold group-hover:scale-110 transition-transform">
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
                             🃏
                           </span>
                           <div>
@@ -140,7 +179,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                               ไพ่ยิปซีพยากรณ์
                             </div>
                             <div className="text-[11px] leading-tight text-muted-foreground">
-                              สำรับ 78 ใบ ความรัก การงาน การเงิน เซลติกครอส
+                              เปิดไพ่ 78 ใบ ความรัก การงาน การเงิน
                             </div>
                           </div>
                         </Link>
@@ -149,13 +188,45 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                       {/* คอลัมน์ 2: จิตสัมผัส & เสี่ยงทาย */}
                       <div className="space-y-1">
                         <div className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-gold/70">
-                          จิตสัมผัส & เสี่ยงทาย
+                          ความรัก & เสี่ยงทาย & เช็คดวง
                         </div>
                         <Link
-                          to="/dream"
-                          className="group flex items-start gap-2.5 rounded-xl p-2.5 transition hover:bg-gold/10"
+                          to="/love-compatibility"
+                          className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
                         >
-                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-lg text-gold group-hover:scale-110 transition-transform">
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-rose-500/15 text-base text-rose-400 group-hover:scale-110 transition-transform">
+                            💞
+                          </span>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
+                              สมพงษ์เนื้อคู่ & ความรัก
+                            </div>
+                            <div className="text-[11px] leading-tight text-muted-foreground">
+                              เช็คดวง 2 คน ธาตุสมพงษ์ & คะแนน %
+                            </div>
+                          </div>
+                        </Link>
+                        <Link
+                          to="/daily-hub"
+                          className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
+                        >
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
+                            ☀️
+                          </span>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
+                              เช็คดวงเช้านี้ Daily Hub
+                            </div>
+                            <div className="text-[11px] leading-tight text-muted-foreground">
+                              สีมงคลวันนี้ ไพ่ประจำวัน & ทิศโชค
+                            </div>
+                          </div>
+                        </Link>
+                        <Link
+                          to="/dream"
+                          className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
+                        >
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
                             🌙
                           </span>
                           <div>
@@ -163,15 +234,15 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                               ทำนายฝันมงคล
                             </div>
                             <div className="text-[11px] leading-tight text-muted-foreground">
-                              ถอดรหัสลางบอกเหตุความฝัน พร้อมเลขเด็ดแม่นยำ
+                              ถอดรหัสลางบอกเหตุ & เลขเด็ดแม่นยำ
                             </div>
                           </div>
                         </Link>
                         <Link
                           to="/siamsi"
-                          className="group flex items-start gap-2.5 rounded-xl p-2.5 transition hover:bg-gold/10"
+                          className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
                         >
-                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-lg text-gold group-hover:scale-110 transition-transform">
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
                             🎋
                           </span>
                           <div>
@@ -214,6 +285,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                 className={`relative flex items-center gap-1 rounded-full px-3.5 py-2 text-sm transition-all ${
                   isActive("/phone-analysis") ||
                   isActive("/name-analysis") ||
+                  isActive("/destiny-card") ||
                   isActive("/lottery") ||
                   isActive("/lucky-colors") ||
                   isActive("/auspicious-calendar") ||
@@ -235,6 +307,22 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                         <div className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-gold/70">
                           ศาสตร์ตัวเลข & ชื่อมงคล
                         </div>
+                        <Link
+                          to="/destiny-card"
+                          className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
+                        >
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
+                            🪪
+                          </span>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
+                              บัตรชะตาชีวิตดิจิทัล
+                            </div>
+                            <div className="text-[11px] text-muted-foreground">
+                              Destiny ID Card พรีเมียม 9:16
+                            </div>
+                          </div>
+                        </Link>
                         <Link
                           to="/phone-analysis"
                           className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
@@ -543,7 +631,19 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
             <div className="my-2 h-px bg-gold/10" />
             <MobileGroupTitle>🔮 บริการดูดวง</MobileGroupTitle>
             <MobileLink to="/bazi" onClick={closeMobile}>
-              ปาจื้อ 八字 (ดวงจีน 4 เสา)
+              🔮 ปาจื้อ 八字 (ดวงจีน 4 เสา)
+            </MobileLink>
+            <MobileLink to="/life-graph" onClick={closeMobile}>
+              📈 กราฟชีวิต 12 เรือน
+            </MobileLink>
+            <MobileLink to="/zodiac" onClick={closeMobile}>
+              ♈ ดูดวง 12 ราศี 2569
+            </MobileLink>
+            <MobileLink to="/love-compatibility" onClick={closeMobile}>
+              💞 สมพงษ์เนื้อคู่ & ความรัก
+            </MobileLink>
+            <MobileLink to="/daily-hub" onClick={closeMobile}>
+              ☀️ เช็คดวงเช้านี้ Daily Hub
             </MobileLink>
             <MobileLink to="/tarot" onClick={closeMobile}>
               🃏 ไพ่ยิปซีพยากรณ์
@@ -563,6 +663,9 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
             {/* Group 2: เสริมดวง & ตัวเลข */}
             <div className="my-2 h-px bg-gold/10" />
             <MobileGroupTitle>✨ เสริมดวง & ตัวเลข</MobileGroupTitle>
+            <MobileLink to="/destiny-card" onClick={closeMobile}>
+              🪪 บัตรชะตาชีวิตดิจิทัล
+            </MobileLink>
             <MobileLink to="/phone-analysis" onClick={closeMobile}>
               📱 เช็คเบอร์มงคล
             </MobileLink>

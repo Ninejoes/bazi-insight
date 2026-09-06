@@ -23,6 +23,10 @@ export function SiteFooter() {
             title="บริการดูดวง"
             links={[
               { to: "/bazi", label: "ปาจื้อ 八字" },
+              { to: "/life-graph", label: "กราฟชีวิต 12 เรือน" },
+              { to: "/zodiac", label: "ดูดวง 12 ราศี 2569" },
+              { to: "/love-compatibility", label: "สมพงษ์เนื้อคู่ & รัก" },
+              { to: "/daily-hub", label: "เช็คดวงเช้านี้ Daily Hub" },
               { to: "/tarot", label: "ไพ่ยิปซี" },
               { to: "/dream", label: "ทำนายฝัน" },
               { to: "/siamsi", label: "เซียมซีออนไลน์" },
@@ -33,6 +37,7 @@ export function SiteFooter() {
           <FooterCol
             title="ตัวเลข & ฤกษ์ยาม"
             links={[
+              { to: "/destiny-card", label: "บัตรชะตาชีวิตดิจิทัล" },
               { to: "/lucky-colors", label: "สีเสื้อมงคลประจำวัน" },
               { to: "/auspicious-calendar", label: "ปฏิทินฤกษ์มงคล 2569" },
               { to: "/phone-analysis", label: "เช็คเบอร์มงคล" },
