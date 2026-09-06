@@ -41,8 +41,8 @@ export function SiteFooter() {
           <FooterCol
             title="ผู้ใช้งาน"
             links={[
-              { to: "/login", label: "เข้าสู่ระบบ" },
-              { to: "/register", label: "สมัครสมาชิก" },
+              { to: "/login", label: "เข้าสู่ระบบ", rel: "nofollow" },
+              { to: "/register", label: "สมัครสมาชิก", rel: "nofollow" },
               { to: "/help", label: "ศูนย์ช่วยเหลือ" },
             ]}
           />
@@ -65,14 +65,20 @@ export function SiteFooter() {
   );
 }
 
-function FooterCol({ title, links }: { title: string; links: { to: string; label: string }[] }) {
+function FooterCol({
+  title,
+  links,
+}: {
+  title: string;
+  links: { to: string; label: string; rel?: string }[];
+}) {
   return (
     <div>
       <div className="text-[11px] uppercase tracking-[0.25em] text-gold/70">{title}</div>
       <ul className="mt-4 space-y-2">
         {links.map((l) => (
           <li key={l.to}>
-            <Link to={l.to} className="text-sm text-muted-foreground hover:text-gold">
+            <Link to={l.to} rel={l.rel} className="text-sm text-muted-foreground hover:text-gold">
               {l.label}
             </Link>
           </li>

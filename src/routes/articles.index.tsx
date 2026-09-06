@@ -3,7 +3,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { ALL_ARTICLE_CATEGORY, ARTICLE_CATEGORIES } from "@/lib/article-categories";
 import { type Article } from "@/lib/articles";
-import { seo } from "@/lib/seo";
+import { seo, siteUrl } from "@/lib/seo";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { useEffect, useState } from "react";
 
@@ -16,6 +16,25 @@ export const Route = createFileRoute("/articles/")({
       path: "/articles",
       keywords: ["บทความดูดวง", "ความรู้ปาจื้อ", "ไพ่ทาโรต์", "ทำนายฝัน", "เสริมโชค"],
     }),
+  loader: async () => {
+    try {
+      const origin = typeof window === "undefined" ? siteUrl : window.location.origin;
+      const response = await fetch(`${origin}/api/articles?page=1&limit=20`);
+      const data = (await response.json().catch(() => ({}))) as ArticlesResponse;
+      if (response.ok && data.ok) {
+        return {
+          initialArticles: data.articles || [],
+          initialTotal: data.total || 0,
+          initialTotalPages: data.totalPages || 1,
+        };
+      }
+    } catch {}
+    return {
+      initialArticles: [],
+      initialTotal: 0,
+      initialTotalPages: 1,
+    };
+  },
   component: ArticlesIndex,
 });
 
@@ -33,20 +52,30 @@ type ArticlesResponse = {
 };
 
 function ArticlesIndex() {
+  const loaderData = Route.useLoaderData() as {
+    initialArticles?: Article[];
+    initialTotal?: number;
+    initialTotalPages?: number;
+  } | undefined;
+
   const searchParams =
     typeof window === "undefined" ? new URLSearchParams() : new URLSearchParams(window.location.search);
   const initialSearch = searchParams.get("search") || "";
   const [active, setActive] = useState(ALL_ARTICLE_CATEGORY);
   const [search, setSearch] = useState(initialSearch);
   const [activeSearch, setActiveSearch] = useState(initialSearch.trim());
-  const [items, setItems] = useState<Article[]>([]);
+  const [items, setItems] = useState<Article[]>(loaderData?.initialArticles || []);
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(loaderData?.initialTotal || (loaderData?.initialArticles?.length ?? 0));
+  const [totalPages, setTotalPages] = useState(loaderData?.initialTotalPages || 1);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (active === ALL_ARTICLE_CATEGORY && !activeSearch && page === 1 && items.length > 0) {
+      return;
+    }
+
     let mounted = true;
 
     async function loadArticles() {

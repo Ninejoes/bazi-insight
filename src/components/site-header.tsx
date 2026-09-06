@@ -218,12 +218,14 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
               <>
                 <Link
                   to="/login"
+                  rel="nofollow"
                   className="rounded-full px-4 py-2 text-sm text-muted-foreground hover:text-gold"
                 >
                   เข้าสู่ระบบ
                 </Link>
                 <Link
                   to="/register"
+                  rel="nofollow"
                   className="rounded-full bg-gradient-gold px-4 py-2 text-sm font-semibold text-primary-foreground shadow-gold hover:scale-[1.02] transition"
                 >
                   สมัครสมาชิก
@@ -333,6 +335,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
               <div className="flex gap-2 p-1">
                 <Link
                   to="/login"
+                  rel="nofollow"
                   onClick={closeMobile}
                   className="flex-1 rounded-xl border border-gold/30 px-3 py-2 text-center text-sm text-gold"
                 >
@@ -340,6 +343,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                 </Link>
                 <Link
                   to="/register"
+                  rel="nofollow"
                   onClick={closeMobile}
                   className="flex-1 rounded-xl bg-gradient-gold px-3 py-2 text-center text-sm font-semibold text-primary-foreground shadow-gold"
                 >

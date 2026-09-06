@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { seo } from "@/lib/seo";
+import { seo, siteUrl } from "@/lib/seo";
 import { type DreamRecord } from "@/lib/admin-content";
 import { readStoredUserSession } from "@/lib/user-session";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
@@ -26,6 +26,21 @@ const THAI_LETTERS = [
   ..."กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ".split(""),
 ];
 
+const DEFAULT_POPULAR_DREAMS = [
+  "งู",
+  "ปลา",
+  "ฟันหัก",
+  "คนตาย",
+  "ทอง",
+  "ช้าง",
+  "คลอดลูก",
+  "ไฟไหม้",
+  "รถชน",
+  "เต่า",
+  "พระ",
+  "จระเข้",
+];
+
 type DreamResponse = {
   ok?: boolean;
   error?: string;
@@ -44,23 +59,57 @@ export const Route = createFileRoute("/dream/")({
       path: "/dream",
       keywords: ["ทำนายฝัน", "ฝันเห็น", "เลขเด็ด", "解梦", "ความหมายความฝัน"],
     }),
+  loader: async () => {
+    try {
+      const origin = typeof window === "undefined" ? siteUrl : window.location.origin;
+      const response = await fetch(`${origin}/api/dreams?page=1&limit=24`);
+      const data = (await response.json().catch(() => ({}))) as DreamResponse;
+      if (response.ok && data.ok) {
+        return {
+          initialDreams: data.dreams || [],
+          initialTotal: data.total || 0,
+          initialTotalPages: data.totalPages || 1,
+          popularKeywords: (data.dreams || []).slice(0, 12).map((dream) => dream.keyword),
+        };
+      }
+    } catch {}
+    return {
+      initialDreams: [],
+      initialTotal: 0,
+      initialTotalPages: 1,
+      popularKeywords: DEFAULT_POPULAR_DREAMS,
+    };
+  },
   component: DreamPage,
 });
 
 function DreamPage() {
+  const loaderData = Route.useLoaderData() as {
+    initialDreams?: DreamRecord[];
+    initialTotal?: number;
+    initialTotalPages?: number;
+    popularKeywords?: string[];
+  } | undefined;
+
   const [q, setQ] = useState("");
   const [activeQuery, setActiveQuery] = useState("");
-  const [dreams, setDreams] = useState<DreamRecord[]>([]);
-  const [popular, setPopular] = useState<string[]>([]);
+  const [dreams, setDreams] = useState<DreamRecord[]>(loaderData?.initialDreams || []);
+  const [popular, setPopular] = useState<string[]>(
+    loaderData?.popularKeywords?.length ? loaderData.popularKeywords : DEFAULT_POPULAR_DREAMS,
+  );
   const [page, setPage] = useState(1);
   const [category, setCategory] = useState("ทั้งหมด");
   const [letter, setLetter] = useState("ทั้งหมด");
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(loaderData?.initialTotal || (loaderData?.initialDreams?.length ?? 0));
+  const [totalPages, setTotalPages] = useState(loaderData?.initialTotalPages || 1);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (!activeQuery && page === 1 && category === "ทั้งหมด" && letter === "ทั้งหมด" && dreams.length > 0) {
+      return;
+    }
+
     let mounted = true;
 
     async function loadDreams() {
@@ -96,6 +145,7 @@ function DreamPage() {
   }, [activeQuery, page, category, letter]);
 
   useEffect(() => {
+    if (popular.length > 0) return;
     let mounted = true;
 
     async function loadPopular() {
@@ -110,7 +160,7 @@ function DreamPage() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [popular.length]);
 
   const searchDreams = (query: string, nextPage = 1) => {
     const keyword = query.trim().toLowerCase();
@@ -168,16 +218,14 @@ function DreamPage() {
               ) : null}
               <div className="flex flex-wrap gap-2">
                 {popular.map((p) => (
-                  <button
+                  <Link
                     key={p}
-                    onClick={() => {
-                      setQ(p);
-                      searchDreams(p, 1);
-                    }}
+                    to="/dream/$slug"
+                    params={{ slug: p }}
                     className="rounded-full border border-border bg-card/40 px-4 py-1.5 text-xs text-muted-foreground transition-all hover:border-gold/40 hover:text-gold"
                   >
                     {p}
-                  </button>
+                  </Link>
                 ))}
               </div>
             </div>

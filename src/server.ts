@@ -21,7 +21,7 @@ let sitemapCache: { files: Map<string, string>; expiresAt: number } | undefined;
 let sitemapRefreshPromise: Promise<Map<string, string>> | undefined;
 
 const sitemapCacheMs = 60 * 60 * 1000;
-const sitemapPageLimit = 2500;
+const sitemapPageLimit = 1000;
 
 async function getServerEntry(): Promise<ServerEntry> {
   if (!serverEntryPromise) {
@@ -42,25 +42,80 @@ async function loadSupabaseSitemapRows<T extends Record<string, unknown>>({
   order: string;
 }) {
   const rows: T[] = [];
-  let offset = 0;
+  const pageSize = sitemapPageLimit;
 
-  while (true) {
-    const params = new URLSearchParams({
-      select,
-      limit: String(sitemapPageLimit),
-      offset: String(offset),
-    });
-    params.set("order", order);
+  const firstParams = new URLSearchParams({
+    select,
+    limit: String(pageSize),
+    offset: "0",
+  });
+  firstParams.set("order", order);
 
-    const response = await supabaseRequest(`${table}?${params.toString()}`);
-    if (!response) return undefined;
+  const firstResponse = await supabaseRequest(`${table}?${firstParams.toString()}`, {
+    headers: { Prefer: "count=exact" },
+  });
+  if (!firstResponse) return undefined;
 
-    const pageRows = (await response.json().catch(() => [])) as T[];
-    if (!Array.isArray(pageRows)) return rows.length ? rows : undefined;
+  const firstRows = (await firstResponse.json().catch(() => [])) as T[];
+  if (!Array.isArray(firstRows)) return undefined;
+  rows.push(...firstRows);
 
-    rows.push(...pageRows);
-    if (pageRows.length < sitemapPageLimit) break;
-    offset += sitemapPageLimit;
+  if (firstRows.length < pageSize) {
+    return rows;
+  }
+
+  const contentRange = firstResponse.headers.get("content-range") || "";
+  const totalCountMatch = contentRange.match(/\/(\d+)$/);
+  const totalCount = totalCountMatch ? parseInt(totalCountMatch[1], 10) : NaN;
+
+  if (Number.isFinite(totalCount) && totalCount > pageSize) {
+    const totalPages = Math.ceil(totalCount / pageSize);
+    const offsets: number[] = [];
+    for (let i = 1; i < totalPages; i++) {
+      offsets.push(i * pageSize);
+    }
+
+    const batchSize = 6;
+    for (let i = 0; i < offsets.length; i += batchSize) {
+      const batchOffsets = offsets.slice(i, i + batchSize);
+      const batchResults = await Promise.all(
+        batchOffsets.map(async (offset) => {
+          const params = new URLSearchParams({
+            select,
+            limit: String(pageSize),
+            offset: String(offset),
+          });
+          params.set("order", order);
+          const response = await supabaseRequest(`${table}?${params.toString()}`);
+          if (!response) return [];
+          const data = (await response.json().catch(() => [])) as T[];
+          return Array.isArray(data) ? data : [];
+        }),
+      );
+      for (const pageRows of batchResults) {
+        rows.push(...pageRows);
+      }
+    }
+  } else {
+    let offset = pageSize;
+    while (true) {
+      const params = new URLSearchParams({
+        select,
+        limit: String(pageSize),
+        offset: String(offset),
+      });
+      params.set("order", order);
+
+      const response = await supabaseRequest(`${table}?${params.toString()}`);
+      if (!response) break;
+
+      const pageRows = (await response.json().catch(() => [])) as T[];
+      if (!Array.isArray(pageRows) || pageRows.length === 0) break;
+
+      rows.push(...pageRows);
+      if (pageRows.length < pageSize) break;
+      offset += pageSize;
+    }
   }
 
   return rows;
