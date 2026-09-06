@@ -64,6 +64,8 @@ export function SiteFooter() {
               { to: "/login", label: "เข้าสู่ระบบ", rel: "nofollow" },
               { to: "/register", label: "สมัครสมาชิก", rel: "nofollow" },
               { to: "/help", label: "ศูนย์ช่วยเหลือ" },
+              { to: "/terms", label: "ข้อกำหนดการใช้งาน" },
+              { to: "/privacy", label: "นโยบายความเป็นส่วนตัว" },
             ]}
           />
         </div>
@@ -75,6 +77,23 @@ export function SiteFooter() {
             ผลทำนายเป็นแนวทางเพื่อทบทวนตนเอง ไม่ใช่คำตัดสินชีวิตหรือคำแนะนำด้านการแพทย์ การเงิน
             หรือกฎหมาย
           </p>
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground/80 pt-1">
+            <Link to="/terms" className="hover:text-gold transition">
+              ข้อกำหนดการใช้งาน
+            </Link>
+            <span>·</span>
+            <Link to="/privacy" className="hover:text-gold transition">
+              นโยบายความเป็นส่วนตัว
+            </Link>
+            <span>·</span>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent("open_cookie_preferences"))}
+              className="hover:text-gold transition cursor-pointer"
+            >
+              ตั้งค่าคุกกี้
+            </button>
+          </div>
           <div className="font-cn text-sm text-gold/50">天 · 地 · 人 · 和</div>
           <div className="text-[11px] text-muted-foreground">
             © {new Date().getFullYear()} Likhitfa. All rights reserved.

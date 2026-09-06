@@ -43,6 +43,8 @@ const basePublicRoutes: SitemapEntry[] = [
   { loc: "/about", lastmod: "2026-09-06", changefreq: "monthly", priority: "0.6" },
   { loc: "/contact", lastmod: "2026-09-06", changefreq: "monthly", priority: "0.6" },
   { loc: "/help", lastmod: "2026-09-06", changefreq: "monthly", priority: "0.6" },
+  { loc: "/terms", lastmod: "2026-09-06", changefreq: "monthly", priority: "0.5" },
+  { loc: "/privacy", lastmod: "2026-09-06", changefreq: "monthly", priority: "0.5" },
 ];
 
 function xmlEscape(value: string) {

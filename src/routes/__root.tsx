@@ -20,6 +20,7 @@ import {
   siteUrl,
   websiteSchema,
 } from "../lib/seo";
+import { CookieConsentBanner } from "@/components/cookie-consent-banner";
 
 declare global {
   interface Window {
@@ -175,6 +176,7 @@ function RootComponent() {
       <AnalyticsTracker />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <CookieConsentBanner />
     </QueryClientProvider>
   );
 }
