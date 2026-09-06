@@ -53,6 +53,86 @@ const services = [
   },
 ];
 
+const quickTools = [
+  {
+    href: "/lucky-colors",
+    badge: "อัปเดตทุกวัน",
+    badgeCn: "色",
+    title: "สีเสื้อมงคลประจำวัน",
+    tagline: "เช็คสีก่อนออกจากบ้าน เสริมงาน เงิน รัก บารมี",
+    desc: "ตารางสีมงคล 5 มิติ และสีกาลกิณีประจำวัน พร้อมทริคแต่งกายเสริมสง่าราศี และการ์ดแชร์สตอรี่",
+    iconBg: "from-amber-400/20 to-orange-500/10",
+    borderGlow: "group-hover:border-amber-400/40",
+    glyph: "彩",
+  },
+  {
+    href: "/phone-analysis",
+    badge: "เลขศาสตร์ชั้นสูง",
+    badgeCn: "数",
+    title: "วิเคราะห์เบอร์มงคล",
+    tagline: "ถอดรหัสพลังตัวเลข 10 หลัก ผลรวม & คู่เลข",
+    desc: "วิเคราะห์ผลรวมเบอร์ คู่เลข 7 คู่ พลัง 4 มิติ และแนะนำอาชีพที่หนุนนำอย่างละเอียด",
+    iconBg: "from-emerald-400/20 to-teal-500/10",
+    borderGlow: "group-hover:border-emerald-400/40",
+    glyph: "数",
+  },
+  {
+    href: "/siamsi",
+    badge: "เขย่าติ้ว 28 ใบ",
+    badgeCn: "签",
+    title: "เซียมซีออนไลน์",
+    tagline: "เสี่ยงทาย 3 ศาลเจ้าศักดิ์สิทธิ์ รับคำทำนายแม่นยำ",
+    desc: "ศาลเจ้าพ่อเสือ วัดเล่งเน่ยยี่ ศาลเจ้ากวนอู พร้อมคำทำนาย 5 ด้านและการ์ดใบเซียมซีสไตล์โมเดิร์น",
+    iconBg: "from-red-400/20 to-rose-500/10",
+    borderGlow: "group-hover:border-red-400/40",
+    glyph: "签",
+  },
+  {
+    href: "/auspicious-calendar",
+    badge: "ปฏิทินจีน 2569",
+    badgeCn: "历",
+    title: "ปฏิทินฤกษ์มงคล",
+    tagline: "ค้นหาฤกษ์ดี วันธงชัย เปิดกิจการ แต่งงาน ออกรถ",
+    desc: "ปฏิทินฤกษ์มงคล กิจกรรมมงคล/อัปมงคล และทิศนำโชคประจำวัน คำนวณตามหลักดาราศาสตร์จีน",
+    iconBg: "from-blue-400/20 to-indigo-500/10",
+    borderGlow: "group-hover:border-blue-400/40",
+    glyph: "吉",
+  },
+  {
+    href: "/tai-sui",
+    badge: "ปีมะเมีย 2569",
+    badgeCn: "岁",
+    title: "ตรวจปีชง 2569 & วิธีแก้ชง",
+    tagline: "เช็ค 4 นักษัตรชง พร้อมสถานที่ไหว้และบทสวด",
+    desc: "คำนวณระดับการชง (ชวด 100%, มะเมีย 75%, เถาะ 50%, ระกา 50%) พร้อมเคล็ดลับผ่อนหนักเป็นเบา",
+    iconBg: "from-rose-400/20 to-red-500/10",
+    borderGlow: "group-hover:border-rose-400/40",
+    glyph: "岁",
+  },
+  {
+    href: "/name-analysis",
+    badge: "เลขศาสตร์ & ทักษา",
+    badgeCn: "名",
+    title: "วิเคราะห์ชื่อ-นามสกุล",
+    tagline: "ถอดรหัสกำลังดาว ทักษาปกรณ์ & อักษรกาลกิณี",
+    desc: "วิเคราะห์ชื่อ สกุล ผลรวม พร้อมตรวจเช็คอักษรกาลกิณีและอักษรเดช-ศรีตามวันเกิด",
+    iconBg: "from-purple-400/20 to-violet-500/10",
+    borderGlow: "group-hover:border-purple-400/40",
+    glyph: "名",
+  },
+  {
+    href: "/wallpaper",
+    badge: "วอลเปเปอร์ HD",
+    badgeCn: "图",
+    title: "วอลเปเปอร์สายมูตามธาตุ",
+    tagline: "เสริมดวงตามธาตุปรับสมดุลปาจื้อ ดาวน์โหลดฟรี",
+    desc: "ภาพพื้นหลังมือถือ 9:16 ความละเอียดสูง ธาตุทอง น้ำ ไม้ ไฟ ดิน พร้อมตรายันต์มงคลและคำอวยพร",
+    iconBg: "from-yellow-400/20 to-amber-500/10",
+    borderGlow: "group-hover:border-yellow-400/40",
+    glyph: "福",
+  },
+];
+
 function Index() {
   return (
     <div className="relative min-h-screen">
@@ -135,6 +215,72 @@ function Index() {
                     </div>
                   </div>
                 </article>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* Popular Spiritual Tools Grid */}
+        <section className="mt-24">
+          <div className="mb-4 text-center">
+            <div className="mx-auto mb-3 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1 text-[11px] tracking-[0.2em] text-gold/90">
+              <span className="h-1 w-1 rounded-full bg-gold" />
+              ศาสตร์เสริมดวง & เครื่องมือยอดนิยม
+            </div>
+            <h2 className="font-display text-3xl font-medium text-foreground md:text-4xl">
+              เครื่องมือเสริมดวงชะตาประจำวัน
+            </h2>
+            <p className="mx-auto mt-2 max-w-xl text-xs text-muted-foreground md:text-sm">
+              เลือกใช้เครื่องมือคำนวณดวงชะตา เลขศาสตร์ และฤกษ์ยามโบราณ เพื่อนำไปใช้ในชีวิตประจำวัน
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {quickTools.map((tool, i) => (
+              <Link
+                key={tool.href}
+                to={tool.href}
+                className="group relative animate-fade-up"
+                style={{ animationDelay: `${i * 80}ms` }}
+              >
+                <div
+                  className={`ornate-border relative h-full overflow-hidden rounded-2xl glass-strong p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-gold ${tool.borderGlow}`}
+                >
+                  <div
+                    className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${tool.iconBg} opacity-0 transition-opacity duration-300 group-hover:opacity-100`}
+                  />
+
+                  {/* Chinese Glyph backdrop */}
+                  <div className="pointer-events-none absolute right-3 top-3 font-cn text-5xl font-bold text-gold/[0.07] transition-all duration-300 group-hover:scale-110 group-hover:text-gold/[0.12]">
+                    {tool.glyph}
+                  </div>
+
+                  <div className="relative flex h-full flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/20 bg-background/50 px-2.5 py-0.5 text-[10px] tracking-wider text-gold/90">
+                          <span className="font-cn text-xs">{tool.badgeCn}</span>
+                          <span className="h-2 w-px bg-gold/30" />
+                          {tool.badge}
+                        </span>
+                        <span className="text-xs text-gold/50 transition-transform group-hover:translate-x-1 group-hover:text-gold">
+                          →
+                        </span>
+                      </div>
+
+                      <h3 className="mt-4 font-display text-xl text-foreground group-hover:text-gold transition-colors">
+                        {tool.title}
+                      </h3>
+                      <p className="mt-1 text-xs font-medium text-gold/80">{tool.tagline}</p>
+                      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{tool.desc}</p>
+                    </div>
+
+                    <div className="mt-6 flex items-center gap-2 border-t border-gold/10 pt-3 text-[11px] text-gold/70 group-hover:text-gold">
+                      <span>เปิดใช้งานเครื่องมือ</span>
+                      <span>›</span>
+                    </div>
+                  </div>
+                </div>
               </Link>
             ))}
           </div>

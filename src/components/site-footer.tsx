@@ -5,8 +5,8 @@ export function SiteFooter() {
   return (
     <footer className="relative z-10 mt-24 border-t border-gold/10">
       <div className="mx-auto max-w-7xl px-6 py-12">
-        <div className="grid gap-10 md:grid-cols-4">
-          <div>
+        <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+          <div className="sm:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-3">
               <BrandMark size={36} />
               <div>
@@ -15,7 +15,7 @@ export function SiteFooter() {
               </div>
             </div>
             <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-              ศาสตร์ดูดวงระดับพรีเมียม รวมปาจื้อ ไพ่ยิปซี ทำนายฝัน และเลขเด็ดไว้ในที่เดียว
+              ศาสตร์ดูดวงระดับพรีเมียม รวมปาจื้อ ไพ่ยิปซี ทำนายฝัน ฤกษ์มงคล และศาสตร์ตัวเลขไว้ในที่เดียว
             </p>
           </div>
 
@@ -25,7 +25,20 @@ export function SiteFooter() {
               { to: "/bazi", label: "ปาจื้อ 八字" },
               { to: "/tarot", label: "ไพ่ยิปซี" },
               { to: "/dream", label: "ทำนายฝัน" },
-              { to: "/lottery", label: "เลขเด็ด" },
+              { to: "/siamsi", label: "เซียมซีออนไลน์" },
+              { to: "/wallpaper", label: "วอลเปเปอร์สายมู" },
+            ]}
+          />
+
+          <FooterCol
+            title="ตัวเลข & ฤกษ์ยาม"
+            links={[
+              { to: "/lucky-colors", label: "สีเสื้อมงคลประจำวัน" },
+              { to: "/auspicious-calendar", label: "ปฏิทินฤกษ์มงคล 2569" },
+              { to: "/phone-analysis", label: "เช็คเบอร์มงคล" },
+              { to: "/name-analysis", label: "วิเคราะห์ชื่อ-นามสกุล" },
+              { to: "/tai-sui", label: "ตรวจปีชง 2569 & แก้ชง" },
+              { to: "/lottery", label: "หวย & สถิติเลขเด็ด" },
             ]}
           />
 
@@ -34,7 +47,7 @@ export function SiteFooter() {
             links={[
               { to: "/about", label: "เกี่ยวกับเรา" },
               { to: "/contact", label: "ติดต่อเรา" },
-              { to: "/articles", label: "บทความ" },
+              { to: "/articles", label: "บทความดูดวง" },
             ]}
           />
 

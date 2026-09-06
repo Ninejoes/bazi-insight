@@ -18,6 +18,13 @@ import { Route as HelpRouteImport } from './routes/help'
 import { Route as DreamRouteImport } from './routes/dream'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BaziRouteImport } from './routes/bazi'
+import { Route as AuspiciousCalendarRouteImport } from './routes/auspicious-calendar'
+import { Route as LuckyColorsRouteImport } from './routes/lucky-colors'
+import { Route as NameAnalysisRouteImport } from './routes/name-analysis'
+import { Route as PhoneAnalysisRouteImport } from './routes/phone-analysis'
+import { Route as SiamsiRouteImport } from './routes/siamsi'
+import { Route as TaiSuiRouteImport } from './routes/tai-sui'
+import { Route as WallpaperRouteImport } from './routes/wallpaper'
 import { Route as ArticlesRouteImport } from './routes/articles'
 import { Route as AdminLoginRouteImport } from './routes/admin-login'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -102,6 +109,41 @@ const ContactRoute = ContactRouteImport.update({
 const BaziRoute = BaziRouteImport.update({
   id: '/bazi',
   path: '/bazi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuspiciousCalendarRoute = AuspiciousCalendarRouteImport.update({
+  id: '/auspicious-calendar',
+  path: '/auspicious-calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LuckyColorsRoute = LuckyColorsRouteImport.update({
+  id: '/lucky-colors',
+  path: '/lucky-colors',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NameAnalysisRoute = NameAnalysisRouteImport.update({
+  id: '/name-analysis',
+  path: '/name-analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PhoneAnalysisRoute = PhoneAnalysisRouteImport.update({
+  id: '/phone-analysis',
+  path: '/phone-analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SiamsiRoute = SiamsiRouteImport.update({
+  id: '/siamsi',
+  path: '/siamsi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TaiSuiRoute = TaiSuiRouteImport.update({
+  id: '/tai-sui',
+  path: '/tai-sui',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WallpaperRoute = WallpaperRouteImport.update({
+  id: '/wallpaper',
+  path: '/wallpaper',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArticlesRoute = ArticlesRouteImport.update({
@@ -312,6 +354,13 @@ export interface FileRoutesByFullPath {
   '/admin-login': typeof AdminLoginRoute
   '/articles': typeof ArticlesRouteWithChildren
   '/bazi': typeof BaziRoute
+  '/auspicious-calendar': typeof AuspiciousCalendarRoute
+  '/lucky-colors': typeof LuckyColorsRoute
+  '/name-analysis': typeof NameAnalysisRoute
+  '/phone-analysis': typeof PhoneAnalysisRoute
+  '/siamsi': typeof SiamsiRoute
+  '/tai-sui': typeof TaiSuiRoute
+  '/wallpaper': typeof WallpaperRoute
   '/contact': typeof ContactRoute
   '/dream': typeof DreamRouteWithChildren
   '/help': typeof HelpRoute
@@ -361,6 +410,13 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/admin-login': typeof AdminLoginRoute
   '/bazi': typeof BaziRoute
+  '/auspicious-calendar': typeof AuspiciousCalendarRoute
+  '/lucky-colors': typeof LuckyColorsRoute
+  '/name-analysis': typeof NameAnalysisRoute
+  '/phone-analysis': typeof PhoneAnalysisRoute
+  '/siamsi': typeof SiamsiRoute
+  '/tai-sui': typeof TaiSuiRoute
+  '/wallpaper': typeof WallpaperRoute
   '/contact': typeof ContactRoute
   '/help': typeof HelpRoute
   '/login': typeof LoginRoute
@@ -410,6 +466,13 @@ export interface FileRoutesById {
   '/admin-login': typeof AdminLoginRoute
   '/articles': typeof ArticlesRouteWithChildren
   '/bazi': typeof BaziRoute
+  '/auspicious-calendar': typeof AuspiciousCalendarRoute
+  '/lucky-colors': typeof LuckyColorsRoute
+  '/name-analysis': typeof NameAnalysisRoute
+  '/phone-analysis': typeof PhoneAnalysisRoute
+  '/siamsi': typeof SiamsiRoute
+  '/tai-sui': typeof TaiSuiRoute
+  '/wallpaper': typeof WallpaperRoute
   '/contact': typeof ContactRoute
   '/dream': typeof DreamRouteWithChildren
   '/help': typeof HelpRoute
@@ -463,6 +526,13 @@ export interface FileRouteTypes {
     | '/admin-login'
     | '/articles'
     | '/bazi'
+    | '/auspicious-calendar'
+    | '/lucky-colors'
+    | '/name-analysis'
+    | '/phone-analysis'
+    | '/siamsi'
+    | '/tai-sui'
+    | '/wallpaper'
     | '/contact'
     | '/dream'
     | '/help'
@@ -512,6 +582,13 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin-login'
     | '/bazi'
+    | '/auspicious-calendar'
+    | '/lucky-colors'
+    | '/name-analysis'
+    | '/phone-analysis'
+    | '/siamsi'
+    | '/tai-sui'
+    | '/wallpaper'
     | '/contact'
     | '/help'
     | '/login'
@@ -560,6 +637,13 @@ export interface FileRouteTypes {
     | '/admin-login'
     | '/articles'
     | '/bazi'
+    | '/auspicious-calendar'
+    | '/lucky-colors'
+    | '/name-analysis'
+    | '/phone-analysis'
+    | '/siamsi'
+    | '/tai-sui'
+    | '/wallpaper'
     | '/contact'
     | '/dream'
     | '/help'
@@ -620,6 +704,13 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRouteWithChildren
   RegisterRoute: typeof RegisterRoute
   TarotRoute: typeof TarotRouteWithChildren
+  AuspiciousCalendarRoute: typeof AuspiciousCalendarRoute
+  LuckyColorsRoute: typeof LuckyColorsRoute
+  NameAnalysisRoute: typeof NameAnalysisRoute
+  PhoneAnalysisRoute: typeof PhoneAnalysisRoute
+  SiamsiRoute: typeof SiamsiRoute
+  TaiSuiRoute: typeof TaiSuiRoute
+  WallpaperRoute: typeof WallpaperRoute
   ApiAdminLoginRoute: typeof ApiAdminLoginRoute
   ApiAdminSessionRoute: typeof ApiAdminSessionRoute
   ApiAdminUsersRoute: typeof ApiAdminUsersRoute
@@ -701,6 +792,55 @@ declare module '@tanstack/react-router' {
       path: '/bazi'
       fullPath: '/bazi'
       preLoaderRoute: typeof BaziRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auspicious-calendar': {
+      id: '/auspicious-calendar'
+      path: '/auspicious-calendar'
+      fullPath: '/auspicious-calendar'
+      preLoaderRoute: typeof AuspiciousCalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lucky-colors': {
+      id: '/lucky-colors'
+      path: '/lucky-colors'
+      fullPath: '/lucky-colors'
+      preLoaderRoute: typeof LuckyColorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/name-analysis': {
+      id: '/name-analysis'
+      path: '/name-analysis'
+      fullPath: '/name-analysis'
+      preLoaderRoute: typeof NameAnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/phone-analysis': {
+      id: '/phone-analysis'
+      path: '/phone-analysis'
+      fullPath: '/phone-analysis'
+      preLoaderRoute: typeof PhoneAnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/siamsi': {
+      id: '/siamsi'
+      path: '/siamsi'
+      fullPath: '/siamsi'
+      preLoaderRoute: typeof SiamsiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tai-sui': {
+      id: '/tai-sui'
+      path: '/tai-sui'
+      fullPath: '/tai-sui'
+      preLoaderRoute: typeof TaiSuiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wallpaper': {
+      id: '/wallpaper'
+      path: '/wallpaper'
+      fullPath: '/wallpaper'
+      preLoaderRoute: typeof WallpaperRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/articles': {
@@ -1064,6 +1204,13 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRouteWithChildren,
   RegisterRoute: RegisterRoute,
   TarotRoute: TarotRouteWithChildren,
+  AuspiciousCalendarRoute: AuspiciousCalendarRoute,
+  LuckyColorsRoute: LuckyColorsRoute,
+  NameAnalysisRoute: NameAnalysisRoute,
+  PhoneAnalysisRoute: PhoneAnalysisRoute,
+  SiamsiRoute: SiamsiRoute,
+  TaiSuiRoute: TaiSuiRoute,
+  WallpaperRoute: WallpaperRoute,
   ApiAdminLoginRoute: ApiAdminLoginRoute,
   ApiAdminSessionRoute: ApiAdminSessionRoute,
   ApiAdminUsersRoute: ApiAdminUsersRoute,
