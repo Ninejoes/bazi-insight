@@ -297,16 +297,35 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                     >
                       ติดต่อเรา
                     </Link>
-                    <Link
-                      to="/help"
-                      className="block rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-gold/10 hover:text-gold"
+                    <div className="my-1 h-px bg-gold/10" />
+                    <a
+                      href="https://ninejoe.online"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-gold hover:bg-gold/10"
                     >
-                      ศูนย์ช่วยเหลือ
-                    </Link>
+                      <div className="flex items-center gap-1.5">
+                        <span>⚡</span>
+                        <span>NineJoe.online</span>
+                      </div>
+                      <span className="text-[10px] opacity-70">↗</span>
+                    </a>
                   </div>
                 </div>
               )}
             </div>
+
+            {/* NineJoe.online Menu Button */}
+            <a
+              href="https://ninejoe.online"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative flex items-center gap-1.5 rounded-full border border-gold/30 bg-gold/10 px-3.5 py-1.5 text-xs font-semibold text-gold shadow-gold transition-all hover:scale-105 hover:bg-gold hover:text-primary-foreground"
+              title="ไปที่เว็บไซต์ NineJoe.online — UX/UI Design, AI Prompts & Creative Resources"
+            >
+              <span>NineJoe.online</span>
+              <span className="text-[10px] opacity-80">↗</span>
+            </a>
           </nav>
         )}
 
@@ -438,6 +457,21 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
             <MobileLink to="/help" onClick={closeMobile}>
               ศูนย์ช่วยเหลือ
             </MobileLink>
+
+            <div className="my-2 h-px bg-gold/10" />
+            <a
+              href="https://ninejoe.online"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={closeMobile}
+              className="flex items-center justify-between rounded-xl border border-gold/40 bg-gold/15 px-4 py-2.5 text-sm font-semibold text-gold shadow-gold transition hover:bg-gold hover:text-primary-foreground"
+            >
+              <div className="flex items-center gap-2">
+                <span>⚡</span>
+                <span>NineJoe.online สตูดิโอ</span>
+              </div>
+              <span className="text-xs">↗</span>
+            </a>
             <div className="my-2 h-px bg-gold/10" />
             {userSession ? (
               <div className="grid gap-2 p-1">

@@ -43,11 +43,13 @@ export function SiteFooter() {
           />
 
           <FooterCol
-            title="บริษัท"
+            title="บริษัท & พันธมิตร"
             links={[
               { to: "/about", label: "เกี่ยวกับเรา" },
               { to: "/contact", label: "ติดต่อเรา" },
               { to: "/articles", label: "บทความดูดวง" },
+              { to: "https://ninejoe.online", label: "NineJoe.online ↗" },
+              { to: "https://ninejoe.online/collections", label: "NineJoe Collections ↗" },
             ]}
           />
 
@@ -91,9 +93,20 @@ function FooterCol({
       <ul className="mt-4 space-y-2">
         {links.map((l) => (
           <li key={l.to}>
-            <Link to={l.to} rel={l.rel} className="text-sm text-muted-foreground hover:text-gold">
-              {l.label}
-            </Link>
+            {l.to.startsWith("http") ? (
+              <a
+                href={l.to}
+                target="_blank"
+                rel={l.rel || "noopener noreferrer"}
+                className="text-sm text-muted-foreground hover:text-gold"
+              >
+                {l.label}
+              </a>
+            ) : (
+              <Link to={l.to} rel={l.rel} className="text-sm text-muted-foreground hover:text-gold">
+                {l.label}
+              </Link>
+            )}
           </li>
         ))}
       </ul>
