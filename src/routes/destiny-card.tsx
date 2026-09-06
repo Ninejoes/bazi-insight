@@ -5,7 +5,7 @@ import { seo, siteUrl } from "@/lib/seo";
 import { analyzeBazi, type BaziAnalysis } from "@/lib/bazi-engine";
 import { readStoredUserSession } from "@/lib/user-session";
 import { ShareStoryModal, type ShareCardData } from "@/components/share-story-modal";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { CreditCard, Palette, Hash, Gem, Sparkles, Share2 } from "lucide-react";
 
 export const Route = createFileRoute("/destiny-card")({
@@ -70,13 +70,26 @@ const PERMANENT_LUCKY_ITEMS: Record<
 };
 
 export function DestinyCardPage() {
-  const session = readStoredUserSession();
-
-  const [name, setName] = useState(session?.displayName || "ชะตาฟ้าลิขิต");
-  const [birthDate, setBirthDate] = useState(session?.birthDate || "1996-08-18");
-  const [birthTime, setBirthTime] = useState(session?.birthTime || "09:30");
-  const [gender, setGender] = useState<"male" | "female">(session?.gender || "female");
+  const [name, setName] = useState("ชะตาฟ้าลิขิต");
+  const [birthDate, setBirthDate] = useState("1996-08-18");
+  const [birthTime, setBirthTime] = useState("09:30");
+  const [gender, setGender] = useState<"หญิง" | "ชาย">("หญิง");
   const [shareModalOpen, setShareModalOpen] = useState(false);
+
+  useEffect(() => {
+    const session = readStoredUserSession();
+    if (session) {
+      if (session.profile?.displayName || session.name) {
+        setName(session.profile?.displayName || session.name);
+      }
+      if (session.profile?.birthDate) {
+        setBirthDate(session.profile.birthDate);
+      }
+      if (session.profile?.gender === "male" || session.profile?.gender === "ชาย") {
+        setGender("ชาย");
+      }
+    }
+  }, []);
 
   const bazi: BaziAnalysis = useMemo(() => {
     return analyzeBazi({
@@ -87,20 +100,22 @@ export function DestinyCardPage() {
     });
   }, [name, gender, birthDate, birthTime]);
 
-  const element = bazi.dayMaster.element; // ไม้, ไฟ, ดิน, ทอง, น้ำ
+  const dm = bazi.context.dm;
+  const element = dm.element; // ไม้, ไฟ, ดิน, ทอง, น้ำ
+  const polarity = dm.polarity === "+" ? "หยาง" : "หยิน";
   const guardian = GUARDIAN_DEITIES[element] || GUARDIAN_DEITIES["ทอง"];
   const luckyData = PERMANENT_LUCKY_ITEMS[element] || PERMANENT_LUCKY_ITEMS["ทอง"];
 
-  const cardNumber = `LK-${bazi.dayMaster.stem.charCodeAt(0) * 17}-${birthDate.replace(/-/g, "").slice(2)}`;
+  const cardNumber = `LK-${(dm.han ? dm.han.charCodeAt(0) : 88) * 17}-${birthDate.replace(/-/g, "").slice(2)}`;
 
   const shareData: ShareCardData = {
     category: "บัตรชะตาชีวิตดิจิทัล",
     categoryCn: "天命玄卡",
     title: `${name} · บัตรชะตาชีวิต`,
-    subtitle: `ธาตุประจำตัว: ${bazi.dayMaster.stem} (${element})`,
+    subtitle: `ธาตุประจำตัว: ${dm.th} (${element}${polarity})`,
     highlights: [
       { label: "รหัสบัตรชะตา", value: cardNumber, color: "#fbbf24" },
-      { label: "ธาตุกำเนิด", value: `ธาตุ${element} (${bazi.dayMaster.yinYang})`, color: "#34d399" },
+      { label: "ธาตุกำเนิด", value: `ธาตุ${element} (${polarity})`, color: "#34d399" },
       { label: "สีมงคลคู่ชีพ", value: luckyData.colors.join(", "), color: "#38bdf8" },
       { label: "เลขนำโชคตลอดชีพ", value: luckyData.numbers, color: "#fb7185" },
       { label: "เทพเจ้าคุ้มครอง", value: guardian.name, color: "#fef08a" },
@@ -145,11 +160,11 @@ export function DestinyCardPage() {
               <label className="block text-xs font-semibold text-muted-foreground mb-1">เพศ</label>
               <select
                 value={gender}
-                onChange={(e) => setGender(e.target.value as "male" | "female")}
+                onChange={(e) => setGender(e.target.value as "หญิง" | "ชาย")}
                 className="w-full rounded-xl border border-gold/30 bg-background/80 px-3.5 py-2 text-sm text-foreground focus:border-gold focus:outline-none"
               >
-                <option value="female">หญิง</option>
-                <option value="male">ชาย</option>
+                <option value="หญิง">หญิง</option>
+                <option value="ชาย">ชาย</option>
               </select>
             </div>
             <div>
@@ -207,7 +222,7 @@ export function DestinyCardPage() {
                 {name}
               </div>
               <div className="mt-1 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-3 py-0.5 text-xs font-medium text-gold">
-                <span>ดิถี {bazi.dayMaster.stem} · ธาตุ{element} ({bazi.dayMaster.yinYang})</span>
+                <span>ดิถี {dm.th} ({dm.han}) · ธาตุ{element} ({polarity})</span>
               </div>
             </div>
 
@@ -247,19 +262,23 @@ export function DestinyCardPage() {
             <div className="mt-4 flex items-center justify-around border-t border-gold/10 pt-3 text-center">
               <div>
                 <div className="text-[10px] text-muted-foreground">เสาปี</div>
-                <div className="text-xs font-bold text-foreground">{bazi.yearPillar.stem}{bazi.yearPillar.branch}</div>
+                <div className="text-xs font-bold text-foreground">{bazi.chart.year.stem.th}{bazi.chart.year.branch.th}</div>
+                <div className="text-[9px] font-cn text-gold/60">{bazi.chart.year.stem.han}{bazi.chart.year.branch.han}</div>
               </div>
               <div>
                 <div className="text-[10px] text-muted-foreground">เสาเดือน</div>
-                <div className="text-xs font-bold text-foreground">{bazi.monthPillar.stem}{bazi.monthPillar.branch}</div>
+                <div className="text-xs font-bold text-foreground">{bazi.chart.month.stem.th}{bazi.chart.month.branch.th}</div>
+                <div className="text-[9px] font-cn text-gold/60">{bazi.chart.month.stem.han}{bazi.chart.month.branch.han}</div>
               </div>
               <div>
                 <div className="text-[10px] text-muted-foreground">เสาวัน (ดิถี)</div>
-                <div className="text-xs font-bold text-gold">{bazi.dayPillar.stem}{bazi.dayPillar.branch}</div>
+                <div className="text-xs font-bold text-gold">{bazi.chart.day.stem.th}{bazi.chart.day.branch.th}</div>
+                <div className="text-[9px] font-cn text-gold">{bazi.chart.day.stem.han}{bazi.chart.day.branch.han}</div>
               </div>
               <div>
                 <div className="text-[10px] text-muted-foreground">เสายาม</div>
-                <div className="text-xs font-bold text-foreground">{bazi.hourPillar.stem}{bazi.hourPillar.branch}</div>
+                <div className="text-xs font-bold text-foreground">{bazi.chart.hour.stem.th}{bazi.chart.hour.branch.th}</div>
+                <div className="text-[9px] font-cn text-gold/60">{bazi.chart.hour.stem.han}{bazi.chart.hour.branch.han}</div>
               </div>
             </div>
 

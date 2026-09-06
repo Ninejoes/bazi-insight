@@ -18,6 +18,7 @@ export type UserSession = {
 };
 
 export function readStoredUserSession() {
+  if (typeof window === "undefined") return null;
   const raw = window.localStorage.getItem(USER_SESSION_KEY);
   if (!raw) return null;
 
@@ -36,9 +37,11 @@ export function readStoredUserSession() {
 }
 
 export function storeUserSession(session: UserSession) {
+  if (typeof window === "undefined") return;
   window.localStorage.setItem(USER_SESSION_KEY, JSON.stringify(session));
 }
 
 export function clearUserSession() {
+  if (typeof window === "undefined") return;
   window.localStorage.removeItem(USER_SESSION_KEY);
 }
