@@ -1747,6 +1747,22 @@ export default async function handler(req, res) {
   cors(res, req);
   if (req.method === "OPTIONS") return res.status(204).end();
 
+  const ua = String(req.headers["user-agent"] || "").toLowerCase();
+  if (
+    ua.includes("httrack") ||
+    ua.includes("wget") ||
+    ua.includes("sitesucker") ||
+    ua.includes("teleport") ||
+    ua.includes("webcopier") ||
+    ua.includes("offline explorer") ||
+    ua.includes("page-grabber")
+  ) {
+    return send(res, 403, {
+      ok: false,
+      error: "Access Denied: Site scraping and cloning tools are blocked by Likhitfa Shield",
+    });
+  }
+
   try {
     const route = pathName(req);
     if (route === "admin-login" && req.method === "POST") return await adminLogin(req, res);

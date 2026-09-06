@@ -300,3 +300,56 @@
     cursor: pointer;
   }
 }
+
+/* ==========================================================================
+   Content Protection & Anti-Copying Rules (Likhitfa Shield)
+   ========================================================================== */
+
+/* Disable text selection by default to prevent copying */
+body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Allow text selection inside inputs and textareas so forms remain fully functional */
+input,
+textarea,
+select,
+[contenteditable="true"],
+.allow-select {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+}
+
+/* Prevent dragging images to desktop or other tabs */
+img {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+}
+
+/* Anti-Print Styling & Copyright Watermark */
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  body::before {
+    content: "© Likhitfa ลิขิตฟ้า (https://www.likhitfa.online) — สงวนลิขสิทธิ์ ห้ามทำซ้ำหรือดัดแปลงโดยไม่ได้รับอนุญาต";
+    display: block;
+    text-align: center;
+    font-size: 14pt;
+    font-weight: bold;
+    color: #888;
+    padding: 12px;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 20px;
+  }
+}
+

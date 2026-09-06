@@ -21,6 +21,7 @@ import {
   websiteSchema,
 } from "../lib/seo";
 import { CookieConsentBanner } from "@/components/cookie-consent-banner";
+import { ContentProtection } from "@/components/content-protection";
 
 declare global {
   interface Window {
@@ -177,6 +178,7 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <CookieConsentBanner />
+      <ContentProtection />
     </QueryClientProvider>
   );
 }

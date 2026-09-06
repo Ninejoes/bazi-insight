@@ -12,4 +12,26 @@ Allow: /api/dreams
 Allow: /api/faqs
 Allow: /api/site-content
 
+# Block automated website copiers, offline scrapers, and clone harvesters
+User-agent: HTTrack
+Disallow: /
+
+User-agent: Wget
+Disallow: /
+
+User-agent: Scrapy
+Disallow: /
+
+User-agent: WebCopier
+Disallow: /
+
+User-agent: TeleportPro
+Disallow: /
+
+User-agent: SiteSucker
+Disallow: /
+
+User-agent: Offline Explorer
+Disallow: /
+
 Sitemap: https://www.likhitfa.online/sitemap.xml

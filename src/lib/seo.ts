@@ -41,7 +41,7 @@ export function seo({
     { title: fullTitle },
     { name: "description", content: description },
     { name: "keywords", content: keywords.join(", ") },
-    { name: "robots", content: noindex ? "noindex,nofollow" : "index,follow" },
+    { name: "robots", content: noindex ? "noindex,nofollow" : "index,follow,noarchive" },
     { property: "og:site_name", content: SITE_NAME },
     { property: "og:locale", content: "th_TH" },
     { property: "og:type", content: type },
