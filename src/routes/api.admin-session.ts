@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
-import { getAdminEmail } from "@/lib/supabase-rest";
+import { getAdminEmail, isAdminEmail } from "@/lib/supabase-rest";
 
 type SupabaseUser = {
   email?: string;
@@ -79,7 +79,7 @@ async function verifySupabaseAdmin(url: string, serviceKey: string, accessToken:
   if (!response.ok) throw new Error("session แอดมินไม่ถูกต้องหรือหมดอายุ");
 
   const user = (await response.json().catch(() => ({}))) as SupabaseUser;
-  if (user.email?.toLowerCase() !== getAdminEmail() || userRole(user) !== "Admin") {
+  if (!isAdminEmail(user.email) || userRole(user) !== "Admin") {
     throw new Error("บัญชีนี้ไม่มีสิทธิ์แอดมิน");
   }
 

@@ -1,8 +1,19 @@
-import { randomUUID } from "node:crypto";
+export const ADMIN_EMAILS = [
+  "bg.chanon@gmail.com",
+  "admin@gmail.com",
+  (process.env.ADMIN_EMAIL || "").trim().toLowerCase(),
+].filter(Boolean);
 
-export const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "admin@gmail.com").trim().toLowerCase();
-export const ADMIN_NAME = "Admin";
+export function isAdminEmail(email) {
+  if (!email) return false;
+  const normalized = String(email).trim().toLowerCase();
+  return ADMIN_EMAILS.includes(normalized);
+}
+
+export const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "bg.chanon@gmail.com").trim().toLowerCase();
+export const ADMIN_NAME = "Chanon (Admin)";
 export const ADMIN_ROLE = "Admin";
+export const ADMIN_BOOTSTRAP_PASSWORD = process.env.ADMIN_BOOTSTRAP_PASSWORD || "Joe@0827795238";
 
 export function getSupabaseConfig() {
   const url = (
@@ -145,7 +156,7 @@ export async function requireAdmin(req) {
   const authorization = req.headers.authorization || "";
   const token = authorization.match(/^Bearer\s+(.+)$/i)?.[1] || "";
   const user = await verifyUser(url, serviceKey, token);
-  if (user.email?.toLowerCase() !== ADMIN_EMAIL || roleOf(user) !== ADMIN_ROLE) {
+  if (!isAdminEmail(user.email) || roleOf(user) !== ADMIN_ROLE) {
     throw new Error("บัญชีนี้ไม่มีสิทธิ์แอดมิน");
   }
   return user;

@@ -28,6 +28,11 @@ type U = {
 const roleFilters = ["ทั้งหมด", "Admin", "User"] as const;
 type RoleFilter = (typeof roleFilters)[number];
 const ADMIN_SESSION_KEY = "likhitfa-admin-session-v2";
+const PRIMARY_ADMIN_EMAILS = ["bg.chanon@gmail.com", "admin@gmail.com"];
+
+function isPrimaryAdmin(email?: string) {
+  return !email || PRIMARY_ADMIN_EMAILS.includes(email.trim().toLowerCase());
+}
 
 function authHeaders(): Record<string, string> {
   try {
@@ -129,7 +134,7 @@ function AdminUsers() {
   };
 
   const deleteUser = async (user: U) => {
-    if (user.email === "admin@gmail.com") {
+    if (isPrimaryAdmin(user.email)) {
       notify("ไม่สามารถลบบัญชีแอดมินหลักได้");
       return;
     }
@@ -273,7 +278,7 @@ function AdminUsers() {
                     </button>
                     <button
                       onClick={() => void deleteUser(u)}
-                      disabled={!!savingId || u.email === "admin@gmail.com"}
+                      disabled={!!savingId || isPrimaryAdmin(u.email)}
                       className="rounded-md border border-rose-400/30 px-2 py-1 text-xs text-rose-300 hover:bg-rose-400/10 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       {savingId === u.id ? "กำลังลบ..." : "ลบ"}
@@ -434,7 +439,7 @@ function UserEditor({
   const [name, setName] = useState(user.name);
   const [role, setRole] = useState<Role>(user.role);
   const [status, setStatus] = useState<UserStatus>(user.status);
-  const isPrimaryAdmin = user.email === "admin@gmail.com";
+  const isPrimaryAdminAccount = isPrimaryAdmin(user.email);
 
   return (
     <div
@@ -469,7 +474,7 @@ function UserEditor({
             <select
               className="input-styled"
               value={role}
-              disabled={isPrimaryAdmin}
+              disabled={isPrimaryAdminAccount}
               onChange={(event) => setRole(event.target.value as Role)}
             >
               <option>Admin</option>
@@ -478,14 +483,14 @@ function UserEditor({
             <select
               className="input-styled"
               value={status}
-              disabled={isPrimaryAdmin}
+              disabled={isPrimaryAdminAccount}
               onChange={(event) => setStatus(event.target.value as UserStatus)}
             >
               <option>Active</option>
               <option>Suspended</option>
             </select>
           </div>
-          {isPrimaryAdmin ? (
+          {isPrimaryAdminAccount ? (
             <div className="rounded-xl border border-gold/15 bg-gold/5 px-3 py-2 text-xs text-gold/80">
               บัญชีแอดมินหลักแก้ไขชื่อได้ แต่ไม่สามารถลดสิทธิ์หรือปิดบัญชีได้
             </div>

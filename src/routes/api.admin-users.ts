@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
-import { getAdminEmail } from "@/lib/supabase-rest";
+import { getAdminEmail, isAdminEmail } from "@/lib/supabase-rest";
 
 type SupabaseUser = {
   id?: string;
@@ -97,7 +97,7 @@ async function requireAdmin(url: string, serviceKey: string, accessToken: string
 
   const user = (await response.json().catch(() => ({}))) as SupabaseUser;
   const role = userRole(user);
-  if (user.email?.toLowerCase() !== getAdminEmail() || role !== "Admin") {
+  if (!isAdminEmail(user.email) || role !== "Admin") {
     throw new Error("บัญชีนี้ไม่มีสิทธิ์แอดมิน");
   }
 }
@@ -151,7 +151,7 @@ async function createUser(url: string, serviceKey: string, payload: Record<strin
 
   if (!email || !email.includes("@")) throw new Error("กรุณากรอกอีเมลให้ถูกต้อง");
   if (!password || password.length < 8) throw new Error("รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร");
-  if (email === getAdminEmail()) throw new Error("บัญชีแอดมินหลักมีอยู่แล้ว");
+  if (isAdminEmail(email)) throw new Error("บัญชีแอดมินหลักมีอยู่แล้ว");
 
   const existing = await findAuthUser(url, serviceKey, email);
   if (existing) throw new Error("อีเมลนี้มีบัญชีอยู่แล้ว");

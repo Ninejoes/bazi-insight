@@ -192,7 +192,7 @@ function AdminLayout() {
               <div className="hidden text-right md:block">
                 <div className="text-sm text-foreground">{session?.name || "Admin"}</div>
                 <div className="text-[11px] text-muted-foreground">
-                  {session?.email || "admin@gmail.com"}
+                  {session?.email || "bg.chanon@gmail.com"}
                 </div>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-gold font-bold text-primary-foreground">
