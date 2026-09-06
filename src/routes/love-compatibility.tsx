@@ -10,6 +10,17 @@ import {
 import { ShareStoryModal, type ShareCardData } from "@/components/share-story-modal";
 import { readStoredUserSession } from "@/lib/user-session";
 import { useState, useMemo } from "react";
+import {
+  HeartHandshake,
+  User,
+  Heart,
+  Share2,
+  Sparkles,
+  Check,
+  AlertTriangle,
+  Gem,
+  MapPin,
+} from "lucide-react";
 
 export const Route = createFileRoute("/love-compatibility")({
   head: () =>
@@ -78,7 +89,8 @@ function LoveCompatibilityPage() {
         {/* Hero Header */}
         <section className="text-center">
           <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-rose-500/30 bg-rose-500/10 px-4 py-1.5 text-xs tracking-widest text-rose-400">
-            <span>💞 LOVE & RELATIONSHIP COMPATIBILITY</span>
+            <HeartHandshake className="h-3.5 w-3.5" />
+            <span>LOVE & RELATIONSHIP COMPATIBILITY</span>
           </div>
           <h1 className="font-display text-3xl font-bold tracking-tight text-foreground md:text-5xl">
             ดูดวง<span className="text-gradient-gold">สมพงษ์เนื้อคู่</span>
@@ -94,7 +106,9 @@ function LoveCompatibilityPage() {
           {/* Person 1 Box */}
           <div className="rounded-3xl border border-gold/30 bg-card/60 p-6 backdrop-blur-md shadow-elegant">
             <div className="flex items-center gap-2.5 mb-4 border-b border-gold/15 pb-3">
-              <span className="text-2xl">👤</span>
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gold/15 text-gold">
+                <User className="h-4 w-4" />
+              </span>
               <div>
                 <h3 className="font-display text-base font-bold text-foreground">ฝ่ายที่ 1 (ตัวคุณ)</h3>
                 <p className="text-xs text-muted-foreground">กรอกข้อมูลวันเกิดของคุณ</p>
@@ -131,7 +145,9 @@ function LoveCompatibilityPage() {
           {/* Person 2 Box */}
           <div className="rounded-3xl border border-rose-500/30 bg-card/60 p-6 backdrop-blur-md shadow-elegant">
             <div className="flex items-center gap-2.5 mb-4 border-b border-rose-500/15 pb-3">
-              <span className="text-2xl">💖</span>
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-500/15 text-rose-400">
+                <Heart className="h-4 w-4" />
+              </span>
               <div>
                 <h3 className="font-display text-base font-bold text-foreground">ฝ่ายที่ 2 (คนรัก / คนที่ชอบ)</h3>
                 <p className="text-xs text-muted-foreground">กรอกข้อมูลวันเกิดของคนรัก</p>
@@ -210,7 +226,8 @@ function LoveCompatibilityPage() {
               onClick={() => setShareModalOpen(true)}
               className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 px-6 py-2.5 text-sm font-semibold text-stone-950 shadow-lg transition hover:opacity-95"
             >
-              <span>💌 บันทึกการ์ดความรัก Story (9:16)</span>
+              <Share2 className="h-4 w-4" />
+              <span>บันทึกการ์ดความรัก Story (9:16)</span>
             </button>
           </div>
         </section>
@@ -246,12 +263,14 @@ function LoveCompatibilityPage() {
         <section className="mx-auto mt-10 max-w-4xl grid gap-6 md:grid-cols-3">
           <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5">
             <h4 className="flex items-center gap-2 font-display text-sm font-bold text-emerald-400 mb-3">
-              <span>🌱</span> จุดแข็งของความสัมพันธ์
+              <Sparkles className="h-4 w-4" />
+              <span>จุดแข็งของความสัมพันธ์</span>
             </h4>
             <ul className="space-y-2 text-xs text-muted-foreground">
               {result.strengths.map((item, i) => (
                 <li key={i} className="flex items-start gap-1.5">
-                  <span className="text-emerald-400">✓</span> {item}
+                  <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                  <span>{item}</span>
                 </li>
               ))}
             </ul>
@@ -259,12 +278,14 @@ function LoveCompatibilityPage() {
 
           <div className="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-5">
             <h4 className="flex items-center gap-2 font-display text-sm font-bold text-rose-400 mb-3">
-              <span>⚠️</span> ข้อควรระวังในการครองคู่
+              <AlertTriangle className="h-4 w-4" />
+              <span>ข้อควรระวังในการครองคู่</span>
             </h4>
             <ul className="space-y-2 text-xs text-muted-foreground">
               {result.cautions.map((item, i) => (
                 <li key={i} className="flex items-start gap-1.5">
-                  <span className="text-rose-400">•</span> {item}
+                  <span className="text-rose-400">•</span>
+                  <span>{item}</span>
                 </li>
               ))}
             </ul>
@@ -272,12 +293,14 @@ function LoveCompatibilityPage() {
 
           <div className="rounded-2xl border border-gold/20 bg-gold/5 p-5">
             <h4 className="flex items-center gap-2 font-display text-sm font-bold text-gold mb-3">
-              <span>💎</span> เคล็ดลับเสริมดวงคู่ครอง
+              <Gem className="h-4 w-4" />
+              <span>เคล็ดลับเสริมดวงคู่ครอง</span>
             </h4>
             <ul className="space-y-2 text-xs text-muted-foreground">
               {result.advices.map((item, i) => (
                 <li key={i} className="flex items-start gap-1.5">
-                  <span className="text-gold">✦</span> {item}
+                  <span className="text-gold">✦</span>
+                  <span>{item}</span>
                 </li>
               ))}
             </ul>
@@ -287,7 +310,9 @@ function LoveCompatibilityPage() {
         {/* Recommended Shrines for Couples */}
         <section className="mx-auto mt-12 max-w-4xl rounded-3xl border border-gold/20 bg-card/40 p-6 md:p-8 backdrop-blur-md">
           <div className="flex items-center gap-2.5 mb-6">
-            <span className="text-2xl">⛩️</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gold/15 text-gold">
+              <MapPin className="h-4 w-4" />
+            </span>
             <div>
               <h3 className="font-display text-lg font-bold text-foreground">สถานที่ขอพรความรักคู่กัน</h3>
               <p className="text-xs text-muted-foreground">เสริมสิริมงคลให้ชีวิตคู่ราบรื่น ร่มเย็น และรักกันยืนยาว</p>

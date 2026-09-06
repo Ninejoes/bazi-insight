@@ -9,7 +9,17 @@ import {
   type DayLuckyColors,
 } from "@/lib/lucky-colors-data";
 import { ShareStoryModal, type ShareCardData } from "@/components/share-story-modal";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import {
+  Coins,
+  Briefcase,
+  Heart,
+  Crown,
+  AlertTriangle,
+  Lightbulb,
+  Gem,
+  Share2,
+} from "lucide-react";
 
 export const Route = createFileRoute("/lucky-colors")({
   head: () =>
@@ -23,9 +33,9 @@ export const Route = createFileRoute("/lucky-colors")({
         "สีเสื้อมงคล",
         "สีเสื้อมงคลวันนี้",
         "สีมงคลประจำวัน",
-        "ตารางสีเสื้อมงคล 2569",
-        "สีนำโชค",
+        "ตารางสีเสื้อมงคล",
         "สีกาลกิณี",
+        "สีนำโชค",
       ],
     }),
   component: LuckyColorsPage,
@@ -44,11 +54,11 @@ function LuckyColorsPage() {
     title: `สีมงคล ${current.dayName}`,
     subtitle: `พลังแห่งดาว${current.planet} · ${current.element}`,
     highlights: [
-      { label: "💰 การเงินโชคลาภ", value: current.categories.wealth.colors.map((c) => c.name).join(", "), color: "#34d399" },
-      { label: "💼 การงานก้าวหน้า", value: current.categories.work.colors.map((c) => c.name).join(", "), color: "#38bdf8" },
-      { label: "💖 เสน่ห์ความรัก", value: current.categories.love.colors.map((c) => c.name).join(", "), color: "#f472b6" },
-      { label: "👑 อำนาจบารมี", value: current.categories.power.colors.map((c) => c.name).join(", "), color: "#fbbf24" },
-      { label: "❌ สีกาลกิณี (ห้ามใส่)", value: current.categories.inauspicious.colors.map((c) => c.name).join(", "), color: "#ef4444" },
+      { label: "การเงินโชคลาภ", value: current.categories.wealth.colors.map((c) => c.name).join(", "), color: "#34d399" },
+      { label: "การงานก้าวหน้า", value: current.categories.work.colors.map((c) => c.name).join(", "), color: "#38bdf8" },
+      { label: "เสน่ห์ความรัก", value: current.categories.love.colors.map((c) => c.name).join(", "), color: "#f472b6" },
+      { label: "อำนาจบารมี", value: current.categories.power.colors.map((c) => c.name).join(", "), color: "#fbbf24" },
+      { label: "สีกาลกิณี (ห้ามใส่)", value: current.categories.inauspicious.colors.map((c) => c.name).join(", "), color: "#ef4444" },
     ],
     quote: current.dressingTip,
     footerTag: "เช็คสีเสื้อมงคลทุกวันได้ที่ www.likhitfa.online",
@@ -124,7 +134,8 @@ function LuckyColorsPage() {
               onClick={() => setIsShareOpen(true)}
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-5 py-2.5 text-xs font-semibold text-gold transition hover:bg-gold/20"
             >
-              <span>🖼️ แชร์ลง Story / LINE</span>
+              <Share2 className="h-4 w-4" />
+              <span>แชร์ลง Story / LINE</span>
             </button>
           </div>
 
@@ -134,7 +145,7 @@ function LuckyColorsPage() {
             <ColorCard
               title="โชคลาภ เงินทอง (ทรัพย์สมบัติ)"
               badge="WEALTH"
-              icon="💰"
+              icon={<Coins className="h-6 w-6 text-emerald-400" />}
               colors={current.categories.wealth.colors}
               description={current.categories.wealth.description}
               borderHighlight="border-emerald-500/30 hover:border-emerald-500/60"
@@ -144,7 +155,7 @@ function LuckyColorsPage() {
             <ColorCard
               title="การงาน การเจรจา (ผู้ใหญ่เอ็นดู)"
               badge="CAREER"
-              icon="💼"
+              icon={<Briefcase className="h-6 w-6 text-sky-400" />}
               colors={current.categories.work.colors}
               description={current.categories.work.description}
               borderHighlight="border-sky-500/30 hover:border-sky-500/60"
@@ -154,7 +165,7 @@ function LuckyColorsPage() {
             <ColorCard
               title="ความรัก เสน่ห์เมตตา (คนรักเอาใจ)"
               badge="LOVE"
-              icon="💖"
+              icon={<Heart className="h-6 w-6 text-pink-400" />}
               colors={current.categories.love.colors}
               description={current.categories.love.description}
               borderHighlight="border-pink-500/30 hover:border-pink-500/60"
@@ -164,7 +175,7 @@ function LuckyColorsPage() {
             <ColorCard
               title="อำนาจบารมี เมตตามหานิยม (คนเกรงใจ)"
               badge="POWER"
-              icon="👑"
+              icon={<Crown className="h-6 w-6 text-amber-400" />}
               colors={current.categories.power.colors}
               description={current.categories.power.description}
               borderHighlight="border-amber-500/30 hover:border-amber-500/60"
@@ -174,7 +185,7 @@ function LuckyColorsPage() {
           {/* สีกาลกิณี ต้องห้าม */}
           <div className="mt-6 rounded-3xl border border-rose-500/30 bg-rose-950/15 p-6 md:p-8">
             <div className="flex items-center gap-2.5 text-rose-400">
-              <span className="text-xl">⚠️</span>
+              <AlertTriangle className="h-5 w-5 shrink-0" />
               <h3 className="font-display text-xl">สีกาลกิณี ประจำ{current.dayName} (ห้ามใส่เด็ดขาด)</h3>
             </div>
             <p className="mt-2 text-xs text-rose-300/80">
@@ -200,7 +211,10 @@ function LuckyColorsPage() {
           <div className="mt-6 grid gap-5 md:grid-cols-2">
             <div className="glass-strong rounded-3xl p-6">
               <div className="text-[11px] uppercase tracking-wider text-gold/80">STYLE TIPS</div>
-              <h4 className="mt-1 font-display text-lg text-foreground">💡 เคล็ดลับการแต่งกาย</h4>
+              <h4 className="flex items-center gap-2 mt-1 font-display text-lg text-foreground">
+                <Lightbulb className="h-5 w-5 text-gold" />
+                <span>เคล็ดลับการแต่งกาย</span>
+              </h4>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                 {current.dressingTip}
               </p>
@@ -208,7 +222,10 @@ function LuckyColorsPage() {
 
             <div className="glass-strong rounded-3xl p-6">
               <div className="text-[11px] uppercase tracking-wider text-gold/80">GEMSTONES & ACCESSORIES</div>
-              <h4 className="mt-1 font-display text-lg text-foreground">💎 อัญมณีและเครื่องประดับมงคล</h4>
+              <h4 className="flex items-center gap-2 mt-1 font-display text-lg text-foreground">
+                <Gem className="h-5 w-5 text-gold" />
+                <span>อัญมณีและเครื่องประดับมงคล</span>
+              </h4>
               <div className="mt-3 space-y-2">
                 <div className="text-sm text-foreground">
                   <span className="text-muted-foreground">อัญมณี: </span>
@@ -246,7 +263,7 @@ function ColorCard({
 }: {
   title: string;
   badge: string;
-  icon: string;
+  icon: ReactNode;
   colors: { name: string; hex: string }[];
   description: string;
   borderHighlight: string;

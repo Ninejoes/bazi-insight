@@ -6,6 +6,7 @@ import { calculateLifeGraph, type LifeGraphResult, type LifeGraphHouse } from "@
 import { ShareStoryModal, type ShareCardData } from "@/components/share-story-modal";
 import { readStoredUserSession } from "@/lib/user-session";
 import { useState, useMemo } from "react";
+import { TrendingUp, Share2, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/life-graph")({
   head: () =>
@@ -67,7 +68,8 @@ function LifeGraphPage() {
         {/* Header Hero */}
         <section className="text-center">
           <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-4 py-1.5 text-xs tracking-widest text-gold">
-            <span>📈 THAI LIFE GRAPH ANALYSIS</span>
+            <TrendingUp className="h-3.5 w-3.5" />
+            <span>THAI LIFE GRAPH ANALYSIS</span>
           </div>
           <h1 className="font-display text-3xl font-bold tracking-tight text-foreground md:text-5xl">
             ดูดวง<span className="text-gradient-gold">กราฟชีวิต 12 เรือน</span>
@@ -94,7 +96,8 @@ function LifeGraphPage() {
               onClick={() => setShareModalOpen(true)}
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-gold px-5 py-2.5 text-sm font-semibold text-stone-950 shadow-gold transition hover:opacity-90"
             >
-              <span>📲 แชร์การ์ด Story</span>
+              <Share2 className="h-4 w-4" />
+              <span>แชร์การ์ด Story</span>
             </button>
           </div>
           <div className="mt-3 flex flex-wrap items-center justify-between text-xs text-muted-foreground">
@@ -107,7 +110,9 @@ function LifeGraphPage() {
         {/* Overall Summary Card */}
         <section className="mx-auto mt-8 max-w-4xl rounded-2xl border border-gold/20 bg-gold/5 p-6 backdrop-blur-md">
           <div className="flex items-start gap-3">
-            <span className="text-2xl">🔮</span>
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-gold">
+              <Sparkles className="h-4 w-4" />
+            </span>
             <div>
               <h2 className="font-display text-lg font-semibold text-gold">ภาพรวมดวงชะตากราฟชีวิต</h2>
               <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{result.overallSummary}</p>

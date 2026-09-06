@@ -9,6 +9,7 @@ import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { adminAuthHeaders } from "@/lib/admin-auth";
 import { useRef, useState, useEffect } from "react";
 import type { Article } from "@/lib/articles";
+import { Sparkles, Loader2, X, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/admin/articles")({
   head: () =>
@@ -137,7 +138,7 @@ function AdminArticles() {
             ? "อัปเดตบทความสำเร็จ"
             : "มีบทความรอบนี้อยู่แล้ว (ข้ามการสร้างเพื่อไม่ให้ซ้ำซ้อน)";
       const modeText =
-        data.result.mode === "gemini" ? "✨ ผ่าน AI Gemini ฟรี" : "🔮 ผ่านระบบคำนวณสถิติ/โหราศาสตร์ในตัว";
+        data.result.mode === "gemini" ? "ผ่าน AI Gemini ฟรี" : "ผ่านระบบคำนวณสถิติ/โหราศาสตร์ในตัว";
       const msg = `${actionText} (${data.result.title}) [${modeText}]`;
       setNotice(msg);
       setShowAutoModal(false);
@@ -162,14 +163,16 @@ function AdminArticles() {
             onClick={() => setShowAutoModal(true)}
             className="shrink-0 inline-flex items-center gap-1.5 rounded-xl border border-gold/40 bg-gold/10 px-4 py-2.5 text-sm font-semibold text-gold transition-colors hover:bg-gold/20"
           >
-            <span>✨</span> เขียนบทความเลขเด็ด AI
+            <Sparkles className="h-4 w-4" />
+            <span>เขียนบทความเลขเด็ด AI</span>
           </button>
           <button
             type="button"
             onClick={() => setCreating(true)}
-            className="shrink-0 rounded-xl bg-gradient-gold px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-gold"
+            className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-gradient-gold px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-gold"
           >
-            + เพิ่มบทความ
+            <Plus className="h-4 w-4" />
+            <span>เพิ่มบทความ</span>
           </button>
         </div>
       </div>
@@ -179,14 +182,16 @@ function AdminArticles() {
           <div className="glass-strong w-full max-w-lg rounded-3xl border border-gold/30 p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="font-display text-xl text-foreground flex items-center gap-2">
-                <span>✨</span> สร้างบทความเลขเด็ดอัตโนมัติ (AI)
+                <Sparkles className="h-5 w-5 text-gold" />
+                <span>สร้างบทความเลขเด็ดอัตโนมัติ (AI)</span>
               </h2>
               <button
                 type="button"
                 onClick={() => setShowAutoModal(false)}
-                className="text-muted-foreground hover:text-foreground text-sm"
+                className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground text-sm"
               >
-                ✕ ปิด
+                <X className="h-4 w-4" />
+                <span>ปิด</span>
               </button>
             </div>
 
@@ -254,11 +259,13 @@ function AdminArticles() {
               >
                 {autoGenerating ? (
                   <>
-                    <span className="inline-block animate-spin">⏳</span> กำลังสร้างบทความ...
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>กำลังสร้างบทความ...</span>
                   </>
                 ) : (
                   <>
-                    <span>✨</span> เริ่มสร้างบทความทันที
+                    <Sparkles className="h-4 w-4" />
+                    <span>เริ่มสร้างบทความทันที</span>
                   </>
                 )}
               </button>

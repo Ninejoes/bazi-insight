@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { BrandMark } from "./site-header";
+import { Download, X, Check } from "lucide-react";
 
 export interface ShareCardData {
   category: string; // e.g. "สีเสื้อมงคลประจำวัน", "คำทำนายฝัน", "ผลดูดวงปาจื้อ", "ผลวิเคราะห์เบอร์มงคล"
@@ -222,7 +223,7 @@ export function ShareStoryModal({ isOpen, onClose, data }: ShareStoryModalProps)
           className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-gold/20 bg-background/60 text-muted-foreground transition hover:border-gold hover:text-gold"
           aria-label="Close modal"
         >
-          ✕
+          <X className="h-4 w-4" />
         </button>
 
         <h3 className="font-display text-xl text-foreground">
@@ -287,15 +288,23 @@ export function ShareStoryModal({ isOpen, onClose, data }: ShareStoryModalProps)
           <button
             onClick={downloadCardImage}
             disabled={downloading}
-            className="flex-1 rounded-xl bg-gradient-gold py-3 text-xs font-semibold text-primary-foreground shadow-gold transition hover:scale-[1.02] disabled:opacity-50"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-gold py-3 text-xs font-semibold text-primary-foreground shadow-gold transition hover:scale-[1.02] disabled:opacity-50"
           >
-            {downloading ? "กำลังสร้างภาพ..." : "📥 บันทึกภาพลงเครื่อง (Story 9:16)"}
+            <Download className="h-4 w-4" />
+            <span>{downloading ? "กำลังสร้างภาพ..." : "บันทึกภาพลงเครื่อง (Story 9:16)"}</span>
           </button>
           <button
             onClick={shareNative}
-            className="rounded-xl border border-gold/30 bg-card/60 px-4 py-3 text-xs text-foreground transition hover:border-gold hover:text-gold"
+            className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-gold/30 bg-card/60 px-4 py-3 text-xs text-foreground transition hover:border-gold hover:text-gold"
           >
-            {copied ? "✓ คัดลอกแล้ว" : "แชร์ / ลิงก์"}
+            {copied ? (
+              <>
+                <Check className="h-3.5 w-3.5 text-emerald-400" />
+                <span>คัดลอกแล้ว</span>
+              </>
+            ) : (
+              <span>แชร์ / ลิงก์</span>
+            )}
           </button>
         </div>
       </div>

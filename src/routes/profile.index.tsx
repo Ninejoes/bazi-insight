@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { seo } from "@/lib/seo";
+import { Sparkles, Layers, Moon } from "lucide-react";
 
 export const Route = createFileRoute("/profile/")({
   head: () =>
@@ -20,9 +21,9 @@ const stats = [
 ];
 
 const shortcuts = [
-  { to: "/bazi", label: "ดูดวงปาจื้อ", icon: "命" },
-  { to: "/tarot", label: "เปิดไพ่ยิปซี", icon: "塔" },
-  { to: "/dream", label: "ทำนายฝัน", icon: "梦" },
+  { to: "/bazi", label: "ดูดวงปาจื้อ", icon: Sparkles },
+  { to: "/tarot", label: "เปิดไพ่ยิปซี", icon: Layers },
+  { to: "/dream", label: "ทำนายฝัน", icon: Moon },
 ];
 
 function ProfileOverview() {
@@ -46,8 +47,8 @@ function ProfileOverview() {
               to={s.to}
               className="ornate-border flex items-center gap-3 rounded-2xl bg-card/40 p-4 hover:bg-gold/10 transition"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-gold font-cn text-2xl text-primary-foreground">
-                {s.icon}
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-gold text-primary-foreground shadow-gold">
+                <s.icon className="h-6 w-6" />
               </div>
               <div className="font-medium text-foreground">{s.label}</div>
             </Link>

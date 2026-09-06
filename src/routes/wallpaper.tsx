@@ -2,7 +2,25 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo, siteUrl } from "@/lib/seo";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  Sparkles,
+  Coins,
+  Droplets,
+  Leaf,
+  Flame,
+  Mountain,
+  Shield,
+  Gem,
+  Sun,
+  Fish,
+  Star,
+  Compass,
+  Maximize2,
+  Download,
+  X,
+  Lightbulb,
+} from "lucide-react";
 import {
   FALLBACK_COLLECTIONS,
   fetchNineJoeCollections,
@@ -42,7 +60,7 @@ interface ElementTheme {
   nameCn: string;
   colors: [string, string, string]; // Top, Mid, Bottom gradient
   accent: string;
-  symbol: string;
+  icon: ReactNode;
   blessingCn: string;
   blessingTh: string;
   bestFor: string;
@@ -55,7 +73,7 @@ const ELEMENT_THEMES: ElementTheme[] = [
     nameCn: "金",
     colors: ["#1e1b18", "#292524", "#0c0a09"],
     accent: "#fbbf24",
-    symbol: "🪙",
+    icon: <Coins className="h-5 w-5 text-amber-400" />,
     blessingCn: "大吉大利",
     blessingTh: "มหาโชค มหาลาภ บารมีสูงส่ง",
     bestFor: "เสริมอำนาจ ความเด็ดขาด การเงินก้อนใหญ่ ข้าราชการ ผู้บริหาร",
@@ -66,7 +84,7 @@ const ELEMENT_THEMES: ElementTheme[] = [
     nameCn: "水",
     colors: ["#082f49", "#0f172a", "#020617"],
     accent: "#38bdf8",
-    symbol: "🌊",
+    icon: <Droplets className="h-5 w-5 text-sky-400" />,
     blessingCn: "招财进宝",
     blessingTh: "เงินทองไหลมาเทมา ค้าขายคล่องตัว",
     bestFor: "เสริมการค้าขาย ไหวพริบ โชคลาภลื่นไหล งานออนไลน์และต่างประเทศ",
@@ -77,7 +95,7 @@ const ELEMENT_THEMES: ElementTheme[] = [
     nameCn: "木",
     colors: ["#064e3b", "#022c22", "#020617"],
     accent: "#34d399",
-    symbol: "🌿",
+    icon: <Leaf className="h-5 w-5 text-emerald-400" />,
     blessingCn: "事业腾飞",
     blessingTh: "การงานก้าวหน้า เติบโตไร้ขีดจำกัด",
     bestFor: "เสริมการเรียน การเติบโตในสายอาชีพ สุขภาพแข็งแรง ความคิดสร้างสรรค์",
@@ -88,7 +106,7 @@ const ELEMENT_THEMES: ElementTheme[] = [
     nameCn: "火",
     colors: ["#450a0a", "#1c1917", "#0c0a09"],
     accent: "#f87171",
-    symbol: "🔥",
+    icon: <Flame className="h-5 w-5 text-rose-400" />,
     blessingCn: "鸿运当头",
     blessingTh: "โชคดีเจิดจรัส ชื่อเสียงโด่งดัง",
     bestFor: "เสริมเสน่ห์ ความรัก ชื่อเสียง ความกระตือรือร้น คนทำงานสายบันเทิง",
@@ -99,7 +117,7 @@ const ELEMENT_THEMES: ElementTheme[] = [
     nameCn: "土",
     colors: ["#292524", "#1c1917", "#0c0a09"],
     accent: "#d97706",
-    symbol: "⛰️",
+    icon: <Mountain className="h-5 w-5 text-amber-600" />,
     blessingCn: "平安富贵",
     blessingTh: "แคล้วคลาดปลอดภัย ร่ำรวยมั่นคง",
     bestFor: "เสริมความมั่นคง อสังหาริมทรัพย์ ความปลอดภัย และความอดทน",
@@ -115,14 +133,14 @@ type FilterKey =
   | "koi"
   | "spiritual";
 
-const FILTER_BUTTONS: { key: FilterKey; label: string; icon: string }[] = [
-  { key: "all", label: "ทั้งหมด", icon: "✨" },
-  { key: "caishen", label: "ไฉ่ซิงเอี้ย", icon: "💰" },
-  { key: "vessavana", label: "ท้าวเวสสุวรรณ", icon: "🛡️" },
-  { key: "lakshmi", label: "พระแม่ลักษมี", icon: "🌸" },
-  { key: "ganesha", label: "พระพิฆเนศ", icon: "🐘" },
-  { key: "koi", label: "ปลาคาร์ฟมงคล", icon: "🐟" },
-  { key: "spiritual", label: "มงคลอื่นๆ", icon: "🌟" },
+const FILTER_BUTTONS: { key: FilterKey; label: string; icon: ReactNode }[] = [
+  { key: "all", label: "ทั้งหมด", icon: <Sparkles className="h-3.5 w-3.5 text-gold" /> },
+  { key: "caishen", label: "ไฉ่ซิงเอี้ย", icon: <Coins className="h-3.5 w-3.5 text-amber-400" /> },
+  { key: "vessavana", label: "ท้าวเวสสุวรรณ", icon: <Shield className="h-3.5 w-3.5 text-rose-400" /> },
+  { key: "lakshmi", label: "พระแม่ลักษมี", icon: <Gem className="h-3.5 w-3.5 text-pink-400" /> },
+  { key: "ganesha", label: "พระพิฆเนศ", icon: <Sun className="h-3.5 w-3.5 text-amber-400" /> },
+  { key: "koi", label: "ปลาคาร์ฟมงคล", icon: <Fish className="h-3.5 w-3.5 text-sky-400" /> },
+  { key: "spiritual", label: "มงคลอื่นๆ", icon: <Star className="h-3.5 w-3.5 text-gold" /> },
 ];
 
 function WallpaperPage() {
@@ -364,7 +382,7 @@ function WallpaperPage() {
                     : "border border-gold/30 bg-card/40 text-muted-foreground hover:border-gold/60 hover:text-foreground"
                 }`}
               >
-                <span>🌟</span>
+                <Sparkles className="h-4 w-4" />
                 <span>คอลเลกชัน Spiritual Art ({allWallpapers.length} ภาพ HD)</span>
               </button>
               <button
@@ -375,7 +393,7 @@ function WallpaperPage() {
                     : "border border-gold/30 bg-card/40 text-muted-foreground hover:border-gold/60 hover:text-foreground"
                 }`}
               >
-                <span>☯️</span>
+                <Compass className="h-4 w-4" />
                 <span>สร้างยันต์ 5 ธาตุปาจื้อ (สลักชื่อเฉพาะบุคคล)</span>
               </button>
             </div>
@@ -465,16 +483,18 @@ function WallpaperPage() {
                         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/60 p-3 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 group-hover:opacity-100">
                           <button
                             onClick={() => setSelectedWallpaper(item)}
-                            className="w-full rounded-xl border border-gold/40 bg-gold/20 py-2 text-center text-[11px] font-semibold text-gold transition hover:bg-gold hover:text-primary-foreground"
+                            className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-gold/40 bg-gold/20 py-2 text-center text-[11px] font-semibold text-gold transition hover:bg-gold hover:text-primary-foreground"
                           >
-                            🔍 ขยายดูภาพ
+                            <Maximize2 className="h-3.5 w-3.5" />
+                            <span>ขยายดูภาพ</span>
                           </button>
                           <button
                             onClick={() => handleDownloadWallpaper(item)}
                             disabled={isDownloading}
-                            className="w-full rounded-xl bg-gradient-gold py-2 text-center text-[11px] font-semibold text-primary-foreground shadow-gold transition hover:scale-105 disabled:opacity-50"
+                            className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-gold py-2 text-center text-[11px] font-semibold text-primary-foreground shadow-gold transition hover:scale-105 disabled:opacity-50"
                           >
-                            {isDownloading ? "กำลังดาวน์โหลด..." : "📥 ดาวน์โหลด HD"}
+                            <Download className="h-3.5 w-3.5" />
+                            <span>{isDownloading ? "กำลังดาวน์โหลด..." : "ดาวน์โหลด HD"}</span>
                           </button>
                           <a
                             href={`https://ninejoe.online/collections/${item.collectionSlug}`}
@@ -548,8 +568,10 @@ function WallpaperPage() {
                             : "border-border/60 bg-card/40 hover:border-gold/40"
                         }`}
                       >
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl">{theme.symbol}</span>
+                        <div className="flex items-center gap-2.5">
+                          <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-gold/25 bg-gold/10">
+                            {theme.icon}
+                          </span>
                           <span className="font-display text-sm font-bold text-foreground">
                             {theme.name}
                           </span>
@@ -583,11 +605,14 @@ function WallpaperPage() {
               <button
                 onClick={handleDownloadCustom}
                 disabled={customDownloading}
-                className="h-14 w-full rounded-2xl bg-gradient-gold text-base font-semibold text-primary-foreground shadow-gold transition hover:scale-[1.02] disabled:opacity-60"
+                className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-gold text-base font-semibold text-primary-foreground shadow-gold transition hover:scale-[1.02] disabled:opacity-60"
               >
-                {customDownloading
-                  ? "กำลังสร้างวอลเปเปอร์ HD..."
-                  : "📥 ดาวน์โหลดวอลเปเปอร์ HD (1080x1920)"}
+                <Download className="h-5 w-5" />
+                <span>
+                  {customDownloading
+                    ? "กำลังสร้างวอลเปเปอร์ HD..."
+                    : "ดาวน์โหลดวอลเปเปอร์ HD (1080x1920)"}
+                </span>
               </button>
             </div>
 
@@ -659,7 +684,7 @@ function WallpaperPage() {
                 onClick={() => setSelectedWallpaper(null)}
                 className="absolute right-4 top-4 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-muted-foreground hover:text-white"
               >
-                ✕
+                <X className="h-4 w-4" />
               </button>
 
               {/* ฝั่งซ้าย: รูปภาพ 9:16 เต็มตา */}
@@ -700,8 +725,11 @@ function WallpaperPage() {
                     </div>
                   )}
 
-                  <div className="mt-6 rounded-xl border border-gold/10 bg-gold/5 p-3 text-[11px] text-gold/80">
-                    💡 <strong>คำแนะนำ:</strong> ภาพนี้มีอัตราส่วน 9:16 ออกแบบมาให้เข้ากับหน้าจอสมาร์ทโฟนทุกรุ่น ดาวน์โหลดแล้วสามารถกดตั้งค่าเป็นภาพพักหน้าจอได้ทันที
+                  <div className="mt-6 flex items-start gap-2 rounded-xl border border-gold/10 bg-gold/5 p-3 text-[11px] text-gold/80">
+                    <Lightbulb className="h-4 w-4 shrink-0 text-gold mt-0.5" />
+                    <div>
+                      <strong>คำแนะนำ:</strong> ภาพนี้มีอัตราส่วน 9:16 ออกแบบมาให้เข้ากับหน้าจอสมาร์ทโฟนทุกรุ่น ดาวน์โหลดแล้วสามารถกดตั้งค่าเป็นภาพพักหน้าจอได้ทันที
+                    </div>
                   </div>
                 </div>
 
@@ -711,7 +739,7 @@ function WallpaperPage() {
                     disabled={downloadingId === selectedWallpaper.id}
                     className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-gold text-sm font-bold text-primary-foreground shadow-gold transition hover:scale-105 disabled:opacity-60"
                   >
-                    <span>📥</span>
+                    <Download className="h-4 w-4" />
                     <span>
                       {downloadingId === selectedWallpaper.id
                         ? "กำลังบันทึกภาพ..."

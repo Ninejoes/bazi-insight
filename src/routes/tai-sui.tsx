@@ -9,6 +9,7 @@ import {
 } from "@/lib/chinese-calendar";
 import { ShareStoryModal, type ShareCardData } from "@/components/share-story-modal";
 import { useState } from "react";
+import { Share2, AlertTriangle, Sparkles, Building2, Scroll } from "lucide-react";
 
 export const Route = createFileRoute("/tai-sui")({
   head: () =>
@@ -56,13 +57,13 @@ function TaiSuiPage() {
     subtitle: `พ.ศ. ${result.birthYearBe} · สถานะ: ${result.clashType}`,
     highlights: [
       {
-        label: "⚡ สถานะปีชง 2569",
+        label: "สถานะปีชง 2569",
         value: result.clashType,
         color: result.severity === "high" ? "#f87171" : result.severity === "medium" ? "#fbbf24" : "#34d399",
       },
-      { label: "⚠️ เรื่องที่ต้องระวัง", value: result.cautionAreas[0] || "ใช้ชีวิตอย่างมีสติ" },
-      { label: "🙏 วิธีแก้เคล็ด", value: result.remedies[0] || "ทำบุญบริจาคทาน" },
-      { label: "🏛️ สถานที่แนะนำ", value: result.recommendedShrines[0]?.name || "วัดมังกรกมลาวาส" },
+      { label: "เรื่องที่ต้องระวัง", value: result.cautionAreas[0] || "ใช้ชีวิตอย่างมีสติ" },
+      { label: "วิธีแก้เคล็ด", value: result.remedies[0] || "ทำบุญบริจาคทาน" },
+      { label: "สถานที่แนะนำ", value: result.recommendedShrines[0]?.name || "วัดมังกรกมลาวาส" },
     ],
     quote: result.prayerText.slice(0, 100),
     footerTag: "ตรวจปีชงและวิธีแก้เคล็ดได้ที่ www.likhitfa.online",
@@ -169,7 +170,8 @@ function TaiSuiPage() {
                 onClick={() => setIsShareOpen(true)}
                 className="inline-flex items-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-5 py-3 text-xs font-semibold text-gold hover:bg-gold/20"
               >
-                <span>🖼️ แชร์การ์ดแก้ชง</span>
+                <Share2 className="h-4 w-4" />
+                <span>แชร์การ์ดแก้ชง</span>
               </button>
             </div>
 
@@ -177,7 +179,8 @@ function TaiSuiPage() {
             <div className="mt-8 grid gap-5 md:grid-cols-2">
               <div className="rounded-2xl border border-rose-500/30 bg-rose-950/15 p-5">
                 <div className="flex items-center gap-2 text-rose-400 font-semibold text-sm">
-                  <span>⚠️</span> เรื่องที่ต้องระมัดระวังเป็นพิเศษ
+                  <AlertTriangle className="h-4 w-4" />
+                  <span>เรื่องที่ต้องระมัดระวังเป็นพิเศษ</span>
                 </div>
                 <ul className="mt-3 space-y-2 text-xs text-rose-200/90 leading-relaxed">
                   {result.cautionAreas.map((c, i) => (
@@ -191,7 +194,8 @@ function TaiSuiPage() {
 
               <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/15 p-5">
                 <div className="flex items-center gap-2 text-emerald-400 font-semibold text-sm">
-                  <span>✨</span> แนวทางเสริมดวง & สะเดาะเคราะห์
+                  <Sparkles className="h-4 w-4" />
+                  <span>แนวทางเสริมดวง & สะเดาะเคราะห์</span>
                 </div>
                 <ul className="mt-3 space-y-2 text-xs text-emerald-200/90 leading-relaxed">
                   {result.remedies.map((r, i) => (
@@ -206,8 +210,9 @@ function TaiSuiPage() {
 
             {/* สถานที่ไหว้แก้ชง */}
             <div className="mt-8">
-              <h3 className="font-display text-xl text-foreground">
-                🏛️ สถานที่ศักดิ์สิทธิ์แนะนำสำหรับไหว้แก้ชง
+              <h3 className="flex items-center gap-2 font-display text-xl text-foreground">
+                <Building2 className="h-5 w-5 text-gold" />
+                <span>สถานที่ศักดิ์สิทธิ์แนะนำสำหรับไหว้แก้ชง</span>
               </h3>
               <div className="mt-4 grid gap-3 md:grid-cols-3">
                 {result.recommendedShrines.map((s, i) => (
@@ -223,7 +228,8 @@ function TaiSuiPage() {
             {/* บทสวดบูชาไท้ส่วยเอี๊ย */}
             <div className="mt-8 rounded-2xl border border-gold/25 bg-gold/5 p-6">
               <div className="flex items-center gap-2 text-amber-200 font-semibold text-sm">
-                <span>🪷</span> บทอธิษฐานจิตและคำสวดฝากดวงชะตากับองค์ไท้ส่วยเอี๊ย
+                <Scroll className="h-4 w-4 text-gold" />
+                <span>บทอธิษฐานจิตและคำสวดฝากดวงชะตากับองค์ไท้ส่วยเอี๊ย</span>
               </div>
               <p className="mt-3 text-sm italic leading-relaxed text-amber-100/90">
                 "{result.prayerText}"

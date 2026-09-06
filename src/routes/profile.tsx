@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo } from "@/lib/seo";
 import { useEffect, useState } from "react";
+import { User, History, Settings } from "lucide-react";
 import {
   clearUserSession,
   readStoredUserSession,
@@ -22,9 +23,9 @@ export const Route = createFileRoute("/profile")({
 });
 
 const tabs = [
-  { to: "/profile", label: "ภาพรวม", icon: "◈" },
-  { to: "/profile/history", label: "ประวัติการดูดวง", icon: "☷" },
-  { to: "/profile/settings", label: "ตั้งค่าและความเป็นส่วนตัว", icon: "⚙" },
+  { to: "/profile", label: "ภาพรวม", icon: User },
+  { to: "/profile/history", label: "ประวัติการดูดวง", icon: History },
+  { to: "/profile/settings", label: "ตั้งค่าและความเป็นส่วนตัว", icon: Settings },
 ] as const;
 
 function ProfileLayout() {
@@ -136,8 +137,8 @@ function ProfileLayout() {
                     : "border border-gold/20 text-muted-foreground hover:text-gold"
                 }`}
               >
-                <span>{t.icon}</span>
-                {t.label}
+                <t.icon className="h-4 w-4 shrink-0" />
+                <span>{t.label}</span>
               </Link>
             );
           })}

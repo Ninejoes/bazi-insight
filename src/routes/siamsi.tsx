@@ -9,7 +9,19 @@ import {
   type SiamsiShrine,
 } from "@/lib/siamsi-data";
 import { ShareStoryModal, type ShareCardData } from "@/components/share-story-modal";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import {
+  Scroll,
+  Share2,
+  Briefcase,
+  Coins,
+  Heart,
+  Activity,
+  Search,
+  Lightbulb,
+  Shield,
+  RefreshCw,
+} from "lucide-react";
 
 export const Route = createFileRoute("/siamsi")({
   head: () =>
@@ -59,10 +71,10 @@ function SiamsiPage() {
         title: `ใบที่ ${fortune.number} · ${fortune.quality}`,
         subtitle: fortune.summary.slice(0, 30),
         highlights: [
-          { label: "💼 การงาน", value: fortune.aspects.career },
-          { label: "💰 การเงิน", value: fortune.aspects.wealth },
-          { label: "💖 ความรัก", value: fortune.aspects.love },
-          { label: "🛡️ สุขภาพ", value: fortune.aspects.health },
+          { label: "การงาน", value: fortune.aspects.career },
+          { label: "การเงิน", value: fortune.aspects.wealth },
+          { label: "ความรัก", value: fortune.aspects.love },
+          { label: "สุขภาพ", value: fortune.aspects.health },
         ],
         quote: fortune.thaiPoem,
         footerTag: "เสี่ยงทายเซียมซีออนไลน์ได้ที่ www.likhitfa.online",
@@ -109,8 +121,16 @@ function SiamsiPage() {
                         : "border-border/60 bg-card/40 hover:border-gold/40"
                     }`}
                   >
-                    <span className="text-2xl">{shrine.icon}</span>
-                    <span className="mt-2 font-display text-base font-bold text-foreground">
+                    <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl border border-gold/30 bg-gold/10">
+                      {shrine.id === "tiger-god" ? (
+                        <Shield className="h-5 w-5 text-gold" />
+                      ) : shrine.id === "luang-phor-sothorn" ? (
+                        <Coins className="h-5 w-5 text-gold" />
+                      ) : (
+                        <Heart className="h-5 w-5 text-rose-400" />
+                      )}
+                    </div>
+                    <span className="mt-1 font-display text-base font-bold text-foreground">
                       {shrine.name}
                     </span>
                     <span className="font-cn text-xs text-gold/70">{shrine.subtitle}</span>
@@ -175,9 +195,10 @@ function SiamsiPage() {
               type="button"
               onClick={handleShake}
               disabled={isShaking}
-              className="h-14 w-full rounded-2xl bg-gradient-gold px-8 text-base font-semibold text-primary-foreground shadow-gold transition hover:scale-[1.02] disabled:opacity-60"
+              className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-gold px-8 text-base font-semibold text-primary-foreground shadow-gold transition hover:scale-[1.02] disabled:opacity-60"
             >
-              {isShaking ? "กำลังเขย่ากระบอกเซียมซี... 🎋" : "🎋 เขย่ากระบอกเซียมซี"}
+              <Scroll className="h-5 w-5" />
+              {isShaking ? "กำลังเขย่ากระบอกเซียมซี..." : "เขย่ากระบอกเซียมซี"}
             </button>
           </div>
         </section>
@@ -200,7 +221,8 @@ function SiamsiPage() {
                   onClick={() => setIsShareOpen(true)}
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-5 py-2.5 text-xs font-semibold text-gold hover:bg-gold/20"
                 >
-                  <span>🖼️ บันทึก / แชร์การ์ดเซียมซี</span>
+                  <Share2 className="h-4 w-4" />
+                  <span>บันทึก / แชร์การ์ดเซียมซี</span>
                 </button>
               </div>
 
@@ -221,21 +243,47 @@ function SiamsiPage() {
 
               {/* คำทำนายแยก 5 ด้าน */}
               <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <AspectCard title="การงานและหน้าที่" desc={fortune.aspects.career} icon="💼" />
-                <AspectCard title="โชคลาภเงินทอง" desc={fortune.aspects.wealth} icon="💰" />
-                <AspectCard title="ความรักและความสัมพันธ์" desc={fortune.aspects.love} icon="💖" />
-                <AspectCard title="สุขภาพร่างกาย" desc={fortune.aspects.health} icon="🌿" />
-                <AspectCard title="ของหายและการฟ้องร้อง" desc={fortune.aspects.lostItems} icon="🔍" />
-                <AspectCard title="คำเตือนและข้อคิด" desc={fortune.advice} icon="💡" isHighlight />
+                <AspectCard
+                  title="การงานและหน้าที่"
+                  desc={fortune.aspects.career}
+                  icon={<Briefcase className="h-4 w-4 text-gold" />}
+                />
+                <AspectCard
+                  title="โชคลาภเงินทอง"
+                  desc={fortune.aspects.wealth}
+                  icon={<Coins className="h-4 w-4 text-gold" />}
+                />
+                <AspectCard
+                  title="ความรักและความสัมพันธ์"
+                  desc={fortune.aspects.love}
+                  icon={<Heart className="h-4 w-4 text-rose-400" />}
+                />
+                <AspectCard
+                  title="สุขภาพร่างกาย"
+                  desc={fortune.aspects.health}
+                  icon={<Activity className="h-4 w-4 text-emerald-400" />}
+                />
+                <AspectCard
+                  title="ของหายและการฟ้องร้อง"
+                  desc={fortune.aspects.lostItems}
+                  icon={<Search className="h-4 w-4 text-amber-400" />}
+                />
+                <AspectCard
+                  title="คำเตือนและข้อคิด"
+                  desc={fortune.advice}
+                  icon={<Lightbulb className="h-4 w-4 text-gold" />}
+                  isHighlight
+                />
               </div>
 
               {/* ปุ่มสุ่มใหม่ */}
               <div className="mt-10 text-center">
                 <button
                   onClick={() => setFortune(null)}
-                  className="rounded-full border border-gold/30 px-6 py-2 text-xs text-muted-foreground hover:border-gold hover:text-gold"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-gold/30 px-6 py-2 text-xs text-muted-foreground hover:border-gold hover:text-gold"
                 >
-                  เสี่ยงทายใหม่อีกครั้ง ↺
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  <span>เสี่ยงทายใหม่อีกครั้ง</span>
                 </button>
               </div>
             </div>
@@ -264,7 +312,7 @@ function AspectCard({
 }: {
   title: string;
   desc: string;
-  icon: string;
+  icon: ReactNode;
   isHighlight?: boolean;
 }) {
   return (

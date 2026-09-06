@@ -203,19 +203,19 @@ export function analyzeLoveCompatibility(p1: LovePersonInput, p2: LovePersonInpu
   let levelBadge = "";
   if (finalScore >= 90) {
     levelTitle = "คู่แท้บุพเพสันนิวาส (Soulmate Divine)";
-    levelBadge = "สมพงษ์ระดับมงคลสูงสุด 🌟";
+    levelBadge = "สมพงษ์ระดับมงคลสูงสุด";
   } else if (finalScore >= 80) {
     levelTitle = "คู่สร้างคู่สม (Harmonious Union)";
-    levelBadge = "สมพงษ์ยอดเยี่ยม 💖";
+    levelBadge = "สมพงษ์ยอดเยี่ยม";
   } else if (finalScore >= 70) {
     levelTitle = "คู่มิตรเกื้อกูล (Supportive Partners)";
-    levelBadge = "สมพงษ์ดีมาก ✨";
+    levelBadge = "สมพงษ์ดีมาก";
   } else if (finalScore >= 60) {
     levelTitle = "คู่พัฒนาศีลเสมอกัน (Growth Companions)";
-    levelBadge = "สมพงษ์ปานกลาง 🌿";
+    levelBadge = "สมพงษ์ปานกลาง";
   } else {
     levelTitle = "คู่บุญคู่บารมี (Karmic Learning)";
-    levelBadge = "ต้องอาศัยการปรับจูน 🕊️";
+    levelBadge = "ต้องอาศัยการปรับจูน";
   }
 
   const strengths = [

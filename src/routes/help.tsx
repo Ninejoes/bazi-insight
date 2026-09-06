@@ -5,6 +5,7 @@ import { seo } from "@/lib/seo";
 import { type FAQRecord } from "@/lib/admin-content";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { useEffect, useState } from "react";
+import { Sparkles, Compass, Settings, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/help")({
   head: () =>
@@ -19,10 +20,10 @@ export const Route = createFileRoute("/help")({
 });
 
 const topics = [
-  { icon: "✦", title: "เริ่มต้นใช้งาน", desc: "สมัครสมาชิก เข้าสู่ระบบ และตั้งค่าโปรไฟล์" },
-  { icon: "☷", title: "การดูดวง", desc: "วิธีใช้งานปาจื้อ ไพ่ยิปซี และทำนายฝัน" },
-  { icon: "⚙", title: "บัญชีและการตั้งค่า", desc: "ความปลอดภัย รหัสผ่าน และการแจ้งเตือน" },
-  { icon: "♢", title: "ความเป็นส่วนตัว", desc: "PDPA, การลบข้อมูล และนโยบายความเป็นส่วนตัว" },
+  { icon: Sparkles, title: "เริ่มต้นใช้งาน", desc: "สมัครสมาชิก เข้าสู่ระบบ และตั้งค่าโปรไฟล์" },
+  { icon: Compass, title: "การดูดวง", desc: "วิธีใช้งานปาจื้อ ไพ่ยิปซี และทำนายฝัน" },
+  { icon: Settings, title: "บัญชีและการตั้งค่า", desc: "ความปลอดภัย รหัสผ่าน และการแจ้งเตือน" },
+  { icon: ShieldCheck, title: "ความเป็นส่วนตัว", desc: "PDPA, การลบข้อมูล และนโยบายความเป็นส่วนตัว" },
 ];
 
 function HelpPage() {
@@ -79,7 +80,9 @@ function HelpPage() {
         <section className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {topics.map((t) => (
             <div key={t.title} className="glass-strong rounded-2xl p-5">
-              <div className="text-3xl text-gold">{t.icon}</div>
+              <div className="text-gold mb-2">
+                <t.icon className="h-7 w-7" />
+              </div>
               <div className="mt-2 font-display text-lg text-foreground">{t.title}</div>
               <p className="mt-1 text-xs text-muted-foreground">{t.desc}</p>
             </div>

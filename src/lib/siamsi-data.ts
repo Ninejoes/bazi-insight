@@ -34,7 +34,7 @@ export const SIAMSI_SHRINES: SiamsiShrine[] = [
     subtitle: "玄天上帝 · 虎爷",
     deity: "องค์เจ้าพ่อเสือ และ องค์ตั่วเหล่าเอี๊ย",
     description: "ศักดิ์สิทธิ์เลื่องลือเรื่องอำนาจบารมี ความสำเร็จในหน้าที่การงาน ปัดเป่าอุปสรรคและศัตรูหมู่มาร",
-    icon: "🐅",
+    icon: "虎",
   },
   {
     id: "luang-phor-sothorn",
@@ -42,7 +42,7 @@ export const SIAMSI_SHRINES: SiamsiShrine[] = [
     subtitle: "หลวงพ่อโสธร แปดริ้ว",
     deity: "องค์หลวงพ่อพุทธโสธร",
     description: "เมตตามหานิยม ค้าขายร่ำรวย ขอพรเรื่องโชคลาภ เงินทอง และความแคล้วคลาดปลอดภัย",
-    icon: "🪷",
+    icon: "佛",
   },
   {
     id: "guanyin",
@@ -50,7 +50,7 @@ export const SIAMSI_SHRINES: SiamsiShrine[] = [
     subtitle: "南海观世音菩萨",
     deity: "พระโพธิสัตว์กวนอิม มหาเมตตา",
     description: "มหาเมตตาบารมี ปลดเปลื้องทุกข์โศก คุ้มครองครอบครัว ความรัก และสุขภาพพลานามัย",
-    icon: "🕊️",
+    icon: "慈",
   },
 ];
 

@@ -6,6 +6,19 @@ import { getTodayLuckyColors, type DayLuckyColors } from "@/lib/lucky-colors-dat
 import { tarotCards, type TarotCard } from "@/lib/tarot-cards";
 import { ShareStoryModal, type ShareCardData } from "@/components/share-story-modal";
 import { useState, useMemo } from "react";
+import {
+  Sunrise,
+  Share2,
+  Palette,
+  Briefcase,
+  Coins,
+  Heart,
+  AlertTriangle,
+  Layers,
+  Sparkles,
+  Compass,
+  Hash,
+} from "lucide-react";
 
 export const Route = createFileRoute("/daily-hub")({
   head: () =>
@@ -117,7 +130,8 @@ export function DailyHubPage() {
         {/* Hero Banner */}
         <section className="text-center">
           <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-4 py-1.5 text-xs tracking-widest text-gold">
-            <span>☀️ DAILY HOROSCOPE DASHBOARD</span>
+            <Sunrise className="h-3.5 w-3.5" />
+            <span>DAILY HOROSCOPE DASHBOARD</span>
           </div>
           <h1 className="font-display text-3xl font-bold tracking-tight text-foreground md:text-5xl">
             กระดาน<span className="text-gradient-gold">เช็คดวงเช้านี้</span>
@@ -134,7 +148,8 @@ export function DailyHubPage() {
               onClick={() => setShareModalOpen(true)}
               className="inline-flex items-center gap-2 rounded-xl bg-gradient-gold px-5 py-2.5 text-xs font-semibold text-stone-950 shadow-gold transition hover:opacity-90"
             >
-              <span>📲 บันทึกการ์ดดวงเช้านี้ Story (9:16)</span>
+              <Share2 className="h-4 w-4" />
+              <span>บันทึกการ์ดดวงเช้านี้ Story (9:16)</span>
             </button>
           </div>
         </section>
@@ -143,7 +158,9 @@ export function DailyHubPage() {
         <section className="mx-auto mt-10 max-w-5xl rounded-3xl border border-gold/30 bg-card/60 p-6 md:p-8 backdrop-blur-md shadow-elegant">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-gold/15 pb-4 mb-6">
             <div className="flex items-center gap-3">
-              <span className="text-3xl">🎨</span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gold/15 text-gold">
+                <Palette className="h-5 w-5" />
+              </span>
               <div>
                 <h2 className="font-display text-xl font-bold text-foreground">
                   สีเสื้อมงคลประจำวัน{todayLuckyColors.dayName}
@@ -163,7 +180,10 @@ export function DailyHubPage() {
             {/* งาน */}
             <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/5 p-4">
               <div className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider mb-2">
-                💼 การงานก้าวหน้า
+                <span className="inline-flex items-center gap-1.5">
+                  <Briefcase className="h-3.5 w-3.5" />
+                  การงานก้าวหน้า
+                </span>
               </div>
               <div className="flex flex-wrap gap-1.5 mb-2">
                 {todayLuckyColors.categories.work.colors.map((c, i) => (
@@ -182,7 +202,10 @@ export function DailyHubPage() {
             {/* เงิน */}
             <div className="rounded-2xl border border-amber-500/25 bg-amber-500/5 p-4">
               <div className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider mb-2">
-                💰 โชคลาภเงินทอง
+                <span className="inline-flex items-center gap-1.5">
+                  <Coins className="h-3.5 w-3.5" />
+                  โชคลาภเงินทอง
+                </span>
               </div>
               <div className="flex flex-wrap gap-1.5 mb-2">
                 {todayLuckyColors.categories.wealth.colors.map((c, i) => (
@@ -201,7 +224,10 @@ export function DailyHubPage() {
             {/* รัก */}
             <div className="rounded-2xl border border-rose-500/25 bg-rose-500/5 p-4">
               <div className="text-[11px] font-semibold text-rose-400 uppercase tracking-wider mb-2">
-                💖 เสน่ห์ความรัก
+                <span className="inline-flex items-center gap-1.5">
+                  <Heart className="h-3.5 w-3.5" />
+                  เสน่ห์ความรัก
+                </span>
               </div>
               <div className="flex flex-wrap gap-1.5 mb-2">
                 {todayLuckyColors.categories.love.colors.map((c, i) => (
@@ -220,7 +246,10 @@ export function DailyHubPage() {
             {/* กาลกิณี */}
             <div className="rounded-2xl border border-rose-600/30 bg-rose-950/20 p-4">
               <div className="text-[11px] font-semibold text-rose-400 uppercase tracking-wider mb-2">
-                🚫 กาลกิณี (ห้ามใส่)
+                <span className="inline-flex items-center gap-1.5">
+                  <AlertTriangle className="h-3.5 w-3.5" />
+                  กาลกิณี (ห้ามใส่)
+                </span>
               </div>
               <div className="flex flex-wrap gap-1.5 mb-2">
                 {todayLuckyColors.categories.inauspicious.colors.map((c, i) => (
@@ -246,7 +275,9 @@ export function DailyHubPage() {
         {/* 2. Daily Tarot Card Module */}
         <section className="mx-auto mt-10 max-w-5xl rounded-3xl border border-gold/30 bg-card/60 p-6 md:p-8 backdrop-blur-md shadow-elegant">
           <div className="flex items-center gap-3 border-b border-gold/15 pb-4 mb-6">
-            <span className="text-3xl">🃏</span>
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gold/15 text-gold">
+              <Layers className="h-5 w-5" />
+            </span>
             <div>
               <h2 className="font-display text-xl font-bold text-foreground">
                 ไพ่ยิปซีประจำวัน (Daily Tarot)
@@ -271,7 +302,7 @@ export function DailyHubPage() {
                 </div>
               ) : (
                 <div className="flex h-full w-full flex-col items-center justify-center rounded-xl bg-gradient-to-b from-stone-900 via-stone-950 to-stone-900 p-4 text-center border border-gold/20">
-                  <span className="text-4xl mb-3 animate-pulse">✨</span>
+                  <Sparkles className="h-10 w-10 text-gold mb-3 animate-pulse" />
                   <div className="font-display text-sm font-bold text-gold">แตะเพื่อเปิดไพ่</div>
                   <div className="text-[10px] text-muted-foreground mt-1">รับคำทำนายประจำวัน</div>
                 </div>
@@ -325,7 +356,9 @@ export function DailyHubPage() {
           {/* ทิศมงคล */}
           <div className="rounded-3xl border border-gold/20 bg-card/60 p-6 backdrop-blur-md">
             <div className="flex items-center gap-2.5 mb-4 border-b border-gold/15 pb-3">
-              <span className="text-2xl">🧭</span>
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gold/15 text-gold">
+                <Compass className="h-4 w-4" />
+              </span>
               <div>
                 <h3 className="font-display text-base font-bold text-foreground">ทิศมงคลประจำวัน</h3>
                 <p className="text-xs text-muted-foreground">หันหน้าโต๊ะทำงาน เจรจาค้าขาย หรือกราบไหว้</p>
@@ -344,7 +377,9 @@ export function DailyHubPage() {
           {/* เลขเด่นประจำวัน */}
           <div className="rounded-3xl border border-gold/20 bg-card/60 p-6 backdrop-blur-md">
             <div className="flex items-center gap-2.5 mb-4 border-b border-gold/15 pb-3">
-              <span className="text-2xl">🔢</span>
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gold/15 text-gold">
+                <Hash className="h-4 w-4" />
+              </span>
               <div>
                 <h3 className="font-display text-base font-bold text-foreground">เลขเด่นนำโชควันนี้</h3>
                 <p className="text-xs text-muted-foreground">สำหรับใช้ตั้งรหัส เจรจา หรือเสริมสิริมงคล</p>

@@ -4,7 +4,8 @@ import { SiteFooter } from "@/components/site-footer";
 import { seo } from "@/lib/seo";
 import { type ContactContent } from "@/lib/admin-content";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { Mail, Phone, MessageSquare, MapPin, Zap } from "lucide-react";
 
 export const Route = createFileRoute("/contact")({
   head: () =>
@@ -46,32 +47,32 @@ function ContactPage() {
 
   const channels = [
     {
-      icon: "✉",
+      icon: <Mail className="h-5 w-5" />,
       label: "อีเมล",
       value: contact?.email || "bg.chanon@gmail.com",
       link: `mailto:${contact?.email || "bg.chanon@gmail.com"}`,
     },
     contact?.phone && contact.phone.trim() !== "-" && contact.phone.trim() !== ""
-      ? { icon: "☎", label: "โทรศัพท์", value: contact.phone, link: `tel:${contact.phone}` }
+      ? { icon: <Phone className="h-5 w-5" />, label: "โทรศัพท์", value: contact.phone, link: `tel:${contact.phone}` }
       : null,
     contact?.line && contact.line.trim() !== "-" && contact.line.trim() !== ""
       ? {
-          icon: "✦",
+          icon: <MessageSquare className="h-5 w-5" />,
           label: "Line Official",
           value: contact.line,
           link: `https://line.me/ti/p/${contact.line.replace(/^@/, "")}`,
         }
       : null,
     contact?.address && contact.address.trim() !== "-" && contact.address.trim() !== ""
-      ? { icon: "📍", label: "ที่อยู่", value: contact.address, link: undefined }
+      ? { icon: <MapPin className="h-5 w-5" />, label: "ที่อยู่", value: contact.address, link: undefined }
       : null,
     {
-      icon: "⚡",
+      icon: <Zap className="h-5 w-5" />,
       label: "พาร์ทเนอร์สตูดิโอ",
       value: "NineJoe.online — UX/UI Design, AI Prompts & วอลเปเปอร์",
       link: "https://ninejoe.online",
     },
-  ].filter(Boolean) as { icon: string; label: string; value: string; link?: string }[];
+  ].filter(Boolean) as { icon: ReactNode; label: string; value: string; link?: string }[];
 
   return (
     <div className="min-h-screen">

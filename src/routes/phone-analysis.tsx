@@ -7,7 +7,17 @@ import {
   type PhoneAnalysisResult,
 } from "@/lib/numerology";
 import { ShareStoryModal, type ShareCardData } from "@/components/share-story-modal";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import {
+  Coins,
+  Briefcase,
+  Heart,
+  Shield,
+  Share2,
+  AlertTriangle,
+  Target,
+  Lightbulb,
+} from "lucide-react";
 
 export const Route = createFileRoute("/phone-analysis")({
   head: () =>
@@ -30,11 +40,11 @@ export const Route = createFileRoute("/phone-analysis")({
 });
 
 const POPULAR_PHONE_EXAMPLES = [
-  "0891564556",
-  "0956362465",
-  "0814594224",
-  "0924151954",
-  "0887895665",
+  "0891234567",
+  "0958965415",
+  "0639824659",
+  "0816892465",
+  "0987895642",
 ];
 
 function PhoneAnalysisPage() {
@@ -43,10 +53,10 @@ function PhoneAnalysisPage() {
   const [error, setError] = useState("");
   const [isShareOpen, setIsShareOpen] = useState(false);
 
-  const handleAnalyze = (numToAnalyze?: string) => {
-    const target = numToAnalyze || phoneNumber;
-    const clean = target.replace(/\D/g, "");
-    if (clean.length < 9) {
+  const handleAnalyze = (inputVal?: string) => {
+    const raw = inputVal !== undefined ? inputVal : phoneNumber;
+    const clean = raw.replace(/\D/g, "");
+    if (clean.length < 9 || clean.length > 10) {
       setError("กรุณากรอกเบอร์โทรศัพท์ให้ครบ 9-10 หลัก");
       setResult(null);
       return;
@@ -63,11 +73,11 @@ function PhoneAnalysisPage() {
         title: `เบอร์ ${result.formattedNumber}`,
         subtitle: `ผลรวม ${result.sum} (${result.sumGrade}) · ${result.sumTitle}`,
         highlights: [
-          { label: "💰 การเงินโชคลาภ", value: `${result.scores.wealth}/100 คะแนน`, color: "#34d399" },
-          { label: "💼 การงานอำนาจ", value: `${result.scores.career}/100 คะแนน`, color: "#38bdf8" },
-          { label: "💖 เสน่ห์ความรัก", value: `${result.scores.love}/100 คะแนน`, color: "#f472b6" },
-          { label: "🛡️ แคล้วคลาดปลอดภัย", value: `${result.scores.health}/100 คะแนน`, color: "#fbbf24" },
-          { label: "🌟 คะแนนรวมทั้งหมด", value: `เกรด ${result.sumGrade} (${result.scores.overall}%)` },
+          { label: "การเงินโชคลาภ", value: `${result.scores.wealth}/100 คะแนน`, color: "#34d399" },
+          { label: "การงานอำนาจ", value: `${result.scores.career}/100 คะแนน`, color: "#38bdf8" },
+          { label: "เสน่ห์ความรัก", value: `${result.scores.love}/100 คะแนน`, color: "#f472b6" },
+          { label: "แคล้วคลาดปลอดภัย", value: `${result.scores.health}/100 คะแนน`, color: "#fbbf24" },
+          { label: "คะแนนรวมทั้งหมด", value: `เกรด ${result.sumGrade} (${result.scores.overall}%)` },
         ],
         quote: result.advice,
         footerTag: "เช็คเบอร์มงคลฟรีได้ที่ www.likhitfa.online",
@@ -121,8 +131,9 @@ function PhoneAnalysisPage() {
             </form>
 
             {error && (
-              <div className="mt-3 text-xs text-rose-400">
-                ⚠️ {error}
+              <div className="mt-3 flex items-center gap-1.5 text-xs text-rose-400">
+                <AlertTriangle className="h-4 w-4 shrink-0" />
+                <span>{error}</span>
               </div>
             )}
 
@@ -171,9 +182,10 @@ function PhoneAnalysisPage() {
                   </div>
                   <button
                     onClick={() => setIsShareOpen(true)}
-                    className="rounded-xl border border-gold/40 bg-gold/10 px-4 py-3 text-xs font-semibold text-gold hover:bg-gold/20"
+                    className="inline-flex items-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-4 py-3 text-xs font-semibold text-gold hover:bg-gold/20"
                   >
-                    🖼️ แชร์ลง Story
+                    <Share2 className="h-4 w-4" />
+                    <span>แชร์ลง Story</span>
                   </button>
                 </div>
               </div>
@@ -184,10 +196,30 @@ function PhoneAnalysisPage() {
 
               {/* คะแนน 4 มิติ */}
               <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <ScoreCard label="การเงินและโชคลาภ" score={result.scores.wealth} icon="💰" color="text-emerald-400" />
-                <ScoreCard label="การงานและบารมี" score={result.scores.career} icon="💼" color="text-sky-400" />
-                <ScoreCard label="ความรักและเสน่ห์" score={result.scores.love} icon="💖" color="text-pink-400" />
-                <ScoreCard label="สุขภาพและแคล้วคลาด" score={result.scores.health} icon="🛡️" color="text-amber-400" />
+                <ScoreCard
+                  label="การเงินและโชคลาภ"
+                  score={result.scores.wealth}
+                  icon={<Coins className="h-4 w-4 text-emerald-400" />}
+                  color="text-emerald-400"
+                />
+                <ScoreCard
+                  label="การงานและบารมี"
+                  score={result.scores.career}
+                  icon={<Briefcase className="h-4 w-4 text-sky-400" />}
+                  color="text-sky-400"
+                />
+                <ScoreCard
+                  label="ความรักและเสน่ห์"
+                  score={result.scores.love}
+                  icon={<Heart className="h-4 w-4 text-pink-400" />}
+                  color="text-pink-400"
+                />
+                <ScoreCard
+                  label="สุขภาพและแคล้วคลาด"
+                  score={result.scores.health}
+                  icon={<Shield className="h-4 w-4 text-amber-400" />}
+                  color="text-amber-400"
+                />
               </div>
             </div>
 
@@ -236,7 +268,10 @@ function PhoneAnalysisPage() {
             <div className="mt-8 grid gap-5 md:grid-cols-2">
               <div className="glass-strong rounded-3xl p-6">
                 <div className="text-[11px] uppercase tracking-wider text-gold/80">CAREER MATCH</div>
-                <h4 className="mt-1 font-display text-lg text-foreground">🎯 เหมาะกับอาชีพและธุรกิจ</h4>
+                <h4 className="flex items-center gap-2 mt-1 font-display text-lg text-foreground">
+                  <Target className="h-5 w-5 text-gold" />
+                  <span>เหมาะกับอาชีพและธุรกิจ</span>
+                </h4>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {result.suitableCareers.map((c, i) => (
                     <span
@@ -251,7 +286,10 @@ function PhoneAnalysisPage() {
 
               <div className="glass-strong rounded-3xl p-6">
                 <div className="text-[11px] uppercase tracking-wider text-gold/80">EXPERT ADVICE</div>
-                <h4 className="mt-1 font-display text-lg text-foreground">💡 คำแนะนำเสริมดวง</h4>
+                <h4 className="flex items-center gap-2 mt-1 font-display text-lg text-foreground">
+                  <Lightbulb className="h-5 w-5 text-gold" />
+                  <span>คำแนะนำเสริมดวง</span>
+                </h4>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                   {result.advice}
                 </p>
@@ -282,7 +320,7 @@ function ScoreCard({
 }: {
   label: string;
   score: number;
-  icon: string;
+  icon: ReactNode;
   color: string;
 }) {
   return (

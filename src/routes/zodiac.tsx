@@ -5,6 +5,19 @@ import { seo, siteUrl } from "@/lib/seo";
 import { ZODIAC_2569_DATA, type ZodiacInfo } from "@/lib/zodiac-2569";
 import { ShareStoryModal, type ShareCardData } from "@/components/share-story-modal";
 import { useState } from "react";
+import {
+  Orbit,
+  Calendar,
+  Share2,
+  Briefcase,
+  Coins,
+  Heart,
+  Activity,
+  Palette,
+  Hash,
+  Gem,
+  Sparkles,
+} from "lucide-react";
 
 export const Route = createFileRoute("/zodiac")({
   head: () =>
@@ -58,7 +71,8 @@ function ZodiacPage() {
         {/* Hero Section */}
         <section className="text-center">
           <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-4 py-1.5 text-xs tracking-widest text-gold">
-            <span>♈ 2026 ANNUAL HOROSCOPE</span>
+            <Orbit className="h-3.5 w-3.5 text-gold" />
+            <span>2026 ANNUAL HOROSCOPE</span>
           </div>
           <h1 className="font-display text-3xl font-bold tracking-tight text-foreground md:text-5xl">
             ดูดวง <span className="text-gradient-gold">12 ราศี ประจำปี 2569</span>
@@ -84,7 +98,7 @@ function ZodiacPage() {
                       : "border border-gold/20 bg-card/60 text-muted-foreground hover:border-gold/50 hover:text-gold hover:bg-card"
                   }`}
                 >
-                  <span className="text-sm">{z.symbol}</span>
+                  <span className="text-sm font-serif">{z.symbol}</span>
                   <span>{z.name}</span>
                 </button>
               );
@@ -97,7 +111,7 @@ function ZodiacPage() {
           {/* Header of the Sign */}
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-gold/15 pb-6">
             <div className="flex items-center gap-4">
-              <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-gold text-3xl shadow-gold text-stone-950">
+              <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-gold text-3xl shadow-gold text-stone-950 font-serif">
                 {activeZodiac.symbol}
               </span>
               <div>
@@ -111,8 +125,14 @@ function ZodiacPage() {
                   </span>
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                  <span>📅 {activeZodiac.dateRange}</span>
-                  <span>🪐 ดาวครองราศี: {activeZodiac.rulingPlanet}</span>
+                  <span className="inline-flex items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5 text-gold" />
+                    {activeZodiac.dateRange}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Orbit className="h-3.5 w-3.5 text-gold" />
+                    ดาวครองราศี: {activeZodiac.rulingPlanet}
+                  </span>
                 </div>
               </div>
             </div>
@@ -121,14 +141,16 @@ function ZodiacPage() {
               onClick={() => setShareModalOpen(true)}
               className="inline-flex items-center gap-2 rounded-xl bg-gradient-gold px-4 py-2.5 text-xs font-semibold text-stone-950 shadow-gold transition hover:opacity-90 self-stretch sm:self-auto justify-center"
             >
-              <span>📲 บันทึกการ์ด Story (9:16)</span>
+              <Share2 className="h-4 w-4" />
+              <span>บันทึกการ์ด Story (9:16)</span>
             </button>
           </div>
 
           {/* Headline & Overview */}
           <div className="mt-6 rounded-2xl border border-gold/20 bg-gold/5 p-5">
-            <h3 className="font-display text-base font-bold text-gold mb-1.5">
-              ✦ {activeZodiac.headline}
+            <h3 className="flex items-center gap-1.5 font-display text-base font-bold text-gold mb-1.5">
+              <Sparkles className="h-4 w-4 shrink-0" />
+              <span>{activeZodiac.headline}</span>
             </h3>
             <p className="text-sm leading-relaxed text-muted-foreground">
               {activeZodiac.overview2569}
@@ -140,7 +162,8 @@ function ZodiacPage() {
             {/* 1. Career */}
             <div className="rounded-2xl border border-gold/20 bg-card/50 p-5">
               <div className="flex items-center gap-2 text-sm font-bold text-foreground mb-2">
-                <span className="text-lg">💼</span> การงาน & ธุรกิจ
+                <Briefcase className="h-4 w-4 text-emerald-400" />
+                <span>การงาน & ธุรกิจ</span>
               </div>
               <p className="text-xs leading-relaxed text-muted-foreground">
                 {activeZodiac.career}
@@ -150,7 +173,8 @@ function ZodiacPage() {
             {/* 2. Finance */}
             <div className="rounded-2xl border border-gold/20 bg-card/50 p-5">
               <div className="flex items-center gap-2 text-sm font-bold text-foreground mb-2">
-                <span className="text-lg">💰</span> การเงิน & โชคลาภ
+                <Coins className="h-4 w-4 text-amber-400" />
+                <span>การเงิน & โชคลาภ</span>
               </div>
               <p className="text-xs leading-relaxed text-muted-foreground">
                 {activeZodiac.finance}
@@ -160,7 +184,8 @@ function ZodiacPage() {
             {/* 3. Love */}
             <div className="rounded-2xl border border-gold/20 bg-card/50 p-5">
               <div className="flex items-center gap-2 text-sm font-bold text-foreground mb-2">
-                <span className="text-lg">💖</span> ความรัก & ความสัมพันธ์
+                <Heart className="h-4 w-4 text-rose-400" />
+                <span>ความรัก & ความสัมพันธ์</span>
               </div>
               <p className="text-xs leading-relaxed text-muted-foreground">
                 {activeZodiac.love}
@@ -170,7 +195,8 @@ function ZodiacPage() {
             {/* 4. Health */}
             <div className="rounded-2xl border border-gold/20 bg-card/50 p-5">
               <div className="flex items-center gap-2 text-sm font-bold text-foreground mb-2">
-                <span className="text-lg">🩺</span> สุขภาพ & ข้อควรระวัง
+                <Activity className="h-4 w-4 text-blue-400" />
+                <span>สุขภาพ & ข้อควรระวัง</span>
               </div>
               <p className="text-xs leading-relaxed text-muted-foreground">
                 {activeZodiac.health}
@@ -181,32 +207,36 @@ function ZodiacPage() {
           {/* Auspicious Items Bar */}
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 rounded-2xl border border-gold/20 bg-card/70 p-5">
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-gold/80 mb-1">
-                🎨 สีมงคลประจำปี
+              <div className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-gold/80 mb-1">
+                <Palette className="h-3 w-3 text-gold" />
+                สีมงคลประจำปี
               </div>
               <div className="text-xs font-bold text-foreground">
                 {activeZodiac.luckyColors.join(", ")}
               </div>
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-gold/80 mb-1">
-                🔢 เลขนำโชค 2569
+              <div className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-gold/80 mb-1">
+                <Hash className="h-3 w-3 text-gold" />
+                เลขนำโชค 2569
               </div>
               <div className="text-xs font-bold text-foreground">
                 {activeZodiac.luckyNumbers}
               </div>
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-gold/80 mb-1">
-                💎 อัญมณีเสริมดวง
+              <div className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-gold/80 mb-1">
+                <Gem className="h-3 w-3 text-gold" />
+                อัญมณีเสริมดวง
               </div>
               <div className="text-xs font-bold text-foreground">
                 {activeZodiac.luckyGem}
               </div>
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-gold/80 mb-1">
-                ⛩️ เคล็ดลับเสริมดวง
+              <div className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-gold/80 mb-1">
+                <Sparkles className="h-3 w-3 text-gold" />
+                เคล็ดลับเสริมดวง
               </div>
               <div className="text-xs font-bold text-foreground line-clamp-2">
                 {activeZodiac.blessingTip}

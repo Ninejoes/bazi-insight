@@ -2,6 +2,16 @@ import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tan
 import { BrandMark } from "@/components/site-header";
 import { useEffect, useState } from "react";
 import { seo } from "@/lib/seo";
+import {
+  LayoutDashboard,
+  FileText,
+  Moon,
+  Users,
+  Mail,
+  Building2,
+  ShieldAlert,
+  HelpCircle,
+} from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () =>
@@ -15,14 +25,14 @@ export const Route = createFileRoute("/admin")({
 });
 
 const nav = [
-  { to: "/admin", label: "แดชบอร์ด", icon: "◈" },
-  { to: "/admin/articles", label: "บทความ", icon: "✎" },
-  { to: "/admin/dreams", label: "ทำนายฝัน", icon: "☾" },
-  { to: "/admin/users", label: "ผู้ใช้งาน", icon: "♟" },
-  { to: "/admin/messages", label: "ข้อความ", icon: "✉" },
-  { to: "/admin/contact", label: "ติดต่อ / เกี่ยวกับเรา", icon: "✉" },
-  { to: "/admin/audit", label: "Audit Log", icon: "!" },
-  { to: "/admin/help", label: "ศูนย์ช่วยเหลือ", icon: "?" },
+  { to: "/admin", label: "แดชบอร์ด", icon: LayoutDashboard },
+  { to: "/admin/articles", label: "บทความ", icon: FileText },
+  { to: "/admin/dreams", label: "ทำนายฝัน", icon: Moon },
+  { to: "/admin/users", label: "ผู้ใช้งาน", icon: Users },
+  { to: "/admin/messages", label: "ข้อความ", icon: Mail },
+  { to: "/admin/contact", label: "ติดต่อ / เกี่ยวกับเรา", icon: Building2 },
+  { to: "/admin/audit", label: "Audit Log", icon: ShieldAlert },
+  { to: "/admin/help", label: "ศูนย์ช่วยเหลือ", icon: HelpCircle },
 ] as const;
 
 const ADMIN_SESSION_KEY = "likhitfa-admin-session-v2";
@@ -151,8 +161,8 @@ function AdminLayout() {
                       : "text-muted-foreground hover:bg-gold/10 hover:text-gold"
                   }`}
                 >
-                  <span className="w-5 text-center">{n.icon}</span>
-                  {n.label}
+                  <n.icon className="h-4 w-4 shrink-0" />
+                  <span>{n.label}</span>
                 </Link>
               );
             })}
@@ -211,8 +221,8 @@ function AdminLayout() {
                         : "border border-gold/20 text-muted-foreground"
                     }`}
                   >
-                    <span>{n.icon}</span>
-                    {n.label}
+                    <n.icon className="h-4 w-4 shrink-0" />
+                    <span>{n.label}</span>
                   </Link>
                 );
               })}

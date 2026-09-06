@@ -9,6 +9,7 @@ import {
 } from "@/lib/numerology";
 import { ShareStoryModal, type ShareCardData } from "@/components/share-story-modal";
 import { useState } from "react";
+import { Share2, AlertTriangle, Check } from "lucide-react";
 
 export const Route = createFileRoute("/name-analysis")({
   head: () =>
@@ -67,11 +68,11 @@ function NameAnalysisPage() {
         title: result.fullName,
         subtitle: `คนเกิด${result.dayName} · เกรดมงคล ${result.grade}`,
         highlights: [
-          { label: "⭐ เลขศาสตร์ชื่อ", value: `${result.firstNameScore} คะแนน`, color: "#fbbf24" },
-          { label: "🏛️ เลขศาสตร์นามสกุล", value: `${result.lastNameScore} คะแนน` },
-          { label: "🌟 ผลรวมดวงชะตา", value: `${result.totalScore} คะแนน`, color: "#34d399" },
+          { label: "เลขศาสตร์ชื่อ", value: `${result.firstNameScore} คะแนน`, color: "#fbbf24" },
+          { label: "เลขศาสตร์นามสกุล", value: `${result.lastNameScore} คะแนน` },
+          { label: "ผลรวมดวงชะตา", value: `${result.totalScore} คะแนน`, color: "#34d399" },
           {
-            label: "🛡️ ทักษาปกรณ์",
+            label: "ทักษาปกรณ์",
             value: result.hasKalakini ? `พบกาลกิณี (${result.kalakiniFound.join(", ")})` : "ไร้อักษรกาลกิณี (ดีเยี่ยม)",
             color: result.hasKalakini ? "#f87171" : "#34d399",
           },
@@ -154,8 +155,9 @@ function NameAnalysisPage() {
             </div>
 
             {error && (
-              <div className="mt-3 text-xs text-rose-400">
-                ⚠️ {error}
+              <div className="mt-3 flex items-center gap-1.5 text-xs text-rose-400">
+                <AlertTriangle className="h-4 w-4 shrink-0" />
+                <span>{error}</span>
               </div>
             )}
           </div>
@@ -186,24 +188,31 @@ function NameAnalysisPage() {
                   </div>
                   <button
                     onClick={() => setIsShareOpen(true)}
-                    className="rounded-xl border border-gold/40 bg-gold/10 px-4 py-3 text-xs font-semibold text-gold hover:bg-gold/20"
+                    className="inline-flex items-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-4 py-3 text-xs font-semibold text-gold hover:bg-gold/20"
                   >
-                    🖼️ แชร์ลง Story
+                    <Share2 className="h-4 w-4" />
+                    <span>แชร์ลง Story</span>
                   </button>
                 </div>
               </div>
 
               {/* แจ้งเตือนอักษรกาลกิณี */}
               {result.hasKalakini ? (
-                <div className="mt-6 rounded-2xl border border-rose-500/40 bg-rose-950/30 p-4 text-xs text-rose-200">
-                  ⚠️ <strong>พบอักษรกาลกิณีในชื่อ:</strong> ตัวอักษร{" "}
-                  <span className="font-bold text-rose-300">({result.kalakiniFound.join(", ")})</span>{" "}
-                  ถือเป็นกาลกิณีสำหรับคนเกิด{result.dayName} อาจส่งผลให้มีอุปสรรคหรือเหน็ดเหนื่อยมากกว่าปกติ
-                  แนะนำให้หลีกเลี่ยงหรือปรึกษาผู้เชี่ยวชาญเพื่อปรับเปลี่ยนชื่อ
+                <div className="mt-6 flex items-start gap-2 rounded-2xl border border-rose-500/40 bg-rose-950/30 p-4 text-xs text-rose-200">
+                  <AlertTriangle className="h-4 w-4 shrink-0 text-rose-400 mt-0.5" />
+                  <div>
+                    <strong>พบอักษรกาลกิณีในชื่อ:</strong> ตัวอักษร{" "}
+                    <span className="font-bold text-rose-300">({result.kalakiniFound.join(", ")})</span>{" "}
+                    ถือเป็นกาลกิณีสำหรับคนเกิด{result.dayName} อาจส่งผลให้มีอุปสรรคหรือเหน็ดเหนื่อยมากกว่าปกติ
+                    แนะนำให้หลีกเลี่ยงหรือปรึกษาผู้เชี่ยวชาญเพื่อปรับเปลี่ยนชื่อ
+                  </div>
                 </div>
               ) : (
-                <div className="mt-6 rounded-2xl border border-emerald-500/40 bg-emerald-950/30 p-4 text-xs text-emerald-200">
-                  ✓ <strong>ชื่อเป็นมงคลตามทักษาปกรณ์:</strong> ไม่พบอักษรต้องห้าม (กาลกิณี) สำหรับคนเกิด{result.dayName} พลังตัวอักษรเกื้อหนุนดวงชะตาได้เป็นอย่างดี
+                <div className="mt-6 flex items-start gap-2 rounded-2xl border border-emerald-500/40 bg-emerald-950/30 p-4 text-xs text-emerald-200">
+                  <Check className="h-4 w-4 shrink-0 text-emerald-400 mt-0.5" />
+                  <div>
+                    <strong>ชื่อเป็นมงคลตามทักษาปกรณ์:</strong> ไม่พบอักษรต้องห้าม (กาลกิณี) สำหรับคนเกิด{result.dayName} พลังตัวอักษรเกื้อหนุนดวงชะตาได้เป็นอย่างดี
+                  </div>
                 </div>
               )}
 

@@ -1,6 +1,31 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { clearUserSession, readStoredUserSession, type UserSession } from "@/lib/user-session";
+import {
+  Sparkles,
+  TrendingUp,
+  Orbit,
+  Layers,
+  HeartHandshake,
+  Sunrise,
+  Moon,
+  Scroll,
+  CreditCard,
+  Smartphone,
+  PenTool,
+  Ticket,
+  Palette,
+  CalendarDays,
+  ShieldAlert,
+  Image as ImageIcon,
+  BookOpen,
+  Building2,
+  Mail,
+  HelpCircle,
+  Zap,
+  Heart,
+  Coins,
+} from "lucide-react";
 
 interface SiteHeaderProps {
   subtitle?: string;
@@ -123,8 +148,8 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                           to="/bazi"
                           className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
                         >
-                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
-                            🔮
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-gold group-hover:scale-110 transition-transform">
+                            <Sparkles className="h-4 w-4" />
                           </span>
                           <div>
                             <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
@@ -139,8 +164,8 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                           to="/life-graph"
                           className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
                         >
-                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
-                            📈
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-gold group-hover:scale-110 transition-transform">
+                            <TrendingUp className="h-4 w-4" />
                           </span>
                           <div>
                             <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
@@ -155,8 +180,8 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                           to="/zodiac"
                           className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
                         >
-                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
-                            ♈
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-gold group-hover:scale-110 transition-transform">
+                            <Orbit className="h-4 w-4" />
                           </span>
                           <div>
                             <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
@@ -171,8 +196,8 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                           to="/tarot"
                           className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
                         >
-                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
-                            🃏
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-gold group-hover:scale-110 transition-transform">
+                            <Layers className="h-4 w-4" />
                           </span>
                           <div>
                             <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
@@ -194,8 +219,8 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                           to="/love-compatibility"
                           className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
                         >
-                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-rose-500/15 text-base text-rose-400 group-hover:scale-110 transition-transform">
-                            💞
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-rose-500/15 text-rose-400 group-hover:scale-110 transition-transform">
+                            <HeartHandshake className="h-4 w-4" />
                           </span>
                           <div>
                             <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
@@ -210,8 +235,8 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                           to="/daily-hub"
                           className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
                         >
-                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
-                            ☀️
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-gold group-hover:scale-110 transition-transform">
+                            <Sunrise className="h-4 w-4" />
                           </span>
                           <div>
                             <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
@@ -226,8 +251,8 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                           to="/dream"
                           className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
                         >
-                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
-                            🌙
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-gold group-hover:scale-110 transition-transform">
+                            <Moon className="h-4 w-4" />
                           </span>
                           <div>
                             <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
@@ -242,8 +267,8 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                           to="/siamsi"
                           className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
                         >
-                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
-                            🎋
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-gold group-hover:scale-110 transition-transform">
+                            <Scroll className="h-4 w-4" />
                           </span>
                           <div>
                             <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
@@ -312,7 +337,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                           className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
                         >
                           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
-                            🪪
+                            <CreditCard className="h-4 w-4" />
                           </span>
                           <div>
                             <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
@@ -328,7 +353,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                           className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
                         >
                           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
-                            📱
+                            <Smartphone className="h-4 w-4" />
                           </span>
                           <div>
                             <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
@@ -344,7 +369,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                           className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
                         >
                           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
-                            ✍️
+                            <PenTool className="h-4 w-4" />
                           </span>
                           <div>
                             <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
@@ -360,7 +385,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                           className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
                         >
                           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
-                            🎰
+                            <Ticket className="h-4 w-4" />
                           </span>
                           <div>
                             <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
@@ -383,7 +408,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                           className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
                         >
                           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
-                            🎨
+                            <Palette className="h-4 w-4" />
                           </span>
                           <div>
                             <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
@@ -399,7 +424,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                           className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
                         >
                           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
-                            📅
+                            <CalendarDays className="h-4 w-4" />
                           </span>
                           <div>
                             <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
@@ -415,7 +440,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                           className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
                         >
                           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
-                            🧧
+                            <ShieldAlert className="h-4 w-4" />
                           </span>
                           <div>
                             <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
@@ -431,7 +456,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                           className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
                         >
                           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
-                            🖼️
+                            <ImageIcon className="h-4 w-4" />
                           </span>
                           <div>
                             <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
@@ -454,7 +479,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                         className="flex items-center justify-between rounded-xl bg-gold/10 px-3 py-2 text-xs font-medium text-gold hover:bg-gold/20 transition"
                       >
                         <span className="flex items-center gap-1.5">
-                          <span>⚡</span>
+                          <Zap className="h-3.5 w-3.5 text-gold" />
                           <span>ชมคอลเลกชันวอลเปเปอร์มงคลกว่า 109+ ภาพ ที่ NineJoe Studio</span>
                         </span>
                         <span className="text-[10px]">เปิดดู ↗</span>
@@ -494,7 +519,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                       to="/about"
                       className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground hover:bg-gold/10 hover:text-gold transition"
                     >
-                      <span className="text-base text-gold/80">🏛️</span>
+                      <Building2 className="h-4 w-4 text-gold/80" />
                       <div>
                         <div className="font-medium leading-tight">เกี่ยวกับ Likhitfa</div>
                         <div className="text-[10px] text-muted-foreground">พันธกิจและทีมงาน</div>
@@ -504,7 +529,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                       to="/contact"
                       className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground hover:bg-gold/10 hover:text-gold transition"
                     >
-                      <span className="text-base text-gold/80">✉️</span>
+                      <Mail className="h-4 w-4 text-gold/80" />
                       <div>
                         <div className="font-medium leading-tight">ติดต่อเรา</div>
                         <div className="text-[10px] text-muted-foreground">สอบถาม & ปรึกษา</div>
@@ -514,7 +539,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                       to="/help"
                       className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground hover:bg-gold/10 hover:text-gold transition"
                     >
-                      <span className="text-base text-gold/80">❓</span>
+                      <HelpCircle className="h-4 w-4 text-gold/80" />
                       <div>
                         <div className="font-medium leading-tight">ศูนย์ช่วยเหลือ</div>
                         <div className="text-[10px] text-muted-foreground">คำถามที่พบบ่อย (FAQ)</div>
@@ -533,7 +558,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                       className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-gold hover:bg-gold/10 transition"
                     >
                       <div className="flex items-center gap-2">
-                        <span>⚡</span>
+                        <Zap className="h-3.5 w-3.5 text-gold" />
                         <span>NineJoe.online</span>
                       </div>
                       <span className="text-[10px] opacity-70">↗</span>
@@ -545,7 +570,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                       className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-gold hover:bg-gold/10 transition"
                     >
                       <div className="flex items-center gap-2">
-                        <span>🎨</span>
+                        <Palette className="h-3.5 w-3.5 text-gold" />
                         <span>NineJoe Collections</span>
                       </div>
                       <span className="text-[10px] opacity-70">↗</span>
@@ -629,79 +654,88 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
 
             {/* Group 1: บริการดูดวง */}
             <div className="my-2 h-px bg-gold/10" />
-            <MobileGroupTitle>🔮 บริการดูดวง</MobileGroupTitle>
-            <MobileLink to="/bazi" onClick={closeMobile}>
-              🔮 ปาจื้อ 八字 (ดวงจีน 4 เสา)
+            <MobileGroupTitle>
+              <Sparkles className="mr-1.5 inline-block h-3.5 w-3.5 text-gold" />
+              บริการดูดวง
+            </MobileGroupTitle>
+            <MobileLink to="/bazi" icon={<Sparkles className="h-4 w-4" />} onClick={closeMobile}>
+              ปาจื้อ 八字 (ดวงจีน 4 เสา)
             </MobileLink>
-            <MobileLink to="/life-graph" onClick={closeMobile}>
-              📈 กราฟชีวิต 12 เรือน
+            <MobileLink to="/life-graph" icon={<TrendingUp className="h-4 w-4" />} onClick={closeMobile}>
+              กราฟชีวิต 12 เรือน
             </MobileLink>
-            <MobileLink to="/zodiac" onClick={closeMobile}>
-              ♈ ดูดวง 12 ราศี 2569
+            <MobileLink to="/zodiac" icon={<Orbit className="h-4 w-4" />} onClick={closeMobile}>
+              ดูดวง 12 ราศี 2569
             </MobileLink>
-            <MobileLink to="/love-compatibility" onClick={closeMobile}>
-              💞 สมพงษ์เนื้อคู่ & ความรัก
+            <MobileLink to="/love-compatibility" icon={<HeartHandshake className="h-4 w-4" />} onClick={closeMobile}>
+              สมพงษ์เนื้อคู่ & ความรัก
             </MobileLink>
-            <MobileLink to="/daily-hub" onClick={closeMobile}>
-              ☀️ เช็คดวงเช้านี้ Daily Hub
+            <MobileLink to="/daily-hub" icon={<Sunrise className="h-4 w-4" />} onClick={closeMobile}>
+              เช็คดวงเช้านี้ Daily Hub
             </MobileLink>
-            <MobileLink to="/tarot" onClick={closeMobile}>
-              🃏 ไพ่ยิปซีพยากรณ์
+            <MobileLink to="/tarot" icon={<Layers className="h-4 w-4" />} onClick={closeMobile}>
+              ไพ่ยิปซีพยากรณ์
             </MobileLink>
             <div className="ml-3 border-l border-gold/15 pl-3 space-y-0.5">
-              <MobileTarotLink slug="daily" icon="☀️" title="ดวงรายวัน" onClick={closeMobile} />
-              <MobileTarotLink slug="love" icon="💖" title="ความรัก & คู่ครอง" onClick={closeMobile} />
-              <MobileTarotLink slug="finance" icon="💰" title="การเงิน & โชคลาภ" onClick={closeMobile} />
+              <MobileTarotLink slug="daily" icon={<Sunrise className="h-3.5 w-3.5" />} title="ดวงรายวัน" onClick={closeMobile} />
+              <MobileTarotLink slug="love" icon={<Heart className="h-3.5 w-3.5" />} title="ความรัก & คู่ครอง" onClick={closeMobile} />
+              <MobileTarotLink slug="finance" icon={<Coins className="h-3.5 w-3.5" />} title="การเงิน & โชคลาภ" onClick={closeMobile} />
             </div>
-            <MobileLink to="/dream" onClick={closeMobile}>
-              🌙 ทำนายฝันแม่นยำ & เลขเด็ด
+            <MobileLink to="/dream" icon={<Moon className="h-4 w-4" />} onClick={closeMobile}>
+              ทำนายฝันแม่นยำ & เลขเด็ด
             </MobileLink>
-            <MobileLink to="/siamsi" onClick={closeMobile}>
-              🎋 เซียมซีออนไลน์ 28 ใบ
+            <MobileLink to="/siamsi" icon={<Scroll className="h-4 w-4" />} onClick={closeMobile}>
+              เซียมซีออนไลน์ 28 ใบ
             </MobileLink>
 
             {/* Group 2: เสริมดวง & ตัวเลข */}
             <div className="my-2 h-px bg-gold/10" />
-            <MobileGroupTitle>✨ เสริมดวง & ตัวเลข</MobileGroupTitle>
-            <MobileLink to="/destiny-card" onClick={closeMobile}>
-              🪪 บัตรชะตาชีวิตดิจิทัล
+            <MobileGroupTitle>
+              <Sparkles className="mr-1.5 inline-block h-3.5 w-3.5 text-gold" />
+              เสริมดวง & ตัวเลข
+            </MobileGroupTitle>
+            <MobileLink to="/destiny-card" icon={<CreditCard className="h-4 w-4" />} onClick={closeMobile}>
+              บัตรชะตาชีวิตดิจิทัล
             </MobileLink>
-            <MobileLink to="/phone-analysis" onClick={closeMobile}>
-              📱 เช็คเบอร์มงคล
+            <MobileLink to="/phone-analysis" icon={<Smartphone className="h-4 w-4" />} onClick={closeMobile}>
+              เช็คเบอร์มงคล
             </MobileLink>
-            <MobileLink to="/name-analysis" onClick={closeMobile}>
-              ✍️ วิเคราะห์ชื่อ-นามสกุล
+            <MobileLink to="/name-analysis" icon={<PenTool className="h-4 w-4" />} onClick={closeMobile}>
+              วิเคราะห์ชื่อ-นามสกุล
             </MobileLink>
-            <MobileLink to="/lottery" onClick={closeMobile}>
-              🎰 หวย & เลขเด็ดสำนักดัง
+            <MobileLink to="/lottery" icon={<Ticket className="h-4 w-4" />} onClick={closeMobile}>
+              หวย & เลขเด็ดสำนักดัง
             </MobileLink>
-            <MobileLink to="/lucky-colors" onClick={closeMobile}>
-              🎨 สีเสื้อมงคลประจำวัน
+            <MobileLink to="/lucky-colors" icon={<Palette className="h-4 w-4" />} onClick={closeMobile}>
+              สีเสื้อมงคลประจำวัน
             </MobileLink>
-            <MobileLink to="/auspicious-calendar" onClick={closeMobile}>
-              📅 ปฏิทินฤกษ์มงคล 2569
+            <MobileLink to="/auspicious-calendar" icon={<CalendarDays className="h-4 w-4" />} onClick={closeMobile}>
+              ปฏิทินฤกษ์มงคล 2569
             </MobileLink>
-            <MobileLink to="/tai-sui" onClick={closeMobile}>
-              🧧 ตรวจปีชง 2569 & แก้ชง
+            <MobileLink to="/tai-sui" icon={<ShieldAlert className="h-4 w-4" />} onClick={closeMobile}>
+              ตรวจปีชง 2569 & แก้ชง
             </MobileLink>
-            <MobileLink to="/wallpaper" onClick={closeMobile}>
-              🖼️ วอลเปเปอร์สายมู 5 ธาตุ
+            <MobileLink to="/wallpaper" icon={<ImageIcon className="h-4 w-4" />} onClick={closeMobile}>
+              วอลเปเปอร์สายมู 5 ธาตุ
             </MobileLink>
 
             {/* Group 3: ข้อมูล & สตูดิโอ */}
             <div className="my-2 h-px bg-gold/10" />
-            <MobileGroupTitle>📚 ข้อมูล & พาร์ตเนอร์</MobileGroupTitle>
-            <MobileLink to="/articles" onClick={closeMobile}>
-              📖 บทความดูดวง
+            <MobileGroupTitle>
+              <BookOpen className="mr-1.5 inline-block h-3.5 w-3.5 text-gold" />
+              ข้อมูล & พาร์ตเนอร์
+            </MobileGroupTitle>
+            <MobileLink to="/articles" icon={<BookOpen className="h-4 w-4" />} onClick={closeMobile}>
+              บทความดูดวง
             </MobileLink>
-            <MobileLink to="/about" onClick={closeMobile}>
-              🏛️ เกี่ยวกับเรา
+            <MobileLink to="/about" icon={<Building2 className="h-4 w-4" />} onClick={closeMobile}>
+              เกี่ยวกับเรา
             </MobileLink>
-            <MobileLink to="/contact" onClick={closeMobile}>
-              ✉️ ติดต่อเรา
+            <MobileLink to="/contact" icon={<Mail className="h-4 w-4" />} onClick={closeMobile}>
+              ติดต่อเรา
             </MobileLink>
-            <MobileLink to="/help" onClick={closeMobile}>
-              ❓ ศูนย์ช่วยเหลือ (FAQ)
+            <MobileLink to="/help" icon={<HelpCircle className="h-4 w-4" />} onClick={closeMobile}>
+              ศูนย์ช่วยเหลือ (FAQ)
             </MobileLink>
 
             <div className="my-2.5 h-px bg-gold/10" />
@@ -713,7 +747,8 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                 onClick={closeMobile}
                 className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/40 bg-gold/10 px-3 py-2 text-xs font-semibold text-gold shadow-gold hover:bg-gold hover:text-primary-foreground transition"
               >
-                <span>⚡ NineJoe</span>
+                <Zap className="h-3.5 w-3.5 text-gold" />
+                <span>NineJoe</span>
                 <span className="text-[10px]">↗</span>
               </a>
               <a
@@ -723,7 +758,8 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                 onClick={closeMobile}
                 className="flex items-center justify-center gap-1.5 rounded-xl border border-gold/40 bg-gold/10 px-3 py-2 text-xs font-semibold text-gold shadow-gold hover:bg-gold hover:text-primary-foreground transition"
               >
-                <span>🎨 Wallpapers</span>
+                <ImageIcon className="h-3.5 w-3.5 text-gold" />
+                <span>Wallpapers</span>
                 <span className="text-[10px]">↗</span>
               </a>
             </div>
@@ -773,7 +809,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
 }
 
 function MobileGroupTitle({ children }: { children: ReactNode }) {
-  return <div className="px-3 pt-2 pb-1 text-[10px] tracking-[0.2em] text-gold/60">{children}</div>;
+  return <div className="flex items-center px-3 pt-2 pb-1 text-[10px] tracking-[0.2em] text-gold/70">{children}</div>;
 }
 
 function MobileTarotLink({
@@ -783,7 +819,7 @@ function MobileTarotLink({
   onClick,
 }: {
   slug: string;
-  icon: string;
+  icon: ReactNode;
   title: string;
   onClick: () => void;
 }) {
@@ -794,8 +830,8 @@ function MobileTarotLink({
       onClick={onClick}
       className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-gold/10 hover:text-gold"
     >
-      <span className="text-gold/70">{icon}</span>
-      {title}
+      <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center text-gold/70">{icon}</span>
+      <span>{title}</span>
     </Link>
   );
 }
@@ -816,19 +852,22 @@ function NavLink({ to, active, children }: { to: string; active: boolean; childr
 function MobileLink({
   to,
   onClick,
+  icon,
   children,
 }: {
   to: string;
   onClick: () => void;
+  icon?: ReactNode;
   children: ReactNode;
 }) {
   return (
     <Link
       to={to}
       onClick={onClick}
-      className="block rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-gold/10 hover:text-gold"
+      className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm text-foreground hover:bg-gold/10 hover:text-gold"
     >
-      {children}
+      {icon && <span className="flex h-4 w-4 shrink-0 items-center justify-center text-gold/80">{icon}</span>}
+      <span>{children}</span>
     </Link>
   );
 }

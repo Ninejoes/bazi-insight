@@ -6,6 +6,7 @@ import { analyzeBazi, type BaziAnalysis } from "@/lib/bazi-engine";
 import { readStoredUserSession } from "@/lib/user-session";
 import { ShareStoryModal, type ShareCardData } from "@/components/share-story-modal";
 import { useState, useMemo } from "react";
+import { CreditCard, Palette, Hash, Gem, Sparkles, Share2 } from "lucide-react";
 
 export const Route = createFileRoute("/destiny-card")({
   head: () =>
@@ -116,7 +117,8 @@ export function DestinyCardPage() {
         {/* Header Hero */}
         <section className="text-center">
           <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-4 py-1.5 text-xs tracking-widest text-gold">
-            <span>🪪 PERSONAL DESTINY IDENTITY CARD</span>
+            <CreditCard className="h-3.5 w-3.5" />
+            <span>PERSONAL DESTINY IDENTITY CARD</span>
           </div>
           <h1 className="font-display text-3xl font-bold tracking-tight text-foreground md:text-5xl">
             บัตรชะตาชีวิต<span className="text-gradient-gold">ดิจิทัล</span>
@@ -212,19 +214,31 @@ export function DestinyCardPage() {
             {/* Card Matrix Information */}
             <div className="grid grid-cols-2 gap-3 rounded-2xl border border-gold/15 bg-gold/5 p-4 text-xs">
               <div>
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">🎨 สีมงคลคู่ชีพ</span>
+                <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+                  <Palette className="h-3 w-3 text-gold" />
+                  สีมงคลคู่ชีพ
+                </span>
                 <p className="font-semibold text-foreground mt-0.5">{luckyData.colors.join(", ")}</p>
               </div>
               <div>
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">🔢 เลขนำโชคตลอดชีพ</span>
+                <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+                  <Hash className="h-3 w-3 text-gold" />
+                  เลขนำโชคตลอดชีพ
+                </span>
                 <p className="font-semibold text-gold mt-0.5">{luckyData.numbers}</p>
               </div>
               <div>
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">💎 อัญมณีหนุนดวง</span>
+                <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+                  <Gem className="h-3 w-3 text-gold" />
+                  อัญมณีหนุนดวง
+                </span>
                 <p className="font-semibold text-foreground mt-0.5">{luckyData.gems}</p>
               </div>
               <div>
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">⛩️ เทพคุ้มครองประจำดวง</span>
+                <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+                  <Sparkles className="h-3 w-3 text-gold" />
+                  เทพคุ้มครองประจำดวง
+                </span>
                 <p className="font-semibold text-gold mt-0.5 line-clamp-1">{guardian.name}</p>
               </div>
             </div>
@@ -266,7 +280,8 @@ export function DestinyCardPage() {
               onClick={() => setShareModalOpen(true)}
               className="inline-flex items-center gap-2 rounded-xl bg-gradient-gold px-6 py-3 text-sm font-bold text-stone-950 shadow-gold transition hover:opacity-90"
             >
-              <span>📲 บันทึกบัตรชะตาชีวิต Story (9:16)</span>
+              <Share2 className="h-4 w-4" />
+              <span>บันทึกบัตรชะตาชีวิต Story (9:16)</span>
             </button>
           </div>
         </section>

@@ -55,10 +55,10 @@ export function classifyDeityGroup(
   const combined = `${title} ${category} ${tags.join(" ")}`.toLowerCase();
 
   if (combined.includes("caishen") || combined.includes("ไฉ่ซิง") || combined.includes("god of wealth")) {
-    return { group: "caishen", label: "💰 เทพเจ้าไฉ่ซิงเอี้ย (โชคลาภ)" };
+    return { group: "caishen", label: "เทพเจ้าไฉ่ซิงเอี้ย (โชคลาภ)" };
   }
   if (combined.includes("vessavana") || combined.includes("เวสสุวรรณ") || combined.includes("ท้าวเวส")) {
-    return { group: "vessavana", label: "🛡️ ท้าวเวสสุวรรณ (คุ้มครอง & บารมี)" };
+    return { group: "vessavana", label: "ท้าวเวสสุวรรณ (คุ้มครอง & บารมี)" };
   }
   if (
     combined.includes("lakshmi") ||
@@ -66,15 +66,15 @@ export function classifyDeityGroup(
     combined.includes("goddess of fortune") ||
     combined.includes("fortune goddess")
   ) {
-    return { group: "lakshmi", label: "🌸 พระแม่ลักษมี & พระแม่ประทานทรัพย์ (ความรัก & มั่งคั่ง)" };
+    return { group: "lakshmi", label: "พระแม่ลักษมี & พระแม่ประทานทรัพย์ (ความรัก & มั่งคั่ง)" };
   }
   if (combined.includes("ganesha") || combined.includes("พิฆเนศ") || combined.includes("คเณศ")) {
-    return { group: "ganesha", label: "🐘 พระพิฆเนศ (ปัญญา & สำเร็จ)" };
+    return { group: "ganesha", label: "พระพิฆเนศ (ปัญญา & สำเร็จ)" };
   }
   if (combined.includes("koi") || combined.includes("คาร์ฟ") || combined.includes("ปลาคราฟ")) {
-    return { group: "koi", label: "🐟 ปลาคาร์ฟมงคล (อุดมสมบูรณ์)" };
+    return { group: "koi", label: "ปลาคาร์ฟมงคล (อุดมสมบูรณ์)" };
   }
-  return { group: "spiritual", label: "🌟 มงคล & สิ่งศักดิ์สิทธิ์" };
+  return { group: "spiritual", label: "มงคล & สิ่งศักดิ์สิทธิ์" };
 }
 
 export function flattenWallpapers(collections: NineJoeCollection[]): NineJoeWallpaperItem[] {
@@ -100,7 +100,7 @@ export function flattenWallpapers(collections: NineJoeCollection[]): NineJoeWall
         collectionId: c.id,
         collectionSlug: c.slug,
         collectionTitle: c.title,
-        collectionCategory: c.category || "🌟 Spiritual Art",
+        collectionCategory: c.category || "Spiritual Art",
         description: c.description || "",
         imageUrl: imgUrl,
         thumbnailUrl: img.thumbnail_url || imgUrl,
@@ -160,7 +160,7 @@ export const FALLBACK_COLLECTIONS: NineJoeCollection[] = [
     id: "adbb8fe8-ffe5-417d-b7e5-bd51e56c635a",
     slug: "caishen-god-of-wealth-wallpapers-collection",
     title: "Caishen God of Wealth Wallpapers Collection",
-    category: "🌟 Spiritual Art",
+    category: "Spiritual Art",
     description: "วอลเปเปอร์เทพเจ้าไฉ่ซิงเอี้ย เทพแห่งโชคลาภและความมั่งคั่งร่ำรวย ออกแบบในสไตล์ลักชูรีทองคำ เสริมฮวงจุ้ยการเงินและธุรกิจการค้า",
     cover_image: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780544132/ChatGPT_Image_4_%E0%B8%A1%E0%B8%B4.%E0%B8%A2._2569_10_35_03_rrfoln.png",
     tags: ["caishen", "god of wealth", "prosperity", "fortune", "lucky wallpaper", "gold"],
@@ -176,7 +176,7 @@ export const FALLBACK_COLLECTIONS: NineJoeCollection[] = [
     id: "618cc18f-171e-4686-b69d-036d8ecdd99b",
     slug: "vessavana-guardian-wallpapers-collection",
     title: "Vessavana Guardian Wallpapers Collection",
-    category: "🌟 Spiritual Art",
+    category: "Spiritual Art",
     description: "คอลเลกชันวอลเปเปอร์ท้าวเวสสุวรรณ 3 สี 3 พลัง สำหรับสายมูที่ต้องการเสริมโชคลาภ การเงิน การงาน และการคุ้มครอง ภาพคมชัดระดับ HD",
     cover_image: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780317703/ChatGPT_Image_1_%E0%B8%A1%E0%B8%B4.%E0%B8%A2._2569_19_41_16_xvy9dm.png",
     tags: ["ท้าวเวสสุวรรณ", "วอลเปเปอร์สายมู", "วอลเปเปอร์มงคล", "protection", "wealth"],
@@ -190,7 +190,7 @@ export const FALLBACK_COLLECTIONS: NineJoeCollection[] = [
     id: "03f23e18-128b-47e4-9e06-97378a55ad52",
     slug: "lakshmi-3d-chibi-premium-wallpapers",
     title: "Lakshmi 3D Chibi Premium Wallpapers",
-    category: "🌟 Spiritual Art",
+    category: "Spiritual Art",
     description: "วอลเปเปอร์พระแม่ลักษมี 3D Chibi พรีเมียม เสริมความรัก มหาเสน่ห์ ความร่ำรวย และความโชคดี อ่อนหวานแต่เปี่ยมด้วยพลังศักดิ์สิทธิ์",
     cover_image: "https://res.cloudinary.com/dhhzjeskm/image/upload/v1782308479/ChatGPT_Image_Jun_24_2026_08_38_29_PM_erlrsb.png",
     tags: ["lakshmi", "goddess lakshmi", "chibi art", "3d wallpaper", "love", "wealth"],
@@ -207,7 +207,7 @@ export const FALLBACK_COLLECTIONS: NineJoeCollection[] = [
     id: "4125b195-fdd9-4011-83a7-1d28f55f13be",
     slug: "lucky-koi-collection-6-fortune-colors-wallpapers",
     title: "Lucky Koi Collection – 6 Fortune Colors Wallpapers",
-    category: "🌟 Spiritual Art",
+    category: "Spiritual Art",
     description: "ปลาคาร์ฟนำโชค 6 สีมงคล เสริมความอุดมสมบูรณ์ การเงินไหลมาเทมา และความสุขในครอบครัวตามศาสตร์ฮวงจุ้ย",
     cover_image: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1781324411/ChatGPT_Image_Jun_13_2026_11_19_46_AM_ggsnhm.png",
     tags: ["koi fish", "lucky koi", "fortune", "prosperity", "abundance", "feng shui"],
@@ -224,7 +224,7 @@ export const FALLBACK_COLLECTIONS: NineJoeCollection[] = [
     id: "e61ee207-a220-4ade-ad17-292c5162b4e9",
     slug: "luxury-ganesha-wallpapers-collection",
     title: "Luxury Ganesha Wallpapers Collection",
-    category: "🌟 Spiritual Art",
+    category: "Spiritual Art",
     description: "วอลเปเปอร์พระพิฆเนศ ลักชูรีโกลด์ ดีไซน์หรูหราสง่างาม ประดับด้วยลวดลายดอกบัวและประกายคริสตัล เสริมความสำเร็จและขจัดอุปสรรคทั้งปวง",
     cover_image: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780237287/ChatGPT_Image_31_%E0%B8%9E.%E0%B8%84._2569_21_21_14_aimgla.png",
     tags: ["ganesha", "lord ganesha", "luxury wallpaper", "gold", "prosperity"],
@@ -238,7 +238,7 @@ export const FALLBACK_COLLECTIONS: NineJoeCollection[] = [
     id: "3f908282-c2a6-4259-abf6-115d1f77d9c4",
     slug: "ganesha-3d-lucky-wallpapers-6-auspicious-colors-collection",
     title: "Ganesha 3D Lucky Wallpapers - 6 Auspicious Colors Collection",
-    category: "🌟 Spiritual Art",
+    category: "Spiritual Art",
     description: "พระพิฆเนศ 3D สไตล์น่ารัก 6 สีมงคลประจำวันเกิด เสริมโชคลาภ เมตตามหานิยม และการสอบผ่าน/งานราบรื่น",
     cover_image: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780932960/ChatGPT_Image_Jun_8_2026_10_35_44_PM_megxnj.png",
     tags: ["ganesha", "3d", "lucky wallpaper", "colors", "baby ganesha"],
@@ -255,7 +255,7 @@ export const FALLBACK_COLLECTIONS: NineJoeCollection[] = [
     id: "8c4b5ef9-2eb0-4be4-aa42-f874e44e1f6a",
     slug: "lakshmi-blessed-wallpapers-collection-2026",
     title: "Lakshmi Blessed Wallpapers Collection 2026",
-    category: "🌟 Spiritual Art",
+    category: "Spiritual Art",
     description: "พระแม่ลักษมีประทานพร ดีไซน์โรสโกลด์ ไวท์โกลด์ และเทอร์ควอยซ์ เสริมเสน่ห์ ความรัก และความมั่งคั่งอย่างงดงาม",
     cover_image: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780382285/ChatGPT_Image_2_%E0%B8%A1%E0%B8%B4.%E0%B8%A2._2569_13_37_21_f6feje.png",
     tags: ["lakshmi", "blessed", "rose-gold", "love", "wealth"],
@@ -270,7 +270,7 @@ export const FALLBACK_COLLECTIONS: NineJoeCollection[] = [
     id: "b876b035-1325-496b-a823-dc56ecc42883",
     slug: "goddess-of-fortune-3d-premium-pink-collection",
     title: "Goddess of Fortune 3D Premium Pink Collection",
-    category: "🌟 Spiritual Art",
+    category: "Spiritual Art",
     description: "พระแม่ประทานทรัพย์ 3D พรีเมียม พิงค์โกลด์ เสริมโชคลาภ เงินทอง และความอ่อนโยนเปี่ยมเมตตา",
     cover_image: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1781190135/ChatGPT_Image_Jun_11_2026_09_56_29_PM_zdd67q.png",
     tags: ["goddess of fortune", "3d", "pink", "wealth", "prosperity"],
@@ -285,7 +285,7 @@ export const FALLBACK_COLLECTIONS: NineJoeCollection[] = [
     id: "ce984c2b-b563-4976-a4c0-b12f76813373",
     slug: "cute-ganesha-premium-wallpapers-collection",
     title: "Cute Ganesha Premium Wallpapers Collection",
-    category: "🌟 Spiritual Art",
+    category: "Spiritual Art",
     description: "วอลเปเปอร์พระพิฆเนศ ลักชูรีพาสเทล 3D ศักดิ์สิทธิ์ เสริมความสำเร็จ ปัญญา ความมั่งคั่ง และเมตตามหานิยม",
     cover_image: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780753189/ChatGPT_Image_6_%E0%B8%A1%E0%B8%B4.%E0%B8%A2._2569_20_38_15_uo28kb.png",
     tags: ["ganesha", "cute ganesha", "wallpaper", "spiritual", "prosperity", "wealth", "luxury", "3d art"],
@@ -301,7 +301,7 @@ export const FALLBACK_COLLECTIONS: NineJoeCollection[] = [
     id: "7a84bf1e-ecec-4e32-8581-eb140c3f2498",
     slug: "cute-ganesha-wallpapers-6-auspicious-color-collection",
     title: "Cute Ganesha Wallpapers – 6 Auspicious Color Collection",
-    category: "🌟 Spiritual Art",
+    category: "Spiritual Art",
     description: "พระพิฆเนศ 6 สีมงคลประจำวันเกิด เสริมดวงชะตารอบด้าน ค้าขายคล่อง การงานราบรื่น ปัดเป่าอุปสรรคทั้งปวง",
     cover_image: "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780644605/ChatGPT_Image_5_%E0%B8%A1%E0%B8%B4.%E0%B8%A2._2569_14_28_14_yc2vys.png",
     tags: ["ganesha", "lucky colors", "auspicious", "wallpaper", "spiritual", "success"],

@@ -8,6 +8,7 @@ import {
 } from "@/lib/chinese-calendar";
 import { ShareStoryModal, type ShareCardData } from "@/components/share-story-modal";
 import { useState } from "react";
+import { Share2, ChevronLeft, ChevronRight, Check, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/auspicious-calendar")({
   head: () =>
@@ -84,11 +85,11 @@ function AuspiciousCalendarPage() {
         title: `ฤกษ์ดี ${activeDay.thaiDateString}`,
         subtitle: `พลังงาน${activeDay.dayQuality} · ${activeDay.elementEnergy}`,
         highlights: [
-          { label: "⭐ คุณภาพวัน", value: `วัน${activeDay.dayQuality}`, color: activeDay.dayQuality === "ธงชัย" ? "#fbbf24" : "#34d399" },
-          { label: "⏰ ฤกษ์มงคล", value: activeDay.luckyHours, color: "#fef08a" },
-          { label: "🧭 ทิศมงคล", value: activeDay.luckyDirection },
-          { label: "⚡ ชงกับปี", value: activeDay.clashZodiac, color: "#f87171" },
-          { label: "✨ กิจกรรมเด่น", value: activeDay.goodActivities.slice(0, 3).join(", ") },
+          { label: "คุณภาพวัน", value: `วัน${activeDay.dayQuality}`, color: activeDay.dayQuality === "ธงชัย" ? "#fbbf24" : "#34d399" },
+          { label: "ฤกษ์มงคล", value: activeDay.luckyHours, color: "#fef08a" },
+          { label: "ทิศมงคล", value: activeDay.luckyDirection },
+          { label: "ชงกับปี", value: activeDay.clashZodiac, color: "#f87171" },
+          { label: "กิจกรรมเด่น", value: activeDay.goodActivities.slice(0, 3).join(", ") },
         ],
         quote: `วัน${activeDay.thaiDateString} เป็น${activeDay.dayQuality} เหมาะแก่การ${activeDay.goodActivities.slice(0, 2).join(" และ ")}`,
         footerTag: "เช็คปฏิทินฤกษ์มงคลได้ที่ www.likhitfa.online",
@@ -142,9 +143,10 @@ function AuspiciousCalendarPage() {
           <div className="glass-strong flex items-center justify-between rounded-2xl p-4">
             <button
               onClick={handlePrevMonth}
-              className="rounded-xl border border-border px-4 py-2 text-xs text-muted-foreground transition hover:border-gold hover:text-gold"
+              className="inline-flex items-center gap-1 rounded-xl border border-border px-4 py-2 text-xs text-muted-foreground transition hover:border-gold hover:text-gold"
             >
-              ← เดือนก่อนหน้า
+              <ChevronLeft className="h-4 w-4" />
+              <span>เดือนก่อนหน้า</span>
             </button>
             <div className="text-center">
               <h2 className="font-display text-xl text-foreground">
@@ -154,9 +156,10 @@ function AuspiciousCalendarPage() {
             </div>
             <button
               onClick={handleNextMonth}
-              className="rounded-xl border border-border px-4 py-2 text-xs text-muted-foreground transition hover:border-gold hover:text-gold"
+              className="inline-flex items-center gap-1 rounded-xl border border-border px-4 py-2 text-xs text-muted-foreground transition hover:border-gold hover:text-gold"
             >
-              เดือนถัดไป →
+              <span>เดือนถัดไป</span>
+              <ChevronRight className="h-4 w-4" />
             </button>
           </div>
 
@@ -267,7 +270,8 @@ function AuspiciousCalendarPage() {
                 onClick={() => setIsShareOpen(true)}
                 className="inline-flex items-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-4 py-2 text-xs font-semibold text-gold hover:bg-gold/20"
               >
-                <span>🖼️ แชร์การ์ดฤกษ์วันนี้</span>
+                <Share2 className="h-4 w-4" />
+                <span>แชร์การ์ดฤกษ์วันนี้</span>
               </button>
             </div>
 
@@ -299,7 +303,10 @@ function AuspiciousCalendarPage() {
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/15 p-5">
-                <div className="text-xs font-semibold text-emerald-400">✅ กิจกรรมที่ส่งเสริม (ควรทำ)</div>
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
+                  <Check className="h-4 w-4 shrink-0" />
+                  <span>กิจกรรมที่ส่งเสริม (ควรทำ)</span>
+                </div>
                 <ul className="mt-2.5 space-y-1.5 text-xs text-emerald-200/90">
                   {activeDay.goodActivities.map((g, i) => (
                     <li key={i}>• {g}</li>
@@ -308,7 +315,10 @@ function AuspiciousCalendarPage() {
               </div>
 
               <div className="rounded-2xl border border-rose-500/30 bg-rose-950/15 p-5">
-                <div className="text-xs font-semibold text-rose-400">⚠️ กิจกรรมที่ควรระวังหรือหลีกเลี่ยง</div>
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-rose-400">
+                  <AlertTriangle className="h-4 w-4 shrink-0" />
+                  <span>กิจกรรมที่ควรระวังหรือหลีกเลี่ยง</span>
+                </div>
                 <ul className="mt-2.5 space-y-1.5 text-xs text-rose-200/90">
                   {activeDay.badActivities.map((b, i) => (
                     <li key={i}>• {b}</li>
