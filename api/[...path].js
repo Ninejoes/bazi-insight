@@ -33,6 +33,27 @@ const rateLimitBuckets = new Map();
 const BLOCKED_DREAM_IDS = new Set(["9cc47d6f-0f65-4c3a-86ed-cbcb98e36622"]);
 const BLOCKED_DREAM_CATEGORIES = new Set(["developer"]);
 
+const INDEXNOW_KEY = "4c98f82877a94b8ea1625902b7da8392";
+
+async function pingIndexNow(urls = []) {
+  if (!urls || urls.length === 0) return;
+  try {
+    const payload = {
+      host: "www.likhitfa.online",
+      key: INDEXNOW_KEY,
+      keyLocation: `https://www.likhitfa.online/${INDEXNOW_KEY}.txt`,
+      urlList: urls,
+    };
+    await fetch("https://api.indexnow.org/indexnow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify(payload),
+    }).catch(() => null);
+  } catch {
+    // Non-blocking background ping
+  }
+}
+
 async function rest(path, init = {}) {
   try {
     const { url, serviceKey } = requireConfig();
@@ -1086,6 +1107,7 @@ async function articles(req, res) {
       summary: article.title,
       metadata: { category: article.category },
     });
+    void pingIndexNow([`https://www.likhitfa.online/articles/${article.slug}`]);
     return send(res, 200, {
       ok: true,
       source: "supabase",
@@ -1769,10 +1791,17 @@ async function cronAutoArticle(req, res) {
         results.push({ ok: false, slot: s, error: err instanceof Error ? err.message : String(err) });
       }
     }
+    const createdUrls = results
+      .filter((r) => r.ok && r.action === "created")
+      .map((r) => `https://www.likhitfa.online/articles/${r.slug}`);
+    if (createdUrls.length > 0) void pingIndexNow(createdUrls);
     return send(res, 200, { ok: true, batch: true, results });
   }
 
   const result = await generateLuckyNumberArticle({ slot, force, targetDate }, rest);
+  if (result.ok && result.action === "created") {
+    void pingIndexNow([`https://www.likhitfa.online/articles/${result.slug}`]);
+  }
   return send(res, 200, { ok: true, result });
 }
 

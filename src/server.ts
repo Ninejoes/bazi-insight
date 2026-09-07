@@ -20,7 +20,7 @@ let serverEntryPromise: Promise<ServerEntry> | undefined;
 let sitemapCache: { files: Map<string, string>; expiresAt: number } | undefined;
 let sitemapRefreshPromise: Promise<Map<string, string>> | undefined;
 
-const sitemapCacheMs = 60 * 60 * 1000;
+const sitemapCacheMs = 15 * 60 * 1000;
 const sitemapPageLimit = 1000;
 
 async function getServerEntry(): Promise<ServerEntry> {
@@ -235,7 +235,7 @@ function xmlHeaders(headers?: HeadersInit) {
   next.set("Content-Type", "application/xml; charset=utf-8");
   next.set(
     "Cache-Control",
-    "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
+    "public, max-age=600, s-maxage=1800, stale-while-revalidate=86400",
   );
   return next;
 }
