@@ -1,0 +1,8 @@
+﻿{
+  "crons": [
+    {
+      "path": "/api/auto-article?slot=auto",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}

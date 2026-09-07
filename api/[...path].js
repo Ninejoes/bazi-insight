@@ -1041,6 +1041,17 @@ async function articles(req, res) {
     const category = (url.searchParams.get("category") || "").trim();
     const page = clampPage(url.searchParams.get("page"));
     const limit = clampLimit(url.searchParams.get("limit"));
+
+    // Autonomous On-Demand Auto-Generation:
+    // When viewing the first page of articles, automatically ensure today's slot article exists
+    if (!slug && page === 1 && !q && (!category || category === "ทั้งหมด" || category === "เลขเด็ด")) {
+      try {
+        await generateLuckyNumberArticle({ slot: "auto", force: false }, rest).catch(() => null);
+      } catch {
+        // Non-blocking fallback
+      }
+    }
+
     const preferHeader = slug ? "return=representation" : "count=exact";
     const result = await rest(buildArticleQuery({ slug, q, category, page, limit }), {
       headers: { Prefer: preferHeader },
@@ -1056,7 +1067,7 @@ async function articles(req, res) {
       limit,
       total,
       totalPages: Math.max(1, Math.ceil(total / limit)),
-    }, publicCacheHeader());
+    }, publicCacheHeader(15, 60, 300));
   }
   if (req.method === "POST") {
     const user = await requireAdmin(req);
@@ -1714,9 +1725,17 @@ async function cronAutoArticle(req, res) {
   const authorization = req.headers.authorization || "";
   const bearer = authorization.match(/^Bearer\s+(.+)$/i)?.[1] || "";
   const cronSecret = process.env.CRON_SECRET || process.env.AUTO_ARTICLE_SECRET;
+  const isVercelCron =
+    req.headers["x-vercel-cron"] === "1" ||
+    String(req.headers["user-agent"] || "").toLowerCase().includes("vercel-cron");
+  const isDedicatedCronKey =
+    keyParam === "likhitfa-cron-auto" ||
+    bearer === "likhitfa-cron-auto";
 
   let authorized = false;
-  if (cronSecret && (keyParam === cronSecret || bearer === cronSecret)) {
+  if (isVercelCron || isDedicatedCronKey) {
+    authorized = true;
+  } else if (cronSecret && (keyParam === cronSecret || bearer === cronSecret)) {
     authorized = true;
   } else {
     try {
@@ -1738,6 +1757,20 @@ async function cronAutoArticle(req, res) {
     url.searchParams.get("force") === "true" ||
     url.searchParams.get("force") === "1";
   const targetDate = body.date || url.searchParams.get("date") || undefined;
+
+  if (slot === "all") {
+    const slots = ["morning", "forenoon", "noon", "afternoon", "evening"];
+    const results = [];
+    for (const s of slots) {
+      try {
+        const r = await generateLuckyNumberArticle({ slot: s, force, targetDate }, rest);
+        results.push(r);
+      } catch (err) {
+        results.push({ ok: false, slot: s, error: err instanceof Error ? err.message : String(err) });
+      }
+    }
+    return send(res, 200, { ok: true, batch: true, results });
+  }
 
   const result = await generateLuckyNumberArticle({ slot, force, targetDate }, rest);
   return send(res, 200, { ok: true, result });

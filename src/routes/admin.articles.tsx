@@ -31,7 +31,7 @@ function AdminArticles() {
   const [savingAction, setSavingAction] = useState("");
   const [autoGenerating, setAutoGenerating] = useState(false);
   const [showAutoModal, setShowAutoModal] = useState(false);
-  const [selectedSlot, setSelectedSlot] = useState<"auto" | "morning" | "forenoon" | "noon" | "afternoon" | "evening">("auto");
+  const [selectedSlot, setSelectedSlot] = useState<"auto" | "all" | "morning" | "forenoon" | "noon" | "afternoon" | "evening">("auto");
   const [forceOverwrite, setForceOverwrite] = useState(false);
 
   useEffect(() => {
@@ -126,11 +126,24 @@ function AdminArticles() {
         }),
       });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok || !data.ok || !data.result) {
+      if (!response.ok || !data.ok) {
         setNotice(friendlyErrorMessage(data.error, "สร้างบทความอัตโนมัติไม่สำเร็จ"));
         return;
       }
       await reload();
+      if (data.batch && Array.isArray(data.results)) {
+        const createdCount = data.results.filter((r: { action?: string }) => r.action === "created").length;
+        const skippedCount = data.results.filter((r: { action?: string }) => r.action === "skipped").length;
+        const msg = `สร้างบทความเสร็จสิ้น: สร้างใหม่ ${createdCount} รอบ, มีอยู่แล้ว ${skippedCount} รอบ`;
+        setNotice(msg);
+        setShowAutoModal(false);
+        window.alert(msg);
+        return;
+      }
+      if (!data.result) {
+        setNotice(friendlyErrorMessage(data.error, "สร้างบทความอัตโนมัติไม่สำเร็จ"));
+        return;
+      }
       const actionText =
         data.result.action === "created"
           ? "สร้างบทความใหม่สำเร็จ"
@@ -203,6 +216,7 @@ function AdminArticles() {
               <label className="text-xs font-medium text-muted-foreground">เลือกรอบเวลาที่ต้องการสร้าง:</label>
               <div className="grid grid-cols-1 gap-2">
                 {[
+                  { value: "all", label: "🌟 สร้างครบทุกรอบของวันนี้ (5 รอบรวด: เช้า สาย เที่ยง บ่าย เย็น)" },
                   { value: "auto", label: "อัตโนมัติ (ตามเวลาปัจจุบัน)" },
                   { value: "morning", label: "รอบเช้า 07:00 น. (เลขมงคลเปิดวัน & เลขกำลังวัน)" },
                   { value: "forenoon", label: "รอบสาย 10:00 น. (เลขปฏิทินจีน & เซียมซีมงคล)" },
@@ -241,6 +255,16 @@ function AdminArticles() {
               />
               <span>บังคับเขียนทับบทความเดิม (กรณีมีบทความในรอบนี้อยู่แล้ว)</span>
             </label>
+
+            <div className="rounded-2xl border border-gold/20 bg-gold/5 p-3 text-[11px] text-muted-foreground space-y-1.5">
+              <div className="font-semibold text-gold flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>สถานะระบบอัตโนมัติ (Automated Status)</span>
+              </div>
+              <p>• <strong>On-Demand:</strong> ระบบตรวจสอบและสร้างบทความรอบปัจจุบันให้อัตโนมัติทันทีเมื่อมีผู้เข้าชมเว็บไซต์</p>
+              <p>• <strong>Vercel Cron:</strong> ตั้งเวลาทำงานรอบ 07:00 น. ทุกวันอัตโนมัติ</p>
+              <p className="truncate">• <strong>Webhook URL:</strong> <code className="text-[10px] text-gold select-all">https://www.likhitfa.online/api/auto-article?key=likhitfa-cron-auto</code></p>
+            </div>
 
             <div className="flex justify-end gap-2 pt-3 border-t border-gold/10">
               <button
