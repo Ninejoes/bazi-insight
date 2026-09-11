@@ -36,12 +36,18 @@ export function seo({
   const imageUrl = image.startsWith("http")
     ? image
     : `${SITE_URL}${image.startsWith("/") ? image : `/${image}`}`;
-  const fullTitle = title.includes("Likhitfa") ? title : `${title} — ${SITE_NAME}`;
+  const hasBrand = title.includes("Likhitfa") || title.includes("ลิขิตฟ้า");
+  const fullTitle = hasBrand ? title : `${title} — ${SITE_NAME}`;
   const meta = [
     { title: fullTitle },
     { name: "description", content: description },
     { name: "keywords", content: keywords.join(", ") },
-    { name: "robots", content: noindex ? "noindex,nofollow" : "index,follow,noarchive" },
+    {
+      name: "robots",
+      content: noindex
+        ? "noindex,nofollow"
+        : "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1",
+    },
     { property: "og:site_name", content: SITE_NAME },
     { property: "og:locale", content: "th_TH" },
     { property: "og:type", content: type },

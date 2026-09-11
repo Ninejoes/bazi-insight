@@ -1,3 +1,92 @@
+# Likhitfa Robots.txt — https://www.likhitfa.online
+# Allowed Search Engines (SEO)
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: Yandex
+Allow: /
+
+# Block AI crawlers, scrapers, and LLM training bots
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: Meta-ExternalAgent
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: Omgilibot
+Disallow: /
+
+User-agent: ImagesiftBot
+Disallow: /
+
+# Block automated website copiers and offline harvesters
+User-agent: Scrapy
+Disallow: /
+
+User-agent: HTTrack
+Disallow: /
+
+User-agent: Wget
+Disallow: /
+
+User-agent: SiteSucker
+Disallow: /
+
+User-agent: TeleportPro
+Disallow: /
+
+User-agent: WebCopier
+Disallow: /
+
+User-agent: Offline Explorer
+Disallow: /
+
+# Default rules for other search engines
 User-agent: *
 Allow: /
 Disallow: /admin
@@ -6,32 +95,5 @@ Disallow: /login
 Disallow: /register
 Disallow: /profile
 Disallow: /api/
-
-Allow: /api/articles
-Allow: /api/dreams
-Allow: /api/faqs
-Allow: /api/site-content
-
-# Block automated website copiers, offline scrapers, and clone harvesters
-User-agent: HTTrack
-Disallow: /
-
-User-agent: Wget
-Disallow: /
-
-User-agent: Scrapy
-Disallow: /
-
-User-agent: WebCopier
-Disallow: /
-
-User-agent: TeleportPro
-Disallow: /
-
-User-agent: SiteSucker
-Disallow: /
-
-User-agent: Offline Explorer
-Disallow: /
 
 Sitemap: https://www.likhitfa.online/sitemap.xml

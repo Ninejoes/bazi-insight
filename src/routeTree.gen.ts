@@ -9,22 +9,30 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ZodiacRouteImport } from './routes/zodiac'
+import { Route as WallpaperRouteImport } from './routes/wallpaper'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TarotRouteImport } from './routes/tarot'
+import { Route as TaiSuiRouteImport } from './routes/tai-sui'
+import { Route as SiamsiRouteImport } from './routes/siamsi'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PhoneAnalysisRouteImport } from './routes/phone-analysis'
+import { Route as NameAnalysisRouteImport } from './routes/name-analysis'
+import { Route as LuckyColorsRouteImport } from './routes/lucky-colors'
+import { Route as LoveCompatibilityRouteImport } from './routes/love-compatibility'
 import { Route as LotteryRouteImport } from './routes/lottery'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as LifeGraphRouteImport } from './routes/life-graph'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as DreamRouteImport } from './routes/dream'
+import { Route as DestinyCardgRouteImport } from './routes/destiny-cardg'
+import { Route as DestinyCardRouteImport } from './routes/destiny-card'
+import { Route as DailyHubRouteImport } from './routes/daily-hub'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BaziRouteImport } from './routes/bazi'
 import { Route as AuspiciousCalendarRouteImport } from './routes/auspicious-calendar'
-import { Route as LuckyColorsRouteImport } from './routes/lucky-colors'
-import { Route as NameAnalysisRouteImport } from './routes/name-analysis'
-import { Route as PhoneAnalysisRouteImport } from './routes/phone-analysis'
-import { Route as SiamsiRouteImport } from './routes/siamsi'
-import { Route as TaiSuiRouteImport } from './routes/tai-sui'
-import { Route as WallpaperRouteImport } from './routes/wallpaper'
 import { Route as ArticlesRouteImport } from './routes/articles'
 import { Route as AdminLoginRouteImport } from './routes/admin-login'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -50,11 +58,11 @@ import { Route as ApiLeadsRouteImport } from './routes/api.leads'
 import { Route as ApiFaqsRouteImport } from './routes/api.faqs'
 import { Route as ApiDreamsRouteImport } from './routes/api.dreams'
 import { Route as ApiDashboardRouteImport } from './routes/api.dashboard'
+import { Route as ApiCronAutoArticleRouteImport } from './routes/api.cron-auto-article'
 import { Route as ApiContactMessagesRouteImport } from './routes/api.contact-messages'
+import { Route as ApiAutoArticleRouteImport } from './routes/api.auto-article'
 import { Route as ApiAuditEventsRouteImport } from './routes/api.audit-events'
 import { Route as ApiArticlesRouteImport } from './routes/api.articles'
-import { Route as ApiAutoArticleRouteImport } from './routes/api.auto-article'
-import { Route as ApiCronAutoArticleRouteImport } from './routes/api.cron-auto-article'
 import { Route as ApiAdminUsersRouteImport } from './routes/api.admin-users'
 import { Route as ApiAdminSessionRouteImport } from './routes/api.admin-session'
 import { Route as ApiAdminLoginRouteImport } from './routes/api.admin-login'
@@ -66,9 +74,34 @@ import { Route as AdminContactRouteImport } from './routes/admin.contact'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminArticlesRouteImport } from './routes/admin.articles'
 
+const ZodiacRoute = ZodiacRouteImport.update({
+  id: '/zodiac',
+  path: '/zodiac',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WallpaperRoute = WallpaperRouteImport.update({
+  id: '/wallpaper',
+  path: '/wallpaper',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TarotRoute = TarotRouteImport.update({
   id: '/tarot',
   path: '/tarot',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TaiSuiRoute = TaiSuiRouteImport.update({
+  id: '/tai-sui',
+  path: '/tai-sui',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SiamsiRoute = SiamsiRouteImport.update({
+  id: '/siamsi',
+  path: '/siamsi',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -81,6 +114,31 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PhoneAnalysisRoute = PhoneAnalysisRouteImport.update({
+  id: '/phone-analysis',
+  path: '/phone-analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NameAnalysisRoute = NameAnalysisRouteImport.update({
+  id: '/name-analysis',
+  path: '/name-analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LuckyColorsRoute = LuckyColorsRouteImport.update({
+  id: '/lucky-colors',
+  path: '/lucky-colors',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoveCompatibilityRoute = LoveCompatibilityRouteImport.update({
+  id: '/love-compatibility',
+  path: '/love-compatibility',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LotteryRoute = LotteryRouteImport.update({
   id: '/lottery',
   path: '/lottery',
@@ -91,6 +149,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LifeGraphRoute = LifeGraphRouteImport.update({
+  id: '/life-graph',
+  path: '/life-graph',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HelpRoute = HelpRouteImport.update({
   id: '/help',
   path: '/help',
@@ -99,6 +162,21 @@ const HelpRoute = HelpRouteImport.update({
 const DreamRoute = DreamRouteImport.update({
   id: '/dream',
   path: '/dream',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DestinyCardgRoute = DestinyCardgRouteImport.update({
+  id: '/destiny-cardg',
+  path: '/destiny-cardg',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DestinyCardRoute = DestinyCardRouteImport.update({
+  id: '/destiny-card',
+  path: '/destiny-card',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DailyHubRoute = DailyHubRouteImport.update({
+  id: '/daily-hub',
+  path: '/daily-hub',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -114,36 +192,6 @@ const BaziRoute = BaziRouteImport.update({
 const AuspiciousCalendarRoute = AuspiciousCalendarRouteImport.update({
   id: '/auspicious-calendar',
   path: '/auspicious-calendar',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LuckyColorsRoute = LuckyColorsRouteImport.update({
-  id: '/lucky-colors',
-  path: '/lucky-colors',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NameAnalysisRoute = NameAnalysisRouteImport.update({
-  id: '/name-analysis',
-  path: '/name-analysis',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PhoneAnalysisRoute = PhoneAnalysisRouteImport.update({
-  id: '/phone-analysis',
-  path: '/phone-analysis',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SiamsiRoute = SiamsiRouteImport.update({
-  id: '/siamsi',
-  path: '/siamsi',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TaiSuiRoute = TaiSuiRouteImport.update({
-  id: '/tai-sui',
-  path: '/tai-sui',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const WallpaperRoute = WallpaperRouteImport.update({
-  id: '/wallpaper',
-  path: '/wallpaper',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArticlesRoute = ArticlesRouteImport.update({
@@ -271,9 +319,19 @@ const ApiDashboardRoute = ApiDashboardRouteImport.update({
   path: '/api/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCronAutoArticleRoute = ApiCronAutoArticleRouteImport.update({
+  id: '/api/cron-auto-article',
+  path: '/api/cron-auto-article',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiContactMessagesRoute = ApiContactMessagesRouteImport.update({
   id: '/api/contact-messages',
   path: '/api/contact-messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAutoArticleRoute = ApiAutoArticleRouteImport.update({
+  id: '/api/auto-article',
+  path: '/api/auto-article',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuditEventsRoute = ApiAuditEventsRouteImport.update({
@@ -284,16 +342,6 @@ const ApiAuditEventsRoute = ApiAuditEventsRouteImport.update({
 const ApiArticlesRoute = ApiArticlesRouteImport.update({
   id: '/api/articles',
   path: '/api/articles',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAutoArticleRoute = ApiAutoArticleRouteImport.update({
-  id: '/api/auto-article',
-  path: '/api/auto-article',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiCronAutoArticleRoute = ApiCronAutoArticleRouteImport.update({
-  id: '/api/cron-auto-article',
-  path: '/api/cron-auto-article',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAdminUsersRoute = ApiAdminUsersRouteImport.update({
@@ -353,22 +401,30 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/admin-login': typeof AdminLoginRoute
   '/articles': typeof ArticlesRouteWithChildren
-  '/bazi': typeof BaziRoute
   '/auspicious-calendar': typeof AuspiciousCalendarRoute
+  '/bazi': typeof BaziRoute
+  '/contact': typeof ContactRoute
+  '/daily-hub': typeof DailyHubRoute
+  '/destiny-card': typeof DestinyCardRoute
+  '/destiny-cardg': typeof DestinyCardgRoute
+  '/dream': typeof DreamRouteWithChildren
+  '/help': typeof HelpRoute
+  '/life-graph': typeof LifeGraphRoute
+  '/login': typeof LoginRoute
+  '/lottery': typeof LotteryRoute
+  '/love-compatibility': typeof LoveCompatibilityRoute
   '/lucky-colors': typeof LuckyColorsRoute
   '/name-analysis': typeof NameAnalysisRoute
   '/phone-analysis': typeof PhoneAnalysisRoute
-  '/siamsi': typeof SiamsiRoute
-  '/tai-sui': typeof TaiSuiRoute
-  '/wallpaper': typeof WallpaperRoute
-  '/contact': typeof ContactRoute
-  '/dream': typeof DreamRouteWithChildren
-  '/help': typeof HelpRoute
-  '/login': typeof LoginRoute
-  '/lottery': typeof LotteryRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRouteWithChildren
   '/register': typeof RegisterRoute
+  '/siamsi': typeof SiamsiRoute
+  '/tai-sui': typeof TaiSuiRoute
   '/tarot': typeof TarotRouteWithChildren
+  '/terms': typeof TermsRoute
+  '/wallpaper': typeof WallpaperRoute
+  '/zodiac': typeof ZodiacRoute
   '/admin/articles': typeof AdminArticlesRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/contact': typeof AdminContactRoute
@@ -380,10 +436,10 @@ export interface FileRoutesByFullPath {
   '/api/admin-session': typeof ApiAdminSessionRoute
   '/api/admin-users': typeof ApiAdminUsersRoute
   '/api/articles': typeof ApiArticlesRoute
-  '/api/auto-article': typeof ApiAutoArticleRoute
-  '/api/cron-auto-article': typeof ApiCronAutoArticleRoute
   '/api/audit-events': typeof ApiAuditEventsRoute
+  '/api/auto-article': typeof ApiAutoArticleRoute
   '/api/contact-messages': typeof ApiContactMessagesRoute
+  '/api/cron-auto-article': typeof ApiCronAutoArticleRoute
   '/api/dashboard': typeof ApiDashboardRoute
   '/api/dreams': typeof ApiDreamsRoute
   '/api/faqs': typeof ApiFaqsRoute
@@ -409,19 +465,27 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin-login': typeof AdminLoginRoute
-  '/bazi': typeof BaziRoute
   '/auspicious-calendar': typeof AuspiciousCalendarRoute
+  '/bazi': typeof BaziRoute
+  '/contact': typeof ContactRoute
+  '/daily-hub': typeof DailyHubRoute
+  '/destiny-card': typeof DestinyCardRoute
+  '/destiny-cardg': typeof DestinyCardgRoute
+  '/help': typeof HelpRoute
+  '/life-graph': typeof LifeGraphRoute
+  '/login': typeof LoginRoute
+  '/lottery': typeof LotteryRoute
+  '/love-compatibility': typeof LoveCompatibilityRoute
   '/lucky-colors': typeof LuckyColorsRoute
   '/name-analysis': typeof NameAnalysisRoute
   '/phone-analysis': typeof PhoneAnalysisRoute
+  '/privacy': typeof PrivacyRoute
+  '/register': typeof RegisterRoute
   '/siamsi': typeof SiamsiRoute
   '/tai-sui': typeof TaiSuiRoute
+  '/terms': typeof TermsRoute
   '/wallpaper': typeof WallpaperRoute
-  '/contact': typeof ContactRoute
-  '/help': typeof HelpRoute
-  '/login': typeof LoginRoute
-  '/lottery': typeof LotteryRoute
-  '/register': typeof RegisterRoute
+  '/zodiac': typeof ZodiacRoute
   '/admin/articles': typeof AdminArticlesRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/contact': typeof AdminContactRoute
@@ -433,10 +497,10 @@ export interface FileRoutesByTo {
   '/api/admin-session': typeof ApiAdminSessionRoute
   '/api/admin-users': typeof ApiAdminUsersRoute
   '/api/articles': typeof ApiArticlesRoute
-  '/api/auto-article': typeof ApiAutoArticleRoute
-  '/api/cron-auto-article': typeof ApiCronAutoArticleRoute
   '/api/audit-events': typeof ApiAuditEventsRoute
+  '/api/auto-article': typeof ApiAutoArticleRoute
   '/api/contact-messages': typeof ApiContactMessagesRoute
+  '/api/cron-auto-article': typeof ApiCronAutoArticleRoute
   '/api/dashboard': typeof ApiDashboardRoute
   '/api/dreams': typeof ApiDreamsRoute
   '/api/faqs': typeof ApiFaqsRoute
@@ -465,22 +529,30 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/admin-login': typeof AdminLoginRoute
   '/articles': typeof ArticlesRouteWithChildren
-  '/bazi': typeof BaziRoute
   '/auspicious-calendar': typeof AuspiciousCalendarRoute
+  '/bazi': typeof BaziRoute
+  '/contact': typeof ContactRoute
+  '/daily-hub': typeof DailyHubRoute
+  '/destiny-card': typeof DestinyCardRoute
+  '/destiny-cardg': typeof DestinyCardgRoute
+  '/dream': typeof DreamRouteWithChildren
+  '/help': typeof HelpRoute
+  '/life-graph': typeof LifeGraphRoute
+  '/login': typeof LoginRoute
+  '/lottery': typeof LotteryRoute
+  '/love-compatibility': typeof LoveCompatibilityRoute
   '/lucky-colors': typeof LuckyColorsRoute
   '/name-analysis': typeof NameAnalysisRoute
   '/phone-analysis': typeof PhoneAnalysisRoute
-  '/siamsi': typeof SiamsiRoute
-  '/tai-sui': typeof TaiSuiRoute
-  '/wallpaper': typeof WallpaperRoute
-  '/contact': typeof ContactRoute
-  '/dream': typeof DreamRouteWithChildren
-  '/help': typeof HelpRoute
-  '/login': typeof LoginRoute
-  '/lottery': typeof LotteryRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRouteWithChildren
   '/register': typeof RegisterRoute
+  '/siamsi': typeof SiamsiRoute
+  '/tai-sui': typeof TaiSuiRoute
   '/tarot': typeof TarotRouteWithChildren
+  '/terms': typeof TermsRoute
+  '/wallpaper': typeof WallpaperRoute
+  '/zodiac': typeof ZodiacRoute
   '/admin/articles': typeof AdminArticlesRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/contact': typeof AdminContactRoute
@@ -492,10 +564,10 @@ export interface FileRoutesById {
   '/api/admin-session': typeof ApiAdminSessionRoute
   '/api/admin-users': typeof ApiAdminUsersRoute
   '/api/articles': typeof ApiArticlesRoute
-  '/api/auto-article': typeof ApiAutoArticleRoute
-  '/api/cron-auto-article': typeof ApiCronAutoArticleRoute
   '/api/audit-events': typeof ApiAuditEventsRoute
+  '/api/auto-article': typeof ApiAutoArticleRoute
   '/api/contact-messages': typeof ApiContactMessagesRoute
+  '/api/cron-auto-article': typeof ApiCronAutoArticleRoute
   '/api/dashboard': typeof ApiDashboardRoute
   '/api/dreams': typeof ApiDreamsRoute
   '/api/faqs': typeof ApiFaqsRoute
@@ -525,22 +597,30 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin-login'
     | '/articles'
-    | '/bazi'
     | '/auspicious-calendar'
+    | '/bazi'
+    | '/contact'
+    | '/daily-hub'
+    | '/destiny-card'
+    | '/destiny-cardg'
+    | '/dream'
+    | '/help'
+    | '/life-graph'
+    | '/login'
+    | '/lottery'
+    | '/love-compatibility'
     | '/lucky-colors'
     | '/name-analysis'
     | '/phone-analysis'
-    | '/siamsi'
-    | '/tai-sui'
-    | '/wallpaper'
-    | '/contact'
-    | '/dream'
-    | '/help'
-    | '/login'
-    | '/lottery'
+    | '/privacy'
     | '/profile'
     | '/register'
+    | '/siamsi'
+    | '/tai-sui'
     | '/tarot'
+    | '/terms'
+    | '/wallpaper'
+    | '/zodiac'
     | '/admin/articles'
     | '/admin/audit'
     | '/admin/contact'
@@ -552,10 +632,10 @@ export interface FileRouteTypes {
     | '/api/admin-session'
     | '/api/admin-users'
     | '/api/articles'
-    | '/api/auto-article'
-    | '/api/cron-auto-article'
     | '/api/audit-events'
+    | '/api/auto-article'
     | '/api/contact-messages'
+    | '/api/cron-auto-article'
     | '/api/dashboard'
     | '/api/dreams'
     | '/api/faqs'
@@ -581,19 +661,27 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin-login'
-    | '/bazi'
     | '/auspicious-calendar'
+    | '/bazi'
+    | '/contact'
+    | '/daily-hub'
+    | '/destiny-card'
+    | '/destiny-cardg'
+    | '/help'
+    | '/life-graph'
+    | '/login'
+    | '/lottery'
+    | '/love-compatibility'
     | '/lucky-colors'
     | '/name-analysis'
     | '/phone-analysis'
+    | '/privacy'
+    | '/register'
     | '/siamsi'
     | '/tai-sui'
+    | '/terms'
     | '/wallpaper'
-    | '/contact'
-    | '/help'
-    | '/login'
-    | '/lottery'
-    | '/register'
+    | '/zodiac'
     | '/admin/articles'
     | '/admin/audit'
     | '/admin/contact'
@@ -605,10 +693,10 @@ export interface FileRouteTypes {
     | '/api/admin-session'
     | '/api/admin-users'
     | '/api/articles'
-    | '/api/auto-article'
-    | '/api/cron-auto-article'
     | '/api/audit-events'
+    | '/api/auto-article'
     | '/api/contact-messages'
+    | '/api/cron-auto-article'
     | '/api/dashboard'
     | '/api/dreams'
     | '/api/faqs'
@@ -636,22 +724,30 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin-login'
     | '/articles'
-    | '/bazi'
     | '/auspicious-calendar'
+    | '/bazi'
+    | '/contact'
+    | '/daily-hub'
+    | '/destiny-card'
+    | '/destiny-cardg'
+    | '/dream'
+    | '/help'
+    | '/life-graph'
+    | '/login'
+    | '/lottery'
+    | '/love-compatibility'
     | '/lucky-colors'
     | '/name-analysis'
     | '/phone-analysis'
-    | '/siamsi'
-    | '/tai-sui'
-    | '/wallpaper'
-    | '/contact'
-    | '/dream'
-    | '/help'
-    | '/login'
-    | '/lottery'
+    | '/privacy'
     | '/profile'
     | '/register'
+    | '/siamsi'
+    | '/tai-sui'
     | '/tarot'
+    | '/terms'
+    | '/wallpaper'
+    | '/zodiac'
     | '/admin/articles'
     | '/admin/audit'
     | '/admin/contact'
@@ -663,10 +759,10 @@ export interface FileRouteTypes {
     | '/api/admin-session'
     | '/api/admin-users'
     | '/api/articles'
-    | '/api/auto-article'
-    | '/api/cron-auto-article'
     | '/api/audit-events'
+    | '/api/auto-article'
     | '/api/contact-messages'
+    | '/api/cron-auto-article'
     | '/api/dashboard'
     | '/api/dreams'
     | '/api/faqs'
@@ -695,28 +791,38 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   AdminLoginRoute: typeof AdminLoginRoute
   ArticlesRoute: typeof ArticlesRouteWithChildren
+  AuspiciousCalendarRoute: typeof AuspiciousCalendarRoute
   BaziRoute: typeof BaziRoute
   ContactRoute: typeof ContactRoute
+  DailyHubRoute: typeof DailyHubRoute
+  DestinyCardRoute: typeof DestinyCardRoute
+  DestinyCardgRoute: typeof DestinyCardgRoute
   DreamRoute: typeof DreamRouteWithChildren
   HelpRoute: typeof HelpRoute
+  LifeGraphRoute: typeof LifeGraphRoute
   LoginRoute: typeof LoginRoute
   LotteryRoute: typeof LotteryRoute
-  ProfileRoute: typeof ProfileRouteWithChildren
-  RegisterRoute: typeof RegisterRoute
-  TarotRoute: typeof TarotRouteWithChildren
-  AuspiciousCalendarRoute: typeof AuspiciousCalendarRoute
+  LoveCompatibilityRoute: typeof LoveCompatibilityRoute
   LuckyColorsRoute: typeof LuckyColorsRoute
   NameAnalysisRoute: typeof NameAnalysisRoute
   PhoneAnalysisRoute: typeof PhoneAnalysisRoute
+  PrivacyRoute: typeof PrivacyRoute
+  ProfileRoute: typeof ProfileRouteWithChildren
+  RegisterRoute: typeof RegisterRoute
   SiamsiRoute: typeof SiamsiRoute
   TaiSuiRoute: typeof TaiSuiRoute
+  TarotRoute: typeof TarotRouteWithChildren
+  TermsRoute: typeof TermsRoute
   WallpaperRoute: typeof WallpaperRoute
+  ZodiacRoute: typeof ZodiacRoute
   ApiAdminLoginRoute: typeof ApiAdminLoginRoute
   ApiAdminSessionRoute: typeof ApiAdminSessionRoute
   ApiAdminUsersRoute: typeof ApiAdminUsersRoute
   ApiArticlesRoute: typeof ApiArticlesRoute
   ApiAuditEventsRoute: typeof ApiAuditEventsRoute
+  ApiAutoArticleRoute: typeof ApiAutoArticleRoute
   ApiContactMessagesRoute: typeof ApiContactMessagesRoute
+  ApiCronAutoArticleRoute: typeof ApiCronAutoArticleRoute
   ApiDashboardRoute: typeof ApiDashboardRoute
   ApiDreamsRoute: typeof ApiDreamsRoute
   ApiFaqsRoute: typeof ApiFaqsRoute
@@ -731,11 +837,46 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/zodiac': {
+      id: '/zodiac'
+      path: '/zodiac'
+      fullPath: '/zodiac'
+      preLoaderRoute: typeof ZodiacRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wallpaper': {
+      id: '/wallpaper'
+      path: '/wallpaper'
+      fullPath: '/wallpaper'
+      preLoaderRoute: typeof WallpaperRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tarot': {
       id: '/tarot'
       path: '/tarot'
       fullPath: '/tarot'
       preLoaderRoute: typeof TarotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tai-sui': {
+      id: '/tai-sui'
+      path: '/tai-sui'
+      fullPath: '/tai-sui'
+      preLoaderRoute: typeof TaiSuiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/siamsi': {
+      id: '/siamsi'
+      path: '/siamsi'
+      fullPath: '/siamsi'
+      preLoaderRoute: typeof SiamsiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -752,6 +893,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/phone-analysis': {
+      id: '/phone-analysis'
+      path: '/phone-analysis'
+      fullPath: '/phone-analysis'
+      preLoaderRoute: typeof PhoneAnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/name-analysis': {
+      id: '/name-analysis'
+      path: '/name-analysis'
+      fullPath: '/name-analysis'
+      preLoaderRoute: typeof NameAnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lucky-colors': {
+      id: '/lucky-colors'
+      path: '/lucky-colors'
+      fullPath: '/lucky-colors'
+      preLoaderRoute: typeof LuckyColorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/love-compatibility': {
+      id: '/love-compatibility'
+      path: '/love-compatibility'
+      fullPath: '/love-compatibility'
+      preLoaderRoute: typeof LoveCompatibilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lottery': {
       id: '/lottery'
       path: '/lottery'
@@ -766,6 +942,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/life-graph': {
+      id: '/life-graph'
+      path: '/life-graph'
+      fullPath: '/life-graph'
+      preLoaderRoute: typeof LifeGraphRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/help': {
       id: '/help'
       path: '/help'
@@ -778,6 +961,27 @@ declare module '@tanstack/react-router' {
       path: '/dream'
       fullPath: '/dream'
       preLoaderRoute: typeof DreamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/destiny-cardg': {
+      id: '/destiny-cardg'
+      path: '/destiny-cardg'
+      fullPath: '/destiny-cardg'
+      preLoaderRoute: typeof DestinyCardgRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/destiny-card': {
+      id: '/destiny-card'
+      path: '/destiny-card'
+      fullPath: '/destiny-card'
+      preLoaderRoute: typeof DestinyCardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/daily-hub': {
+      id: '/daily-hub'
+      path: '/daily-hub'
+      fullPath: '/daily-hub'
+      preLoaderRoute: typeof DailyHubRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -799,48 +1003,6 @@ declare module '@tanstack/react-router' {
       path: '/auspicious-calendar'
       fullPath: '/auspicious-calendar'
       preLoaderRoute: typeof AuspiciousCalendarRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lucky-colors': {
-      id: '/lucky-colors'
-      path: '/lucky-colors'
-      fullPath: '/lucky-colors'
-      preLoaderRoute: typeof LuckyColorsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/name-analysis': {
-      id: '/name-analysis'
-      path: '/name-analysis'
-      fullPath: '/name-analysis'
-      preLoaderRoute: typeof NameAnalysisRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/phone-analysis': {
-      id: '/phone-analysis'
-      path: '/phone-analysis'
-      fullPath: '/phone-analysis'
-      preLoaderRoute: typeof PhoneAnalysisRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/siamsi': {
-      id: '/siamsi'
-      path: '/siamsi'
-      fullPath: '/siamsi'
-      preLoaderRoute: typeof SiamsiRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tai-sui': {
-      id: '/tai-sui'
-      path: '/tai-sui'
-      fullPath: '/tai-sui'
-      preLoaderRoute: typeof TaiSuiRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/wallpaper': {
-      id: '/wallpaper'
-      path: '/wallpaper'
-      fullPath: '/wallpaper'
-      preLoaderRoute: typeof WallpaperRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/articles': {
@@ -1018,11 +1180,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/cron-auto-article': {
+      id: '/api/cron-auto-article'
+      path: '/api/cron-auto-article'
+      fullPath: '/api/cron-auto-article'
+      preLoaderRoute: typeof ApiCronAutoArticleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/contact-messages': {
       id: '/api/contact-messages'
       path: '/api/contact-messages'
       fullPath: '/api/contact-messages'
       preLoaderRoute: typeof ApiContactMessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auto-article': {
+      id: '/api/auto-article'
+      path: '/api/auto-article'
+      fullPath: '/api/auto-article'
+      preLoaderRoute: typeof ApiAutoArticleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/audit-events': {
@@ -1195,30 +1371,38 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   AdminLoginRoute: AdminLoginRoute,
   ArticlesRoute: ArticlesRouteWithChildren,
+  AuspiciousCalendarRoute: AuspiciousCalendarRoute,
   BaziRoute: BaziRoute,
   ContactRoute: ContactRoute,
+  DailyHubRoute: DailyHubRoute,
+  DestinyCardRoute: DestinyCardRoute,
+  DestinyCardgRoute: DestinyCardgRoute,
   DreamRoute: DreamRouteWithChildren,
   HelpRoute: HelpRoute,
+  LifeGraphRoute: LifeGraphRoute,
   LoginRoute: LoginRoute,
   LotteryRoute: LotteryRoute,
-  ProfileRoute: ProfileRouteWithChildren,
-  RegisterRoute: RegisterRoute,
-  TarotRoute: TarotRouteWithChildren,
-  AuspiciousCalendarRoute: AuspiciousCalendarRoute,
+  LoveCompatibilityRoute: LoveCompatibilityRoute,
   LuckyColorsRoute: LuckyColorsRoute,
   NameAnalysisRoute: NameAnalysisRoute,
   PhoneAnalysisRoute: PhoneAnalysisRoute,
+  PrivacyRoute: PrivacyRoute,
+  ProfileRoute: ProfileRouteWithChildren,
+  RegisterRoute: RegisterRoute,
   SiamsiRoute: SiamsiRoute,
   TaiSuiRoute: TaiSuiRoute,
+  TarotRoute: TarotRouteWithChildren,
+  TermsRoute: TermsRoute,
   WallpaperRoute: WallpaperRoute,
+  ZodiacRoute: ZodiacRoute,
   ApiAdminLoginRoute: ApiAdminLoginRoute,
   ApiAdminSessionRoute: ApiAdminSessionRoute,
   ApiAdminUsersRoute: ApiAdminUsersRoute,
   ApiArticlesRoute: ApiArticlesRoute,
-  ApiAutoArticleRoute: ApiAutoArticleRoute,
-  ApiCronAutoArticleRoute: ApiCronAutoArticleRoute,
   ApiAuditEventsRoute: ApiAuditEventsRoute,
+  ApiAutoArticleRoute: ApiAutoArticleRoute,
   ApiContactMessagesRoute: ApiContactMessagesRoute,
+  ApiCronAutoArticleRoute: ApiCronAutoArticleRoute,
   ApiDashboardRoute: ApiDashboardRoute,
   ApiDreamsRoute: ApiDreamsRoute,
   ApiFaqsRoute: ApiFaqsRoute,

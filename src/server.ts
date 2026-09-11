@@ -332,9 +332,177 @@ async function sitemapResponse(pathname: string) {
   return new Response(xml, { headers: xmlHeaders() });
 }
 
+const BLOCKED_AI_SCRAPERS = [
+  /gptbot/i,
+  /chatgpt-user/i,
+  /claudebot/i,
+  /claude-web/i,
+  /anthropic-ai/i,
+  /ccbot/i,
+  /bytespider/i,
+  /diffbot/i,
+  /perplexitybot/i,
+  /cohere-ai/i,
+  /meta-externalagent/i,
+  /facebookbot/i,
+  /omgilibot/i,
+  /imagesiftbot/i,
+  /scrapy/i,
+  /httrack/i,
+  /sitesucker/i,
+  /teleportpro/i,
+  /webcopier/i,
+  /offline explorer/i,
+];
+
+function checkBotShield(request: Request, pathname: string): Response | null {
+  const ua = request.headers.get("user-agent") || "";
+
+  // Check known AI scraping bots and site cloners
+  if (ua) {
+    for (const pattern of BLOCKED_AI_SCRAPERS) {
+      if (pattern.test(ua)) {
+        return new Response(
+          "403 Forbidden: Automated AI scraping and content harvesting are strictly prohibited on Likhitfa.",
+          {
+            status: 403,
+            headers: textHeaders({ "X-Robots-Tag": "noindex, nofollow" }),
+          },
+        );
+      }
+    }
+  }
+
+  // Protect internal API endpoints from direct scraper/script dumping
+  if (pathname.startsWith("/api/")) {
+    const isWebhookOrCron =
+      pathname === "/api/cron-auto-article" ||
+      pathname === "/api/auto-article";
+
+    if (!isWebhookOrCron) {
+      const secFetchSite = request.headers.get("sec-fetch-site");
+      const referer = request.headers.get("referer") || "";
+      const isSameOriginBrowser =
+        secFetchSite === "same-origin" ||
+        referer.includes("likhitfa.online") ||
+        referer.includes("localhost");
+
+      const isScriptScraper =
+        !ua ||
+        /python-requests|aiohttp|wget|httpie|scrapy|postman|insomnia|go-http-client|axios|node-fetch/i.test(
+          ua,
+        );
+
+      if (!isSameOriginBrowser && isScriptScraper) {
+        return new Response(
+          JSON.stringify({ error: "Forbidden: API access restricted to authenticated clients." }),
+          {
+            status: 403,
+            headers: {
+              "Content-Type": "application/json",
+              "X-Robots-Tag": "noindex, nofollow",
+            },
+          },
+        );
+      }
+    }
+  }
+
+  return null;
+}
+
 function robotsResponse() {
   return new Response(
     [
+      "# Likhitfa Robots.txt — https://www.likhitfa.online",
+      "# Allowed Search Engines (SEO)",
+      "User-agent: Googlebot",
+      "Allow: /",
+      "",
+      "User-agent: Googlebot-Image",
+      "Allow: /",
+      "",
+      "User-agent: Bingbot",
+      "Allow: /",
+      "",
+      "User-agent: Slurp",
+      "Allow: /",
+      "",
+      "User-agent: DuckDuckBot",
+      "Allow: /",
+      "",
+      "User-agent: Baiduspider",
+      "Allow: /",
+      "",
+      "User-agent: Yandex",
+      "Allow: /",
+      "",
+      "# Block AI crawlers, scrapers, and LLM training bots",
+      "User-agent: GPTBot",
+      "Disallow: /",
+      "",
+      "User-agent: ChatGPT-User",
+      "Disallow: /",
+      "",
+      "User-agent: CCBot",
+      "Disallow: /",
+      "",
+      "User-agent: ClaudeBot",
+      "Disallow: /",
+      "",
+      "User-agent: Claude-Web",
+      "Disallow: /",
+      "",
+      "User-agent: anthropic-ai",
+      "Disallow: /",
+      "",
+      "User-agent: Bytespider",
+      "Disallow: /",
+      "",
+      "User-agent: Diffbot",
+      "Disallow: /",
+      "",
+      "User-agent: PerplexityBot",
+      "Disallow: /",
+      "",
+      "User-agent: cohere-ai",
+      "Disallow: /",
+      "",
+      "User-agent: Meta-ExternalAgent",
+      "Disallow: /",
+      "",
+      "User-agent: FacebookBot",
+      "Disallow: /",
+      "",
+      "User-agent: Omgilibot",
+      "Disallow: /",
+      "",
+      "User-agent: ImagesiftBot",
+      "Disallow: /",
+      "",
+      "# Block automated website copiers and offline harvesters",
+      "User-agent: Scrapy",
+      "Disallow: /",
+      "",
+      "User-agent: HTTrack",
+      "Disallow: /",
+      "",
+      "User-agent: Wget",
+      "Disallow: /",
+      "",
+      "User-agent: SiteSucker",
+      "Disallow: /",
+      "",
+      "User-agent: TeleportPro",
+      "Disallow: /",
+      "",
+      "User-agent: WebCopier",
+      "Disallow: /",
+      "",
+      "User-agent: Offline Explorer",
+      "Disallow: /",
+      "",
+      "# Default rules for other search engines",
       "User-agent: *",
       "Allow: /",
       "Disallow: /admin",
@@ -343,11 +511,6 @@ function robotsResponse() {
       "Disallow: /register",
       "Disallow: /profile",
       "Disallow: /api/",
-      "",
-      "Allow: /api/articles",
-      "Allow: /api/dreams",
-      "Allow: /api/faqs",
-      "Allow: /api/site-content",
       "",
       `Sitemap: ${siteUrl}/sitemap.xml`,
       "",
@@ -364,6 +527,10 @@ export default {
         return sitemapResponse(url.pathname);
       }
       if (url.pathname === "/robots.txt") return robotsResponse();
+
+      const shieldBlock = checkBotShield(request, url.pathname);
+      if (shieldBlock) return shieldBlock;
+
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return withHtmlCache(await normalizeCatastrophicSsrResponse(response), url.pathname);

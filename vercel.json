@@ -4,5 +4,18 @@
       "path": "/api/auto-article",
       "schedule": "0 0 * * *"
     }
+  ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "likhitfa.online"
+        }
+      ],
+      "destination": "https://www.likhitfa.online/:path*",
+      "permanent": true
+    }
   ]
 }
