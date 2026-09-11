@@ -1376,13 +1376,19 @@ const siteContentDefaults = {
 function normalizeContent(row = {}) {
   const about = row.about && typeof row.about === "object" ? row.about : {};
   const contact = row.contact && typeof row.contact === "object" ? row.contact : {};
+  const email =
+    !contact.email ||
+    contact.email === "contact@likhitfa.online" ||
+    contact.email === "hello@likhitfa.com"
+      ? "bg.chanon@gmail.com"
+      : contact.email;
   return {
     about: {
       ...siteContentDefaults.about,
       ...about,
       story: Array.isArray(about.story) ? about.story : siteContentDefaults.about.story,
     },
-    contact: { ...siteContentDefaults.contact, ...contact },
+    contact: { ...siteContentDefaults.contact, ...contact, email },
   };
 }
 
@@ -1392,7 +1398,18 @@ async function siteContent(req, res) {
     if (!result.ok) return sendRestError(res, result);
     const rows = Array.isArray(result.data) ? result.data : [];
     if (!rows[0]) throw new Error("ไม่พบข้อมูล site_content id=main ใน Supabase");
-    return send(res, 200, { ok: true, source: "supabase", content: normalizeContent(rows[0]) }, publicCacheHeader());
+    const normalized = normalizeContent(rows[0]);
+    if (
+      rows[0].contact?.email === "contact@likhitfa.online" ||
+      rows[0].contact?.email === "hello@likhitfa.com"
+    ) {
+      void rest("site_content?on_conflict=id", {
+        method: "POST",
+        headers: { Prefer: "resolution=merge-duplicates" },
+        body: JSON.stringify({ id: "main", ...normalized, updated_at: new Date().toISOString() }),
+      });
+    }
+    return send(res, 200, { ok: true, source: "supabase", content: normalized }, publicCacheHeader());
   }
   if (req.method === "POST") {
     const user = await requireAdmin(req);
