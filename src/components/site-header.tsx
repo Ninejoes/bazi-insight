@@ -25,6 +25,8 @@ import {
   Zap,
   Heart,
   Coins,
+  Compass,
+  Car,
 } from "lucide-react";
 
 interface SiteHeaderProps {
@@ -125,6 +127,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                   isActive("/dream") ||
                   isActive("/siamsi") ||
                   isActive("/life-graph") ||
+                  isActive("/brahma-wheel") ||
                   isActive("/love-compatibility") ||
                   isActive("/zodiac") ||
                   isActive("/daily-hub")
@@ -136,8 +139,8 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                 <span className={`text-[10px] transition-transform duration-200 ${servicesOpen ? "rotate-180 text-gold" : "opacity-70"}`}>▾</span>
               </button>
               {servicesOpen && (
-                <div className="absolute left-1/2 top-full z-50 w-[36rem] -translate-x-1/2 pt-2">
-                  <div className="glass-strong overflow-hidden rounded-2xl border border-gold/20 p-4 shadow-elegant backdrop-blur-xl">
+                <div className="absolute left-1/2 top-full z-50 w-[38rem] -translate-x-1/2 pt-2">
+                  <div className="bg-[#0b0e17] overflow-hidden rounded-2xl border border-gold/35 p-4 shadow-[0_25px_60px_rgba(0,0,0,0.98)] ring-1 ring-gold/25">
                     <div className="grid grid-cols-2 gap-3">
                       {/* คอลัมน์ 1: ชะตาชีวิต & ไพ่ */}
                       <div className="space-y-1">
@@ -173,6 +176,22 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                             </div>
                             <div className="text-[11px] leading-tight text-muted-foreground">
                               พล็อตเส้นกราฟชีวิต & ช่วงอายุทองคำ
+                            </div>
+                          </div>
+                        </Link>
+                        <Link
+                          to="/brahma-wheel"
+                          className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
+                        >
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-gold group-hover:scale-110 transition-transform">
+                            <Compass className="h-4 w-4" />
+                          </span>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
+                              กงล้อพรหมชาติ 12 ราศี
+                            </div>
+                            <div className="text-[11px] leading-tight text-muted-foreground">
+                              พยากรณ์ชะตาชีวิตโบราณ เวียนขวาชาย-ซ้ายหญิง
                             </div>
                           </div>
                         </Link>
@@ -309,7 +328,9 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                 type="button"
                 className={`relative flex items-center gap-1 rounded-full px-3.5 py-2 text-sm transition-all ${
                   isActive("/phone-analysis") ||
+                  isActive("/plate-analysis") ||
                   isActive("/name-analysis") ||
+                  isActive("/naming") ||
                   isActive("/destiny-card") ||
                   isActive("/lottery") ||
                   isActive("/lucky-colors") ||
@@ -324,8 +345,8 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                 <span className={`text-[10px] transition-transform duration-200 ${toolsOpen ? "rotate-180 text-gold" : "opacity-70"}`}>▾</span>
               </button>
               {toolsOpen && (
-                <div className="absolute left-1/2 top-full z-50 w-[38rem] -translate-x-1/2 pt-2">
-                  <div className="glass-strong overflow-hidden rounded-2xl border border-gold/20 p-4 shadow-elegant backdrop-blur-xl">
+                <div className="absolute left-1/2 top-full z-50 w-[42rem] -translate-x-1/2 pt-2">
+                  <div className="bg-[#0b0e17] overflow-hidden rounded-2xl border border-gold/35 p-4 shadow-[0_25px_60px_rgba(0,0,0,0.98)] ring-1 ring-gold/25">
                     <div className="grid grid-cols-2 gap-4">
                       {/* Col 1: ศาสตร์ตัวเลข & ชื่อ */}
                       <div className="space-y-1.5 border-r border-gold/10 pr-4">
@@ -365,6 +386,22 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                           </div>
                         </Link>
                         <Link
+                          to="/plate-analysis"
+                          className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
+                        >
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
+                            <Car className="h-4 w-4" />
+                          </span>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
+                              วิเคราะห์ทะเบียนรถ
+                            </div>
+                            <div className="text-[11px] text-muted-foreground">
+                              ทะเบียน 4 มิติ ผลรวม คู่เลข ธาตุสี และแก้เคล็ด
+                            </div>
+                          </div>
+                        </Link>
+                        <Link
                           to="/name-analysis"
                           className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
                         >
@@ -377,6 +414,22 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                             </div>
                             <div className="text-[11px] text-muted-foreground">
                               เลขศาสตร์พลังดาว & ทักษาปกรณ์
+                            </div>
+                          </div>
+                        </Link>
+                        <Link
+                          to="/naming"
+                          className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
+                        >
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-base text-gold group-hover:scale-110 transition-transform">
+                            <PenTool className="h-4 w-4 text-amber-400" />
+                          </span>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
+                              ระบบตั้งชื่อมงคล
+                            </div>
+                            <div className="text-[11px] text-muted-foreground">
+                              คลังชื่อ 8 วันเกิด กรองกาลกิณี อักษรเดช-ศรี
                             </div>
                           </div>
                         </Link>
@@ -514,7 +567,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
               </button>
               {aboutOpen && (
                 <div className="absolute right-0 top-full z-50 w-64 pt-2">
-                  <div className="glass-strong overflow-hidden rounded-2xl border border-gold/20 p-2.5 shadow-elegant backdrop-blur-xl">
+                  <div className="bg-[#0b0e17] overflow-hidden rounded-2xl border border-gold/35 p-2.5 shadow-[0_25px_60px_rgba(0,0,0,0.98)] ring-1 ring-gold/25">
                     <Link
                       to="/about"
                       className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground hover:bg-gold/10 hover:text-gold transition"
@@ -647,7 +700,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
 
       {showNav && openMobile && (
         <div className="lg:hidden">
-          <div className="mx-4 mb-4 max-h-[80vh] overflow-y-auto rounded-2xl border border-gold/15 bg-card/95 p-3.5 backdrop-blur shadow-2xl">
+          <div className="mx-4 mb-4 max-h-[80vh] overflow-y-auto rounded-2xl border border-gold/35 bg-[#0b0e17] p-3.5 shadow-[0_25px_60px_rgba(0,0,0,0.98)] ring-1 ring-gold/25">
             <MobileLink to="/" onClick={closeMobile}>
               หน้าหลัก
             </MobileLink>
@@ -663,6 +716,9 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
             </MobileLink>
             <MobileLink to="/life-graph" icon={<TrendingUp className="h-4 w-4" />} onClick={closeMobile}>
               กราฟชีวิต 12 เรือน
+            </MobileLink>
+            <MobileLink to="/brahma-wheel" icon={<Compass className="h-4 w-4" />} onClick={closeMobile}>
+              กงล้อพรหมชาติ 12 ราศี
             </MobileLink>
             <MobileLink to="/zodiac" icon={<Orbit className="h-4 w-4" />} onClick={closeMobile}>
               ดูดวง 12 ราศี 2569
@@ -700,8 +756,14 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
             <MobileLink to="/phone-analysis" icon={<Smartphone className="h-4 w-4" />} onClick={closeMobile}>
               เช็คเบอร์มงคล
             </MobileLink>
+            <MobileLink to="/plate-analysis" icon={<Car className="h-4 w-4" />} onClick={closeMobile}>
+              วิเคราะห์ทะเบียนรถ
+            </MobileLink>
             <MobileLink to="/name-analysis" icon={<PenTool className="h-4 w-4" />} onClick={closeMobile}>
               วิเคราะห์ชื่อ-นามสกุล
+            </MobileLink>
+            <MobileLink to="/naming" icon={<PenTool className="h-4 w-4 text-amber-400" />} onClick={closeMobile}>
+              ระบบตั้งชื่อมงคล
             </MobileLink>
             <MobileLink to="/lottery" icon={<Ticket className="h-4 w-4" />} onClick={closeMobile}>
               หวย & เลขเด็ดสำนักดัง

@@ -18,7 +18,9 @@ import { Route as SiamsiRouteImport } from './routes/siamsi'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PlateAnalysisRouteImport } from './routes/plate-analysis'
 import { Route as PhoneAnalysisRouteImport } from './routes/phone-analysis'
+import { Route as NamingRouteImport } from './routes/naming'
 import { Route as NameAnalysisRouteImport } from './routes/name-analysis'
 import { Route as LuckyColorsRouteImport } from './routes/lucky-colors'
 import { Route as LoveCompatibilityRouteImport } from './routes/love-compatibility'
@@ -31,6 +33,7 @@ import { Route as DestinyCardgRouteImport } from './routes/destiny-cardg'
 import { Route as DestinyCardRouteImport } from './routes/destiny-card'
 import { Route as DailyHubRouteImport } from './routes/daily-hub'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as BrahmaWheelRouteImport } from './routes/brahma-wheel'
 import { Route as BaziRouteImport } from './routes/bazi'
 import { Route as AuspiciousCalendarRouteImport } from './routes/auspicious-calendar'
 import { Route as ArticlesRouteImport } from './routes/articles'
@@ -119,9 +122,19 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlateAnalysisRoute = PlateAnalysisRouteImport.update({
+  id: '/plate-analysis',
+  path: '/plate-analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PhoneAnalysisRoute = PhoneAnalysisRouteImport.update({
   id: '/phone-analysis',
   path: '/phone-analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NamingRoute = NamingRouteImport.update({
+  id: '/naming',
+  path: '/naming',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NameAnalysisRoute = NameAnalysisRouteImport.update({
@@ -182,6 +195,11 @@ const DailyHubRoute = DailyHubRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BrahmaWheelRoute = BrahmaWheelRouteImport.update({
+  id: '/brahma-wheel',
+  path: '/brahma-wheel',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BaziRoute = BaziRouteImport.update({
@@ -403,6 +421,7 @@ export interface FileRoutesByFullPath {
   '/articles': typeof ArticlesRouteWithChildren
   '/auspicious-calendar': typeof AuspiciousCalendarRoute
   '/bazi': typeof BaziRoute
+  '/brahma-wheel': typeof BrahmaWheelRoute
   '/contact': typeof ContactRoute
   '/daily-hub': typeof DailyHubRoute
   '/destiny-card': typeof DestinyCardRoute
@@ -415,7 +434,9 @@ export interface FileRoutesByFullPath {
   '/love-compatibility': typeof LoveCompatibilityRoute
   '/lucky-colors': typeof LuckyColorsRoute
   '/name-analysis': typeof NameAnalysisRoute
+  '/naming': typeof NamingRoute
   '/phone-analysis': typeof PhoneAnalysisRoute
+  '/plate-analysis': typeof PlateAnalysisRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRouteWithChildren
   '/register': typeof RegisterRoute
@@ -467,6 +488,7 @@ export interface FileRoutesByTo {
   '/admin-login': typeof AdminLoginRoute
   '/auspicious-calendar': typeof AuspiciousCalendarRoute
   '/bazi': typeof BaziRoute
+  '/brahma-wheel': typeof BrahmaWheelRoute
   '/contact': typeof ContactRoute
   '/daily-hub': typeof DailyHubRoute
   '/destiny-card': typeof DestinyCardRoute
@@ -478,7 +500,9 @@ export interface FileRoutesByTo {
   '/love-compatibility': typeof LoveCompatibilityRoute
   '/lucky-colors': typeof LuckyColorsRoute
   '/name-analysis': typeof NameAnalysisRoute
+  '/naming': typeof NamingRoute
   '/phone-analysis': typeof PhoneAnalysisRoute
+  '/plate-analysis': typeof PlateAnalysisRoute
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/siamsi': typeof SiamsiRoute
@@ -531,6 +555,7 @@ export interface FileRoutesById {
   '/articles': typeof ArticlesRouteWithChildren
   '/auspicious-calendar': typeof AuspiciousCalendarRoute
   '/bazi': typeof BaziRoute
+  '/brahma-wheel': typeof BrahmaWheelRoute
   '/contact': typeof ContactRoute
   '/daily-hub': typeof DailyHubRoute
   '/destiny-card': typeof DestinyCardRoute
@@ -543,7 +568,9 @@ export interface FileRoutesById {
   '/love-compatibility': typeof LoveCompatibilityRoute
   '/lucky-colors': typeof LuckyColorsRoute
   '/name-analysis': typeof NameAnalysisRoute
+  '/naming': typeof NamingRoute
   '/phone-analysis': typeof PhoneAnalysisRoute
+  '/plate-analysis': typeof PlateAnalysisRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRouteWithChildren
   '/register': typeof RegisterRoute
@@ -599,6 +626,7 @@ export interface FileRouteTypes {
     | '/articles'
     | '/auspicious-calendar'
     | '/bazi'
+    | '/brahma-wheel'
     | '/contact'
     | '/daily-hub'
     | '/destiny-card'
@@ -611,7 +639,9 @@ export interface FileRouteTypes {
     | '/love-compatibility'
     | '/lucky-colors'
     | '/name-analysis'
+    | '/naming'
     | '/phone-analysis'
+    | '/plate-analysis'
     | '/privacy'
     | '/profile'
     | '/register'
@@ -663,6 +693,7 @@ export interface FileRouteTypes {
     | '/admin-login'
     | '/auspicious-calendar'
     | '/bazi'
+    | '/brahma-wheel'
     | '/contact'
     | '/daily-hub'
     | '/destiny-card'
@@ -674,7 +705,9 @@ export interface FileRouteTypes {
     | '/love-compatibility'
     | '/lucky-colors'
     | '/name-analysis'
+    | '/naming'
     | '/phone-analysis'
+    | '/plate-analysis'
     | '/privacy'
     | '/register'
     | '/siamsi'
@@ -726,6 +759,7 @@ export interface FileRouteTypes {
     | '/articles'
     | '/auspicious-calendar'
     | '/bazi'
+    | '/brahma-wheel'
     | '/contact'
     | '/daily-hub'
     | '/destiny-card'
@@ -738,7 +772,9 @@ export interface FileRouteTypes {
     | '/love-compatibility'
     | '/lucky-colors'
     | '/name-analysis'
+    | '/naming'
     | '/phone-analysis'
+    | '/plate-analysis'
     | '/privacy'
     | '/profile'
     | '/register'
@@ -793,6 +829,7 @@ export interface RootRouteChildren {
   ArticlesRoute: typeof ArticlesRouteWithChildren
   AuspiciousCalendarRoute: typeof AuspiciousCalendarRoute
   BaziRoute: typeof BaziRoute
+  BrahmaWheelRoute: typeof BrahmaWheelRoute
   ContactRoute: typeof ContactRoute
   DailyHubRoute: typeof DailyHubRoute
   DestinyCardRoute: typeof DestinyCardRoute
@@ -805,7 +842,9 @@ export interface RootRouteChildren {
   LoveCompatibilityRoute: typeof LoveCompatibilityRoute
   LuckyColorsRoute: typeof LuckyColorsRoute
   NameAnalysisRoute: typeof NameAnalysisRoute
+  NamingRoute: typeof NamingRoute
   PhoneAnalysisRoute: typeof PhoneAnalysisRoute
+  PlateAnalysisRoute: typeof PlateAnalysisRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRouteWithChildren
   RegisterRoute: typeof RegisterRoute
@@ -900,11 +939,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/plate-analysis': {
+      id: '/plate-analysis'
+      path: '/plate-analysis'
+      fullPath: '/plate-analysis'
+      preLoaderRoute: typeof PlateAnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/phone-analysis': {
       id: '/phone-analysis'
       path: '/phone-analysis'
       fullPath: '/phone-analysis'
       preLoaderRoute: typeof PhoneAnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/naming': {
+      id: '/naming'
+      path: '/naming'
+      fullPath: '/naming'
+      preLoaderRoute: typeof NamingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/name-analysis': {
@@ -989,6 +1042,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/brahma-wheel': {
+      id: '/brahma-wheel'
+      path: '/brahma-wheel'
+      fullPath: '/brahma-wheel'
+      preLoaderRoute: typeof BrahmaWheelRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bazi': {
@@ -1373,6 +1433,7 @@ const rootRouteChildren: RootRouteChildren = {
   ArticlesRoute: ArticlesRouteWithChildren,
   AuspiciousCalendarRoute: AuspiciousCalendarRoute,
   BaziRoute: BaziRoute,
+  BrahmaWheelRoute: BrahmaWheelRoute,
   ContactRoute: ContactRoute,
   DailyHubRoute: DailyHubRoute,
   DestinyCardRoute: DestinyCardRoute,
@@ -1385,7 +1446,9 @@ const rootRouteChildren: RootRouteChildren = {
   LoveCompatibilityRoute: LoveCompatibilityRoute,
   LuckyColorsRoute: LuckyColorsRoute,
   NameAnalysisRoute: NameAnalysisRoute,
+  NamingRoute: NamingRoute,
   PhoneAnalysisRoute: PhoneAnalysisRoute,
+  PlateAnalysisRoute: PlateAnalysisRoute,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRouteWithChildren,
   RegisterRoute: RegisterRoute,
@@ -1417,3 +1480,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

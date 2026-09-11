@@ -3,7 +3,20 @@ import { useEffect, useMemo, useState } from "react";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import {
+  Flame,
+  Snowflake,
+  TrendingUp,
+  RotateCcw,
+  ArrowRight,
+  Filter,
+  Layers,
+  Sparkles,
+  Calendar,
+  Grid,
+} from "lucide-react";
+import {
   buildLotteryFrequency,
+  lotteryDrawKey,
   lotteryPrizeRows,
   lotteryPrizes,
   thaiLotteryDate,
@@ -17,7 +30,7 @@ import {
 import { seo } from "@/lib/seo";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
 
-type LotteryTab = "result" | "stats" | "probability" | "predict";
+type LotteryTab = "result" | "stats" | "radar" | "follower" | "probability" | "predict";
 type LotteryApiResponse = {
   ok?: boolean;
   error?: string;
@@ -37,9 +50,11 @@ type LotteryApiResponse = {
 
 const tabs: { id: LotteryTab; label: string; sub: string }[] = [
   { id: "result", label: "ผลรางวัล", sub: "ตรวจผลสลากตามงวด" },
-  { id: "stats", label: "สถิติ", sub: "เลขที่ออกบ่อยย้อนหลัง" },
+  { id: "stats", label: "สถิติย้อนหลัง", sub: "เลขออกบ่อย 1-5 ปี" },
+  { id: "radar", label: "เรดาร์ 100 ประตู", sub: "Heatmap 00-99 ตามวัน" },
+  { id: "follower", label: "ระบบเลขตาม", sub: "งวดถัดไปมักออกเลขไหน" },
   { id: "probability", label: "ความน่าจะเป็น", sub: "โอกาสถูกรางวัลจริง" },
-  { id: "predict", label: "ทำนาย", sub: "สุ่มเลขจากสถิติ" },
+  { id: "predict", label: "ทำนายเลข", sub: "สุ่มเลขจากสถิติ" },
 ];
 
 const freqLabels: Record<LotteryFrequencyMode, string> = {
@@ -258,7 +273,7 @@ function LotteryPage() {
 
         <LotteryDataSummaryCard summary={dataSummary} />
 
-        <section className="mt-8 grid gap-3 md:grid-cols-4">
+        <section className="mt-8 grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -309,6 +324,25 @@ function LotteryPage() {
               nextDraw={nextDraw}
               dataSource={dataSource}
               cachedAt={cachedAt}
+            />
+          )}
+          {activeTab === "radar" && (
+            <RadarPanel
+              history={history}
+              loading={loading === "stats"}
+              onLoad={() => loadStats(LOTTERY_HISTORY_LIMIT)}
+              nextDraw={nextDraw}
+              dataSource={dataSource}
+              cachedAt={cachedAt}
+            />
+          )}
+          {activeTab === "follower" && (
+            <FollowerPanel
+              history={history}
+              loading={loading === "stats"}
+              onLoad={() => loadStats(LOTTERY_HISTORY_LIMIT)}
+              nextDraw={nextDraw}
+              dataSource={dataSource}
             />
           )}
           {activeTab === "probability" && (
@@ -1160,4 +1194,824 @@ function formatCacheTime(value: string) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+const WEEKDAYS = [
+  { id: -1, label: "ทุกวัน", desc: "รวมทุกวันออกรางวัล" },
+  { id: 0, label: "วันอาทิตย์", desc: "งวดตรงกับวันอาทิตย์" },
+  { id: 1, label: "วันจันทร์", desc: "งวดตรงกับวันจันทร์" },
+  { id: 2, label: "วันอังคาร", desc: "งวดตรงกับวันอังคาร" },
+  { id: 3, label: "วันพุธ", desc: "งวดตรงกับวันพุธ" },
+  { id: 4, label: "วันพฤหัสฯ", desc: "งวดตรงกับวันพฤหัสบดี" },
+  { id: 5, label: "วันศุกร์", desc: "งวดตรงกับวันศุกร์" },
+  { id: 6, label: "วันเสาร์", desc: "งวดตรงกับวันเสาร์" },
+];
+
+function getDrawDayOfWeek(item: LotteryHistoryItem): number {
+  if (item.isoDate && /^\d{4}-\d{2}-\d{2}$/.test(item.isoDate)) {
+    const parts = item.isoDate.split("-").map((s) => Number.parseInt(s, 10));
+    return new Date(parts[0], parts[1] - 1, parts[2]).getDay();
+  }
+  const y = Number.parseInt(item.date.year, 10);
+  const m = Number.parseInt(item.date.month, 10) - 1;
+  const d = Number.parseInt(item.date.date, 10);
+  return new Date(y, m, d).getDay();
+}
+
+type RadarMode = "last2" | "top2" | "both";
+type RadarFilterChip = "all" | "hot" | "cold" | "double" | "consecutive";
+
+function RadarPanel({
+  history,
+  loading,
+  onLoad,
+  nextDraw,
+  dataSource,
+  cachedAt,
+}: {
+  history: LotteryHistoryItem[];
+  loading: boolean;
+  onLoad: () => void;
+  nextDraw: LotteryDrawDate | null;
+  dataSource: string;
+  cachedAt: string;
+}) {
+  const [radarMode, setRadarMode] = useState<RadarMode>("last2");
+  const [selectedWeekday, setSelectedWeekday] = useState<number>(-1);
+  const [filterChip, setFilterChip] = useState<RadarFilterChip>("all");
+  const [activeNumber, setActiveNumber] = useState<string>("00");
+
+  const filteredHistory = useMemo(() => {
+    if (selectedWeekday === -1) return history;
+    return history.filter((item) => getDrawDayOfWeek(item) === selectedWeekday);
+  }, [history, selectedWeekday]);
+
+  const numberMatrix = useMemo(() => {
+    const map: Record<
+      string,
+      { count: number; draws: { date: LotteryDrawDate; type: string }[] }
+    > = {};
+    for (let i = 0; i < 100; i += 1) {
+      const num = String(i).padStart(2, "0");
+      map[num] = { count: 0, draws: [] };
+    }
+
+    for (const item of filteredHistory) {
+      const last2 = item.data.last2?.number?.[0]?.value;
+      const top2 = item.data.first?.number?.[0]?.value?.slice(-2);
+
+      if (radarMode === "last2" || radarMode === "both") {
+        if (last2 && map[last2]) {
+          map[last2].count += 1;
+          map[last2].draws.push({ date: item.date, type: "เลขท้าย 2 ตัว" });
+        }
+      }
+      if (radarMode === "top2" || radarMode === "both") {
+        if (top2 && map[top2]) {
+          map[top2].count += 1;
+          map[top2].draws.push({ date: item.date, type: "2 ตัวบน (ท้ายรางวัลที่ 1)" });
+        }
+      }
+    }
+
+    return map;
+  }, [filteredHistory, radarMode]);
+
+  const maxCount = useMemo(() => {
+    const counts = Object.values(numberMatrix).map((n) => n.count);
+    return Math.max(...counts, 1);
+  }, [numberMatrix]);
+
+  const sortedNumbers = useMemo(() => {
+    return Object.entries(numberMatrix)
+      .map(([num, data]) => ({ num, count: data.count, draws: data.draws }))
+      .sort((a, b) => b.count - a.count || a.num.localeCompare(b.num));
+  }, [numberMatrix]);
+
+  const hotTop10 = useMemo(() => sortedNumbers.slice(0, 10), [sortedNumbers]);
+  const coldNumbers = useMemo(() => sortedNumbers.filter((n) => n.count === 0), [sortedNumbers]);
+
+  const isDouble = (num: string) => num[0] === num[1];
+  const isConsecutive = (num: string) => {
+    const diff = Math.abs(Number(num[0]) - Number(num[1]));
+    return diff === 1 || (num === "09" || num === "90");
+  };
+
+  const isVisibleByFilter = (num: string) => {
+    if (filterChip === "all") return true;
+    if (filterChip === "hot") return hotTop10.some((h) => h.num === num);
+    if (filterChip === "cold") return numberMatrix[num]?.count === 0;
+    if (filterChip === "double") return isDouble(num);
+    if (filterChip === "consecutive") return isConsecutive(num);
+    return true;
+  };
+
+  const activeData = numberMatrix[activeNumber] || { count: 0, draws: [] };
+
+  return (
+    <div className="space-y-6">
+      {/* Header card */}
+      <div className="glass-strong rounded-3xl p-6 shadow-elegant">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-gold/20 bg-gold/5 px-3 py-1 text-[11px] uppercase tracking-wider text-gold">
+              <Grid className="h-3.5 w-3.5 text-gold" />
+              100-Door Heatmap Matrix
+            </div>
+            <h2 className="mt-2 font-display text-3xl text-foreground">
+              เรดาร์ 100 ประตู (เลขท้าย 00–99)
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              แผนผังความร้อนกระจายตัวของตัวเลข 00–99 แยกวิเคราะห์ตามวันในสัปดาห์ที่ออกสลาก
+              ช่วยค้นหาเลขค้างที่ยังไม่ออก (เลขดับ) และเลขมาแรงประจำวันอย่างชัดเจน
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+              <span>ฐานข้อมูล: {filteredHistory.length} งวดที่ตรงเงื่อนไข</span>
+              {nextDraw && <span>· รอผลงวด {thaiLotteryDate(nextDraw)}</span>}
+              {dataSource && <span>· {dataSource}</span>}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onLoad}
+            disabled={loading}
+            className="flex items-center gap-2 rounded-2xl border border-gold/30 px-5 py-3 text-sm font-semibold text-gold hover:bg-gold/10 disabled:opacity-50"
+          >
+            <RotateCcw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            {loading ? "กำลังโหลด..." : "รีเฟรชสถิติ"}
+          </button>
+        </div>
+
+        {/* Mode & Day Filters */}
+        <div className="mt-6 space-y-4 border-t border-gold/10 pt-5">
+          {/* Target Mode */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-gold/80 mr-2">ตำแหน่งเลข:</span>
+            <button
+              type="button"
+              onClick={() => setRadarMode("last2")}
+              className={`rounded-full px-3.5 py-1.5 text-xs transition ${
+                radarMode === "last2"
+                  ? "bg-gradient-gold text-primary-foreground font-semibold shadow-gold"
+                  : "border border-border text-muted-foreground hover:border-gold/30 hover:text-gold"
+              }`}
+            >
+              เลขท้าย 2 ตัว (ล่าง)
+            </button>
+            <button
+              type="button"
+              onClick={() => setRadarMode("top2")}
+              className={`rounded-full px-3.5 py-1.5 text-xs transition ${
+                radarMode === "top2"
+                  ? "bg-gradient-gold text-primary-foreground font-semibold shadow-gold"
+                  : "border border-border text-muted-foreground hover:border-gold/30 hover:text-gold"
+              }`}
+            >
+              2 ตัวบน (ท้ายรางวัลที่ 1)
+            </button>
+            <button
+              type="button"
+              onClick={() => setRadarMode("both")}
+              className={`rounded-full px-3.5 py-1.5 text-xs transition ${
+                radarMode === "both"
+                  ? "bg-gradient-gold text-primary-foreground font-semibold shadow-gold"
+                  : "border border-border text-muted-foreground hover:border-gold/30 hover:text-gold"
+              }`}
+            >
+              รวมทั้ง 2 ตัวบน + ล่าง
+            </button>
+          </div>
+
+          {/* Weekday Selector */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-gold/80 mr-2">วันออกรางวัล:</span>
+            {WEEKDAYS.map((day) => (
+              <button
+                key={day.id}
+                type="button"
+                onClick={() => setSelectedWeekday(day.id)}
+                className={`rounded-full px-3 py-1 text-xs transition ${
+                  selectedWeekday === day.id
+                    ? "bg-gold/25 border border-gold text-gold font-medium"
+                    : "border border-border text-muted-foreground hover:border-gold/20 hover:text-foreground"
+                }`}
+              >
+                {day.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Filter Chips */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-gold/80 mr-2">คัดกรอง:</span>
+            <button
+              type="button"
+              onClick={() => setFilterChip("all")}
+              className={`rounded-lg px-3 py-1 text-xs transition ${
+                filterChip === "all"
+                  ? "bg-gold/20 text-gold font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              ทั้งหมด (100 ประตู)
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilterChip("hot")}
+              className={`inline-flex items-center gap-1 rounded-lg px-3 py-1 text-xs transition ${
+                filterChip === "hot"
+                  ? "bg-amber-500/20 text-amber-300 font-semibold border border-amber-400/40"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Flame className="h-3 w-3 text-amber-400" />
+              เลขมาแรง Top 10
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilterChip("cold")}
+              className={`inline-flex items-center gap-1 rounded-lg px-3 py-1 text-xs transition ${
+                filterChip === "cold"
+                  ? "bg-cyan-500/20 text-cyan-300 font-semibold border border-cyan-400/40"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Snowflake className="h-3 w-3 text-cyan-400" />
+              เลขค้าง/ยังไม่ออก ({coldNumbers.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilterChip("double")}
+              className={`rounded-lg px-3 py-1 text-xs transition ${
+                filterChip === "double"
+                  ? "bg-purple-500/20 text-purple-300 font-semibold border border-purple-400/40"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              เลขเบิ้ล (00-99)
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilterChip("consecutive")}
+              className={`rounded-lg px-3 py-1 text-xs transition ${
+                filterChip === "consecutive"
+                  ? "bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-400/40"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              เลขพี่น้อง
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Heatmap Grid & Active Detail Layout */}
+      <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+        {/* Heatmap 10x10 */}
+        <div className="glass-strong rounded-3xl p-6 shadow-elegant">
+          <div className="mb-4 flex items-center justify-between text-xs text-muted-foreground">
+            <span>คลิกที่ตัวเลขเพื่อดูรายละเอียดประวัติการออกรางวัล</span>
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1">
+                <span className="h-2.5 w-2.5 rounded-sm bg-card/60 border border-border" /> 0 ครั้ง
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="h-2.5 w-2.5 rounded-sm bg-gold/20 border border-gold/40" /> ปานกลาง
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="h-2.5 w-2.5 rounded-sm bg-gradient-gold" /> สูงสุด
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-5 sm:grid-cols-10 gap-1.5 sm:gap-2">
+            {Array.from({ length: 100 }, (_, i) => {
+              const num = String(i).padStart(2, "0");
+              const data = numberMatrix[num] || { count: 0, draws: [] };
+              const count = data.count;
+              const intensity = maxCount > 0 ? count / maxCount : 0;
+              const isSelected = activeNumber === num;
+              const isVisible = isVisibleByFilter(num);
+
+              let heatClasses = "bg-card/40 border-border/50 text-muted-foreground/40";
+              if (count === 1) {
+                heatClasses = "bg-gold/10 border-gold/25 text-foreground";
+              } else if (count === 2) {
+                heatClasses = "bg-gold/20 border-gold/40 text-gold font-semibold";
+              } else if (count >= 3 && count < maxCount) {
+                heatClasses =
+                  "bg-amber-500/25 border-amber-400/60 text-amber-300 font-bold shadow-[0_0_10px_rgba(245,158,11,0.2)]";
+              } else if (count > 0 && count === maxCount) {
+                heatClasses =
+                  "bg-gradient-gold text-primary-foreground font-black shadow-gold ring-1 ring-gold";
+              }
+
+              return (
+                <button
+                  key={num}
+                  type="button"
+                  onClick={() => setActiveNumber(num)}
+                  className={`group relative flex flex-col items-center justify-center rounded-xl border p-2 text-center transition-all ${heatClasses} ${
+                    isSelected ? "ring-2 ring-gold scale-105 z-10" : ""
+                  } ${!isVisible ? "opacity-20 scale-95" : "hover:scale-105"}`}
+                >
+                  <span className="font-mono text-base sm:text-lg font-bold tracking-tight">
+                    {num}
+                  </span>
+                  <span
+                    className={`text-[10px] font-mono leading-none mt-0.5 ${
+                      count === maxCount && count > 0
+                        ? "text-primary-foreground font-bold"
+                        : count > 0
+                        ? "text-gold/90"
+                        : "text-muted-foreground/50"
+                    }`}
+                  >
+                    {count}x
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Selected Number Details & Highlights */}
+        <div className="space-y-6">
+          <div className="glass-strong rounded-3xl p-6 shadow-elegant border border-gold/20">
+            <div className="flex items-center justify-between">
+              <span className="text-xs uppercase tracking-wider text-gold/80 font-semibold">
+                เจาะลึกตัวเลข
+              </span>
+              <span
+                className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
+                  activeData.count === maxCount && activeData.count > 0
+                    ? "bg-gold/20 text-gold border border-gold/40"
+                    : activeData.count > 0
+                    ? "bg-card text-foreground border border-border"
+                    : "bg-cyan-500/10 text-cyan-300 border border-cyan-500/20"
+                }`}
+              >
+                {activeData.count === 0
+                  ? "เลขค้าง/ยังไม่ออก"
+                  : activeData.count === maxCount
+                  ? "เลขฮิตอันดับ 1"
+                  : `ออกแล้ว ${activeData.count} ครั้ง`}
+              </span>
+            </div>
+
+            <div className="my-5 text-center">
+              <div className="font-mono text-6xl font-black text-gold tracking-wider">
+                {activeNumber}
+              </div>
+              <div className="mt-2 text-xs text-muted-foreground">
+                สถิติใน {filteredHistory.length} งวดที่ผ่านมา
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-center">
+              <div className="rounded-xl border border-border bg-background/30 p-3">
+                <div className="text-[10px] text-muted-foreground">ออกทั้งหมด</div>
+                <div className="mt-1 font-display text-xl text-foreground">
+                  {activeData.count} ครั้ง
+                </div>
+              </div>
+              <div className="rounded-xl border border-border bg-background/30 p-3">
+                <div className="text-[10px] text-muted-foreground">อัตราการออก</div>
+                <div className="mt-1 font-display text-xl text-gold">
+                  {filteredHistory.length > 0
+                    ? ((activeData.count / filteredHistory.length) * 100).toFixed(1)
+                    : "0.0"}
+                  %
+                </div>
+              </div>
+            </div>
+
+            {/* List of past draws for activeNumber */}
+            <div className="mt-5 border-t border-gold/10 pt-4">
+              <div className="text-xs font-semibold text-foreground mb-3">
+                งวดที่เคยออก ({activeData.draws.length}):
+              </div>
+              {activeData.draws.length > 0 ? (
+                <div className="max-h-48 overflow-y-auto space-y-2 pr-1 text-xs">
+                  {activeData.draws.map((d, index) => (
+                    <div
+                      key={`${lotteryDrawKey(d.date)}-${index}`}
+                      className="flex items-center justify-between rounded-lg border border-border/60 bg-background/20 px-3 py-2"
+                    >
+                      <span className="font-medium text-foreground">
+                        {thaiLotteryDate(d.date)}
+                      </span>
+                      <span className="text-[10px] text-gold/80">{d.type}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-xl border border-dashed border-border/70 p-4 text-center text-xs text-muted-foreground">
+                  ไม่เคยออกในชุดงวดที่เลือกนี้เลย (เป็นเลขดับในสถิติชุดนี้)
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Quick Top 5 Hot & Cold Box */}
+          <div className="glass-strong rounded-3xl p-6 shadow-elegant space-y-4">
+            <div>
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-400">
+                <Flame className="h-4 w-4" />
+                Top 5 เลขมาแรงสุด
+              </div>
+              <div className="mt-2.5 flex flex-wrap gap-2">
+                {hotTop10.slice(0, 5).map((h) => (
+                  <button
+                    key={h.num}
+                    type="button"
+                    onClick={() => setActiveNumber(h.num)}
+                    className="flex items-center gap-1.5 rounded-xl border border-amber-400/40 bg-amber-400/10 px-3 py-1.5 text-xs font-bold text-amber-300 hover:bg-amber-400/20"
+                  >
+                    <span>{h.num}</span>
+                    <span className="text-[10px] font-normal opacity-70">({h.count}x)</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="border-t border-gold/10 pt-3">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-cyan-400">
+                <Snowflake className="h-4 w-4" />
+                ตัวอย่างเลขค้างนาน (0 ครั้ง)
+              </div>
+              <div className="mt-2.5 flex flex-wrap gap-2">
+                {coldNumbers.slice(0, 6).map((c) => (
+                  <button
+                    key={c.num}
+                    type="button"
+                    onClick={() => setActiveNumber(c.num)}
+                    className="rounded-xl border border-border bg-card/60 px-2.5 py-1 text-xs font-medium text-muted-foreground hover:text-foreground"
+                  >
+                    {c.num}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FollowerPanel({
+  history,
+  loading,
+  onLoad,
+  nextDraw,
+  dataSource,
+}: {
+  history: LotteryHistoryItem[];
+  loading: boolean;
+  onLoad: () => void;
+  nextDraw: LotteryDrawDate | null;
+  dataSource: string;
+}) {
+  const [targetMode, setTargetMode] = useState<"last2" | "top2">("last2");
+  const [baseNumber, setBaseNumber] = useState<string>("");
+  const [inputVal, setInputVal] = useState<string>("");
+
+  // Sort chronological (oldest to newest)
+  const chronological = useMemo(() => {
+    return [...history].sort((a, b) => lotteryDrawKey(a.date).localeCompare(lotteryDrawKey(b.date)));
+  }, [history]);
+
+  // Default baseNumber to the latest draw's number if not set
+  useEffect(() => {
+    if (!baseNumber && history.length > 0) {
+      const latest = history[0];
+      const val =
+        targetMode === "last2"
+          ? latest.data.last2?.number?.[0]?.value
+          : latest.data.first?.number?.[0]?.value?.slice(-2);
+      if (val) {
+        setBaseNumber(val);
+        setInputVal(val);
+      }
+    }
+  }, [history, targetMode, baseNumber]);
+
+  // Compute follower occurrences
+  const followerAnalysis = useMemo(() => {
+    if (!baseNumber || chronological.length < 2) {
+      return {
+        occurrences: [],
+        topFollowers: [],
+        digitFrequency: {},
+        bestDigit: null,
+      };
+    }
+
+    const occurrences: {
+      fromDate: LotteryDrawDate;
+      toDate: LotteryDrawDate;
+      nextNumber: string;
+    }[] = [];
+    const followerCount: Record<string, number> = {};
+    const digitCount: Record<string, number> = {
+      "0": 0, "1": 0, "2": 0, "3": 0, "4": 0,
+      "5": 0, "6": 0, "7": 0, "8": 0, "9": 0,
+    };
+
+    for (let i = 0; i < chronological.length - 1; i += 1) {
+      const current = chronological[i];
+      const next = chronological[i + 1];
+
+      const currentVal =
+        targetMode === "last2"
+          ? current.data.last2?.number?.[0]?.value
+          : current.data.first?.number?.[0]?.value?.slice(-2);
+
+      const nextVal =
+        targetMode === "last2"
+          ? next.data.last2?.number?.[0]?.value
+          : next.data.first?.number?.[0]?.value?.slice(-2);
+
+      if (currentVal === baseNumber && nextVal) {
+        occurrences.push({
+          fromDate: current.date,
+          toDate: next.date,
+          nextNumber: nextVal,
+        });
+        followerCount[nextVal] = (followerCount[nextVal] || 0) + 1;
+
+        // Count individual digits
+        for (const ch of nextVal) {
+          if (digitCount[ch] !== undefined) {
+            digitCount[ch] += 1;
+          }
+        }
+      }
+    }
+
+    const topFollowers = Object.entries(followerCount)
+      .map(([num, count]) => ({ num, count }))
+      .sort((a, b) => b.count - a.count || a.num.localeCompare(b.num));
+
+    const sortedDigits = Object.entries(digitCount).sort((a, b) => b[1] - a[1]);
+    const bestDigit = sortedDigits[0]?.[1] > 0 ? sortedDigits[0] : null;
+
+    return {
+      occurrences,
+      topFollowers,
+      digitFrequency: digitCount,
+      bestDigit,
+    };
+  }, [chronological, baseNumber, targetMode]);
+
+  const handleSelectNumber = (num: string) => {
+    setBaseNumber(num);
+    setInputVal(num);
+  };
+
+  const handleApplyInput = () => {
+    const clean = inputVal.trim().padStart(2, "0").slice(-2);
+    if (/^\d{2}$/.test(clean)) {
+      setBaseNumber(clean);
+      setInputVal(clean);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="glass-strong rounded-3xl p-6 shadow-elegant">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-gold/20 bg-gold/5 px-3 py-1 text-[11px] uppercase tracking-wider text-gold">
+              <TrendingUp className="h-3.5 w-3.5 text-gold" />
+              Follower Pattern Analysis
+            </div>
+            <h2 className="mt-2 font-display text-3xl text-foreground">
+              ระบบสถิติเลขตาม (Follower Matrix)
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              “เมื่อเลขงวดก่อนหน้าออก XX งวดถัดไปมักจะออกเลขอะไร?”
+              คำนวณจากประวัติศาสตร์ผลสลากจริงต่อเนื่องทุกงวด ย้อนรอยความสัมพันธ์ของตัวเลข
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onLoad}
+            disabled={loading}
+            className="flex items-center gap-2 rounded-2xl border border-gold/30 px-5 py-3 text-sm font-semibold text-gold hover:bg-gold/10 disabled:opacity-50"
+          >
+            <RotateCcw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            {loading ? "กำลังโหลด..." : "โหลดสถิติ"}
+          </button>
+        </div>
+
+        {/* Input & Mode Selector */}
+        <div className="mt-6 flex flex-wrap items-center gap-4 border-t border-gold/10 pt-5">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-gold/80">ตำแหน่ง:</span>
+            <button
+              type="button"
+              onClick={() => setTargetMode("last2")}
+              className={`rounded-full px-3.5 py-1.5 text-xs transition ${
+                targetMode === "last2"
+                  ? "bg-gradient-gold text-primary-foreground font-semibold shadow-gold"
+                  : "border border-border text-muted-foreground hover:border-gold/30 hover:text-gold"
+              }`}
+            >
+              เลขท้าย 2 ตัว (ล่าง)
+            </button>
+            <button
+              type="button"
+              onClick={() => setTargetMode("top2")}
+              className={`rounded-full px-3.5 py-1.5 text-xs transition ${
+                targetMode === "top2"
+                  ? "bg-gradient-gold text-primary-foreground font-semibold shadow-gold"
+                  : "border border-border text-muted-foreground hover:border-gold/30 hover:text-gold"
+              }`}
+            >
+              2 ตัวบน (ท้ายรางวัลที่ 1)
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-gold/80">ตรวจเลขตั้งต้น:</span>
+            <input
+              type="text"
+              maxLength={2}
+              value={inputVal}
+              onChange={(e) => setInputVal(e.target.value.replace(/\D/g, ""))}
+              onKeyDown={(e) => e.key === "Enter" && handleApplyInput()}
+              placeholder="00-99"
+              className="w-20 rounded-xl border border-gold/30 bg-background/40 px-3 py-1.5 font-mono text-center text-lg font-bold text-gold focus:border-gold focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={handleApplyInput}
+              className="rounded-xl bg-gold/20 px-4 py-2 text-xs font-semibold text-gold hover:bg-gold/30 transition"
+            >
+              ค้นหาเลขตาม
+            </button>
+          </div>
+        </div>
+
+        {/* Quick Recent Numbers */}
+        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
+          <span className="text-muted-foreground">เลขจากงวดล่าสุด:</span>
+          {history.slice(0, 6).map((item) => {
+            const num =
+              targetMode === "last2"
+                ? item.data.last2?.number?.[0]?.value
+                : item.data.first?.number?.[0]?.value?.slice(-2);
+            if (!num) return null;
+            return (
+              <button
+                key={lotteryDrawKey(item.date)}
+                type="button"
+                onClick={() => handleSelectNumber(num)}
+                className={`rounded-lg px-2.5 py-1 font-mono transition ${
+                  baseNumber === num
+                    ? "bg-gold text-background font-bold"
+                    : "border border-border bg-card/40 text-muted-foreground hover:border-gold/30 hover:text-foreground"
+                }`}
+              >
+                {num}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Analysis Results */}
+      <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
+        {/* Summary Card */}
+        <div className="space-y-6">
+          <div className="glass-strong rounded-3xl p-6 shadow-elegant border border-gold/20">
+            <div className="text-xs uppercase tracking-wider text-gold/80 font-semibold">
+              บทสรุปเลขตามงวดถัดไป
+            </div>
+            <div className="my-5 text-center">
+              <div className="text-xs text-muted-foreground mb-1">
+                เมื่องวดก่อนหน้าออกเลข
+              </div>
+              <div className="font-mono text-5xl font-black text-gold tracking-widest">
+                {baseNumber}
+              </div>
+              <div className="mt-2 text-xs text-muted-foreground">
+                เคยเกิดขึ้นทั้งหมด {followerAnalysis.occurrences.length} ครั้ง ในรอบ 5 ปี
+              </div>
+            </div>
+
+            {followerAnalysis.occurrences.length > 0 ? (
+              <div className="space-y-4 border-t border-gold/10 pt-4">
+                {followerAnalysis.bestDigit && (
+                  <div className="rounded-2xl border border-amber-400/30 bg-amber-400/10 p-4 text-center">
+                    <div className="text-[11px] text-amber-300 uppercase tracking-wider font-semibold">
+                      เลขวิ่ง/รูด ที่ตามมาบ่อยสุด
+                    </div>
+                    <div className="mt-1 font-mono text-3xl font-black text-amber-400">
+                      เลข {followerAnalysis.bestDigit[0]}
+                    </div>
+                    <div className="mt-1 text-[11px] text-amber-200/80">
+                      ปรากฏในหลักสิบหรือหน่วย {followerAnalysis.bestDigit[1]} ครั้ง
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <div className="text-xs font-semibold text-foreground mb-2">
+                    Top เลขตามที่ออกซ้ำ:
+                  </div>
+                  <div className="space-y-2">
+                    {followerAnalysis.topFollowers.slice(0, 5).map((tf, index) => (
+                      <div
+                        key={tf.num}
+                        className="flex items-center justify-between rounded-xl border border-border bg-background/30 p-2.5 text-xs"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gold/20 font-mono text-[10px] font-bold text-gold">
+                            {index + 1}
+                          </span>
+                          <span className="font-mono text-base font-bold text-gold">
+                            {tf.num}
+                          </span>
+                        </div>
+                        <div className="text-right">
+                          <span className="font-semibold text-foreground">
+                            {tf.count} ครั้ง
+                          </span>
+                          <span className="text-muted-foreground ml-1.5">
+                            (
+                            {(
+                              (tf.count / followerAnalysis.occurrences.length) *
+                              100
+                            ).toFixed(0)}
+                            %)
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-border/70 p-6 text-center text-xs text-muted-foreground leading-relaxed">
+                เลข <span className="font-bold text-gold">{baseNumber}</span>{" "}
+                ยังไม่เคยออกในชุดงวดที่มีประวัติในระบบนี้
+                ลองเลือกเลขอื่นที่มีประวัติการออกรางวัล เช่น เลขจากงวดล่าสุดด้านบน
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Timeline Log */}
+        <div className="glass-strong rounded-3xl p-6 shadow-elegant">
+          <div className="flex items-center justify-between">
+            <h3 className="font-display text-2xl text-foreground">
+              ไทม์ไลน์ประวัติศาสตร์เลขตาม ({followerAnalysis.occurrences.length} งวด)
+            </h3>
+            <span className="text-xs text-muted-foreground">เรียงตามลำดับเวลา</span>
+          </div>
+
+          {followerAnalysis.occurrences.length > 0 ? (
+            <div className="mt-5 divide-y divide-gold/10">
+              {followerAnalysis.occurrences.map((occ, idx) => (
+                <div
+                  key={`${lotteryDrawKey(occ.fromDate)}-${idx}`}
+                  className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm hover:bg-gold/5 rounded-xl px-2 transition"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="text-xs text-muted-foreground">
+                      งวด {thaiLotteryDate(occ.fromDate)}
+                    </div>
+                    <span className="font-mono text-lg font-bold text-foreground bg-card px-2.5 py-0.5 rounded-lg border border-border">
+                      {baseNumber}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-gold">
+                    <ArrowRight className="h-4 w-4" />
+                    <span className="text-xs text-muted-foreground">งวดถัดไป</span>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="text-xs text-muted-foreground">
+                      งวด {thaiLotteryDate(occ.toDate)}
+                    </div>
+                    <span className="font-mono text-xl font-black text-gold bg-gold/15 px-3 py-1 rounded-xl border border-gold/40 shadow-sm">
+                      {occ.nextNumber}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-8 rounded-2xl border border-dashed border-border/70 p-10 text-center text-xs text-muted-foreground">
+              ไม่มีประวัติเลขตามสำหรับเลขนี้ในฐานข้อมูลปัจจุบัน
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
