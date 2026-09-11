@@ -49,9 +49,9 @@ function LoveCompatibilityPage() {
   const session = readStoredUserSession();
 
   const [p1, setP1] = useState<LovePersonInput>({
-    name: session?.displayName || "คุณ",
+    name: session?.profile?.displayName || session?.name || "คุณ",
     gender: "female",
-    birthDate: session?.birthDate || "1997-02-14",
+    birthDate: session?.profile?.birthDate || "1997-02-14",
   });
 
   const [p2, setP2] = useState<LovePersonInput>({

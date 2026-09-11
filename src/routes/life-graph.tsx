@@ -33,7 +33,7 @@ export const Route = createFileRoute("/life-graph")({
 
 function LifeGraphPage() {
   const session = readStoredUserSession();
-  const defaultDate = session?.birthDate || "1995-06-15";
+  const defaultDate = session?.profile?.birthDate || "1995-06-15";
 
   const [birthDate, setBirthDate] = useState(defaultDate);
   const [selectedHouse, setSelectedHouse] = useState<LifeGraphHouse | null>(null);
