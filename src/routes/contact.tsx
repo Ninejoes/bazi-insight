@@ -52,8 +52,8 @@ function ContactPage() {
     {
       icon: <Mail className="h-5 w-5" />,
       label: "อีเมล",
-      value: contact?.email || "contact@likhitfa.online",
-      link: `mailto:${contact?.email || "contact@likhitfa.online"}`,
+      value: contact?.email || "bg.chanon@gmail.com",
+      link: `mailto:${contact?.email || "bg.chanon@gmail.com"}`,
     },
     contact?.phone && contact.phone.trim() !== "-" && contact.phone.trim() !== ""
       ? { icon: <Phone className="h-5 w-5" />, label: "โทรศัพท์", value: contact.phone, link: `tel:${contact.phone}` }

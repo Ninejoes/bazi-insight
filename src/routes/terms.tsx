@@ -217,8 +217,8 @@ function TermsPage() {
           <div className="rounded-2xl border border-gold/20 bg-gold/5 p-4 space-y-1 text-xs">
             <div className="font-semibold text-foreground">หากมีข้อสงสัยเกี่ยวกับข้อกำหนดการใช้งาน:</div>
             <div className="text-muted-foreground">อีเมลติดต่อฝ่ายกฎหมายและความเป็นส่วนตัว:</div>
-            <a href="mailto:contact@likhitfa.online" className="text-gold underline font-mono">
-              contact@likhitfa.online
+            <a href="mailto:bg.chanon@gmail.com" className="text-gold underline font-mono">
+              bg.chanon@gmail.com
             </a>
             <div className="text-muted-foreground mt-2">
               หรือติดต่อผ่านหน้าฟอร์ม:{" "}

@@ -132,7 +132,7 @@ export const siteContentSeed: SiteContent = {
     mission: "ส่งมอบประสบการณ์ดูดวงที่งดงาม น่าเชื่อถือ และมีจริยธรรมในทุกการตีความ",
   },
   contact: {
-    email: "hello@likhitfa.com",
+    email: "bg.chanon@gmail.com",
     phone: "02-123-4567",
     line: "@likhitfa",
     facebook: "facebook.com/likhitfa",

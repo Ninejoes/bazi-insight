@@ -203,8 +203,8 @@ function PrivacyPage() {
             <div className="font-semibold text-foreground">ทีมงานคุ้มครองข้อมูลส่วนบุคคล Likhitfa</div>
             <div>
               อีเมล:{" "}
-              <a href="mailto:contact@likhitfa.online" className="text-gold underline font-mono">
-                contact@likhitfa.online
+              <a href="mailto:bg.chanon@gmail.com" className="text-gold underline font-mono">
+                bg.chanon@gmail.com
               </a>
             </div>
             <div>เว็บไซต์: https://www.likhitfa.online</div>
