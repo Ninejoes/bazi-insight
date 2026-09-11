@@ -173,18 +173,29 @@ function VirtualShrinePage() {
         setHistoryList(getPrayerHistory());
 
         // Prepare share data
+        const dateFormatted = new Date().toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" });
         setShareData({
           category: `ไหว้พระขอพร · ${activeDeity.temple}`,
-          categoryCn: "佛光普照",
+          categoryCn: "佛光普照 · สาธุ",
           title: activeDeity.name,
-          subtitle: `ขอพรสำเร็จ ณ วันที่ ${new Date().toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" })}`,
+          subtitle: `ขอพรสำเร็จ ณ วันที่ ${dateFormatted}`,
+          bgImageUrl: activeDeity.imageUrl,
+          theme: "shrine",
+          luckyNumbers: {
+            twoDigit: calculated.twoDigit,
+            threeDigit: calculated.threeDigit,
+          },
+          devoteeName: userName.trim() || "ผู้มีจิตศรัทธา",
+          templeName: activeDeity.temple,
+          badgeText: activeDeity.badge,
+          dateText: dateFormatted,
           highlights: [
             { label: "ผู้ขอพร", value: userName.trim() || "ผู้มีจิตศรัทธา" },
             { label: "สถานที่", value: `${activeDeity.temple} ${activeDeity.province}` },
             { label: "เลขมงคล", value: `${calculated.twoDigit} / ${calculated.threeDigit}` },
             { label: "พุทธคุณเด่น", value: activeDeity.badge },
           ],
-          quote: prayerText.slice(0, 95) || activeDeity.chantMeaning,
+          quote: prayerText.trim() || activeDeity.chantMeaning,
           footerTag: "ไหว้พระออนไลน์เสมือนจริง www.likhitfa.online",
         });
       }
@@ -849,7 +860,35 @@ function VirtualShrinePage() {
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   <button
                     type="button"
-                    onClick={() => setIsShareModalOpen(true)}
+                    onClick={() => {
+                      const currentLucky = luckyResult || calculateDeityAuspiciousNumbers(activeDeity, userName, userBirth);
+                      const dateFormatted = new Date().toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" });
+                      setShareData({
+                        category: `ไหว้พระขอพร · ${activeDeity.temple}`,
+                        categoryCn: "佛光普照 · สาธุ",
+                        title: activeDeity.name,
+                        subtitle: `ขอพรสำเร็จ ณ วันที่ ${dateFormatted}`,
+                        bgImageUrl: activeDeity.imageUrl,
+                        theme: "shrine",
+                        luckyNumbers: {
+                          twoDigit: currentLucky.twoDigit,
+                          threeDigit: currentLucky.threeDigit,
+                        },
+                        devoteeName: userName.trim() || "ผู้มีจิตศรัทธา",
+                        templeName: activeDeity.temple,
+                        badgeText: activeDeity.badge,
+                        dateText: dateFormatted,
+                        highlights: [
+                          { label: "ผู้ขอพร", value: userName.trim() || "ผู้มีจิตศรัทธา" },
+                          { label: "สถานที่", value: `${activeDeity.temple} ${activeDeity.province}` },
+                          { label: "เลขมงคล", value: `${currentLucky.twoDigit} / ${currentLucky.threeDigit}` },
+                          { label: "พุทธคุณเด่น", value: activeDeity.badge },
+                        ],
+                        quote: prayerText.trim() || activeDeity.chantMeaning,
+                        footerTag: "ไหว้พระออนไลน์เสมือนจริง www.likhitfa.online",
+                      });
+                      setIsShareModalOpen(true);
+                    }}
                     className="inline-flex items-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-5 py-3 text-xs font-semibold text-gold transition hover:bg-gold/20 shadow-md cursor-pointer"
                   >
                     <Share2 className="h-4 w-4" />
