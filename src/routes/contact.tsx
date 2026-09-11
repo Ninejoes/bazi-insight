@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo } from "@/lib/seo";
-import { type ContactContent } from "@/lib/admin-content";
+import { siteContentSeed, type ContactContent } from "@/lib/admin-content";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { useEffect, useState, type ReactNode } from "react";
 import { Mail, Phone, MessageSquare, MapPin, Zap } from "lucide-react";
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/contact")({
 });
 
 function ContactPage() {
-  const [contact, setContact] = useState<ContactContent | null>(null);
+  const [contact, setContact] = useState<ContactContent | null>(siteContentSeed.contact);
   const [notice, setNotice] = useState("");
   const [loadError, setLoadError] = useState("");
   const [verifiedData, setVerifiedData] = useState<{ token: string; renderedAt: number } | null>(null);
@@ -35,10 +35,20 @@ function ContactPage() {
       const data = await response.json().catch(() => ({}));
       if (!mounted) return;
       if (!response.ok || !data.ok) {
-        setLoadError(friendlyErrorMessage(data.error, "โหลดข้อมูลติดต่อไม่สำเร็จ"));
         return;
       }
-      setContact(data.content?.contact || null);
+      const loaded = data.content?.contact;
+      if (loaded) {
+        setContact({
+          ...loaded,
+          email:
+            !loaded.email ||
+            loaded.email === "contact@likhitfa.online" ||
+            loaded.email === "hello@likhitfa.com"
+              ? "bg.chanon@gmail.com"
+              : loaded.email,
+        });
+      }
     }
 
     void loadContact();
