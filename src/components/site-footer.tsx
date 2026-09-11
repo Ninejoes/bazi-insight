@@ -30,6 +30,7 @@ export function SiteFooter() {
               { to: "/daily-hub", label: "เช็คดวงเช้านี้ Daily Hub" },
               { to: "/tarot", label: "ไพ่ยิปซี" },
               { to: "/dream", label: "ทำนายฝัน" },
+              { to: "/virtual-shrine", label: "ไหว้พระออนไลน์" },
               { to: "/siamsi", label: "เซียมซีออนไลน์" },
               { to: "/wallpaper", label: "วอลเปเปอร์สายมู" },
             ]}

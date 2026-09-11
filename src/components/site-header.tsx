@@ -126,6 +126,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                   isActive("/tarot") ||
                   isActive("/dream") ||
                   isActive("/siamsi") ||
+                  isActive("/virtual-shrine") ||
                   isActive("/life-graph") ||
                   isActive("/brahma-wheel") ||
                   isActive("/love-compatibility") ||
@@ -263,6 +264,22 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                             </div>
                             <div className="text-[11px] leading-tight text-muted-foreground">
                               สีมงคลวันนี้ ไพ่ประจำวัน & ทิศโชค
+                            </div>
+                          </div>
+                        </Link>
+                        <Link
+                          to="/virtual-shrine"
+                          className="group flex items-start gap-2.5 rounded-xl p-2 transition hover:bg-gold/10"
+                        >
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold/15 text-gold group-hover:scale-110 transition-transform">
+                            <Sparkles className="h-4 w-4" />
+                          </span>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
+                              ไหว้พระออนไลน์เสมือนจริง
+                            </div>
+                            <div className="text-[11px] leading-tight text-muted-foreground">
+                              จุดธูปเทียน ขอพร 10 วัดดัง ทำบุญตรงเข้าวัด
                             </div>
                           </div>
                         </Link>
@@ -739,6 +756,9 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
             </div>
             <MobileLink to="/dream" icon={<Moon className="h-4 w-4" />} onClick={closeMobile}>
               ทำนายฝันแม่นยำ & เลขเด็ด
+            </MobileLink>
+            <MobileLink to="/virtual-shrine" icon={<Sparkles className="h-4 w-4" />} onClick={closeMobile}>
+              ไหว้พระออนไลน์ ขอพร 10 วัดดัง
             </MobileLink>
             <MobileLink to="/siamsi" icon={<Scroll className="h-4 w-4" />} onClick={closeMobile}>
               เซียมซีออนไลน์ 28 ใบ

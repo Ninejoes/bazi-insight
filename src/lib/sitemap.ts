@@ -39,6 +39,7 @@ const basePublicRoutes: SitemapEntry[] = [
   { loc: "/name-analysis", lastmod: "2026-09-11", changefreq: "weekly", priority: "0.9" },
   { loc: "/naming", lastmod: "2026-09-11", changefreq: "weekly", priority: "0.9" },
   { loc: "/tai-sui", lastmod: "2026-09-11", changefreq: "weekly", priority: "0.9" },
+  { loc: "/virtual-shrine", lastmod: "2026-09-11", changefreq: "daily", priority: "0.9" },
   { loc: "/siamsi", lastmod: "2026-09-11", changefreq: "daily", priority: "0.9" },
   { loc: "/wallpaper", lastmod: "2026-09-11", changefreq: "weekly", priority: "0.8" },
   { loc: "/lottery", lastmod: "2026-09-11", changefreq: "daily", priority: "0.8" },

@@ -171,6 +171,17 @@ const quickTools = [
     glyph: "车",
   },
   {
+    href: "/virtual-shrine",
+    badge: "ขอพร 10 วัดดัง",
+    badgeCn: "佛",
+    title: "ไหว้พระออนไลน์ เสมือนจริง",
+    tagline: "จุดธูปเทียน สวดพระคาถา ขอพร 8 มิติ และทำบุญตรงเข้าวัด",
+    desc: "จำลองแท่นบูชาศักดิ์สิทธิ์ จุดธูป 3 ดอก เทียนคู่ ถวายดอกไม้ สวดมนต์พร้อมเสียงระฆัง และทำบุญตรงเข้าบัญชีวัด 100% ไม่ผ่านคนกลาง",
+    iconBg: "from-amber-400/20 to-yellow-600/10",
+    borderGlow: "group-hover:border-amber-400/40",
+    glyph: "佛",
+  },
+  {
     href: "/siamsi",
     badge: "เขย่าติ้ว 28 ใบ",
     badgeCn: "签",

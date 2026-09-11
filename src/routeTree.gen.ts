@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ZodiacRouteImport } from './routes/zodiac'
 import { Route as WallpaperRouteImport } from './routes/wallpaper'
+import { Route as VirtualShrineRouteImport } from './routes/virtual-shrine'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TarotRouteImport } from './routes/tarot'
 import { Route as TaiSuiRouteImport } from './routes/tai-sui'
@@ -85,6 +86,11 @@ const ZodiacRoute = ZodiacRouteImport.update({
 const WallpaperRoute = WallpaperRouteImport.update({
   id: '/wallpaper',
   path: '/wallpaper',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VirtualShrineRoute = VirtualShrineRouteImport.update({
+  id: '/virtual-shrine',
+  path: '/virtual-shrine',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -444,6 +450,7 @@ export interface FileRoutesByFullPath {
   '/tai-sui': typeof TaiSuiRoute
   '/tarot': typeof TarotRouteWithChildren
   '/terms': typeof TermsRoute
+  '/virtual-shrine': typeof VirtualShrineRoute
   '/wallpaper': typeof WallpaperRoute
   '/zodiac': typeof ZodiacRoute
   '/admin/articles': typeof AdminArticlesRoute
@@ -508,6 +515,7 @@ export interface FileRoutesByTo {
   '/siamsi': typeof SiamsiRoute
   '/tai-sui': typeof TaiSuiRoute
   '/terms': typeof TermsRoute
+  '/virtual-shrine': typeof VirtualShrineRoute
   '/wallpaper': typeof WallpaperRoute
   '/zodiac': typeof ZodiacRoute
   '/admin/articles': typeof AdminArticlesRoute
@@ -578,6 +586,7 @@ export interface FileRoutesById {
   '/tai-sui': typeof TaiSuiRoute
   '/tarot': typeof TarotRouteWithChildren
   '/terms': typeof TermsRoute
+  '/virtual-shrine': typeof VirtualShrineRoute
   '/wallpaper': typeof WallpaperRoute
   '/zodiac': typeof ZodiacRoute
   '/admin/articles': typeof AdminArticlesRoute
@@ -649,6 +658,7 @@ export interface FileRouteTypes {
     | '/tai-sui'
     | '/tarot'
     | '/terms'
+    | '/virtual-shrine'
     | '/wallpaper'
     | '/zodiac'
     | '/admin/articles'
@@ -713,6 +723,7 @@ export interface FileRouteTypes {
     | '/siamsi'
     | '/tai-sui'
     | '/terms'
+    | '/virtual-shrine'
     | '/wallpaper'
     | '/zodiac'
     | '/admin/articles'
@@ -782,6 +793,7 @@ export interface FileRouteTypes {
     | '/tai-sui'
     | '/tarot'
     | '/terms'
+    | '/virtual-shrine'
     | '/wallpaper'
     | '/zodiac'
     | '/admin/articles'
@@ -852,6 +864,7 @@ export interface RootRouteChildren {
   TaiSuiRoute: typeof TaiSuiRoute
   TarotRoute: typeof TarotRouteWithChildren
   TermsRoute: typeof TermsRoute
+  VirtualShrineRoute: typeof VirtualShrineRoute
   WallpaperRoute: typeof WallpaperRoute
   ZodiacRoute: typeof ZodiacRoute
   ApiAdminLoginRoute: typeof ApiAdminLoginRoute
@@ -888,6 +901,13 @@ declare module '@tanstack/react-router' {
       path: '/wallpaper'
       fullPath: '/wallpaper'
       preLoaderRoute: typeof WallpaperRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/virtual-shrine': {
+      id: '/virtual-shrine'
+      path: '/virtual-shrine'
+      fullPath: '/virtual-shrine'
+      preLoaderRoute: typeof VirtualShrineRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -1456,6 +1476,7 @@ const rootRouteChildren: RootRouteChildren = {
   TaiSuiRoute: TaiSuiRoute,
   TarotRoute: TarotRouteWithChildren,
   TermsRoute: TermsRoute,
+  VirtualShrineRoute: VirtualShrineRoute,
   WallpaperRoute: WallpaperRoute,
   ZodiacRoute: ZodiacRoute,
   ApiAdminLoginRoute: ApiAdminLoginRoute,
