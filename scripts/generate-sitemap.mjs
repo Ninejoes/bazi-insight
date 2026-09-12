@@ -17,6 +17,22 @@ const urls = [
   { loc: "/tarot/study", changefreq: "weekly", priority: "0.7" },
   { loc: "/tarot/luck", changefreq: "weekly", priority: "0.7" },
   { loc: "/dream", changefreq: "weekly", priority: "0.9" },
+  { loc: "/life-graph", changefreq: "weekly", priority: "0.9" },
+  { loc: "/brahma-wheel", changefreq: "weekly", priority: "0.9" },
+  { loc: "/love-compatibility", changefreq: "weekly", priority: "0.9" },
+  { loc: "/zodiac", changefreq: "weekly", priority: "0.9" },
+  { loc: "/daily-hub", changefreq: "daily", priority: "0.9" },
+  { loc: "/destiny-card", changefreq: "weekly", priority: "0.8" },
+  { loc: "/lucky-colors", changefreq: "daily", priority: "0.9" },
+  { loc: "/auspicious-calendar", changefreq: "daily", priority: "0.9" },
+  { loc: "/phone-analysis", changefreq: "weekly", priority: "0.9" },
+  { loc: "/plate-analysis", changefreq: "weekly", priority: "0.9" },
+  { loc: "/name-analysis", changefreq: "weekly", priority: "0.9" },
+  { loc: "/naming", changefreq: "weekly", priority: "0.9" },
+  { loc: "/tai-sui", changefreq: "weekly", priority: "0.9" },
+  { loc: "/virtual-shrine", changefreq: "daily", priority: "0.9" },
+  { loc: "/siamsi", changefreq: "daily", priority: "0.9" },
+  { loc: "/wallpaper", changefreq: "weekly", priority: "0.8" },
   { loc: "/lottery", changefreq: "daily", priority: "0.8" },
   { loc: "/articles", changefreq: "weekly", priority: "0.8" },
   { loc: "/articles/bazi-101", changefreq: "weekly", priority: "0.7" },
@@ -28,6 +44,8 @@ const urls = [
   { loc: "/about", changefreq: "monthly", priority: "0.6" },
   { loc: "/contact", changefreq: "monthly", priority: "0.6" },
   { loc: "/help", changefreq: "monthly", priority: "0.6" },
+  { loc: "/terms", changefreq: "monthly", priority: "0.5" },
+  { loc: "/privacy", changefreq: "monthly", priority: "0.5" },
 ];
 
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -46,3 +64,4 @@ ${urls
 `;
 
 await writeFile(new URL("../public/sitemap.xml", import.meta.url), sitemap);
+console.log(`Generated public/sitemap.xml with ${urls.length} URLs`);

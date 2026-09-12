@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { type Article } from "@/lib/articles";
+import { type Article, getArticle } from "@/lib/articles";
 import {
   json,
   requireAdmin,
@@ -216,10 +216,18 @@ export const Route = createFileRoute("/api/articles")({
           const category = (url.searchParams.get("category") || "").trim();
           const page = clampPage(url.searchParams.get("page"));
           const limit = clampLimit(url.searchParams.get("limit"));
+          const result = await listArticles({ slug, q, category, page, limit });
+          if (slug && (!result.articles || result.articles.length === 0)) {
+            const fallback = getArticle(slug);
+            if (fallback) {
+              result.articles = [fallback];
+              result.total = 1;
+            }
+          }
           return json(
             {
               ok: true,
-              ...(await listArticles({ slug, q, category, page, limit })),
+              ...result,
             },
             {
               headers: {

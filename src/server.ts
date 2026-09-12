@@ -287,9 +287,18 @@ async function loadDreamsForSitemap() {
 }
 
 async function buildFreshSitemapXml() {
-  const [articles, dreams] = await Promise.all([loadArticlesForSitemap(), loadDreamsForSitemap()]);
-  const sitemapFiles = buildSitemapFiles(articles, siteUrl, dreams);
-  return buildSitemapFileMap(sitemapFiles);
+  try {
+    const [articles, dreams] = await Promise.all([
+      loadArticlesForSitemap().catch(() => undefined),
+      loadDreamsForSitemap().catch(() => undefined),
+    ]);
+    const sitemapFiles = buildSitemapFiles(articles, siteUrl, dreams);
+    return buildSitemapFileMap(sitemapFiles);
+  } catch (err) {
+    console.error("Failed to build dynamic sitemap, fallback to static entries", err);
+    const sitemapFiles = buildSitemapFiles([], siteUrl, []);
+    return buildSitemapFileMap(sitemapFiles);
+  }
 }
 
 function buildSitemapFileMap(sitemapFiles: SitemapFile[]) {
@@ -311,6 +320,11 @@ async function getCachedSitemapFiles() {
         sitemapCache = { files, expiresAt: Date.now() + sitemapCacheMs };
         return files;
       })
+      .catch((err) => {
+        console.error("getCachedSitemapFiles refresh error", err);
+        const fallbackFiles = buildSitemapFiles([], siteUrl, []);
+        return buildSitemapFileMap(fallbackFiles);
+      })
       .finally(() => {
         sitemapRefreshPromise = undefined;
       });
@@ -321,15 +335,27 @@ async function getCachedSitemapFiles() {
 }
 
 async function sitemapResponse(pathname: string) {
-  const files = await getCachedSitemapFiles();
-  const xml = files.get(pathname);
-  if (!xml) {
-    return new Response("Sitemap not found", {
-      status: 404,
-      headers: textHeaders({ "X-Robots-Tag": "noindex, follow" }),
-    });
+  try {
+    const files = await getCachedSitemapFiles();
+    const xml = files?.get(pathname);
+    if (!xml) {
+      if (pathname === "/sitemap.xml" || pathname === "/sitemap-static.xml") {
+        const fallbackMap = buildSitemapFileMap(buildSitemapFiles([], siteUrl, []));
+        const fallbackXml = fallbackMap.get(pathname);
+        if (fallbackXml) return new Response(fallbackXml, { headers: xmlHeaders() });
+      }
+      return new Response("Sitemap not found", {
+        status: 404,
+        headers: textHeaders({ "X-Robots-Tag": "noindex, follow" }),
+      });
+    }
+    return new Response(xml, { headers: xmlHeaders() });
+  } catch (err) {
+    console.error("sitemapResponse error, serving fallback", err);
+    const fallbackMap = buildSitemapFileMap(buildSitemapFiles([], siteUrl, []));
+    const fallbackXml = fallbackMap.get(pathname) || fallbackMap.get("/sitemap.xml");
+    return new Response(fallbackXml, { headers: xmlHeaders() });
   }
-  return new Response(xml, { headers: xmlHeaders() });
 }
 
 const BLOCKED_AI_SCRAPERS = [

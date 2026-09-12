@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { type Article, formatArticleDate, formatArticleReadTime } from "@/lib/articles";
+import { type Article, formatArticleDate, formatArticleReadTime, getArticle } from "@/lib/articles";
 import { seo, siteUrl } from "@/lib/seo";
 import { Fragment, useEffect, useState } from "react";
 import { Calendar, Clock, Bookmark, Share2, Copy, Check, MessageCircle } from "lucide-react";
@@ -13,7 +13,9 @@ import {
 
 export const Route = createFileRoute("/articles/$slug")({
   head: ({ params, ...ctx }) => {
-    const article = (ctx as { loaderData?: { article?: Article | null } }).loaderData?.article;
+    const article =
+      (ctx as { loaderData?: { article?: Article | null } }).loaderData?.article ||
+      getArticle(params.slug);
     if (article) {
       return articleSeo(article);
     }
@@ -380,6 +382,9 @@ function applyClientArticleSeo(article: Article) {
 }
 
 async function loadArticleBySlug(slug: string): Promise<Article | null> {
+  const local = getArticle(slug);
+  if (local) return local;
+
   try {
     const origin = typeof window === "undefined" ? siteUrl : window.location.origin;
     const response = await fetch(`${origin}/api/articles?slug=${encodeURIComponent(slug)}`);
