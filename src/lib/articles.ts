@@ -5,6 +5,7 @@ export type Article = {
   category: string;
   author: string;
   date: string;
+  createdAt?: string;
   readMin: number;
   cover: string;
   coverAlt?: string;
@@ -115,3 +116,61 @@ export const articles: Article[] = [
 export function getArticle(slug: string) {
   return articles.find((a) => a.slug === slug);
 }
+
+/**
+ * แปลงวันที่บทความให้เป็นภาษาไทยที่อ่านง่าย ชัดเจน
+ * รองรับทั้ง "กี่นาทีที่แล้ว / กี่ชั่วโมงที่แล้ว" หากโพสต์ภายในวันเดียวกัน
+ * หรือ "12 ก.ย. 2569" หากเป็นวันที่ก่อนหน้า
+ */
+export function formatArticleDate(dateStr?: string, createdAt?: string): string {
+  if (!dateStr && !createdAt) return "";
+  try {
+    const target = createdAt ? new Date(createdAt) : new Date(dateStr!);
+    const now = new Date();
+    const diffMs = now.getTime() - target.getTime();
+
+    // หากมีข้อมูล timestamp และโพสต์ภายใน 24 ชม. ที่ผ่านมา
+    if (!Number.isNaN(diffMs) && diffMs >= 0 && diffMs < 24 * 60 * 60 * 1000) {
+      const diffSec = Math.floor(diffMs / 1000);
+      const diffMin = Math.floor(diffSec / 60);
+      const diffHour = Math.floor(diffMin / 60);
+
+      if (diffSec < 60) return "เมื่อสักครู่";
+      if (diffMin < 60) return `${diffMin} นาทีที่แล้ว`;
+      if (diffHour < 24) return `${diffHour} ชั่วโมงที่แล้ว`;
+    }
+
+    // แปลงวันที่แบบปี พ.ศ. สั้น เช่น "12 ก.ย. 2569"
+    const raw = (dateStr || createdAt || "").split("T")[0].split("-");
+    if (raw.length === 3) {
+      const year = parseInt(raw[0], 10);
+      const month = parseInt(raw[1], 10) - 1;
+      const day = parseInt(raw[2], 10);
+      const d = new Date(year, month, day);
+      if (!Number.isNaN(d.getTime())) {
+        return d.toLocaleDateString("th-TH", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        });
+      }
+    }
+
+    return target.toLocaleDateString("th-TH", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return dateStr || "";
+  }
+}
+
+/**
+ * แสดงเวลาที่ใช้ในการอ่านอย่างชัดเจน ป้องกันผู้ใช้สับสนกับเวลาโพสต์
+ */
+export function formatArticleReadTime(readMin?: number): string {
+  const min = Math.max(1, Number(readMin) || 3);
+  return `อ่าน ${min} นาที`;
+}
+

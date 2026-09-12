@@ -689,7 +689,7 @@ function Editor({
                     {excerpt || "เนื้อหาย่อจะแสดงตรงนี้"}
                   </p>
                   <div className="mt-3 text-[11px] text-muted-foreground">
-                    {author || "Admin"} · {readMin} นาที
+                    {author || "Admin"} · อ่าน {readMin} นาที
                   </div>
                 </div>
               </div>

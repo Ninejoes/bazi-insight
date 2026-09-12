@@ -16,6 +16,8 @@ type ArticleRow = {
   category: string;
   author: string;
   date: string;
+  created_at?: string;
+  createdAt?: string;
   read_min?: number;
   readMin?: number;
   cover: string;
@@ -52,6 +54,7 @@ function normalizeArticle(row: ArticleRow): Article {
     category: row.category,
     author: row.author,
     date: row.date,
+    createdAt: row.createdAt || row.created_at || row.date,
     readMin: Number(row.readMin || row.read_min || 3),
     cover: row.cover,
     coverAlt: row.coverAlt || row.cover_alt || "",

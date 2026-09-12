@@ -2,10 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { ALL_ARTICLE_CATEGORY, ARTICLE_CATEGORIES } from "@/lib/article-categories";
-import { type Article } from "@/lib/articles";
+import { type Article, formatArticleDate, formatArticleReadTime } from "@/lib/articles";
 import { seo, siteUrl } from "@/lib/seo";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { useEffect, useState } from "react";
+import { Calendar, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/articles/")({
   head: () =>
@@ -209,10 +210,15 @@ function ArticlesIndex() {
                   </div>
                   <h3 className="mt-1.5 font-display text-xl text-foreground">{a.title}</h3>
                   <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">{a.excerpt}</p>
-                  <div className="mt-3 flex items-center gap-2 text-[11px] text-muted-foreground">
-                    <span>{a.date}</span>
-                    <span>·</span>
-                    <span>{a.readMin} นาที</span>
+                  <div className="mt-3 flex items-center justify-between border-t border-gold/10 pt-2.5 text-[11px] text-muted-foreground">
+                    <span className="inline-flex items-center gap-1 font-medium text-slate-300">
+                      <Calendar className="h-3 w-3 text-gold/70" />
+                      <span>{formatArticleDate(a.date, a.createdAt)}</span>
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-gold/80">
+                      <Clock className="h-3 w-3" />
+                      <span>{formatArticleReadTime(a.readMin)}</span>
+                    </span>
                   </div>
                 </div>
               </article>

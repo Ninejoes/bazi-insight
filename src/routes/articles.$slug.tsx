@@ -1,9 +1,10 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { type Article } from "@/lib/articles";
+import { type Article, formatArticleDate, formatArticleReadTime } from "@/lib/articles";
 import { seo, siteUrl } from "@/lib/seo";
 import { Fragment, useEffect, useState } from "react";
+import { Calendar, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/articles/$slug")({
   head: ({ params, ...ctx }) => {
@@ -192,12 +193,18 @@ function ArticleDetail() {
         <article className="mt-6">
           <div className="text-[11px] uppercase tracking-[0.25em] text-gold">{a.category}</div>
           <h1 className="mt-2 font-display text-4xl text-foreground md:text-5xl">{a.title}</h1>
-          <div className="mt-4 flex items-center gap-3 text-xs text-muted-foreground">
-            <span>{a.author}</span>
+          <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+            <span className="font-semibold text-foreground">{a.author}</span>
             <span>·</span>
-            <span>{a.date}</span>
+            <span className="inline-flex items-center gap-1 font-medium text-slate-300">
+              <Calendar className="h-3.5 w-3.5 text-gold/80" />
+              <span>เผยแพร่: {formatArticleDate(a.date, a.createdAt)}</span>
+            </span>
             <span>·</span>
-            <span>{a.readMin} นาที</span>
+            <span className="inline-flex items-center gap-1 text-gold/90">
+              <Clock className="h-3.5 w-3.5" />
+              <span>{formatArticleReadTime(a.readMin)}</span>
+            </span>
           </div>
           <div className="mt-8 aspect-[16/9] overflow-hidden rounded-2xl">
             <img src={a.cover} alt={a.coverAlt || a.title} className="h-full w-full object-cover" />
