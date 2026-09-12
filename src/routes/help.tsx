@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo } from "@/lib/seo";
-import { type FAQRecord } from "@/lib/admin-content";
+import { faqSeed, type FAQRecord } from "@/lib/admin-content";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { useEffect, useState } from "react";
 import { Sparkles, Compass, Settings, ShieldCheck } from "lucide-react";
@@ -20,15 +20,16 @@ export const Route = createFileRoute("/help")({
 });
 
 const topics = [
-  { icon: Sparkles, title: "เริ่มต้นใช้งาน", desc: "สมัครสมาชิก เข้าสู่ระบบ และตั้งค่าโปรไฟล์" },
-  { icon: Compass, title: "การดูดวง", desc: "วิธีใช้งานปาจื้อ ไพ่ยิปซี และทำนายฝัน" },
-  { icon: Settings, title: "บัญชีและการตั้งค่า", desc: "ความปลอดภัย รหัสผ่าน และการแจ้งเตือน" },
-  { icon: ShieldCheck, title: "ความเป็นส่วนตัว", desc: "PDPA, การลบข้อมูล และนโยบายความเป็นส่วนตัว" },
+  { icon: Sparkles, title: "เริ่มต้นใช้งาน", desc: "สมัครสมาชิก เข้าสู่ระบบ และตั้งค่าโปรไฟล์", keyword: "สมาชิก" },
+  { icon: Compass, title: "การดูดวง", desc: "วิธีใช้งานปาจื้อ กราฟชีวิต เซียมซี และไหว้พระ", keyword: "ดูดวง" },
+  { icon: Settings, title: "บัญชีและการตั้งค่า", desc: "ความปลอดภัย รหัสผ่าน และประวัติ", keyword: "บัญชี" },
+  { icon: ShieldCheck, title: "ความเป็นส่วนตัว", desc: "PDPA การลบข้อมูล และนโยบายความเป็นส่วนตัว", keyword: "PDPA" },
 ];
 
 function HelpPage() {
   const [open, setOpen] = useState<number | null>(0);
-  const [faqs, setFaqs] = useState<FAQRecord[]>([]);
+  const [faqs, setFaqs] = useState<FAQRecord[]>(faqSeed);
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [error, setError] = useState("");
 
@@ -40,10 +41,12 @@ function HelpPage() {
       const data = await response.json().catch(() => ({}));
       if (!mounted) return;
       if (!response.ok || !data.ok) {
-        setError(friendlyErrorMessage(data.error, "โหลดศูนย์ช่วยเหลือไม่สำเร็จ"));
+        // Safe fallback to faqSeed
         return;
       }
-      setFaqs(data.faqs || []);
+      if (Array.isArray(data.faqs) && data.faqs.length > 0) {
+        setFaqs(data.faqs);
+      }
     }
 
     void loadFaqs();
@@ -65,28 +68,54 @@ function HelpPage() {
           <div className="text-[11px] uppercase tracking-[0.3em] text-gold/70">HELP CENTER</div>
           <h1 className="mt-2 font-display text-5xl text-foreground">ศูนย์ช่วยเหลือ</h1>
           <p className="mx-auto mt-4 max-w-xl text-sm text-muted-foreground">
-            {error || "ค้นหาคำตอบ หรือเลือกหมวดด้านล่าง"}
+            {error || "ค้นหาคำตอบ หรือเลือกหมวดด้านล่างเพื่อกรองคำถาม"}
           </p>
           <div className="mx-auto mt-6 max-w-xl">
             <input
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setSelectedTopic(null);
+              }}
               className="input-styled"
-              placeholder="ค้นหา เช่น วิธีดูดวงไพ่ยิปซี"
+              placeholder="ค้นหา เช่น ดูดวง, สมาชิก, PDPA, ไหว้พระ"
             />
           </div>
         </section>
 
         <section className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {topics.map((t) => (
-            <div key={t.title} className="glass-strong rounded-2xl p-5">
-              <div className="text-gold mb-2">
-                <t.icon className="h-7 w-7" />
-              </div>
-              <div className="mt-2 font-display text-lg text-foreground">{t.title}</div>
-              <p className="mt-1 text-xs text-muted-foreground">{t.desc}</p>
-            </div>
-          ))}
+          {topics.map((t) => {
+            const isSelected = selectedTopic === t.title;
+            return (
+              <button
+                key={t.title}
+                type="button"
+                onClick={() => {
+                  if (isSelected) {
+                    setSelectedTopic(null);
+                    setQuery("");
+                  } else {
+                    setSelectedTopic(t.title);
+                    setQuery(t.keyword);
+                  }
+                }}
+                className={`flex flex-col text-left rounded-2xl p-5 border transition-all cursor-pointer ${
+                  isSelected
+                    ? "border-gold bg-gold/15 shadow-gold scale-[1.02]"
+                    : "border-border/60 bg-card/40 hover:border-gold/40 hover:bg-gold/5"
+                }`}
+              >
+                <div className={`mb-2 ${isSelected ? "text-gold" : "text-gold/80"}`}>
+                  <t.icon className="h-7 w-7" />
+                </div>
+                <div className="mt-1 font-display text-lg font-semibold text-foreground flex items-center justify-between w-full">
+                  <span>{t.title}</span>
+                  {isSelected && <span className="text-[11px] text-gold font-normal">กำลังเลือก</span>}
+                </div>
+                <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">{t.desc}</p>
+              </button>
+            );
+          })}
         </section>
 
         <section className="mt-12">

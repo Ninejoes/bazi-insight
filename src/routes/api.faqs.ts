@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
-import { type FAQRecord } from "@/lib/admin-content";
+import { faqSeed, type FAQRecord } from "@/lib/admin-content";
 import {
   getSupabaseConfig,
   json,
@@ -39,16 +39,23 @@ function toRow(faq: FAQRecord) {
 
 async function listFaqs() {
   if (!getSupabaseConfig()) {
-    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
+    return { source: "seed", faqs: faqSeed };
   }
 
-  const response = await supabaseRequest("faqs?select=*&order=sort_order.asc");
-  if (!response) {
-    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
-  }
+  try {
+    const response = await supabaseRequest("faqs?select=*&order=sort_order.asc");
+    if (!response || !response.ok) {
+      return { source: "seed", faqs: faqSeed };
+    }
 
-  const rows = (await response.json().catch(() => [])) as FAQRow[];
-  return { source: "supabase", faqs: rows.map(normalizeFaq) };
+    const rows = (await response.json().catch(() => [])) as FAQRow[];
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return { source: "seed", faqs: faqSeed };
+    }
+    return { source: "supabase", faqs: rows.map(normalizeFaq) };
+  } catch {
+    return { source: "seed", faqs: faqSeed };
+  }
 }
 
 async function saveFaqs(rows: FAQRow[]) {

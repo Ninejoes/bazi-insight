@@ -9,6 +9,7 @@ import {
 } from "@/lib/love-compatibility";
 import { ShareStoryModal, type ShareCardData } from "@/components/share-story-modal";
 import { readStoredUserSession } from "@/lib/user-session";
+import { recordDivinationHistory } from "@/lib/member-history";
 import { useState, useMemo } from "react";
 import {
   HeartHandshake,
@@ -20,6 +21,7 @@ import {
   AlertTriangle,
   Gem,
   MapPin,
+  Bookmark,
 } from "lucide-react";
 
 export const Route = createFileRoute("/love-compatibility")({
@@ -61,10 +63,29 @@ function LoveCompatibilityPage() {
   });
 
   const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   const result: CompatibilityAnalysis = useMemo(() => {
     return analyzeLoveCompatibility(p1, p2);
   }, [p1, p2]);
+
+  const handleSaveToHistory = () => {
+    recordDivinationHistory({
+      type: "ดวงสมพงษ์",
+      title: `ดวงสมพงษ์: ${p1.name} & ${p2.name}`,
+      result: `คะแนนความสมพงษ์ ${result.score}% (${result.levelTitle}) · ธาตุ${result.person1.element}+${result.person2.element}`,
+      url: "/love-compatibility",
+      metadata: {
+        person1: p1.name,
+        person2: p2.name,
+        score: result.score,
+        levelBadge: result.levelBadge,
+        levelTitle: result.levelTitle,
+      },
+    });
+    setIsSaved(true);
+    setTimeout(() => setIsSaved(false), 3000);
+  };
 
   const shareData: ShareCardData = {
     category: "ดวงสมพงษ์เนื้อคู่ & ความรัก",
@@ -221,10 +242,30 @@ function LoveCompatibilityPage() {
             </div>
           </div>
 
-          <div className="mx-auto flex justify-center">
+          <div className="mx-auto flex flex-wrap items-center justify-center gap-3">
+            <button
+              onClick={handleSaveToHistory}
+              className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition cursor-pointer ${
+                isSaved
+                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                  : "border border-rose-500/40 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20"
+              }`}
+            >
+              {isSaved ? (
+                <>
+                  <Check className="h-4 w-4 text-emerald-400" />
+                  <span>บันทึกผลแล้ว</span>
+                </>
+              ) : (
+                <>
+                  <Bookmark className="h-4 w-4" />
+                  <span>บันทึกผลลงประวัติดูดวง</span>
+                </>
+              )}
+            </button>
             <button
               onClick={() => setShareModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 px-6 py-2.5 text-sm font-semibold text-stone-950 shadow-lg transition hover:opacity-95"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 px-6 py-2.5 text-sm font-semibold text-stone-950 shadow-lg transition hover:opacity-95 cursor-pointer"
             >
               <Share2 className="h-4 w-4" />
               <span>บันทึกการ์ดความรัก Story (9:16)</span>

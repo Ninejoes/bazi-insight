@@ -3,7 +3,10 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { type DreamRecord } from "@/lib/admin-content";
 import { seo, siteUrl } from "@/lib/seo";
+import { recordDivinationHistory } from "@/lib/member-history";
+import { ShareStoryModal, type ShareCardData } from "@/components/share-story-modal";
 import { useEffect, useState } from "react";
+import { Copy, Check, Share2, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/dream/$slug")({
   head: ({ params, ...ctx }) => {
@@ -55,6 +58,9 @@ function DreamDetail() {
   const [related, setRelated] = useState<DreamRecord[]>([]);
   const [loading, setLoading] = useState(!initialDream);
   const [error, setError] = useState("");
+  const [copiedNumber, setCopiedNumber] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -80,6 +86,19 @@ function DreamDetail() {
   useEffect(() => {
     if (!dream) return;
     applyClientDreamSeo(dream);
+
+    recordDivinationHistory({
+      type: "ทำนายฝัน",
+      title: `ฝันเห็น${dream.keyword}`,
+      result: `เลขเด็ด ${dream.numbers || "-"} · ${dream.meaning.slice(0, 50)}...`,
+      url: `/dream/${encodeURIComponent(dream.keyword)}`,
+      metadata: {
+        keyword: dream.keyword,
+        category: dream.category,
+        numbers: dream.numbers,
+      },
+    });
+
     const currentDream = dream;
     let mounted = true;
 
@@ -98,6 +117,35 @@ function DreamDetail() {
       mounted = false;
     };
   }, [dream]);
+
+  const handleCopyNumber = () => {
+    if (!dream?.numbers) return;
+    navigator.clipboard.writeText(dream.numbers);
+    setCopiedNumber(true);
+    setTimeout(() => setCopiedNumber(false), 2200);
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2200);
+  };
+
+  const shareData: ShareCardData | null = dream
+    ? {
+        category: `ทำนายฝันโบราณ · ${dream.category || "ความฝัน"}`,
+        categoryCn: "周公解梦",
+        title: `ฝันเห็น${dream.keyword}`,
+        subtitle: `เลขเด็ดมงคล: ${dream.numbers || "ไม่ระบุ"}`,
+        highlights: [
+          { label: "เลขเด็ดนำโชค", value: dream.numbers || "ไม่ระบุ", color: "#fbbf24" },
+          { label: "หมวดคำฝัน", value: dream.category || "ทั่วไป", color: "#38bdf8" },
+          { label: "ช่วงเวลาฝัน", value: dream.time || "ตลอดคืน", color: "#34d399" },
+        ],
+        quote: dream.meaning,
+        footerTag: "ค้นหาคำทำนายฝันโบราณที่ www.likhitfa.online",
+      }
+    : null;
 
   if (loading && !dream) {
     return (
@@ -194,7 +242,24 @@ function DreamDetail() {
           <div className="gold-divider my-8" />
 
           <section className="grid gap-4 md:grid-cols-3">
-            <InfoCard title="เลขเด็ดจากความฝัน" value={dream.numbers || "ไม่ระบุ"} large />
+            <div className="relative rounded-2xl border border-gold/30 bg-gold/5 p-5">
+              <div className="flex items-center justify-between">
+                <div className="text-[10px] uppercase tracking-wider text-gold/80">เลขเด็ดจากความฝัน</div>
+                {dream.numbers && (
+                  <button
+                    type="button"
+                    onClick={handleCopyNumber}
+                    className="inline-flex items-center gap-1 rounded-lg border border-gold/40 bg-gold/10 px-2 py-1 text-[11px] font-semibold text-gold transition hover:bg-gold/20 cursor-pointer"
+                  >
+                    {copiedNumber ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+                    <span>{copiedNumber ? "คัดลอกแล้ว" : "คัดลอกเลข"}</span>
+                  </button>
+                )}
+              </div>
+              <div className="mt-2 font-display text-3xl font-bold text-gold">
+                {dream.numbers || "ไม่ระบุ"}
+              </div>
+            </div>
             <InfoCard title="ช่วงเวลาฝัน" value={dream.time || "ไม่ระบุ"} />
             <InfoCard title="หมวดคำฝัน" value={dream.category || "ทั่วไป"} />
           </section>
@@ -203,6 +268,49 @@ function DreamDetail() {
             <div className="text-[10px] uppercase tracking-wider text-gold/70">วิธีแก้เคล็ด</div>
             <p className="mt-2 text-sm leading-relaxed text-foreground/85">{dream.advice}</p>
           </section>
+
+          {/* Action & Sharing Bar */}
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-gold/15 pt-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsShareOpen(true)}
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-gold px-4 py-2 text-xs font-semibold text-stone-950 shadow-gold transition hover:opacity-90 cursor-pointer"
+              >
+                <Share2 className="h-3.5 w-3.5" />
+                แชร์การ์ดคำทำนาย Story
+              </button>
+
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card/60 px-3.5 py-2 text-xs text-muted-foreground transition hover:border-gold/50 hover:text-foreground cursor-pointer"
+              >
+                {copiedLink ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                {copiedLink ? "คัดลอกลิงก์แล้ว" : "คัดลอกลิงก์"}
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>แชร์ไปยัง:</span>
+              <a
+                href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(typeof window !== "undefined" ? window.location.href : `${siteUrl}/dream/${encodeURIComponent(dream.keyword)}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-400 hover:bg-emerald-500/20 cursor-pointer"
+              >
+                LINE
+              </a>
+              <a
+                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== "undefined" ? window.location.href : `${siteUrl}/dream/${encodeURIComponent(dream.keyword)}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-lg border border-sky-500/30 bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-400 hover:bg-sky-500/20 cursor-pointer"
+              >
+                Facebook
+              </a>
+            </div>
+          </div>
         </article>
 
         {related.length > 0 && (
@@ -232,6 +340,14 @@ function DreamDetail() {
               ))}
             </div>
           </section>
+        )}
+
+        {shareData && (
+          <ShareStoryModal
+            isOpen={isShareOpen}
+            onClose={() => setIsShareOpen(false)}
+            data={shareData}
+          />
         )}
       </main>
       <SiteFooter />

@@ -4,9 +4,10 @@ import { SiteFooter } from "@/components/site-footer";
 import { seo, siteUrl } from "@/lib/seo";
 import { analyzeBazi, type BaziAnalysis } from "@/lib/bazi-engine";
 import { readStoredUserSession } from "@/lib/user-session";
+import { recordDivinationHistory } from "@/lib/member-history";
 import { ShareStoryModal, type ShareCardData } from "@/components/share-story-modal";
 import { useState, useMemo, useEffect } from "react";
-import { CreditCard, Palette, Hash, Gem, Sparkles, Share2 } from "lucide-react";
+import { CreditCard, Palette, Hash, Gem, Sparkles, Share2, Bookmark, Check } from "lucide-react";
 
 export const Route = createFileRoute("/destiny-card")({
   head: () =>
@@ -75,6 +76,7 @@ export function DestinyCardPage() {
   const [birthTime, setBirthTime] = useState("09:30");
   const [gender, setGender] = useState<"หญิง" | "ชาย">("หญิง");
   const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
     const session = readStoredUserSession();
@@ -122,6 +124,27 @@ export function DestinyCardPage() {
     ],
     quote: `คติธรรมประจำชะตา: สติรู้ทัน วาสนานำพา ปัญญาคุ้มภัย (${guardian.blessing})`,
     footerTag: "สร้างบัตรชะตาชีวิตดิจิทัลของคุณได้ที่ Likhitfa.online",
+  };
+
+  const handleSaveToHistory = () => {
+    recordDivinationHistory({
+      type: "บัตรชะตาชีวิต",
+      title: `บัตรชะตาชีวิต: ${name}`,
+      result: `ดิถี ${dm.th} (${element}${polarity}) · เลขนำโชค ${luckyData.numbers} · เทพคุ้มครอง ${guardian.name}`,
+      url: "/destiny-card",
+      metadata: {
+        name,
+        birthDate,
+        cardNumber,
+        element,
+        polarity,
+        luckyNumbers: luckyData.numbers,
+        luckyColors: luckyData.colors,
+        guardian: guardian.name,
+      },
+    });
+    setIsSaved(true);
+    setTimeout(() => setIsSaved(false), 3000);
   };
 
   return (
@@ -293,11 +316,31 @@ export function DestinyCardPage() {
             </div>
           </div>
 
-          {/* Download Action */}
-          <div className="mt-6 flex justify-center">
+          {/* Action Buttons */}
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <button
+              onClick={handleSaveToHistory}
+              className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition cursor-pointer ${
+                isSaved
+                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                  : "border border-gold/40 bg-gold/10 text-gold hover:bg-gold/20"
+              }`}
+            >
+              {isSaved ? (
+                <>
+                  <Check className="h-4 w-4 text-emerald-400" />
+                  <span>บันทึกบัตรแล้ว</span>
+                </>
+              ) : (
+                <>
+                  <Bookmark className="h-4 w-4" />
+                  <span>บันทึกบัตรลงโปรไฟล์</span>
+                </>
+              )}
+            </button>
             <button
               onClick={() => setShareModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-gold px-6 py-3 text-sm font-bold text-stone-950 shadow-gold transition hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-gold px-6 py-3 text-sm font-bold text-stone-950 shadow-gold transition hover:opacity-90 cursor-pointer"
             >
               <Share2 className="h-4 w-4" />
               <span>บันทึกบัตรชะตาชีวิต Story (9:16)</span>

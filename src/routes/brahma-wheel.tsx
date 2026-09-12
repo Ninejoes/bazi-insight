@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo, siteUrl } from "@/lib/seo";
 import { BRAHMA_HOUSES, calculateBrahmaHouse, type BrahmaHouse } from "@/lib/brahma-wheel";
+import { recordDivinationHistory } from "@/lib/member-history";
 import { useState, useRef } from "react";
 import {
   Sparkles,
@@ -66,6 +67,19 @@ function BrahmaWheelPage() {
     setTimeout(() => {
       setIsSpinning(false);
       setSelectedHouse(house);
+      recordDivinationHistory({
+        type: "กงล้อพรหมชาติ",
+        title: `กงล้อพรหมชาติ: เรือน${house.name}`,
+        result: `อายุย่าง ${age} ปี (${gender === "male" ? "ชายเวียนขวา" : "หญิงเวียนซ้าย"}): ${house.title}`,
+        url: "/brahma-wheel",
+        metadata: {
+          age,
+          gender,
+          houseName: house.name,
+          houseId: house.id,
+          quality: house.quality,
+        },
+      });
     }, 3200);
   };
 

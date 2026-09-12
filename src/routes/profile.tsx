@@ -23,8 +23,8 @@ export const Route = createFileRoute("/profile")({
 });
 
 const tabs = [
-  { to: "/profile", label: "ภาพรวม", icon: User },
-  { to: "/profile/history", label: "ประวัติการดูดวง", icon: History },
+  { to: "/profile", label: "ภาพรวมสมาชิก", icon: User },
+  { to: "/profile/history", label: "ประวัติการดู & การอ่าน", icon: History },
   { to: "/profile/settings", label: "ตั้งค่าและความเป็นส่วนตัว", icon: Settings },
 ] as const;
 

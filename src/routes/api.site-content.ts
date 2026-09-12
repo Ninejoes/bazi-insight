@@ -36,36 +36,42 @@ function normalizeContent(row?: SiteContentRow | Partial<SiteContent>): SiteCont
 
 async function loadContent() {
   if (!getSupabaseConfig()) {
-    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
+    return { source: "seed", content: normalizeContent(siteContentSeed) };
   }
 
-  const response = await supabaseRequest("site_content?id=eq.main&select=*&limit=1");
-  if (!response) {
-    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
+  try {
+    const response = await supabaseRequest("site_content?id=eq.main&select=*&limit=1");
+    if (!response || !response.ok) {
+      return { source: "seed", content: normalizeContent(siteContentSeed) };
+    }
+
+    const rows = (await response.json().catch(() => [])) as SiteContentRow[];
+    if (!rows[0]) {
+      return { source: "seed", content: normalizeContent(siteContentSeed) };
+    }
+
+    const normalized = normalizeContent(rows[0]);
+
+    if (
+      rows[0].contact?.email === "contact@likhitfa.online" ||
+      rows[0].contact?.email === "hello@likhitfa.com"
+    ) {
+      void supabaseRequest("site_content?on_conflict=id", {
+        method: "POST",
+        headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+        body: JSON.stringify({
+          id: "main",
+          about: normalized.about,
+          contact: normalized.contact,
+          updated_at: new Date().toISOString(),
+        }),
+      });
+    }
+
+    return { source: "supabase", content: normalized };
+  } catch {
+    return { source: "seed", content: normalizeContent(siteContentSeed) };
   }
-
-  const rows = (await response.json().catch(() => [])) as SiteContentRow[];
-  if (!rows[0]) throw new Error("ไม่พบข้อมูล site_content id=main ใน Supabase");
-
-  const normalized = normalizeContent(rows[0]);
-
-  if (
-    rows[0].contact?.email === "contact@likhitfa.online" ||
-    rows[0].contact?.email === "hello@likhitfa.com"
-  ) {
-    void supabaseRequest("site_content?on_conflict=id", {
-      method: "POST",
-      headers: { Prefer: "resolution=merge-duplicates,return=representation" },
-      body: JSON.stringify({
-        id: "main",
-        about: normalized.about,
-        contact: normalized.contact,
-        updated_at: new Date().toISOString(),
-      }),
-    });
-  }
-
-  return { source: "supabase", content: normalized };
 }
 
 async function saveContent(content: SiteContent) {

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo } from "@/lib/seo";
-import { type AboutContent } from "@/lib/admin-content";
+import { siteContentSeed, type AboutContent } from "@/lib/admin-content";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { useEffect, useState } from "react";
 
@@ -19,7 +19,7 @@ export const Route = createFileRoute("/about")({
 });
 
 function AboutPage() {
-  const [about, setAbout] = useState<AboutContent | null>(null);
+  const [about, setAbout] = useState<AboutContent>(siteContentSeed.about);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -30,10 +30,11 @@ function AboutPage() {
       const data = await response.json().catch(() => ({}));
       if (!mounted) return;
       if (!response.ok || !data.ok) {
-        setError(friendlyErrorMessage(data.error, "โหลดข้อมูลเกี่ยวกับเราไม่สำเร็จ"));
         return;
       }
-      setAbout(data.content?.about || null);
+      if (data.content?.about) {
+        setAbout(data.content.about);
+      }
     }
 
     void loadAbout();

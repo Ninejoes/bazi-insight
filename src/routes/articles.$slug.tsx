@@ -4,7 +4,12 @@ import { SiteFooter } from "@/components/site-footer";
 import { type Article, formatArticleDate, formatArticleReadTime } from "@/lib/articles";
 import { seo, siteUrl } from "@/lib/seo";
 import { Fragment, useEffect, useState } from "react";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, Bookmark, Share2, Copy, Check, MessageCircle } from "lucide-react";
+import {
+  recordArticleRead,
+  isArticleBookmarked,
+  toggleArticleBookmark,
+} from "@/lib/member-history";
 
 export const Route = createFileRoute("/articles/$slug")({
   head: ({ params, ...ctx }) => {
@@ -51,6 +56,56 @@ function ArticleDetail() {
   const [related, setRelated] = useState<Article[]>([]);
   const [loading, setLoading] = useState(!initialArticle);
   const [error, setError] = useState("");
+  const [bookmarked, setBookmarked] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
+
+  useEffect(() => {
+    if (!article) return;
+    recordArticleRead({
+      slug: article.slug,
+      title: article.title,
+      category: article.category,
+      cover: article.cover,
+      readMin: article.readMin,
+    });
+    setBookmarked(isArticleBookmarked(article.slug));
+  }, [article]);
+
+  const handleBookmarkToggle = () => {
+    if (!article) return;
+    const nowSaved = toggleArticleBookmark({
+      slug: article.slug,
+      title: article.title,
+      category: article.category,
+      cover: article.cover,
+      excerpt: article.excerpt,
+    });
+    setBookmarked(nowSaved);
+    setToastMsg(nowSaved ? "บันทึกบทความลงโปรไฟล์เรียบร้อยแล้ว" : "นำออกจากบทความที่บันทึกแล้ว");
+    setTimeout(() => setToastMsg(""), 3000);
+  };
+
+  const handleCopyLink = () => {
+    if (typeof window === "undefined") return;
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setToastMsg("คัดลอกลิงก์บทความเรียบร้อยแล้ว");
+    setTimeout(() => {
+      setCopied(false);
+      setToastMsg("");
+    }, 3000);
+  };
+
+  const handleShareLine = () => {
+    if (typeof window === "undefined") return;
+    window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(window.location.href)}`, "_blank");
+  };
+
+  const handleShareFb = () => {
+    if (typeof window === "undefined") return;
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, "_blank");
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -214,6 +269,63 @@ function ArticleDetail() {
             {a.content.map((p: string, i: number) => (
               <ArticleBlock key={i} text={p} />
             ))}
+          </div>
+
+          {/* Interactive Member Action & Social Share Bar */}
+          <div className="mt-10 rounded-2xl border border-gold/20 bg-card/50 p-5 backdrop-blur-md">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleBookmarkToggle}
+                  className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition cursor-pointer ${
+                    bookmarked
+                      ? "bg-gradient-gold text-stone-950 shadow-gold"
+                      : "border border-gold/30 bg-gold/5 text-gold hover:bg-gold/15"
+                  }`}
+                >
+                  <Bookmark className={`h-4 w-4 ${bookmarked ? "fill-stone-950" : ""}`} />
+                  <span>{bookmarked ? "บันทึกแล้วในโปรไฟล์" : "บันทึกบทความนี้"}</span>
+                </button>
+
+                {toastMsg && (
+                  <span className="text-xs text-emerald-300 animate-fade-in font-medium">
+                    ✓ {toastMsg}
+                  </span>
+                )}
+              </div>
+
+              {/* Social Share Buttons */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground mr-1">แชร์:</span>
+                <button
+                  type="button"
+                  onClick={handleShareLine}
+                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#06C755]/15 text-[#06C755] hover:bg-[#06C755] hover:text-white transition cursor-pointer"
+                  title="แชร์ลง LINE"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleShareFb}
+                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#1877F2]/15 text-[#1877F2] hover:bg-[#1877F2] hover:text-white transition cursor-pointer"
+                  title="แชร์ลง Facebook"
+                >
+                  <Share2 className="h-4 w-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-gold/20 bg-card/60 text-gold hover:bg-gold/15 transition cursor-pointer"
+                  title="คัดลอกลิงก์"
+                >
+                  {copied ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
           </div>
         </article>
 

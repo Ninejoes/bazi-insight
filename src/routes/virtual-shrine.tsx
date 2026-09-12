@@ -17,6 +17,7 @@ import {
   type AuspiciousResult,
 } from "@/lib/virtual-shrine";
 import { ShareStoryModal, type ShareCardData } from "@/components/share-story-modal";
+import { recordDivinationHistory } from "@/lib/member-history";
 import {
   Coins,
   Briefcase,
@@ -171,6 +172,22 @@ function VirtualShrinePage() {
           luckyThreeDigit: calculated.threeDigit,
         });
         setHistoryList(getPrayerHistory());
+
+        // Sync to member divination history
+        recordDivinationHistory({
+          type: "ไหว้พระออนไลน์",
+          title: `ไหว้พระขอพร: ${activeDeity.name} (${activeDeity.temple})`,
+          result: `กราบไหว้สำเร็จ 3 วาระ · เลขมงคลประจำจิต ${calculated.twoDigit} / ${calculated.threeDigit}`,
+          url: "/virtual-shrine",
+          metadata: {
+            deityName: activeDeity.name,
+            templeName: activeDeity.temple,
+            userName: userName.trim() || "ผู้มีจิตศรัทธา",
+            prayerText: prayerText.trim(),
+            luckyTwoDigit: calculated.twoDigit,
+            luckyThreeDigit: calculated.threeDigit,
+          },
+        });
 
         // Prepare share data
         const dateFormatted = new Date().toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" });

@@ -22,6 +22,7 @@ import {
   Shield,
   RefreshCw,
 } from "lucide-react";
+import { recordDivinationHistory } from "@/lib/member-history";
 
 export const Route = createFileRoute("/siamsi")({
   head: () =>
@@ -61,6 +62,18 @@ function SiamsiPage() {
       const drawn = drawRandomSiamsi();
       setFortune(drawn);
       setIsShaking(false);
+      recordDivinationHistory({
+        type: "เซียมซี",
+        title: `เซียมซี ${selectedShrine.name} (ใบที่ ${drawn.number})`,
+        result: `${drawn.quality}: ${drawn.summary}`,
+        url: "/siamsi",
+        metadata: {
+          shrine: selectedShrine.name,
+          number: drawn.number,
+          quality: drawn.quality,
+          wish: wish || undefined,
+        },
+      });
     }, 2200);
   };
 

@@ -21,6 +21,9 @@ function LoginPage() {
   const navigate = useNavigate();
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
+  const [forgotModalOpen, setForgotModalOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotSubmitted, setForgotSubmitted] = useState(false);
 
   return (
     <div className="min-h-screen">
@@ -78,9 +81,16 @@ function LoginPage() {
           <div>
             <div className="mb-1.5 flex items-center justify-between">
               <label className="block text-xs text-muted-foreground">รหัสผ่าน</label>
-              <Link to="/login" className="text-[11px] text-gold/80 hover:text-gold">
+              <button
+                type="button"
+                onClick={() => {
+                  setForgotModalOpen(true);
+                  setForgotSubmitted(false);
+                }}
+                className="text-[11px] text-gold/80 hover:text-gold cursor-pointer"
+              >
                 ลืมรหัสผ่าน?
-              </Link>
+              </button>
             </div>
             <input
               name="password"
@@ -96,7 +106,7 @@ function LoginPage() {
           </label>
           <button
             disabled={loading}
-            className="w-full rounded-xl bg-gradient-gold py-3 text-sm font-semibold text-primary-foreground shadow-gold hover:scale-[1.01] transition disabled:opacity-50"
+            className="w-full rounded-xl bg-gradient-gold py-3 text-sm font-semibold text-primary-foreground shadow-gold hover:scale-[1.01] transition disabled:opacity-50 cursor-pointer"
           >
             {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
           </button>
@@ -108,6 +118,70 @@ function LoginPage() {
           </Link>
         </p>
       </main>
+
+      {/* Forgot Password Modal */}
+      {forgotModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+          <div className="glass-strong relative w-full max-w-md rounded-3xl p-6 shadow-2xl border border-gold/30">
+            <h3 className="font-display text-xl font-bold text-foreground">รีเซ็ตรหัสผ่าน</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              กรอกอีเมลที่คุณใช้สมัครสมาชิก เพื่อรับคำแนะนำในการตั้งรหัสผ่านใหม่
+            </p>
+
+            {forgotSubmitted ? (
+              <div className="mt-5 space-y-4">
+                <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs text-emerald-200 leading-relaxed">
+                  หากอีเมล <b>{forgotEmail}</b> มีอยู่ในระบบ เราจะส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ไปยังกล่องข้อความของคุณ หรือติดต่อฝ่ายบริการสมาชิกได้ที่ <b>bg.chanon@gmail.com</b>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setForgotModalOpen(false)}
+                  className="w-full rounded-xl bg-gradient-gold py-2.5 text-xs font-semibold text-primary-foreground shadow-gold cursor-pointer"
+                >
+                  เข้าใจแล้ว / ปิดหน้าต่าง
+                </button>
+              </div>
+            ) : (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!forgotEmail.trim()) return;
+                  setForgotSubmitted(true);
+                }}
+                className="mt-5 space-y-4"
+              >
+                <div>
+                  <label className="mb-1 block text-xs text-muted-foreground">อีเมลของคุณ</label>
+                  <input
+                    type="email"
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    required
+                    className="input-styled"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setForgotModalOpen(false)}
+                    className="flex-1 rounded-xl border border-border bg-card/60 py-2.5 text-xs text-muted-foreground hover:bg-card/80 cursor-pointer"
+                  >
+                    ยกเลิก
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 rounded-xl bg-gradient-gold py-2.5 text-xs font-semibold text-primary-foreground shadow-gold cursor-pointer"
+                  >
+                    ส่งคำขอรีเซ็ต
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
       <SiteFooter />
     </div>
   );

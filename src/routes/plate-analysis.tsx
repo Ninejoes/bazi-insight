@@ -3,6 +3,8 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo, siteUrl } from "@/lib/seo";
 import { analyzeLicensePlate, type PlateAnalysisResult } from "@/lib/plate-analysis";
+import { recordDivinationHistory } from "@/lib/member-history";
+import { ShareStoryModal, type ShareCardData } from "@/components/share-story-modal";
 import { useState } from "react";
 import {
   Car,
@@ -14,6 +16,7 @@ import {
   Palette,
   CheckCircle2,
   Lightbulb,
+  Share2,
 } from "lucide-react";
 
 export const Route = createFileRoute("/plate-analysis")({
@@ -55,6 +58,7 @@ function PlateAnalysisPage() {
   const [birthDay, setBirthDay] = useState("");
   const [result, setResult] = useState<PlateAnalysisResult | null>(null);
   const [error, setError] = useState("");
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   const handleAnalyze = (inputVal?: string) => {
     const raw = inputVal !== undefined ? inputVal : plateInput;
@@ -65,7 +69,36 @@ function PlateAnalysisPage() {
     setError("");
     const res = analyzeLicensePlate(raw, birthDay || undefined);
     setResult(res);
+    recordDivinationHistory({
+      type: "ทะเบียนรถ",
+      title: `ทะเบียน ${res.cleanedPlate}`,
+      result: `ผลรวม ${res.grandTotal} (เกรด ${res.grade}) · ${res.overallMeaning}`,
+      url: "/plate-analysis",
+      metadata: {
+        plate: res.cleanedPlate,
+        grandTotal: res.grandTotal,
+        grade: res.grade,
+        dayName: BIRTH_DAYS.find((d) => d.key === birthDay)?.label,
+      },
+    });
   };
+
+  const shareData: ShareCardData | null = result
+    ? {
+        category: "วิเคราะห์ทะเบียนรถมงคล",
+        categoryCn: "车牌数理",
+        title: `ทะเบียน ${result.cleanedPlate}`,
+        subtitle: `ผลรวม ${result.grandTotal} (เกรด ${result.grade}) · ${result.overallMeaning}`,
+        highlights: [
+          { label: "ผลรวมทั้งหมด", value: `${result.grandTotal} (${result.grade})`, color: "#fbbf24" },
+          { label: "ผลรวมหมวดตัวเลข", value: `${result.digitSum}`, color: "#38bdf8" },
+          { label: "ผลรวมหมวดอักษร", value: `${result.letterSum}`, color: "#34d399" },
+          { label: "คะแนนมงคล", value: `${result.score}/100 คะแนน`, color: "#f472b6" },
+        ],
+        quote: result.remedies[0] || "ขับขี่ปลอดภัย มีสติ และเสริมบารมีสิริมงคล",
+        footerTag: "วิเคราะห์ทะเบียนรถมงคลฟรีได้ที่ www.likhitfa.online",
+      }
+    : null;
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col justify-between">
@@ -180,6 +213,18 @@ function PlateAnalysisPage() {
                 <span>•</span>
                 <span>ผลรวมใหญ่: <b className="text-gold text-sm">{result.grandTotal}</b></span>
               </div>
+            </div>
+
+            {/* Share / Save Action */}
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={() => setIsShareOpen(true)}
+                className="inline-flex items-center gap-2 rounded-xl border border-gold/40 bg-gold/10 px-5 py-2.5 text-xs font-semibold text-gold transition-all hover:bg-gold/20 hover:scale-105 cursor-pointer"
+              >
+                <Share2 className="h-4 w-4" />
+                แชร์ผลวิเคราะห์ทะเบียนรถ / บันทึกรูปภาพ
+              </button>
             </div>
 
             {/* Score & Grade Overview */}
@@ -366,6 +411,14 @@ function PlateAnalysisPage() {
               </ul>
             </div>
           </div>
+        )}
+
+        {shareData && (
+          <ShareStoryModal
+            isOpen={isShareOpen}
+            onClose={() => setIsShareOpen(false)}
+            data={shareData}
+          />
         )}
       </main>
 

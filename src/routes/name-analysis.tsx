@@ -7,6 +7,7 @@ import {
   type NameAnalysisResult,
   DAY_TAKSA_RULES,
 } from "@/lib/numerology";
+import { recordDivinationHistory } from "@/lib/member-history";
 import { ShareStoryModal, type ShareCardData } from "@/components/share-story-modal";
 import { useState } from "react";
 import { Share2, AlertTriangle, Check } from "lucide-react";
@@ -59,6 +60,20 @@ function NameAnalysisPage() {
     setError("");
     const res = analyzeName(firstName, lastName, dayIndex);
     setResult(res);
+    recordDivinationHistory({
+      type: "วิเคราะห์ชื่อ",
+      title: `ชื่อ ${res.fullName}`,
+      result: `คนเกิด${res.dayName} · ผลรวม ${res.totalScore} (${res.grade})`,
+      url: "/name-analysis",
+      metadata: {
+        fullName: res.fullName,
+        firstName: res.firstName,
+        lastName: res.lastName,
+        dayName: res.dayName,
+        totalScore: res.totalScore,
+        grade: res.grade,
+      },
+    });
   };
 
   const shareData: ShareCardData | null = result

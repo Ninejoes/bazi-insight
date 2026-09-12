@@ -5,8 +5,9 @@ import { seo, siteUrl } from "@/lib/seo";
 import { calculateLifeGraph, type LifeGraphResult, type LifeGraphHouse } from "@/lib/life-graph";
 import { ShareStoryModal, type ShareCardData } from "@/components/share-story-modal";
 import { readStoredUserSession } from "@/lib/user-session";
-import { useState, useMemo } from "react";
-import { TrendingUp, Share2, Sparkles } from "lucide-react";
+import { recordDivinationHistory } from "@/lib/member-history";
+import { useState, useMemo, useEffect } from "react";
+import { TrendingUp, Share2, Sparkles, Bookmark, Check } from "lucide-react";
 
 export const Route = createFileRoute("/life-graph")({
   head: () =>
@@ -38,10 +39,30 @@ function LifeGraphPage() {
   const [birthDate, setBirthDate] = useState(defaultDate);
   const [selectedHouse, setSelectedHouse] = useState<LifeGraphHouse | null>(null);
   const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   const result: LifeGraphResult = useMemo(() => {
     return calculateLifeGraph(birthDate);
   }, [birthDate]);
+
+  const handleSaveToHistory = () => {
+    recordDivinationHistory({
+      type: "กราฟชีวิต",
+      title: `กราฟชีวิต: ${result.dayName} ปี${result.zodiacYearName}`,
+      result: `ดัชนีเฉลี่ย ${result.averageScore}/12 · เรือนเด่นสุด: ${result.highestHouse.name} (${result.highestHouse.score} แต้ม)`,
+      url: "/life-graph",
+      metadata: {
+        birthDate,
+        dayName: result.dayName,
+        zodiacYear: result.zodiacYearName,
+        highestHouse: result.highestHouse.name,
+        lowestHouse: result.lowestHouse.name,
+        averageScore: result.averageScore,
+      },
+    });
+    setIsSaved(true);
+    setTimeout(() => setIsSaved(false), 3000);
+  };
 
   const activeHouse = selectedHouse || result.highestHouse;
 
@@ -89,15 +110,38 @@ function LifeGraphPage() {
             <input
               type="date"
               value={birthDate}
-              onChange={(e) => setBirthDate(e.target.value)}
+              onChange={(e) => {
+                setBirthDate(e.target.value);
+                setIsSaved(false);
+              }}
               className="flex-1 rounded-xl border border-gold/30 bg-background/80 px-4 py-2.5 text-sm text-foreground focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
             />
             <button
+              onClick={handleSaveToHistory}
+              className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition cursor-pointer ${
+                isSaved
+                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                  : "border border-gold/40 bg-gold/10 text-gold hover:bg-gold/20"
+              }`}
+            >
+              {isSaved ? (
+                <>
+                  <Check className="h-4 w-4 text-emerald-400" />
+                  <span>บันทึกแล้ว</span>
+                </>
+              ) : (
+                <>
+                  <Bookmark className="h-4 w-4" />
+                  <span>บันทึกผล</span>
+                </>
+              )}
+            </button>
+            <button
               onClick={() => setShareModalOpen(true)}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-gold px-5 py-2.5 text-sm font-semibold text-stone-950 shadow-gold transition hover:opacity-90"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-gold px-5 py-2.5 text-sm font-semibold text-stone-950 shadow-gold transition hover:opacity-90 cursor-pointer"
             >
               <Share2 className="h-4 w-4" />
-              <span>แชร์การ์ด Story</span>
+              <span>แชร์การ์ด</span>
             </button>
           </div>
           <div className="mt-3 flex flex-wrap items-center justify-between text-xs text-muted-foreground">

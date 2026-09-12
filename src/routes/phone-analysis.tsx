@@ -6,6 +6,7 @@ import {
   analyzePhoneNumber,
   type PhoneAnalysisResult,
 } from "@/lib/numerology";
+import { recordDivinationHistory } from "@/lib/member-history";
 import { ShareStoryModal, type ShareCardData } from "@/components/share-story-modal";
 import { useState, type ReactNode } from "react";
 import {
@@ -64,6 +65,18 @@ function PhoneAnalysisPage() {
     setError("");
     const analysis = analyzePhoneNumber(clean);
     setResult(analysis);
+    recordDivinationHistory({
+      type: "วิเคราะห์เบอร์",
+      title: `เบอร์โทร ${analysis.formattedNumber}`,
+      result: `ผลรวม ${analysis.sum} (${analysis.sumGrade}) · ${analysis.sumTitle}`,
+      url: "/phone-analysis",
+      metadata: {
+        number: analysis.formattedNumber,
+        sum: analysis.sum,
+        grade: analysis.sumGrade,
+        overallScore: analysis.scores.overall,
+      },
+    });
   };
 
   const shareData: ShareCardData | null = result

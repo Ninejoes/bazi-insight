@@ -23,6 +23,7 @@ import {
   Shuffle,
   Lightbulb,
 } from "lucide-react";
+import { toggleFavoriteName, isNameFavorited } from "@/lib/member-history";
 
 export const Route = createFileRoute("/naming")({
   head: () =>
@@ -72,10 +73,24 @@ function NamingPage() {
 
   const currentRule = BIRTH_DAY_RULES[birthDay];
 
+  const [favMap, setFavMap] = useState<Record<string, boolean>>({});
+
   const handleCopy = (name: string, id: string) => {
     navigator.clipboard.writeText(name);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handleToggleFav = (item: AuspiciousName) => {
+    const isNowFav = toggleFavoriteName({
+      id: item.id,
+      name: item.name,
+      meaning: item.meaning,
+      gender: item.gender,
+      birthDay,
+      score: item.scoreNumber,
+    });
+    setFavMap((prev) => ({ ...prev, [item.id]: isNowFav }));
   };
 
   const handleLuckyDraw = () => {
@@ -273,23 +288,39 @@ function NamingPage() {
                     ? "เพศหญิง"
                     : "ชาย/หญิง"}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => handleCopy(item.name, item.id)}
-                  className="flex items-center gap-1 text-gold/70 hover:text-gold transition cursor-pointer"
-                >
-                  {copiedId === item.id ? (
-                    <>
-                      <Check className="h-3 w-3 text-emerald-400" />
-                      <span className="text-emerald-400">คัดลอกแล้ว</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-3 w-3" />
-                      <span>คัดลอก</span>
-                    </>
-                  )}
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleToggleFav(item)}
+                    className="flex items-center gap-1 text-gold/70 hover:text-rose-400 transition cursor-pointer"
+                    title={favMap[item.id] ? "นำออกจากรายการที่ชอบ" : "บันทึกชื่อที่ชอบลงโปรไฟล์"}
+                  >
+                    <Heart
+                      className={`h-3.5 w-3.5 transition ${
+                        favMap[item.id] ? "fill-rose-500 text-rose-500" : "hover:text-rose-400"
+                      }`}
+                    />
+                    <span>{favMap[item.id] ? "บันทึกแล้ว" : "ชอบ"}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(item.name, item.id)}
+                    className="flex items-center gap-1 text-gold/70 hover:text-gold transition cursor-pointer"
+                  >
+                    {copiedId === item.id ? (
+                      <>
+                        <Check className="h-3 w-3 text-emerald-400" />
+                        <span className="text-emerald-400">คัดลอกแล้ว</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-3 w-3" />
+                        <span>คัดลอก</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           ))}
