@@ -2,6 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { seo } from "@/lib/seo";
+import { CelestialBackground } from "@/components/celestial-background";
+import { AuspiciousHourTicker } from "@/components/auspicious-hour-ticker";
+import { DailyOracleCard } from "@/components/daily-oracle-card";
 
 export const Route = createFileRoute("/")({
   head: () =>
@@ -175,8 +178,8 @@ const quickTools = [
     badge: "ขอพร 10 วัดดัง",
     badgeCn: "佛",
     title: "ไหว้พระออนไลน์ เสมือนจริง",
-    tagline: "จุดธูปเทียน สวดพระคาถา ขอพร 8 มิติ และทำบุญตรงเข้าวัด",
-    desc: "จำลองแท่นบูชาศักดิ์สิทธิ์ จุดธูป 3 ดอก เทียนคู่ ถวายดอกไม้ สวดมนต์พร้อมเสียงระฆัง และทำบุญตรงเข้าบัญชีวัด 100% ไม่ผ่านคนกลาง",
+    tagline: "จุดธูป 3 มิติ สวดพระคาถา ขอพร 8 มิติ & เลขมงคลเฉพาะบุคคล",
+    desc: "จำลองแท่นบูชาศักดิ์สิทธิ์ 10 อาราม จุดธูปเทียนเสมือนจริง บทสวดพร้อมเสียงระฆัง บันทึกประวัติ และนำทาง Google Maps ไปกราบไหว้องค์จริง",
     iconBg: "from-amber-400/20 to-yellow-600/10",
     borderGlow: "group-hover:border-amber-400/40",
     glyph: "佛",
@@ -252,23 +255,43 @@ const quickTools = [
 function Index() {
   return (
     <div className="relative min-h-screen">
+      {/* 60fps Mystical Celestial Canvas with Stars & Meteors */}
+      <CelestialBackground />
+
       <SiteHeader />
 
-      <main className="relative mx-auto max-w-7xl px-6 pt-16 pb-12">
+      <main className="relative mx-auto max-w-7xl px-6 pt-10 pb-16">
+        {/* Rotating Celestial Astrological Wheel in Background */}
+        <div className="pointer-events-none absolute left-1/2 -top-6 -translate-x-1/2 -z-10 w-[520px] h-[520px] sm:w-[680px] sm:h-[680px] md:w-[860px] md:h-[860px] overflow-hidden opacity-30 select-none [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_72%)]">
+          <img
+            src="/images/celestial-wheel.jpg"
+            alt="Celestial Astrological Wheel"
+            className="w-full h-full object-cover animate-[spin_180s_linear_infinite]"
+            loading="eager"
+          />
+        </div>
+
+        {/* Real-time Astrological Ticker */}
+        <div className="mb-8 flex justify-center animate-fade-in">
+          <AuspiciousHourTicker />
+        </div>
+
         {/* Hero */}
         <section className="relative mx-auto max-w-3xl text-center">
-          <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-1.5 text-[11px] tracking-[0.25em] text-gold/80">
-            <span className="h-1 w-1 rounded-full bg-gold" />
-            ศาสตร์โบราณ · ตีความร่วมสมัย
+          <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-4 py-1.5 text-[11px] tracking-[0.25em] text-gold/90 shadow-[0_0_20px_rgba(212,175,55,0.15)]">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-gold"></span>
+            </span>
+            ศาสตร์พยากรณ์โบราณ · ตีความด้วยปัญญาประดิษฐ์ร่วมสมัย
           </div>
-          <h1 className="font-display text-5xl font-medium leading-[1.05] text-foreground md:text-7xl">
-            อ่านลิขิตฟ้า
+          <h1 className="font-display text-5xl font-medium leading-[1.08] text-foreground sm:text-6xl md:text-7xl">
+            เปิดม่านลิขิตฟ้า
             <br />
-            <span className="text-gradient-gold italic">ด้วยศาสตร์ที่แม่นยำ</span>
+            <span className="text-gradient-gold italic">ถอดรหัสชะตาชีวิตอย่างแม่นยำ</span>
           </h1>
-          <p className="mx-auto mt-6 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
-            รวมสามศาสตร์การดูดวงสำคัญไว้ในที่เดียว — ปาจื้อจีนโบราณ ไพ่ทาโรต์ และทำนายฝัน
-            พร้อมระบบวิเคราะห์ที่ออกแบบมาให้เข้าใจง่ายสำหรับยุคใหม่
+          <p className="mx-auto mt-6 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+            ศูนย์รวมศาสตร์พยากรณ์ชั้นสูงและเครื่องมือสายมูอันดับ 1 — ดวงจีนปาจื้อ 4 เสา, ไพ่ยิปซีประจำวัน, ทำนายฝันเลขเด็ด, กงล้อพรหมชาติ, กราฟชีวิต 12 เรือน และไหว้พระออนไลน์เสมือนจริง 10 อารามศักดิ์สิทธิ์
           </p>
           <div className="mx-auto mt-8 flex items-center justify-center gap-6 font-cn text-2xl text-gold/40">
             <span>命</span>
@@ -277,6 +300,11 @@ function Index() {
             <span className="h-px w-12 bg-gold/30" />
             <span>和</span>
           </div>
+        </section>
+
+        {/* Interactive Mystic Daily Oracle Sphere */}
+        <section className="mt-12 mb-16 animate-fade-up">
+          <DailyOracleCard />
         </section>
 
         {/* Services */}

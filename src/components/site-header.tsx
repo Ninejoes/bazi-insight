@@ -38,22 +38,14 @@ interface SiteHeaderProps {
 export function BrandMark({ size = 44 }: { size?: number }) {
   return (
     <div
-      className="relative flex items-center justify-center rounded-full bg-gradient-gold shadow-gold"
+      className="relative flex items-center justify-center rounded-full overflow-hidden border border-gold/40 shadow-[0_0_15px_rgba(212,175,55,0.4)] transition-transform duration-500 hover:rotate-45 cursor-pointer shrink-0"
       style={{ width: size, height: size }}
     >
-      <svg
-        viewBox="0 0 24 24"
-        width={size * 0.55}
-        height={size * 0.55}
-        fill="none"
-        stroke="oklch(0.18 0.02 60)"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M12 2 L12 22 M5 9 L19 9 M7 15 L17 15 M9 22 L15 22" />
-        <circle cx="12" cy="5" r="1.4" fill="oklch(0.18 0.02 60)" />
-      </svg>
+      <img
+        src="/favicon.svg"
+        alt="Likhitfa ลิขิตฟ้า"
+        className="h-full w-full object-cover"
+      />
     </div>
   );
 }
@@ -279,7 +271,7 @@ export function SiteHeader({ subtitle, subtitleCn, showNav = true }: SiteHeaderP
                               ไหว้พระออนไลน์เสมือนจริง
                             </div>
                             <div className="text-[11px] leading-tight text-muted-foreground">
-                              จุดธูปเทียน ขอพร 10 วัดดัง ทำบุญตรงเข้าวัด
+                              จุดธูปเทียน ขอพร 10 วัดดัง พร้อมเลขมงคล & แผนที่วัด
                             </div>
                           </div>
                         </Link>

@@ -1,6 +1,6 @@
 const SITE_NAME = "Likhitfa ลิขิตฟ้า";
 const SITE_URL = "https://www.likhitfa.online";
-const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg?v=20260609`;
+const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg?v=20260912`;
 export const googleAnalyticsId = "G-7F7B1DXGC1";
 export const googleSearchVerification =
   import.meta.env.VITE_GOOGLE_SITE_VERIFICATION ||
