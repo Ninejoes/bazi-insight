@@ -138,8 +138,22 @@ function RootShell({ children }: { children: ReactNode }) {
   const siteSchemaJson = JSON.stringify(websiteSchema());
 
   return (
-    <html lang="th">
+    <html
+      lang="th"
+      data-platform="Likhitfa"
+      data-creator="Likhitfa ลิขิตฟ้า"
+      data-license="Proprietary"
+      data-canonical="https://www.likhitfa.online"
+    >
       <head>
+        {/*
+          ============================================================================
+          INTELLECTUAL PROPERTY & DIGITAL RIGHTS NOTICE
+          Platform: Likhitfa ลิขิตฟ้า (Online Astrology & Spiritual Platform)
+          Official Domain: https://www.likhitfa.online
+          Copyright (c) 2026 Likhitfa. All Rights Reserved.
+          ============================================================================
+        */}
         <HeadContent />
         <script
           type="application/ld+json"
@@ -162,7 +176,7 @@ gtag('config', '${googleAnalyticsId}', { send_page_view: false });
           }}
         />
       </head>
-      <body>
+      <body data-platform="Likhitfa" data-rights="Protected">
         {children}
         <Scripts />
       </body>

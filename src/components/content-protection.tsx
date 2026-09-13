@@ -1,5 +1,37 @@
 import { useEffect, useState, useRef } from "react";
-import { ShieldAlert, Lock, AlertCircle } from "lucide-react";
+import { Lock } from "lucide-react";
+
+declare global {
+  interface Window {
+    __decodeLikhitfaWatermark?: (text: string) => string | null;
+  }
+}
+
+function encodeZeroWidth(text: string): string {
+  let binary = "";
+  for (let i = 0; i < text.length; i++) {
+    let b = text.charCodeAt(i).toString(2);
+    while (b.length < 8) b = "0" + b;
+    binary += b;
+  }
+  let zw = "\u200D";
+  for (let i = 0; i < binary.length; i++) {
+    zw += binary[i] === "0" ? "\u200B" : "\u200C";
+  }
+  return zw + "\u200D";
+}
+
+function decodeZeroWidth(text: string): string | null {
+  if (!text) return null;
+  const match = text.match(/\u200D([\u200B\u200C]+)\u200D/);
+  if (!match) return null;
+  const bin = match[1].replace(/\u200B/g, "0").replace(/\u200C/g, "1");
+  let str = "";
+  for (let i = 0; i < bin.length; i += 8) {
+    str += String.fromCharCode(parseInt(bin.substr(i, 8), 2));
+  }
+  return str;
+}
 
 export function ContentProtection() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -16,10 +48,44 @@ export function ContentProtection() {
   };
 
   useEffect(() => {
+    // 0. Console ASCII Signature & Domain Integrity
+    try {
+      const badgeStyle =
+        "background: #ffd700; color: #0a0a0c; font-weight: bold; font-size: 13px; padding: 4px 10px; border-radius: 4px; font-family: monospace;";
+      const textStyle =
+        "color: #94a3b8; font-size: 11px; line-height: 1.6; font-family: sans-serif;";
+      const linkStyle =
+        "color: #ffd700; font-weight: bold; font-size: 11px; text-decoration: underline;";
+
+      console.log(
+        "%c LIKHITFA | CELESTIAL ASTROLOGY %c\n" +
+          "© 2026 Likhitfa. All Rights Reserved.\n" +
+          "Bazi · Tarot · Shrine · Daily Horoscopes · Wallpapers\n" +
+          "Official Platform: %chttps://www.likhitfa.online",
+        badgeStyle,
+        textStyle,
+        linkStyle
+      );
+
+      window.__decodeLikhitfaWatermark = decodeZeroWidth;
+
+      const host = window.location.hostname;
+      const allowed = [
+        "likhitfa.online",
+        "www.likhitfa.online",
+        "localhost",
+        "127.0.0.1",
+        ".vercel.app",
+      ];
+      const isAllowed = allowed.some((h) => host === h || host.endsWith(h));
+      if (!isAllowed) {
+        console.warn("⚠️ [Likhitfa Shield] Unauthorized mirror / scrape detected on: " + host);
+      }
+    } catch (err) {}
+
     // 1. Prevent Right-Click Context Menu
     const handleContextMenu = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
-      // Allow right-click inside editable input fields so users can paste/edit
       if (
         target instanceof HTMLInputElement ||
         target instanceof HTMLTextAreaElement ||
@@ -32,7 +98,7 @@ export function ContentProtection() {
       showWarning("สงวนลิขสิทธิ์เนื้อหาและภาพมงคล © Likhitfa — ไม่อนุญาตให้คลิกขวาหรือคัดลอก");
     };
 
-    // 2. Prevent Copy Event (Ctrl+C / Cmd+C / Selection copy)
+    // 2. Smart Copy Event with Invisible Watermark & Attribution
     const handleCopy = (e: ClipboardEvent) => {
       const target = e.target as HTMLElement | null;
       if (
@@ -43,8 +109,28 @@ export function ContentProtection() {
         return;
       }
 
-      e.preventDefault();
-      showWarning("สงวนลิขสิทธิ์เนื้อหา © Likhitfa — ไม่อนุญาตให้คัดลอกข้อความ");
+      const selection = window.getSelection();
+      const selectedText = selection ? selection.toString() : "";
+      if (selectedText && selectedText.trim().length >= 35) {
+        const invisibleSig = encodeZeroWidth("LIKHITFA-CELESTIAL-2026-ORIGINAL");
+        const splitPoint = Math.min(15, Math.floor(selectedText.length / 2));
+        const watermarkedText =
+          selectedText.slice(0, splitPoint) + invisibleSig + selectedText.slice(splitPoint);
+
+        const attribution =
+          "\n\n--------------------------------------------------\n" +
+          "🔮 คัดลอกและอ้างอิงจาก: Likhitfa ลิขิตฟ้า ดูดวง โหราศาสตร์ & ศาลเจ้าเสมือนจริง (https://www.likhitfa.online)\n" +
+          "© 2026 Likhitfa. All Rights Reserved. สงวนลิขสิทธิ์ตามกฎหมาย\n" +
+          "--------------------------------------------------";
+
+        const finalCopiedText = watermarkedText + attribution;
+
+        if (e.clipboardData) {
+          e.clipboardData.setData("text/plain", finalCopiedText);
+          e.preventDefault();
+          showWarning("คัดลอกข้อความสำเร็จ พร้อมระบุที่มา © Likhitfa");
+        }
+      }
     };
 
     // 3. Prevent Dragging Images to desktop/new tabs
@@ -56,14 +142,8 @@ export function ContentProtection() {
       }
     };
 
-    // 4. Block Keyboard Shortcuts (Inspect, View Source, Save, Print, Cut)
+    // 4. Block Keyboard Shortcuts (Inspect, View Source, Save, Print)
     const handleKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement | null;
-      const isInput =
-        target instanceof HTMLInputElement ||
-        target instanceof HTMLTextAreaElement ||
-        target?.isContentEditable;
-
       const isCtrlOrCmd = e.ctrlKey || e.metaKey;
 
       // F12 -> DevTools
@@ -73,9 +153,7 @@ export function ContentProtection() {
         return;
       }
 
-      // Ctrl+Shift+I / Cmd+Opt+I -> Inspect
-      // Ctrl+Shift+J / Cmd+Opt+J -> Console
-      // Ctrl+Shift+C / Cmd+Opt+C -> Element Selector
+      // Inspect shortcuts
       if (
         isCtrlOrCmd &&
         e.shiftKey &&
@@ -109,13 +187,6 @@ export function ContentProtection() {
       if (isCtrlOrCmd && (e.key === "p" || e.key === "P")) {
         e.preventDefault();
         showWarning("ระบบความปลอดภัย Likhitfa Shield — ไม่อนุญาตให้พิมพ์หน้าเว็บไซต์");
-        return;
-      }
-
-      // Ctrl+C / Cmd+C -> Copy (outside input fields)
-      if (isCtrlOrCmd && (e.key === "c" || e.key === "C") && !isInput) {
-        e.preventDefault();
-        showWarning("สงวนลิขสิทธิ์เนื้อหา © Likhitfa — ไม่อนุญาตให้คัดลอกข้อความ");
         return;
       }
     };
