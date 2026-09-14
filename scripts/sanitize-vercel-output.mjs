@@ -1,7 +1,14 @@
-import { readdir, readFile, writeFile } from "node:fs/promises";
+import { access, readdir, readFile, writeFile } from "node:fs/promises";
 
 const outputConfigPath = new URL("../.vercel/output/config.json", import.meta.url);
 const functionsPath = new URL("../.vercel/output/functions/", import.meta.url);
+
+try {
+  await access(outputConfigPath);
+} catch {
+  console.log("Skipping Vercel output sanitization: no Vercel build output found.");
+  process.exit(0);
+}
 
 const config = JSON.parse(await readFile(outputConfigPath, "utf8"));
 
