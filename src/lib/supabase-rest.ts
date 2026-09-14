@@ -82,7 +82,7 @@ export async function supabaseRequest(path: string, init?: RequestInit) {
 
   if (!response.ok) {
     const detail = await response.text().catch(() => "");
-    throw new Error(`[Supabase ${response.status}] ${detail}`);
+    throw new Error(friendlyErrorMessage(detail, "เชื่อมต่อฐานข้อมูลไม่สำเร็จ"));
   }
 
   return response;

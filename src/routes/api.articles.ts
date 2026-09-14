@@ -237,15 +237,10 @@ export const Route = createFileRoute("/api/articles")({
             },
           );
         } catch (error) {
-          const cfg = getSupabaseConfig();
           return json(
             {
               ok: false,
               error: friendlyErrorMessage(error, "โหลดบทความไม่สำเร็จ"),
-              debug: error instanceof Error ? error.message : String(error),
-              cfgUrl: cfg?.url,
-              cfgKeyPrefix: cfg?.serviceKey ? cfg.serviceKey.slice(0, 15) + "..." : "none",
-              cfgKeyLen: cfg?.serviceKey?.length || 0,
             },
             { status: 502 },
           );
