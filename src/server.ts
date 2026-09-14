@@ -547,6 +547,15 @@ function robotsResponse() {
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    if (env && typeof env === "object") {
+      (globalThis as any).__cf_env__ = env;
+      for (const [key, value] of Object.entries(env)) {
+        if (typeof value === "string") {
+          process.env[key] = value;
+        }
+      }
+    }
+
     try {
       const url = new URL(request.url);
       if (url.pathname === "/sitemap.xml" || /^\/sitemap-[\w-]+\.xml$/.test(url.pathname)) {

@@ -35,12 +35,21 @@ type ContentAuditInput = {
 };
 
 export function getSupabaseConfig() {
+  const cf = ((globalThis as any).__cf_env__ || {}) as Record<string, string | undefined>;
   const url = (
+    cf.SUPABASE_URL ||
+    cf.VITE_SUPABASE_URL ||
+    cf.NEXT_PUBLIC_SUPABASE_URL ||
     process.env.SUPABASE_URL ||
     process.env.VITE_SUPABASE_URL ||
-    process.env.NEXT_PUBLIC_SUPABASE_URL
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    "https://wskouqzfhvlotykquiyj.supabase.co"
   )?.replace(/\/$/, "");
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
+  const serviceKey =
+    cf.SUPABASE_SERVICE_ROLE_KEY ||
+    cf.SUPABASE_SERVICE_KEY ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_SERVICE_KEY;
   if (!url || !serviceKey) return null;
   return { url, serviceKey };
 }
