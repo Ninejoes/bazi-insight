@@ -8,7 +8,7 @@ import tsConfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   nitro: {
-    preset: "vercel",
+    preset: (process.env.NITRO_PRESET as any) || (process.env.VERCEL ? "vercel" : "cloudflare-pages"),
   },
   plugins: [
     tanstackRouter({
