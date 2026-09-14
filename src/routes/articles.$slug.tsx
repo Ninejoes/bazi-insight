@@ -386,6 +386,38 @@ async function loadArticleBySlug(slug: string): Promise<Article | null> {
   if (local) return local;
 
   try {
+    if (typeof window === "undefined") {
+      const { getSupabaseConfig, supabaseRequest } = await import("@/lib/supabase-rest");
+      if (getSupabaseConfig()) {
+        const response = await supabaseRequest(`articles?slug=eq.${encodeURIComponent(slug)}&select=*&limit=1`);
+        if (response && response.ok) {
+          const rows = (await response.json().catch(() => [])) as Array<Record<string, unknown>>;
+          if (Array.isArray(rows) && rows[0]) {
+            const row = rows[0];
+            return {
+              slug: String(row.slug || ""),
+              title: String(row.title || ""),
+              excerpt: String(row.excerpt || ""),
+              category: String(row.category || "บทความทั่วไป"),
+              author: String(row.author || "ทีมงาน Likhitfa"),
+              date: String(row.date || ""),
+              createdAt: String(row.created_at || ""),
+              readMin: Number(row.read_min) || 3,
+              cover: String(row.cover || "/og-image.jpg"),
+              coverAlt: row.cover_alt ? String(row.cover_alt) : undefined,
+              seoTitle: row.seo_title ? String(row.seo_title) : undefined,
+              seoDescription: row.seo_description ? String(row.seo_description) : undefined,
+              keywords: Array.isArray(row.keywords) ? (row.keywords as unknown[]).map(String) : [],
+              canonicalUrl: row.canonical_url ? String(row.canonical_url) : undefined,
+              content: Array.isArray(row.content)
+                ? (row.content as unknown[]).map(String)
+                : String(row.content || "").split("\n\n").filter(Boolean),
+            };
+          }
+        }
+      }
+    }
+
     const origin = typeof window === "undefined" ? siteUrl : window.location.origin;
     const response = await fetch(`${origin}/api/articles?slug=${encodeURIComponent(slug)}`);
     const data = await response.json().catch(() => ({}));
