@@ -43,7 +43,7 @@ export function getSupabaseConfig() {
     process.env.SUPABASE_URL ||
     process.env.VITE_SUPABASE_URL ||
     process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    "https://wskouqzfhvlotykquiyj.supabase.co"
+    "https://jltijgkprudsbpiwjrxs.supabase.co"
   )?.replace(/\/$/, "");
   const serviceKey =
     cf.SUPABASE_SERVICE_ROLE_KEY ||
