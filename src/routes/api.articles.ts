@@ -241,6 +241,7 @@ export const Route = createFileRoute("/api/articles")({
             {
               ok: false,
               error: friendlyErrorMessage(error, "โหลดบทความไม่สำเร็จ"),
+              debug: error instanceof Error ? error.message : String(error),
             },
             { status: 502 },
           );
