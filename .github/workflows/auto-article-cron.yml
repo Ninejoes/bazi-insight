@@ -30,17 +30,27 @@ jobs:
           FORCE="${{ github.event.inputs.force }}"
           CRON_SECRET="${{ secrets.CRON_SECRET || 'ninejoe-auto-articles-2026' }}"
           
-          URL="https://www.likhitfa.online/api/cron-auto-article?key=${CRON_SECRET}&slot=${SLOT}"
+          URL_PAGES="https://bazi-insight.pages.dev/api/cron-auto-article?key=${CRON_SECRET}&slot=${SLOT}"
+          URL_DOMAIN="https://www.likhitfa.online/api/cron-auto-article?key=${CRON_SECRET}&slot=${SLOT}"
           if [ "$FORCE" = "true" ]; then
-            URL="${URL}&force=true"
+            URL_PAGES="${URL_PAGES}&force=true"
+            URL_DOMAIN="${URL_DOMAIN}&force=true"
           fi
           
           echo "Triggering Likhitfa Auto Article API..."
           echo "Slot: $SLOT | Force: $FORCE"
           
-          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" "$URL")
+          # Try Cloudflare Pages direct endpoint first (bypasses Zone WAF/Bot Challenge)
+          RESPONSE=$(curl -s -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -w "\nHTTP_STATUS:%{http_code}" "$URL_PAGES")
           HTTP_BODY=$(echo "$RESPONSE" | sed -e '$d')
           HTTP_STATUS=$(echo "$RESPONSE" | tail -n1 | cut -d':' -f2)
+          
+          if [ "$HTTP_STATUS" -ne 200 ]; then
+            echo "Primary endpoint returned $HTTP_STATUS, trying custom domain fallback..."
+            RESPONSE=$(curl -s -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -w "\nHTTP_STATUS:%{http_code}" "$URL_DOMAIN")
+            HTTP_BODY=$(echo "$RESPONSE" | sed -e '$d')
+            HTTP_STATUS=$(echo "$RESPONSE" | tail -n1 | cut -d':' -f2)
+          fi
           
           echo "HTTP Status: $HTTP_STATUS"
           echo "Response Body: $HTTP_BODY"
