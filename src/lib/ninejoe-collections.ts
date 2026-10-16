@@ -35,7 +35,7 @@ export interface NineJoeWallpaperItem {
   downloadUrl: string;
   altText: string;
   tags: string[];
-  deityGroup: "caishen" | "vessavana" | "lakshmi" | "ganesha" | "koi" | "spiritual";
+  deityGroup: "caishen" | "vessavana" | "lakshmi" | "ganesha" | "durga" | "koi" | "spiritual";
   deityLabel: string;
 }
 
@@ -70,6 +70,9 @@ export function classifyDeityGroup(
   }
   if (combined.includes("ganesha") || combined.includes("พิฆเนศ") || combined.includes("คเณศ")) {
     return { group: "ganesha", label: "พระพิฆเนศ (ปัญญา & สำเร็จ)" };
+  }
+  if (combined.includes("durga") || combined.includes("ทุรคา")) {
+    return { group: "durga", label: "พระแม่ทุรคา (บารมี & ชัยชนะ)" };
   }
   if (combined.includes("koi") || combined.includes("คาร์ฟ") || combined.includes("ปลาคราฟ")) {
     return { group: "koi", label: "ปลาคาร์ฟมงคล (อุดมสมบูรณ์)" };
@@ -156,6 +159,40 @@ export async function fetchNineJoeCollections(): Promise<NineJoeCollection[]> {
  * Fallback Seed Data: คอลเลกชันจริง 10 ชุดจาก ninejoe.online
  */
 export const FALLBACK_COLLECTIONS: NineJoeCollection[] = [
+  {
+    id: "518ae87b-6059-4def-9bee-696bf12f9ff9",
+    slug: "maha-durga-wallpapers-5-auspicious-elements-collection",
+    title: "Maha Durga Wallpapers – 5 Auspicious Elements Collection",
+    category: "🌟 Spiritual Art",
+    description: "คอลเลกชันวอลเปเปอร์พระแม่ทุรคามหาเทวี (Goddess Durga) ขี่สิงโต ทรงศาสตราวุธศักดิ์สิทธิ์ เสริมพลังมหาบารมี ชัยชนะเด็ดขาดเหนืออุปสรรค และความแคล้วคลาดปลอดภัย ออกแบบพิเศษ 5 ธาตุมงคล (ไฟ, น้ำ, ไม้, มนตรา, ทอง) คมชัดระดับ Ultra HD 9:16 สำหรับหน้าจอมือถือ ดาวน์โหลดฟรี",
+    cover_image: "https://ninejoe.online/images/wallpapers/maha-durga-5-elements/durga-crimson-fire.png",
+    tags: ["durga", "พระแม่ทุรคา", "แม่ทุรคา", "goddess durga", "วอลเปเปอร์สายมู", "วอลเปเปอร์มงคล", "spiritual art", "mobile wallpaper", "hindu deity", "protection", "victory", "lion", "5 ธาตุ"],
+    collection_images: [
+      { image_url: "https://ninejoe.online/images/wallpapers/maha-durga-5-elements/durga-crimson-fire.png", sort_order: 0, alt_text: "พระแม่ทุรคา ธาตุไฟ (Fire) — มหาอำนาจ ชัยชนะเด็ดขาด เผาผลาญอุปสรรค" },
+      { image_url: "https://ninejoe.online/images/wallpapers/maha-durga-5-elements/durga-sapphire-water.png", sort_order: 1, alt_text: "พระแม่ทุรคา ธาตุน้ำ (Water) — ปัญญาญาณ ความสงบร่มเย็น ชนะใจศัตรู" },
+      { image_url: "https://ninejoe.online/images/wallpapers/maha-durga-5-elements/durga-emerald-wood.png", sort_order: 2, alt_text: "พระแม่ทุรคา ธาตุไม้ (Wood) — การเติบโต ก้าวหน้าในหน้าที่การงาน อุดมสมบูรณ์" },
+      { image_url: "https://ninejoe.online/images/wallpapers/maha-durga-5-elements/durga-royal-purple.png", sort_order: 3, alt_text: "พระแม่ทุรคา ธาตุลม/มนตรา (Aether) — มหาเสน่ห์ เมตตามหานิยม ลาภลอย" },
+      { image_url: "https://ninejoe.online/images/wallpapers/maha-durga-5-elements/durga-radiant-gold.png", sort_order: 4, alt_text: "พระแม่ทุรคา ธาตุทอง-ดิน (Gold/Earth) — มหาเศรษฐี ความมั่งคั่งมั่นคง บารมีสูงสุด" },
+    ],
+  },
+  {
+    id: "0dd52b36-c3b3-4017-a7fd-a4992de3bb87",
+    slug: "maha-ganapati-wallpapers-7-auspicious-day-colors-collection",
+    title: "Maha Ganapati Wallpapers – 7 Auspicious Day Colors Collection",
+    category: "🌟 Spiritual Art",
+    description: "คอลเลกชันวอลเปเปอร์พระพิฆเนศมหาเศรษฐี (Lord Ganesha) ประทับบนบัลลังก์ดอกบัว เสวยสุขพร้อมบริวารหนูมุสิกะ เสริมสิริมงคล โชคลาภ ความสำเร็จ ขจัดอุปสรรค และความเจริญรุ่งเรือง ออกแบบครบ 7 สีมงคลประจำวันเกิด คมชัดระดับ Ultra HD 9:16 ดาวน์โหลดฟรี",
+    cover_image: "https://ninejoe.online/images/wallpapers/maha-ganesha-7-day-colors/ganesha-ruby-red.png",
+    tags: ["ganesha", "พระพิฆเนศ", "lord ganesha", "ganapati", "วอลเปเปอร์สายมู", "วอลเปเปอร์มงคล", "วอลเปเปอร์พระพิฆเนศ", "7 วันเกิด", "spiritual art", "mobile wallpaper", "prosperity", "success", "luck", "wealth"],
+    collection_images: [
+      { image_url: "https://ninejoe.online/images/wallpapers/maha-ganesha-7-day-colors/ganesha-ruby-red.png", sort_order: 0, alt_text: "พระพิฆเนศ สีแดงมงคล (วันอาทิตย์) — เสริมอำนาจบารมี ผู้นำ ความกล้าหาญ เกียรติยศ" },
+      { image_url: "https://ninejoe.online/images/wallpapers/maha-ganesha-7-day-colors/ganesha-sapphire-blue.png", sort_order: 1, alt_text: "พระพิฆเนศ สีฟ้า/น้ำเงิน (วันศุกร์) — เสริมการค้าขาย โชคลาภเงินทอง เสน่ห์เมตตา" },
+      { image_url: "https://ninejoe.online/images/wallpapers/maha-ganesha-7-day-colors/ganesha-emerald-green.png", sort_order: 2, alt_text: "พระพิฆเนศ สีเขียวมรกต (วันพุธ) — เสริมสติปัญญา วาจาเรียกทรัพย์ การเจรจาราบรื่น" },
+      { image_url: "https://ninejoe.online/images/wallpapers/maha-ganesha-7-day-colors/ganesha-amethyst-purple.png", sort_order: 3, alt_text: "พระพิฆเนศ สีม่วง/ชมพูเข้ม (วันเสาร์/อังคาร) — ชนะการแข่งขัน ป้องกันสิ่งชั่วร้าย มั่นคง" },
+      { image_url: "https://ninejoe.online/images/wallpapers/maha-ganesha-7-day-colors/ganesha-radiant-gold.png", sort_order: 4, alt_text: "พระพิฆเนศ สีเหลือง/ทองคำ (วันจันทร์) — มหาเสน่ห์ เมตตามหานิยม เงินทองไหลมาเทมา" },
+      { image_url: "https://ninejoe.online/images/wallpapers/maha-ganesha-7-day-colors/ganesha-sunset-orange.png", sort_order: 5, alt_text: "พระพิฆเนศ สีส้มอรุณ (วันพฤหัสบดี) — เสริมความก้าวหน้า ผู้ใหญ่เกื้อหนุน การศึกษา" },
+      { image_url: "https://ninejoe.online/images/wallpapers/maha-ganesha-7-day-colors/ganesha-lotus-pink.png", sort_order: 6, alt_text: "พระพิฆเนศ สีชมพูดอกบัว (วันอังคาร) — เสริมความรัก ความเมตตา สุขภาพและความสุข" },
+    ],
+  },
   {
     id: "adbb8fe8-ffe5-417d-b7e5-bd51e56c635a",
     slug: "caishen-god-of-wealth-wallpapers-collection",

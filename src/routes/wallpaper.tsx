@@ -130,15 +130,17 @@ type FilterKey =
   | "vessavana"
   | "lakshmi"
   | "ganesha"
+  | "durga"
   | "koi"
   | "spiritual";
 
 const FILTER_BUTTONS: { key: FilterKey; label: string; icon: ReactNode }[] = [
   { key: "all", label: "ทั้งหมด", icon: <Sparkles className="h-3.5 w-3.5 text-gold" /> },
+  { key: "ganesha", label: "พระพิฆเนศ", icon: <Sun className="h-3.5 w-3.5 text-amber-400" /> },
+  { key: "durga", label: "พระแม่ทุรคา", icon: <Flame className="h-3.5 w-3.5 text-orange-400" /> },
   { key: "caishen", label: "ไฉ่ซิงเอี้ย", icon: <Coins className="h-3.5 w-3.5 text-amber-400" /> },
   { key: "vessavana", label: "ท้าวเวสสุวรรณ", icon: <Shield className="h-3.5 w-3.5 text-rose-400" /> },
   { key: "lakshmi", label: "พระแม่ลักษมี", icon: <Gem className="h-3.5 w-3.5 text-pink-400" /> },
-  { key: "ganesha", label: "พระพิฆเนศ", icon: <Sun className="h-3.5 w-3.5 text-amber-400" /> },
   { key: "koi", label: "ปลาคาร์ฟมงคล", icon: <Fish className="h-3.5 w-3.5 text-sky-400" /> },
   { key: "spiritual", label: "มงคลอื่นๆ", icon: <Star className="h-3.5 w-3.5 text-gold" /> },
 ];
@@ -200,10 +202,11 @@ function WallpaperPage() {
   const counts = useMemo(() => {
     return {
       all: allWallpapers.length,
+      ganesha: allWallpapers.filter((w) => w.deityGroup === "ganesha").length,
+      durga: allWallpapers.filter((w) => w.deityGroup === "durga").length,
       caishen: allWallpapers.filter((w) => w.deityGroup === "caishen").length,
       vessavana: allWallpapers.filter((w) => w.deityGroup === "vessavana").length,
       lakshmi: allWallpapers.filter((w) => w.deityGroup === "lakshmi").length,
-      ganesha: allWallpapers.filter((w) => w.deityGroup === "ganesha").length,
       koi: allWallpapers.filter((w) => w.deityGroup === "koi").length,
       spiritual: allWallpapers.filter((w) => w.deityGroup === "spiritual").length,
     };
