@@ -400,7 +400,10 @@ function checkBotShield(request: Request, pathname: string): Response | null {
           "403 Forbidden: Automated AI scraping and content harvesting are strictly prohibited on Likhitfa.",
           {
             status: 403,
-            headers: textHeaders({ "X-Robots-Tag": "noindex, nofollow" }),
+            headers: noStoreHeaders({
+              "Content-Type": "text/plain; charset=utf-8",
+              "X-Robots-Tag": "noindex, nofollow",
+            }),
           },
         );
       }
