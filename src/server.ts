@@ -383,8 +383,16 @@ const BLOCKED_AI_SCRAPERS = [
 
 function checkBotShield(request: Request, pathname: string): Response | null {
   const ua = request.headers.get("user-agent") || "";
+  const secChUa = request.headers.get("sec-ch-ua");
+  const secFetchDest = request.headers.get("sec-fetch-dest");
+  const accept = request.headers.get("accept") || "";
 
-  // Check known AI scraping bots and site cloners
+  // Never block human browser navigation or requests with browser client hints
+  if (secChUa || secFetchDest === "document" || accept.includes("text/html")) {
+    return null;
+  }
+
+  // Check known AI scraping bots and site cloners for non-browser requests
   if (ua) {
     for (const pattern of BLOCKED_AI_SCRAPERS) {
       if (pattern.test(ua)) {
