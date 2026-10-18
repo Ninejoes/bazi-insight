@@ -1,5 +1,5 @@
-import { type Article } from "./articles";
-import { type DreamRecord } from "./admin-content";
+import { articles as staticArticles, type Article } from "./articles";
+import { dreamSeed, type DreamRecord } from "./admin-content";
 import { siteUrl } from "./seo";
 import { tarotCategories } from "./tarot-cards";
 
@@ -20,6 +20,7 @@ export type SitemapFile = {
 };
 
 const sitemapChunkSize = 5000;
+const maxCuratedDreamSitemapCount = 250;
 
 const basePublicRoutes: SitemapEntry[] = [
   { loc: "/", lastmod: "2026-09-11", changefreq: "weekly", priority: "1.0" },
@@ -92,6 +93,23 @@ function chunkEntries(entries: SitemapEntry[], size = sitemapChunkSize) {
   return chunks;
 }
 
+export function isCuratedArticleSlug(slug: string) {
+  const clean = slug.trim();
+  if (!clean) return false;
+  if (/^seo-/i.test(clean)) return false;
+  if (/--/.test(clean)) return false;
+  if (/^dream-.*-\d+-\d+$/i.test(clean)) return false;
+  return true;
+}
+
+export function isCuratedDreamKeyword(keyword: string) {
+  const clean = keyword.trim();
+  if (!clean) return false;
+  if (clean.includes(" ")) return false;
+  if (clean.startsWith("ฝันเห็น")) return false;
+  return true;
+}
+
 export function staticSitemapEntries() {
   const tarotRoutes = tarotCategories.map((category) => ({
     loc: `/tarot/${category.slug}`,
@@ -103,23 +121,36 @@ export function staticSitemapEntries() {
 }
 
 export function articleSitemapEntries(articles: SitemapArticle[] = []) {
-  const articleRoutes = articles.map((article) => ({
-    loc: `/articles/${encodePathSegment(article.slug)}`,
-    lastmod: normalizeDate(article.date) || "2026-09-06",
-    changefreq: "weekly" as const,
-    priority: "0.7",
-  }));
+  const combined: SitemapArticle[] = [
+    ...staticArticles.map((article) => ({ slug: article.slug, date: article.date })),
+    ...articles,
+  ];
+  const articleRoutes = combined
+    .filter((article) => isCuratedArticleSlug(article.slug))
+    .map((article) => ({
+      loc: `/articles/${encodePathSegment(article.slug)}`,
+      lastmod: normalizeDate(article.date) || "2026-09-06",
+      changefreq: "weekly" as const,
+      priority: "0.7",
+    }));
   return dedupeEntries(articleRoutes);
 }
 
 export function dreamSitemapEntries(dreams: SitemapDream[] = []) {
-  const dreamRoutes = dreams.map((dream) => ({
+  const curatedBase: SitemapDream[] = dreamSeed.map((dream) => ({
+    keyword: dream.keyword,
+    updatedAt: "2026-09-14",
+  }));
+  const filteredDynamic = dreams.filter((dream) => isCuratedDreamKeyword(dream.keyword));
+  const combined = [...curatedBase, ...filteredDynamic];
+
+  const dreamRoutes = combined.map((dream) => ({
     loc: `/dream/${encodePathSegment(dream.keyword)}`,
-    lastmod: normalizeDate(dream.updatedAt) || "2026-09-06",
+    lastmod: normalizeDate(dream.updatedAt) || "2026-09-14",
     changefreq: "weekly" as const,
     priority: "0.7",
   }));
-  return dedupeEntries(dreamRoutes);
+  return dedupeEntries(dreamRoutes).slice(0, maxCuratedDreamSitemapCount);
 }
 
 export function publicSitemapEntries(articles: SitemapArticle[] = [], dreams: SitemapDream[] = []) {

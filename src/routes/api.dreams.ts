@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
-import { type DreamRecord } from "@/lib/admin-content";
+import { dreamSeed, getCuratedDream, type DreamRecord } from "@/lib/admin-content";
 import {
   getSupabaseConfig,
   json,
@@ -133,6 +133,31 @@ function buildDreamQuery({
   return `dreams?${params.toString()}`;
 }
 
+function filterCuratedDreams({
+  q = "",
+  category = "",
+  letter = "",
+}: {
+  q?: string;
+  category?: string;
+  letter?: string;
+}) {
+  return dreamSeed.filter((item) => {
+    if (category && category !== "ทั้งหมด" && item.category !== category) return false;
+    if (letter && letter !== "ทั้งหมด" && item.letter !== letter) return false;
+    if (q) {
+      const needle = q.toLowerCase();
+      return (
+        item.keyword.toLowerCase().includes(needle) ||
+        item.category.toLowerCase().includes(needle) ||
+        item.meaning.toLowerCase().includes(needle) ||
+        item.numbers.toLowerCase().includes(needle)
+      );
+    }
+    return true;
+  });
+}
+
 async function listDreams({
   q = "",
   keyword = "",
@@ -142,11 +167,85 @@ async function listDreams({
   limit = 20,
   includeBlocked = false,
 } = {}) {
+  const curatedMatch = keyword ? getCuratedDream(keyword) : undefined;
+
   if (!getSupabaseConfig()) {
-    throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
+    if (keyword) {
+      const dreams = curatedMatch ? [curatedMatch] : [];
+      return { source: "curated", dreams, page: 1, limit: 1, total: dreams.length, totalPages: 1 };
+    }
+    const filtered = filterCuratedDreams({ q, category, letter });
+    const start = (page - 1) * limit;
+    return {
+      source: "curated",
+      dreams: filtered.slice(start, start + limit),
+      page,
+      limit,
+      total: filtered.length,
+      totalPages: Math.max(1, Math.ceil(filtered.length / limit)),
+    };
   }
 
-  const preferHeader = keyword ? "return=representation" : "count=estimated";
+  if (keyword) {
+    const response = await supabaseRequest(
+      buildDreamQuery({ q, keyword, category, letter, page: 1, limit: 1, includeBlocked }),
+      { headers: { Prefer: "return=representation" } },
+    );
+    const rows = response ? ((await response.json().catch(() => [])) as DreamRow[]) : [];
+    if (rows.length > 0) {
+      return {
+        source: "supabase",
+        dreams: rows.map(normalizeDream),
+        page: 1,
+        limit: 1,
+        total: 1,
+        totalPages: 1,
+      };
+    }
+    if (curatedMatch) {
+      return {
+        source: "curated",
+        dreams: [curatedMatch],
+        page: 1,
+        limit: 1,
+        total: 1,
+        totalPages: 1,
+      };
+    }
+    const prefixResponse = await supabaseRequest(
+      `dreams?keyword=ilike.${encodeURIComponent(`${keyword}*`)}&select=*&order=keyword.asc&limit=1`,
+    );
+    const prefixRows = prefixResponse
+      ? ((await prefixResponse.json().catch(() => [])) as DreamRow[])
+      : [];
+    return {
+      source: "supabase",
+      dreams: prefixRows.map(normalizeDream),
+      page: 1,
+      limit: 1,
+      total: prefixRows.length,
+      totalPages: 1,
+    };
+  }
+
+  // When browsing without a search query, prioritize the 200 curated flagship dreams first
+  if (!q && !includeBlocked) {
+    const curatedList = filterCuratedDreams({ category, letter });
+    const start = (page - 1) * limit;
+    if (start < curatedList.length) {
+      const slice = curatedList.slice(start, start + limit);
+      return {
+        source: "curated",
+        dreams: slice,
+        page,
+        limit,
+        total: curatedList.length,
+        totalPages: Math.max(1, Math.ceil(curatedList.length / limit)),
+      };
+    }
+  }
+
+  const preferHeader = "count=estimated";
   const response = await supabaseRequest(
     buildDreamQuery({ q, keyword, category, letter, page, limit, includeBlocked }),
     {
@@ -158,9 +257,29 @@ async function listDreams({
   }
   const rows = (await response.json().catch(() => [])) as DreamRow[];
   const total = parseTotal(response.headers.get("content-range"), rows.length);
+  const supabaseDreams = rows.map(normalizeDream);
+
+  if (q && page === 1) {
+    const curatedMatches = filterCuratedDreams({ q, category, letter });
+    const seenKeywords = new Set(curatedMatches.map((item) => item.keyword));
+    const merged = [
+      ...curatedMatches,
+      ...supabaseDreams.filter((item) => !seenKeywords.has(item.keyword)),
+    ].slice(0, limit);
+    const effectiveTotal = Math.max(total, merged.length);
+    return {
+      source: "supabase",
+      dreams: merged,
+      page,
+      limit,
+      total: effectiveTotal,
+      totalPages: Math.max(1, Math.ceil(effectiveTotal / limit)),
+    };
+  }
+
   return {
     source: "supabase",
-    dreams: rows.map(normalizeDream),
+    dreams: supabaseDreams,
     page,
     limit,
     total,

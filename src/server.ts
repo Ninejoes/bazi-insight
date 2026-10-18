@@ -250,40 +250,40 @@ function textHeaders(headers?: HeadersInit) {
   return next;
 }
 
+import { dreamSeed } from "./lib/admin-content";
+import { isCuratedArticleSlug } from "./lib/sitemap";
+
 async function loadArticlesForSitemap() {
   if (!getSupabaseConfig()) return undefined;
 
-  const rows = await loadSupabaseSitemapRows<{ slug?: string; date?: string }>({
-    table: "articles",
+  const params = new URLSearchParams({
     select: "slug,date",
+    slug: "not.like.seo-*",
     order: "date.desc",
+    limit: "1000",
+    offset: "0",
   });
 
+  const response = await supabaseRequest(`articles?${params.toString()}`);
+  if (!response) return undefined;
+
+  const rows = (await response.json().catch(() => [])) as Array<{ slug?: string; date?: string }>;
+  if (!Array.isArray(rows)) return undefined;
+
   return rows
-    ?.map((row): SitemapArticle | null => {
+    .map((row): SitemapArticle | null => {
       const slug = String(row.slug || "").trim();
-      if (!slug) return null;
+      if (!slug || !isCuratedArticleSlug(slug)) return null;
       return { slug, date: String(row.date || "") };
     })
     .filter((row): row is SitemapArticle => Boolean(row));
 }
 
-async function loadDreamsForSitemap() {
-  if (!getSupabaseConfig()) return undefined;
-
-  const rows = await loadSupabaseSitemapRows<{ keyword?: string; updated_at?: string }>({
-    table: "dreams",
-    select: "keyword,updated_at",
-    order: "keyword.asc",
-  });
-
-  return rows
-    ?.map((row): SitemapDream | null => {
-      const keyword = String(row.keyword || "").trim();
-      if (!keyword) return null;
-      return { keyword, updatedAt: String(row.updated_at || "") };
-    })
-    .filter((row): row is SitemapDream => Boolean(row));
+async function loadDreamsForSitemap(): Promise<SitemapDream[]> {
+  return dreamSeed.map((dream) => ({
+    keyword: dream.keyword,
+    updatedAt: "2026-09-14",
+  }));
 }
 
 async function buildFreshSitemapXml() {
@@ -358,6 +358,9 @@ async function sitemapResponse(pathname: string) {
   }
 }
 
+const ALLOWED_SEARCH_AND_SOCIAL_BOTS =
+  /googlebot|adsbot-google|mediapartners-google|google-inspectiontool|google-read-aloud|apis-google|feedfetcher-google|bingbot|adidxbot|msnbot|applebot|duckduckbot|slurp|baiduspider|yandex|facebookexternalhit|facebot|twitterbot|line|linkedinbot|telegrambot|whatsapp|discordbot/i;
+
 const BLOCKED_AI_SCRAPERS = [
   /gptbot/i,
   /chatgpt-user/i,
@@ -381,8 +384,22 @@ const BLOCKED_AI_SCRAPERS = [
   /offline explorer/i,
 ];
 
+const PUBLIC_READ_API_PATHS = new Set([
+  "/api/articles",
+  "/api/dreams",
+  "/api/faqs",
+  "/api/site-content",
+  "/api/lottery",
+]);
+
 function checkBotShield(request: Request, pathname: string): Response | null {
   const ua = request.headers.get("user-agent") || "";
+
+  // Always allow legitimate search engine, ad verification, and social preview crawlers
+  if (ua && ALLOWED_SEARCH_AND_SOCIAL_BOTS.test(ua)) {
+    return null;
+  }
+
   const secChUa = request.headers.get("sec-ch-ua");
   const secFetchDest = request.headers.get("sec-fetch-dest");
   const accept = request.headers.get("accept") || "";
@@ -410,6 +427,11 @@ function checkBotShield(request: Request, pathname: string): Response | null {
     }
   }
 
+  // Allow GET requests to public content APIs (used by SSR and Googlebot WRS)
+  if (request.method === "GET" && PUBLIC_READ_API_PATHS.has(pathname)) {
+    return null;
+  }
+
   // Protect internal API endpoints from direct scraper/script dumping
   if (pathname.startsWith("/api/")) {
     const isWebhookOrCron =
@@ -435,10 +457,10 @@ function checkBotShield(request: Request, pathname: string): Response | null {
           JSON.stringify({ error: "Forbidden: API access restricted to authenticated clients." }),
           {
             status: 403,
-            headers: {
+            headers: noStoreHeaders({
               "Content-Type": "application/json",
               "X-Robots-Tag": "noindex, nofollow",
-            },
+            }),
           },
         );
       }
@@ -455,12 +477,36 @@ function robotsResponse() {
       "# Allowed Search Engines (SEO)",
       "User-agent: Googlebot",
       "Allow: /",
+      "Allow: /api/articles",
+      "Allow: /api/dreams",
+      "Allow: /api/faqs",
+      "Allow: /api/site-content",
+      "Disallow: /admin",
+      "Disallow: /admin-login",
+      "Disallow: /login",
+      "Disallow: /register",
+      "Disallow: /profile",
       "",
       "User-agent: Googlebot-Image",
       "Allow: /",
       "",
+      "User-agent: AdsBot-Google",
+      "Allow: /",
+      "",
+      "User-agent: Mediapartners-Google",
+      "Allow: /",
+      "",
       "User-agent: Bingbot",
       "Allow: /",
+      "Allow: /api/articles",
+      "Allow: /api/dreams",
+      "Allow: /api/faqs",
+      "Allow: /api/site-content",
+      "Disallow: /admin",
+      "Disallow: /admin-login",
+      "Disallow: /login",
+      "Disallow: /register",
+      "Disallow: /profile",
       "",
       "User-agent: Slurp",
       "Allow: /",
@@ -542,6 +588,10 @@ function robotsResponse() {
       "# Default rules for other search engines",
       "User-agent: *",
       "Allow: /",
+      "Allow: /api/articles",
+      "Allow: /api/dreams",
+      "Allow: /api/faqs",
+      "Allow: /api/site-content",
       "Disallow: /admin",
       "Disallow: /admin-login",
       "Disallow: /login",
@@ -569,6 +619,35 @@ export default {
 
     try {
       const url = new URL(request.url);
+      if (url.hostname === "likhitfa.online") {
+        const cleanPath =
+          url.pathname.length > 1 && !url.pathname.startsWith("/api/")
+            ? url.pathname.replace(/\/+$/, "")
+            : url.pathname;
+        return new Response(null, {
+          status: 301,
+          headers: {
+            Location: `${siteUrl}${cleanPath}${url.search}`,
+            "Cache-Control": "public, max-age=86400",
+          },
+        });
+      }
+      if (
+        (request.method === "GET" || request.method === "HEAD") &&
+        url.pathname.length > 1 &&
+        url.pathname.endsWith("/") &&
+        !url.pathname.startsWith("/api/")
+      ) {
+        const cleanPath = url.pathname.replace(/\/+$/, "");
+        return new Response(null, {
+          status: 301,
+          headers: {
+            Location: `${siteUrl}${cleanPath}${url.search}`,
+            "Cache-Control": "public, max-age=86400",
+          },
+        });
+      }
+
       if (url.pathname === "/sitemap.xml" || /^\/sitemap-[\w-]+\.xml$/.test(url.pathname)) {
         return sitemapResponse(url.pathname);
       }

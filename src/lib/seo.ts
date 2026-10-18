@@ -20,6 +20,17 @@ type SeoInput = {
   canonicalUrl?: string;
 };
 
+function normalizeCanonicalUrl(rawUrl: string): string {
+  const withOrigin = rawUrl.startsWith("http")
+    ? rawUrl.replace(/^https?:\/\/(www\.)?likhitfa\.online/i, SITE_URL)
+    : `${SITE_URL}${rawUrl.startsWith("/") ? rawUrl : `/${rawUrl}`}`;
+  const withoutQueryOrHash = withOrigin.split(/[?#]/)[0];
+  if (withoutQueryOrHash === SITE_URL || withoutQueryOrHash === `${SITE_URL}/`) {
+    return `${SITE_URL}/`;
+  }
+  return withoutQueryOrHash.replace(/\/+$/, "");
+}
+
 export function seo({
   title,
   description,
@@ -32,7 +43,7 @@ export function seo({
   modifiedTime,
   canonicalUrl,
 }: SeoInput) {
-  const canonical = canonicalUrl || `${SITE_URL}${path}`;
+  const canonical = normalizeCanonicalUrl(canonicalUrl || `${SITE_URL}${path}`);
   const imageUrl = image.startsWith("http")
     ? image
     : `${SITE_URL}${image.startsWith("/") ? image : `/${image}`}`;
@@ -73,7 +84,7 @@ export function seo({
 
   return {
     meta,
-    links: [{ rel: "canonical", href: canonical }],
+    links: noindex ? [] : [{ rel: "canonical", href: canonical }],
   };
 }
 

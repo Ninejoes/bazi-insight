@@ -2,8 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { ALL_ARTICLE_CATEGORY, ARTICLE_CATEGORIES } from "@/lib/article-categories";
-import { type Article, formatArticleDate, formatArticleReadTime } from "@/lib/articles";
-import { seo, siteUrl } from "@/lib/seo";
+import { type Article, articles as staticArticles, formatArticleDate, formatArticleReadTime } from "@/lib/articles";
+import { seo } from "@/lib/seo";
+import { getSupabaseConfig, supabaseRequest } from "@/lib/supabase-rest";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { useEffect, useState } from "react";
 import { Calendar, Clock } from "lucide-react";
@@ -27,9 +28,54 @@ export const Route = createFileRoute("/articles/")({
       ],
     }),
   loader: async () => {
+    if (typeof window === "undefined") {
+      try {
+        if (getSupabaseConfig()) {
+          const response = await supabaseRequest(
+            "articles?select=*&slug=not.like.seo-*&order=date.desc&limit=20&offset=0",
+            { headers: { Prefer: "count=exact" } },
+          );
+          if (response) {
+            const rows = (await response.json().catch(() => [])) as Array<Record<string, unknown>>;
+            const range = response.headers.get("content-range");
+            const totalMatch = range?.match(/\/(\d+|\*)$/)?.[1];
+            const total = totalMatch && totalMatch !== "*" ? Number.parseInt(totalMatch, 10) : rows.length;
+            if (rows.length > 0) {
+              const normalized: Article[] = rows.map((row) => ({
+                slug: String(row.slug || ""),
+                title: String(row.title || ""),
+                excerpt: String(row.excerpt || ""),
+                category: String(row.category || ""),
+                author: String(row.author || ""),
+                date: String(row.date || ""),
+                createdAt: String(row.createdAt || row.created_at || row.date || ""),
+                readMin: Number(row.readMin || row.read_min || 3),
+                cover: String(row.cover || ""),
+                coverAlt: String(row.coverAlt || row.cover_alt || ""),
+                seoTitle: String(row.seoTitle || row.seo_title || ""),
+                seoDescription: String(row.seoDescription || row.seo_description || ""),
+                keywords: Array.isArray(row.keywords) ? (row.keywords as string[]) : [],
+                canonicalUrl: String(row.canonicalUrl || row.canonical_url || ""),
+                content: Array.isArray(row.content) ? (row.content as string[]) : [],
+              }));
+              return {
+                initialArticles: normalized,
+                initialTotal: total,
+                initialTotalPages: Math.max(1, Math.ceil(total / 20)),
+              };
+            }
+          }
+        }
+      } catch {}
+      return {
+        initialArticles: staticArticles.slice(0, 20),
+        initialTotal: staticArticles.length,
+        initialTotalPages: 1,
+      };
+    }
+
     try {
-      const origin = typeof window === "undefined" ? siteUrl : window.location.origin;
-      const response = await fetch(`${origin}/api/articles?page=1&limit=20`);
+      const response = await fetch(`${window.location.origin}/api/articles?page=1&limit=20`);
       const data = (await response.json().catch(() => ({}))) as ArticlesResponse;
       if (response.ok && data.ok) {
         return {
@@ -40,8 +86,8 @@ export const Route = createFileRoute("/articles/")({
       }
     } catch {}
     return {
-      initialArticles: [],
-      initialTotal: 0,
+      initialArticles: staticArticles.slice(0, 20),
+      initialTotal: staticArticles.length,
       initialTotalPages: 1,
     };
   },

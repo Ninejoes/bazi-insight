@@ -127,6 +127,8 @@ function buildArticleQuery({
 
   if (slug) {
     params.set("slug", `eq.${slug}`);
+  } else if (!q) {
+    params.set("slug", "not.like.seo-*");
   }
   if (category && category !== "ทั้งหมด") {
     params.set("category", `eq.${category}`);

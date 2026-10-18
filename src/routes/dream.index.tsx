@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { seo, siteUrl } from "@/lib/seo";
-import { type DreamRecord } from "@/lib/admin-content";
+import { seo } from "@/lib/seo";
+import { dreamSeed, type DreamRecord } from "@/lib/admin-content";
 import { readStoredUserSession } from "@/lib/user-session";
 import { friendlyErrorMessage } from "@/lib/friendly-error";
 import { useEffect, useState } from "react";
@@ -73,23 +73,13 @@ export const Route = createFileRoute("/dream/")({
       ],
     }),
   loader: async () => {
-    try {
-      const origin = typeof window === "undefined" ? siteUrl : window.location.origin;
-      const response = await fetch(`${origin}/api/dreams?page=1&limit=24`);
-      const data = (await response.json().catch(() => ({}))) as DreamResponse;
-      if (response.ok && data.ok) {
-        return {
-          initialDreams: data.dreams || [],
-          initialTotal: data.total || 0,
-          initialTotalPages: data.totalPages || 1,
-          popularKeywords: (data.dreams || []).slice(0, 12).map((dream) => dream.keyword),
-        };
-      }
-    } catch {}
+    const initialDreams = dreamSeed.slice(0, PAGE_SIZE);
+    const initialTotal = dreamSeed.length;
+    const initialTotalPages = Math.max(1, Math.ceil(initialTotal / PAGE_SIZE));
     return {
-      initialDreams: [],
-      initialTotal: 0,
-      initialTotalPages: 1,
+      initialDreams,
+      initialTotal,
+      initialTotalPages,
       popularKeywords: DEFAULT_POPULAR_DREAMS,
     };
   },

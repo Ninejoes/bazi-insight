@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { type DreamRecord } from "@/lib/admin-content";
+import { getCuratedDream, type DreamRecord } from "@/lib/admin-content";
 import { seo, siteUrl } from "@/lib/seo";
 import { recordDivinationHistory } from "@/lib/member-history";
 import { ShareStoryModal, type ShareCardData } from "@/components/share-story-modal";
@@ -10,10 +10,11 @@ import { Copy, Check, Share2, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/dream/$slug")({
   head: ({ params, ...ctx }) => {
-    const dream = (ctx as { loaderData?: { dream?: DreamRecord | null } }).loaderData?.dream;
-    if (dream) return dreamSeo(dream);
-
     const decodedKeyword = decodeURIComponent(params.slug);
+    const dream =
+      (ctx as { loaderData?: { dream?: DreamRecord | null } }).loaderData?.dream ||
+      getCuratedDream(decodedKeyword);
+    if (dream) return dreamSeo(dream);
     return seo({
       title: `ทำนายฝันเห็น${decodedKeyword} แปลว่าอะไร เลขเด็ดนำโชค`,
       description: `ดูคำทำนายฝันเห็น${decodedKeyword} ฝันเห็น${decodedKeyword}หมายถึงอะไร พร้อมเลขเด็ดงวดนี้ ช่วงเวลาฝันบอกเหตุ และวิธีแก้เคล็ดตามตำราโบราณ`,
@@ -377,15 +378,66 @@ function InfoCard({
 }
 
 async function loadDreamBySlug(slug: string): Promise<DreamRecord | null> {
+  const keyword = decodeURIComponent(slug).trim();
+  const curated = getCuratedDream(keyword);
+
   try {
-    const keyword = decodeURIComponent(slug);
+    if (typeof window === "undefined") {
+      const { getSupabaseConfig, supabaseRequest } = await import("@/lib/supabase-rest");
+      if (getSupabaseConfig()) {
+        const exactRes = await supabaseRequest(
+          `dreams?keyword=eq.${encodeURIComponent(keyword)}&select=*&limit=1`,
+        );
+        if (exactRes && exactRes.ok) {
+          const rows = (await exactRes.json().catch(() => [])) as Array<Record<string, unknown>>;
+          if (Array.isArray(rows) && rows[0]) {
+            const row = rows[0];
+            return {
+              id: String(row.id || ""),
+              keyword: String(row.keyword || keyword),
+              letter: String(row.letter || keyword.charAt(0)),
+              category: String(row.category || "สิ่งของ"),
+              meaning: String(row.meaning || ""),
+              numbers: String(row.numbers || ""),
+              time: String(row.time || "ไม่ระบุ"),
+              advice: String(row.advice || ""),
+            };
+          }
+        }
+        if (curated) return curated;
+
+        const prefixRes = await supabaseRequest(
+          `dreams?keyword=ilike.${encodeURIComponent(`${keyword}*`)}&select=*&order=keyword.asc&limit=1`,
+        );
+        if (prefixRes && prefixRes.ok) {
+          const rows = (await prefixRes.json().catch(() => [])) as Array<Record<string, unknown>>;
+          if (Array.isArray(rows) && rows[0]) {
+            const row = rows[0];
+            return {
+              id: String(row.id || ""),
+              keyword: String(row.keyword || keyword),
+              letter: String(row.letter || keyword.charAt(0)),
+              category: String(row.category || "สิ่งของ"),
+              meaning: String(row.meaning || ""),
+              numbers: String(row.numbers || ""),
+              time: String(row.time || "ไม่ระบุ"),
+              advice: String(row.advice || ""),
+            };
+          }
+        }
+      }
+      if (curated) return curated;
+    }
+
     const origin = typeof window === "undefined" ? siteUrl : window.location.origin;
     const response = await fetch(`${origin}/api/dreams?keyword=${encodeURIComponent(keyword)}`);
     const data = await response.json().catch(() => ({}));
-    if (!response.ok || !data.ok) return null;
-    return (data.dreams?.[0] || null) as DreamRecord | null;
+    if (response.ok && data.ok && data.dreams?.[0]) {
+      return data.dreams[0] as DreamRecord;
+    }
+    return curated || null;
   } catch {
-    return null;
+    return curated || null;
   }
 }
 

@@ -2,12 +2,36 @@
 # Allowed Search Engines (SEO)
 User-agent: Googlebot
 Allow: /
+Allow: /api/articles
+Allow: /api/dreams
+Allow: /api/faqs
+Allow: /api/site-content
+Disallow: /admin
+Disallow: /admin-login
+Disallow: /login
+Disallow: /register
+Disallow: /profile
 
 User-agent: Googlebot-Image
 Allow: /
 
+User-agent: AdsBot-Google
+Allow: /
+
+User-agent: Mediapartners-Google
+Allow: /
+
 User-agent: Bingbot
 Allow: /
+Allow: /api/articles
+Allow: /api/dreams
+Allow: /api/faqs
+Allow: /api/site-content
+Disallow: /admin
+Disallow: /admin-login
+Disallow: /login
+Disallow: /register
+Disallow: /profile
 
 User-agent: Slurp
 Allow: /
@@ -89,6 +113,10 @@ Disallow: /
 # Default rules for other search engines
 User-agent: *
 Allow: /
+Allow: /api/articles
+Allow: /api/dreams
+Allow: /api/faqs
+Allow: /api/site-content
 Disallow: /admin
 Disallow: /admin-login
 Disallow: /login
