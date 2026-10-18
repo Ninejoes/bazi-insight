@@ -160,6 +160,26 @@ export async function fetchNineJoeCollections(): Promise<NineJoeCollection[]> {
  */
 export const FALLBACK_COLLECTIONS: NineJoeCollection[] = [
   {
+    id: "b8527dfd-4e51-475a-a12e-72c21625027a",
+    slug: "bal-hindu-deities-sacred-garden",
+    title: "Bal Hindu Deities – เทพน้อยพนาสวรรค์ มงคลบารมีแดนทิพย์",
+    category: "🌟 Spiritual Art",
+    description: "รวมวอลเปเปอร์มงคลพระมหาเทพและพระแม่องค์น้อยในอิริยาบถเปี่ยมเมตตาบารมี ท่ามกลางสวนทิพย์พฤกษาสวรรค์และสระบัวสถิต เสริมพลังศิริมงคล ความสุขอันบริสุทธิ์ เมตตามหานิยม และความอุดมสมบูรณ์ในชีวิต ออกแบบสำหรับหน้าจอมือถือ Ultra HD 9:16 ฟรี",
+    cover_image: "https://ninejoe.online/images/wallpapers/bal-hindu-deities-sacred-garden/bal-ganesha-peaceful-garden.png",
+    tags: ["Spiritual", "Hindu Deities", "Bal Ganesha", "Bal Shiva", "Bal Lakshmi", "Bal Saraswati", "Bal Vishnu", "Bal Rama", "Bal Durga", "Bal Parvati", "Bal Murugan", "เทพน้อย", "วอลเปเปอร์สายมู"],
+    collection_images: [
+      { image_url: "https://ninejoe.online/images/wallpapers/bal-hindu-deities-sacred-garden/bal-ganesha-peaceful-garden.png", sort_order: 0, alt_text: "พระพิฆเนศน้อย — Bal Ganesha in Sacred Blossom Garden (มงคลความสำเร็จ ปัญญาบริสุทธิ์)" },
+      { image_url: "https://ninejoe.online/images/wallpapers/bal-hindu-deities-sacred-garden/bal-shiva-nandi-kailash-spring.png", sort_order: 1, alt_text: "พระศิวะน้อย — Bal Shiva & Nandi Kailash Spring (มงคลสันติสุข ชนะอุปสรรค พลังชีวิต)" },
+      { image_url: "https://ninejoe.online/images/wallpapers/bal-hindu-deities-sacred-garden/bal-lakshmi-pink-lotus-elephants.png", sort_order: 2, alt_text: "พระแม่ลักษมีน้อย — Bal Lakshmi Pink Lotus & Elephants (มงคลโชคลาภ ทรัพย์สิน ความมั่งคั่ง)" },
+      { image_url: "https://ninejoe.online/images/wallpapers/bal-hindu-deities-sacred-garden/bal-saraswati-veena-swan-lake.png", sort_order: 3, alt_text: "พระสุรัสวดีน้อย — Bal Saraswati Swan Lake & Veena (มงคลสติปัญญา การศึกษา ความคิดสร้างสรรค์)" },
+      { image_url: "https://ninejoe.online/images/wallpapers/bal-hindu-deities-sacred-garden/bal-vishnu-garuda-lotus-river.png", sort_order: 4, alt_text: "พระนารายณ์น้อย — Bal Vishnu & Garuda Sacred Waters (มงคลคุ้มครอง ร่มเย็น ปกป้องรักษา)" },
+      { image_url: "https://ninejoe.online/images/wallpapers/bal-hindu-deities-sacred-garden/bal-rama-golden-bow-deer-forest.png", sort_order: 5, alt_text: "พระรามน้อย — Bal Rama & Golden Bow in Sacred Forest (มงคลเกียรติยศ ชัยชนะ ความซื่อตรง)" },
+      { image_url: "https://ninejoe.online/images/wallpapers/bal-hindu-deities-sacred-garden/bal-durga-lion-cub-flower-meadow.png", sort_order: 6, alt_text: "พระแม่ทุรคาน้อย — Bal Durga & Lion Cub in Blossom Meadow (มงคลอำนาจ ขจัดศัตรู ความแคล้วคลาด)" },
+      { image_url: "https://ninejoe.online/images/wallpapers/bal-hindu-deities-sacred-garden/bal-parvati-tiger-cub-himalaya.png", sort_order: 7, alt_text: "พระแม่อุมาเทวีน้อย — Bal Parvati & Tiger Cub Mountain Sanctuary (มงคลความรัก เมตตามหานิยม ความสมบูรณ์พูนสุข)" },
+      { image_url: "https://ninejoe.online/images/wallpapers/bal-hindu-deities-sacred-garden/bal-murugan-golden-spear-peacock.png", sort_order: 8, alt_text: "พระขันธกุมารน้อย — Bal Murugan Peacock & Golden Spear (มงคลความกล้าหาญ ความสำเร็จในหน้าที่การงาน)" },
+    ],
+  },
+  {
     id: "518ae87b-6059-4def-9bee-696bf12f9ff9",
     slug: "maha-durga-wallpapers-5-auspicious-elements-collection",
     title: "Maha Durga Wallpapers – 5 Auspicious Elements Collection",
