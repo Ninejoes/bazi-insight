@@ -989,11 +989,7 @@ export const FALLBACK_COLLECTIONS: NineJoeCollection[] = [
     "id": "03f23e18-128b-47e4-9e06-97378a55ad52",
     "slug": "lakshmi-3d-chibi-premium-wallpapers",
     "title": "Lakshmi 3D Chibi Premium Wallpapers",
-    "description": "A premium collection of adorable Lakshmi 3D Chibi wallpapers inspired by prosperity, abundance, beauty, and positive energy.
-
-Featuring elegant fantasy artwork in multiple color themes including Gold, Pink, White, Green, Blue, and Purple. Designed for mobile devices with stunning details, soft lighting, and luxurious aesthetics.
-
-Perfect for wallpaper lovers, spiritual art collectors, and anyone who enjoys beautiful premium digital artwork.",
+    "description": "A premium collection of adorable Lakshmi 3D Chibi wallpapers inspired by prosperity, abundance, beauty, and positive energy.\\n\\nFeaturing elegant fantasy artwork in multiple color themes including Gold, Pink, White, Green, Blue, and Purple. Designed for mobile devices with stunning details, soft lighting, and luxurious aesthetics.\\n\\nPerfect for wallpaper lovers, spiritual art collectors, and anyone who enjoys beautiful premium digital artwork.",
     "category": "🌟 Spiritual Art",
     "cover_image": "https://res.cloudinary.com/dhhzjeskm/image/upload/v1782308479/ChatGPT_Image_Jun_24_2026_08_38_29_PM_erlrsb.png",
     "tags": [
@@ -1049,9 +1045,7 @@ Perfect for wallpaper lovers, spiritual art collectors, and anyone who enjoys be
     "id": "4125b195-fdd9-4011-83a7-1d28f55f13be",
     "slug": "lucky-koi-collection-6-fortune-colors-wallpapers",
     "title": "Lucky Koi Collection – 6 Fortune Colors Wallpapers",
-    "description": "A premium collection of fantasy koi fish wallpapers inspired by prosperity, abundance, harmony, and positive energy. Featuring 6 unique color themes designed to enhance your mobile screen with elegance and symbolic fortune.
-
-Perfect for wallpaper lovers, spiritual art collectors, and aesthetic enthusiasts.",
+    "description": "A premium collection of fantasy koi fish wallpapers inspired by prosperity, abundance, harmony, and positive energy. Featuring 6 unique color themes designed to enhance your mobile screen with elegance and symbolic fortune.\\n\\nPerfect for wallpaper lovers, spiritual art collectors, and aesthetic enthusiasts.",
     "category": "🌟 Spiritual Art",
     "cover_image": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1781324411/ChatGPT_Image_Jun_13_2026_11_19_46_AM_ggsnhm.png",
     "tags": [
@@ -1106,11 +1100,7 @@ Perfect for wallpaper lovers, spiritual art collectors, and aesthetic enthusiast
     "id": "b876b035-1325-496b-a823-dc56ecc42883",
     "slug": "goddess-of-fortune-3d-premium-pink-collection",
     "title": "Goddess of Fortune 3D Premium Pink Collection",
-    "description": "A premium collection of adorable 3D Goddess of Fortune wallpapers featuring soft pink pastel tones, luxurious fantasy details, lotus flowers, golden coins, and elegant spiritual aesthetics.
-
-Designed for mobile devices, each wallpaper combines wealth, prosperity, beauty, and positive energy in a charming chibi art style. Perfect for lock screens, home screens, and collectors of fantasy spiritual artwork.
-
-Includes high-resolution wallpapers optimized for modern smartphones.",
+    "description": "A premium collection of adorable 3D Goddess of Fortune wallpapers featuring soft pink pastel tones, luxurious fantasy details, lotus flowers, golden coins, and elegant spiritual aesthetics.\\n\\nDesigned for mobile devices, each wallpaper combines wealth, prosperity, beauty, and positive energy in a charming chibi art style. Perfect for lock screens, home screens, and collectors of fantasy spiritual artwork.\\n\\nIncludes high-resolution wallpapers optimized for modern smartphones.",
     "category": "🌟 Spiritual Art",
     "cover_image": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1781190135/ChatGPT_Image_Jun_11_2026_09_56_29_PM_zdd67q.png",
     "tags": [],
@@ -1146,18 +1136,7 @@ Includes high-resolution wallpapers optimized for modern smartphones.",
     "id": "3f908282-c2a6-4259-abf6-115d1f77d9c4",
     "slug": "ganesha-3d-lucky-wallpapers-6-auspicious-colors-collection",
     "title": "Ganesha 3D Lucky Wallpapers - 6 Auspicious Colors Collection",
-    "description": "Premium 3D Baby Ganesha wallpaper collection featuring 6 auspicious colors designed for mobile devices. Each wallpaper is crafted with detailed fantasy artwork, soft lighting, luxury ornaments, and symbolic prosperity elements.
-
-Colors Included:
-• Gold - Wealth & Success
-• Red - Power & Fortune
-• Green - Growth & Opportunities
-• Blue - Peace & Wisdom
-• Purple - Luck & Spiritual Energy
-• Pink - Love & Harmony
-
-Perfect for lock screens and home screens.
-High-resolution quality for modern smartphones.",
+    "description": "Premium 3D Baby Ganesha wallpaper collection featuring 6 auspicious colors designed for mobile devices. Each wallpaper is crafted with detailed fantasy artwork, soft lighting, luxury ornaments, and symbolic prosperity elements.\\n\\nColors Included:\\n• Gold - Wealth & Success\\n• Red - Power & Fortune\\n• Green - Growth & Opportunities\\n• Blue - Peace & Wisdom\\n• Purple - Luck & Spiritual Energy\\n• Pink - Love & Harmony\\n\\nPerfect for lock screens and home screens.\\nHigh-resolution quality for modern smartphones.",
     "category": "🌟 Spiritual Art",
     "cover_image": "https://res.cloudinary.com/dhhzjeskm/image/upload/q_auto/f_auto/v1780932960/ChatGPT_Image_Jun_8_2026_10_35_44_PM_megxnj.png",
     "tags": [
