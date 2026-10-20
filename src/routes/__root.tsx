@@ -154,6 +154,12 @@ function RootShell({ children }: { children: ReactNode }) {
       data-canonical="https://www.likhitfa.online"
     >
       <head>
+        <meta name="google-adsense-account" content="ca-pub-3283700610727665" />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3283700610727665"
+          crossOrigin="anonymous"
+        />
         {/*
           ============================================================================
           INTELLECTUAL PROPERTY & DIGITAL RIGHTS NOTICE
