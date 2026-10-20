@@ -190,7 +190,7 @@ function publicSsrHeaders(headers?: HeadersInit) {
   const next = new Headers(headers);
   next.set(
     "Cache-Control",
-    "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400",
+    "public, max-age=0, must-revalidate",
   );
   applySecurityHeaders(next);
   return next;
@@ -623,19 +623,6 @@ export default {
 
     try {
       const url = new URL(request.url);
-      if (url.hostname === "likhitfa.online") {
-        const cleanPath =
-          url.pathname.length > 1 && !url.pathname.startsWith("/api/")
-            ? url.pathname.replace(/\/+$/, "")
-            : url.pathname;
-        return new Response(null, {
-          status: 301,
-          headers: {
-            Location: `${siteUrl}${cleanPath}${url.search}`,
-            "Cache-Control": "public, max-age=86400",
-          },
-        });
-      }
       if (
         (request.method === "GET" || request.method === "HEAD") &&
         url.pathname.length > 1 &&

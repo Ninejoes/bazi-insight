@@ -4,7 +4,7 @@
 
 /*
   X-Content-Type-Options: nosniff
-  Content-Security-Policy: frame-ancestors 'self' https://adsense.google.com https://*.google.com;
+  Content-Security-Policy: frame-ancestors 'self' https://adsense.google.com https://*.google.com https://google.com;
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
 
@@ -18,7 +18,7 @@
   Cache-Control: public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400
 
 /robots.txt
-  Cache-Control: public, max-age=86400
+  Cache-Control: public, max-age=0, must-revalidate
 
 /sitemap.xml
   Cache-Control: public, max-age=3600, s-maxage=14400
