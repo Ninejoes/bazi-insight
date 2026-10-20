@@ -141,7 +141,11 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
 }
 
 function applySecurityHeaders(headers: Headers) {
-  headers.set("X-Frame-Options", "DENY");
+  headers.delete("X-Frame-Options");
+  headers.set(
+    "Content-Security-Policy",
+    "frame-ancestors 'self' https://adsense.google.com https://*.google.com https://google.com;",
+  );
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");

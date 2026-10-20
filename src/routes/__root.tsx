@@ -96,6 +96,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "author", content: "Likhitfa ลิขิตฟ้า" },
       { name: "theme-color", content: "#05080d" },
+      { name: "google-adsense-account", content: "ca-pub-3283700610727665" },
       { property: "og:site_name", content: siteName },
       { property: "og:url", content: siteUrl },
       ...(googleSearchVerification
