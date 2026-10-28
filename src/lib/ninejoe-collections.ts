@@ -169,9 +169,13 @@ export async function fetchNineJoeCollections(): Promise<NineJoeCollection[]> {
       const spiritualOnly = data.filter((c) =>
         (c.category || "").toLowerCase().includes("spiritual")
       );
-      memoryCache = spiritualOnly;
+      // Merge live data with FALLBACK_COLLECTIONS so any new collections missing from Supabase still display
+      const liveSlugs = new Set(spiritualOnly.map((c) => c.slug));
+      const missingFromLive = FALLBACK_COLLECTIONS.filter((c) => !liveSlugs.has(c.slug));
+      const merged = [...spiritualOnly, ...missingFromLive];
+      memoryCache = merged;
       lastFetchTime = now;
-      return spiritualOnly;
+      return merged;
     }
   } catch (err) {
     console.warn("Failed to fetch live NineJoe collections, using fallback seed:", err);
