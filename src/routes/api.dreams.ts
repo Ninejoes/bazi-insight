@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
-import { dreamSeed, getCuratedDream, type DreamRecord } from "@/lib/admin-content";
+import { dreamSeed, getCuratedDream, resolveOrSynthesizeDream, type DreamRecord } from "@/lib/admin-content";
 import {
   getSupabaseConfig,
   json,
@@ -218,12 +218,23 @@ async function listDreams({
     const prefixRows = prefixResponse
       ? ((await prefixResponse.json().catch(() => [])) as DreamRow[])
       : [];
+    if (prefixRows.length > 0) {
+      return {
+        source: "supabase",
+        dreams: prefixRows.map((r) => ({ ...normalizeDream(r), keyword })),
+        page: 1,
+        limit: 1,
+        total: 1,
+        totalPages: 1,
+      };
+    }
+    const synthesized = resolveOrSynthesizeDream(keyword);
     return {
-      source: "supabase",
-      dreams: prefixRows.map(normalizeDream),
+      source: "curated",
+      dreams: [synthesized],
       page: 1,
       limit: 1,
-      total: prefixRows.length,
+      total: 1,
       totalPages: 1,
     };
   }

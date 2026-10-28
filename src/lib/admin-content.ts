@@ -378,8 +378,57 @@ const dreamSeedByKeyword = new Map<string, DreamRecord>(
 );
 
 export function getCuratedDream(keyword: string): DreamRecord | undefined {
-  const clean = keyword.trim().toLowerCase().replace(/^ฝันเห็น|^ฝันว่า/, "").trim();
-  return dreamSeedByKeyword.get(keyword.trim().toLowerCase()) || dreamSeedByKeyword.get(clean);
+  const raw = decodeURIComponent(keyword || "").trim();
+  if (!raw) return undefined;
+  const lower = raw.toLowerCase();
+  const clean = lower.replace(/^ฝันเห็น|^ฝันว่า/, "").trim();
+  const exact = dreamSeedByKeyword.get(lower) || dreamSeedByKeyword.get(clean);
+  if (exact) {
+    return exact.keyword === raw ? exact : { ...exact, keyword: raw };
+  }
+  return undefined;
+}
+
+export function resolveOrSynthesizeDream(rawKeyword: string): DreamRecord {
+  const keyword = decodeURIComponent(rawKeyword || "").trim() || "มงคล";
+  const exact = getCuratedDream(keyword);
+  if (exact) return exact;
+
+  const clean = keyword.toLowerCase().replace(/^ฝันเห็น|^ฝันว่า/, "").trim();
+
+  // Check if any curated dream keyword is a substring/root of `clean` (longest match first)
+  const rootMatch = dreamSeed
+    .filter((item) => {
+      const k = item.keyword.trim().toLowerCase();
+      return k.length >= 2 && (clean.includes(k) || k.includes(clean));
+    })
+    .sort((a, b) => b.keyword.length - a.keyword.length)[0];
+
+  let hash = 0;
+  for (const ch of keyword) {
+    hash = (hash * 31 + ch.charCodeAt(0)) % 100000;
+  }
+
+  const categoryName = rootMatch?.category || curatedDreamCategories[hash % curatedDreamCategories.length].name;
+  const profile = curatedCategoryProfiles[categoryName] || curatedCategoryProfiles["สัตว์"];
+  const numbers = computeDreamNumbers(keyword, (hash % 200) + 1);
+  const time = curatedTimePool[hash % curatedTimePool.length];
+  const advice = `${curatedAdvicePool[hash % curatedAdvicePool.length]} และ${profile.caution}`;
+
+  const baseMeaning = rootMatch
+    ? `${rootMatch.meaning} สำหรับรายละเอียดของการฝันเห็น${keyword}โดยเฉพาะ ตำราทำนายฝันโบราณระบุว่าเกี่ยวข้องกับ${profile.theme} มีเกณฑ์ว่า${profile.positive} แต่ควรเพิ่มความรอบคอบเรื่อง${profile.caution}`
+    : `ฝันเห็น${keyword} ตามตำราทำนายฝันโบราณสื่อถึง${profile.theme} โดยภาพรวมเป็นสัญญาณว่า${profile.positive} ทั้งด้านการงาน การเงิน และความสัมพันธ์ จุดที่ควรระวังคือ${profile.caution}`;
+
+  return {
+    id: `dream-synth-${hash}`,
+    keyword,
+    letter: [...keyword.trim()][0] || "ก",
+    category: categoryName,
+    meaning: baseMeaning,
+    numbers,
+    time,
+    advice,
+  };
 }
 
 export const faqSeed: FAQRecord[] = [

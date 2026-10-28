@@ -117,6 +117,40 @@ export function getArticle(slug: string) {
   return articles.find((a) => a.slug === slug);
 }
 
+export function resolveOrSynthesizeArticle(rawSlug: string): Article {
+  const slug = decodeURIComponent(rawSlug || "").trim();
+  const exact = getArticle(slug);
+  if (exact) return exact;
+
+  let hash = 0;
+  for (const ch of slug) {
+    hash = (hash * 31 + ch.charCodeAt(0)) % 100000;
+  }
+  const base = articles[hash % articles.length];
+  const topicLabel = slug
+    .replace(/^seo-/, "")
+    .replace(/[-_]+/g, " ")
+    .trim();
+
+  return {
+    ...base,
+    slug,
+    title: `${topicLabel} — วิเคราะห์ดวงชะตาและแนวทางเสริมสิริมงคล`,
+    excerpt: `เจาะลึก ${topicLabel} ตามหลักโหราศาสตร์ตะวันออก ปาจื้อ 4 เสา และการปรับสมดุลธาตุทั้ง 5 เพื่อเสริมดวงการงาน การเงิน และความรัก`,
+    seoTitle: `${topicLabel} | บทความดูดวง โหราศาสตร์ Likhitfa`,
+    seoDescription: `อ่านบทความเรื่อง ${topicLabel} วิเคราะห์ดวงชะตา โหราศาสตร์ ฮวงจุ้ย และเคล็ดลับเสริมดวงแม่นยำจาก Likhitfa ลิขิตฟ้า`,
+    canonicalUrl: `https://www.likhitfa.online/articles/${encodeURIComponent(slug)}`,
+    content: [
+      `## ความสำคัญของ ${topicLabel} ในมุมมองโหราศาสตร์ตะวันออก`,
+      `ในศาสตร์การพยากรณ์ตะวันออก ทั้งปาจื้อ 4 เสา (八字) ไพ่ทาโรต์ และตำราทำนายฝันโบราณ เรื่องของ **${topicLabel}** ถือเป็นสัญญาณสะท้อนจังหวะการหมุนเวียนของพลังงานธาตุทั้ง 5 (ไม้ ไฟ ดิน ทอง น้ำ) รอบตัวเจ้าชะตา`,
+      `## แนวทางวิเคราะห์และสังเกตจังหวะดวงชะตา`,
+      `- สังเกตความสมดุลระหว่างธาตุประจำตัว (ดิถี) กับอิทธิพลของปีจรและเดือนจร\n- ใช้สติและข้อมูลจริงประกอบการตัดสินใจเรื่องสำคัญ ทั้งการงาน การเงิน และความสัมพันธ์\n- จัดสภาพแวดล้อมโต๊ะทำงานและที่อยู่อาศัยให้โปร่งโล่งเพื่อรับกระแสพลังงานมงคล`,
+      `> ดวงชะตาบอกทิศทางของลมฟ้าอากาศ แต่การกระทำและสติสัมปชัญญะคือหางเสือที่กำหนดจุดหมายปลายทางของคุณ`,
+      ...base.content,
+    ],
+  };
+}
+
 /**
  * แปลงวันที่บทความให้เป็นภาษาไทยที่อ่านง่าย ชัดเจน
  * รองรับทั้ง "กี่นาทีที่แล้ว / กี่ชั่วโมงที่แล้ว" หากโพสต์ภายในวันเดียวกัน

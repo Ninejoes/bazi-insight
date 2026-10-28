@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { getCuratedDream, type DreamRecord } from "@/lib/admin-content";
+import { getCuratedDream, resolveOrSynthesizeDream, type DreamRecord } from "@/lib/admin-content";
 import { seo, siteUrl } from "@/lib/seo";
 import { recordDivinationHistory } from "@/lib/member-history";
 import { ShareStoryModal, type ShareCardData } from "@/components/share-story-modal";
@@ -10,30 +10,17 @@ import { Copy, Check, Share2, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/dream/$slug")({
   head: ({ params, ...ctx }) => {
-    const decodedKeyword = decodeURIComponent(params.slug);
+    const decodedKeyword = decodeURIComponent(params.slug).trim();
     const dream =
       (ctx as { loaderData?: { dream?: DreamRecord | null } }).loaderData?.dream ||
-      getCuratedDream(decodedKeyword);
-    if (dream) return dreamSeo(dream);
-    return seo({
-      title: `ทำนายฝันเห็น${decodedKeyword} แปลว่าอะไร เลขเด็ดนำโชค`,
-      description: `ดูคำทำนายฝันเห็น${decodedKeyword} ฝันเห็น${decodedKeyword}หมายถึงอะไร พร้อมเลขเด็ดงวดนี้ ช่วงเวลาฝันบอกเหตุ และวิธีแก้เคล็ดตามตำราโบราณ`,
-      path: `/dream/${encodeURIComponent(params.slug)}`,
-      canonicalUrl: `${siteUrl}/dream/${encodeURIComponent(params.slug)}`,
-      noindex: false,
-      keywords: [
-        `ฝันเห็น${decodedKeyword}`,
-        `ทำนายฝัน${decodedKeyword}`,
-        `เลขเด็ดฝันเห็น${decodedKeyword}`,
-        "ทำนายฝัน",
-        "เลขเด็ดงวดนี้",
-      ],
-    });
+      getCuratedDream(decodedKeyword) ||
+      resolveOrSynthesizeDream(decodedKeyword);
+    return dreamSeo({ ...dream, keyword: decodedKeyword });
   },
   loader: async ({ params }) => {
-    const dream = await loadDreamBySlug(params.slug);
-    if (!dream) throw notFound();
-    return { slug: params.slug, dream };
+    const decodedKeyword = decodeURIComponent(params.slug).trim();
+    const dream = (await loadDreamBySlug(params.slug)) || resolveOrSynthesizeDream(decodedKeyword);
+    return { slug: params.slug, dream: { ...dream, keyword: decodedKeyword } };
   },
   notFoundComponent: () => (
     <div className="min-h-screen">
@@ -394,7 +381,7 @@ async function loadDreamBySlug(slug: string): Promise<DreamRecord | null> {
             const row = rows[0];
             return {
               id: String(row.id || ""),
-              keyword: String(row.keyword || keyword),
+              keyword,
               letter: String(row.letter || keyword.charAt(0)),
               category: String(row.category || "สิ่งของ"),
               meaning: String(row.meaning || ""),
@@ -415,7 +402,7 @@ async function loadDreamBySlug(slug: string): Promise<DreamRecord | null> {
             const row = rows[0];
             return {
               id: String(row.id || ""),
-              keyword: String(row.keyword || keyword),
+              keyword,
               letter: String(row.letter || keyword.charAt(0)),
               category: String(row.category || "สิ่งของ"),
               meaning: String(row.meaning || ""),
@@ -426,18 +413,19 @@ async function loadDreamBySlug(slug: string): Promise<DreamRecord | null> {
           }
         }
       }
-      if (curated) return curated;
+      return curated || resolveOrSynthesizeDream(keyword);
     }
 
     const origin = typeof window === "undefined" ? siteUrl : window.location.origin;
     const response = await fetch(`${origin}/api/dreams?keyword=${encodeURIComponent(keyword)}`);
     const data = await response.json().catch(() => ({}));
     if (response.ok && data.ok && data.dreams?.[0]) {
-      return data.dreams[0] as DreamRecord;
+      const d = data.dreams[0] as DreamRecord;
+      return { ...d, keyword };
     }
-    return curated || null;
+    return curated || resolveOrSynthesizeDream(keyword);
   } catch {
-    return curated || null;
+    return curated || resolveOrSynthesizeDream(keyword);
   }
 }
 

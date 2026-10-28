@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { type Article, getArticle } from "@/lib/articles";
+import { type Article, getArticle, resolveOrSynthesizeArticle } from "@/lib/articles";
 import {
   json,
   requireAdmin,
@@ -164,6 +164,17 @@ async function listArticles({ slug = "", q = "", category = "", page = 1, limit 
     throw new Error("ยังไม่ได้ตั้งค่า SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY บน server");
   }
   const rows = (await response.json().catch(() => [])) as ArticleRow[];
+  if (slug && rows.length === 0) {
+    const fallback = getArticle(slug) || resolveOrSynthesizeArticle(slug);
+    return {
+      source: "curated",
+      articles: [fallback],
+      page: 1,
+      limit: 1,
+      total: 1,
+      totalPages: 1,
+    };
+  }
   const total = parseTotal(response.headers.get("content-range"), rows.length);
   return {
     source: "supabase",

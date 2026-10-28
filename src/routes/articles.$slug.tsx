@@ -1,7 +1,13 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { type Article, formatArticleDate, formatArticleReadTime, getArticle } from "@/lib/articles";
+import {
+  type Article,
+  formatArticleDate,
+  formatArticleReadTime,
+  getArticle,
+  resolveOrSynthesizeArticle,
+} from "@/lib/articles";
 import { seo, siteUrl } from "@/lib/seo";
 import { Fragment, useEffect, useState } from "react";
 import { Calendar, Clock, Bookmark, Share2, Copy, Check, MessageCircle } from "lucide-react";
@@ -13,28 +19,17 @@ import {
 
 export const Route = createFileRoute("/articles/$slug")({
   head: ({ params, ...ctx }) => {
+    const decodedSlug = decodeURIComponent(params.slug).trim();
     const article =
       (ctx as { loaderData?: { article?: Article | null } }).loaderData?.article ||
-      getArticle(params.slug);
-    if (article) {
-      return articleSeo(article);
-    }
-
-    const decodedSlug = decodeURIComponent(params.slug).replace(/[-_]/g, " ");
-    return seo({
-      title: `${decodedSlug} | บทความดูดวง โหราศาสตร์`,
-      description: `อ่านบทความเรื่อง ${decodedSlug} วิเคราะห์ดวงชะตา โหราศาสตร์ ฮวงจุ้ย และศาสตร์พยากรณ์แม่นยำจาก Likhitfa`,
-      path: `/articles/${params.slug}`,
-      canonicalUrl: `${siteUrl}/articles/${encodeURIComponent(params.slug)}`,
-      type: "article",
-      noindex: false,
-      keywords: [decodedSlug, "บทความดูดวง", "โหราศาสตร์", "ดวงชะตา", "Likhitfa"],
-    });
+      getArticle(decodedSlug) ||
+      resolveOrSynthesizeArticle(decodedSlug);
+    return articleSeo({ ...article, slug: decodedSlug });
   },
   loader: async ({ params }) => {
-    const article = await loadArticleBySlug(params.slug);
-    if (!article) throw notFound();
-    return { slug: params.slug, article };
+    const decodedSlug = decodeURIComponent(params.slug).trim();
+    const article = (await loadArticleBySlug(params.slug)) || resolveOrSynthesizeArticle(decodedSlug);
+    return { slug: params.slug, article: { ...article, slug: decodedSlug } };
   },
   notFoundComponent: () => (
     <div className="min-h-screen flex items-center justify-center text-center">
@@ -421,10 +416,10 @@ async function loadArticleBySlug(slug: string): Promise<Article | null> {
     const origin = typeof window === "undefined" ? siteUrl : window.location.origin;
     const response = await fetch(`${origin}/api/articles?slug=${encodeURIComponent(slug)}`);
     const data = await response.json().catch(() => ({}));
-    if (!response.ok || !data.ok) return null;
-    return (data.articles?.[0] || null) as Article | null;
+    if (!response.ok || !data.ok) return resolveOrSynthesizeArticle(slug);
+    return ((data.articles?.[0] as Article | undefined) || resolveOrSynthesizeArticle(slug));
   } catch {
-    return null;
+    return resolveOrSynthesizeArticle(slug);
   }
 }
 
