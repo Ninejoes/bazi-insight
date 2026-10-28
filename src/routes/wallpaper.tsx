@@ -128,10 +128,14 @@ type FilterKey =
   | "all"
   | "ganesha"
   | "wukong"
-  | "caishen"
-  | "vessavana"
+  | "shiva"
+  | "nezha"
   | "lakshmi"
   | "durga"
+  | "guanyin"
+  | "deities"
+  | "caishen"
+  | "vessavana"
   | "koi"
   | "spiritual";
 
@@ -139,12 +143,16 @@ const FILTER_BUTTONS: { key: FilterKey; label: string; icon: ReactNode }[] = [
   { key: "all", label: "ทั้งหมด", icon: <Sparkles className="h-3.5 w-3.5 text-gold" /> },
   { key: "ganesha", label: "พระพิฆเนศ", icon: <Sun className="h-3.5 w-3.5 text-amber-400" /> },
   { key: "wukong", label: "พญาวานร / หงอคง", icon: <Flame className="h-3.5 w-3.5 text-red-400" /> },
-  { key: "caishen", label: "ไฉ่ซิงเอี้ย", icon: <Coins className="h-3.5 w-3.5 text-amber-400" /> },
-  { key: "vessavana", label: "ท้าวเวสสุวรรณ", icon: <Shield className="h-3.5 w-3.5 text-rose-400" /> },
+  { key: "shiva", label: "พระศิวะมหาเทพ", icon: <Sparkles className="h-3.5 w-3.5 text-sky-400" /> },
+  { key: "nezha", label: "นาจาซาไท้จื้อ", icon: <Flame className="h-3.5 w-3.5 text-orange-400" /> },
   { key: "lakshmi", label: "พระแม่ลักษมี", icon: <Gem className="h-3.5 w-3.5 text-pink-400" /> },
-  { key: "durga", label: "พระแม่ทุรคา", icon: <Flame className="h-3.5 w-3.5 text-orange-400" /> },
-  { key: "koi", label: "ปลาคาร์ฟมงคล", icon: <Fish className="h-3.5 w-3.5 text-sky-400" /> },
-  { key: "spiritual", label: "มงคลอื่นๆ", icon: <Star className="h-3.5 w-3.5 text-gold" /> },
+  { key: "durga", label: "พระแม่ทุรคา & มหาเทวี", icon: <Shield className="h-3.5 w-3.5 text-rose-400" /> },
+  { key: "guanyin", label: "พระแม่กวนอิม & โพธิสัตว์", icon: <Star className="h-3.5 w-3.5 text-amber-300" /> },
+  { key: "deities", label: "มหาเทพ & สุริยะ", icon: <Sun className="h-3.5 w-3.5 text-yellow-400" /> },
+  { key: "caishen", label: "ไฉ่ซิงเอี้ย", icon: <Coins className="h-3.5 w-3.5 text-amber-400" /> },
+  { key: "vessavana", label: "ท้าวเวสสุวรรณ", icon: <Shield className="h-3.5 w-3.5 text-emerald-400" /> },
+  { key: "koi", label: "ปลาคาร์ฟมงคล", icon: <Fish className="h-3.5 w-3.5 text-cyan-400" /> },
+  { key: "spiritual", label: "ภาพมงคลอื่นๆ", icon: <Compass className="h-3.5 w-3.5 text-purple-400" /> },
 ];
 
 function WallpaperPage() {
@@ -206,10 +214,14 @@ function WallpaperPage() {
       all: allWallpapers.length,
       ganesha: allWallpapers.filter((w) => w.deityGroup === "ganesha").length,
       wukong: allWallpapers.filter((w) => w.deityGroup === "wukong").length,
-      caishen: allWallpapers.filter((w) => w.deityGroup === "caishen").length,
-      vessavana: allWallpapers.filter((w) => w.deityGroup === "vessavana").length,
+      shiva: allWallpapers.filter((w) => w.deityGroup === "shiva").length,
+      nezha: allWallpapers.filter((w) => w.deityGroup === "nezha").length,
       lakshmi: allWallpapers.filter((w) => w.deityGroup === "lakshmi").length,
       durga: allWallpapers.filter((w) => w.deityGroup === "durga").length,
+      guanyin: allWallpapers.filter((w) => w.deityGroup === "guanyin").length,
+      deities: allWallpapers.filter((w) => w.deityGroup === "deities").length,
+      caishen: allWallpapers.filter((w) => w.deityGroup === "caishen").length,
+      vessavana: allWallpapers.filter((w) => w.deityGroup === "vessavana").length,
       koi: allWallpapers.filter((w) => w.deityGroup === "koi").length,
       spiritual: allWallpapers.filter((w) => w.deityGroup === "spiritual").length,
     };

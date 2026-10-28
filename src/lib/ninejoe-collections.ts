@@ -23,6 +23,21 @@ export interface NineJoeCollection {
   collection_images: NineJoeImage[];
 }
 
+export type DeityGroupKey =
+  | "all"
+  | "ganesha"
+  | "wukong"
+  | "shiva"
+  | "nezha"
+  | "lakshmi"
+  | "durga"
+  | "guanyin"
+  | "deities"
+  | "caishen"
+  | "vessavana"
+  | "koi"
+  | "spiritual";
+
 export interface NineJoeWallpaperItem {
   id: string;
   collectionId: string;
@@ -35,7 +50,7 @@ export interface NineJoeWallpaperItem {
   downloadUrl: string;
   altText: string;
   tags: string[];
-  deityGroup: "caishen" | "vessavana" | "lakshmi" | "ganesha" | "wukong" | "durga" | "koi" | "spiritual";
+  deityGroup: DeityGroupKey;
   deityLabel: string;
 }
 
@@ -47,75 +62,182 @@ let memoryCache: NineJoeCollection[] | null = null;
 let lastFetchTime = 0;
 const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
+export function classifyDeityItem(
+  altText: string = "",
+  imageUrl: string = "",
+  collectionTitle: string = "",
+  collectionSlug: string = "",
+  collectionTags: string[] = []
+): { group: DeityGroupKey; label: string } {
+  const alt = (altText || "").toLowerCase();
+  const url = (imageUrl || "").toLowerCase();
+  const slug = (collectionSlug || "").toLowerCase();
+  const title = (collectionTitle || "").toLowerCase();
+
+  const imgSignal = `${alt} ${url}`;
+  const colSignal = `${slug} ${title}`;
+
+  // 1. นาจาซาไท้จื้อ (Nezha)
+  if (
+    imgSignal.includes("nezha") || imgSignal.includes("นาจา") ||
+    colSignal.includes("nezha") || colSignal.includes("นาจา")
+  ) {
+    return { group: "nezha", label: "นาจาซาไท้จื้อ (ขจัดอุปสรรค & ชัยชนะ)" };
+  }
+
+  // 2. พญาวานร / ไซอิ๋ว หงอคง / หนุมาน (Wukong & Hanuman)
+  if (
+    imgSignal.includes("wukong") || imgSignal.includes("หงอคง") ||
+    imgSignal.includes("white-ape") || imgSignal.includes("white ape") ||
+    imgSignal.includes("ape-god") || imgSignal.includes("ape god") ||
+    imgSignal.includes("hanuman") || imgSignal.includes("หนุมาน") ||
+    colSignal.includes("wukong") || colSignal.includes("หงอคง") ||
+    colSignal.includes("white-ape") || colSignal.includes("ape-god")
+  ) {
+    let name = "พญาวานร / หงอคง (อำนาจบารมี & ปกป้อง)";
+    if (imgSignal.includes("hanuman") || imgSignal.includes("หนุมาน")) {
+      name = "พญาหนุมานชาญสมร (ฤทธิ์เดช & ชัยชนะ)";
+    }
+    return { group: "wukong", label: name };
+  }
+
+  // 3. พระศิวะมหาเทพ (Lord Shiva / Mahadeva)
+  if (
+    imgSignal.includes("shiva") || imgSignal.includes("ศิวะ") ||
+    imgSignal.includes("mahadeva") || imgSignal.includes("ไกรลาส") ||
+    colSignal.includes("shiva") || colSignal.includes("mahadeva")
+  ) {
+    return { group: "shiva", label: "พระศิวะมหาเทพ (มหาบารมี & ขจัดอุปสรรค)" };
+  }
+
+  // 4. เทพเจ้าไฉ่ซิงเอี้ย (Caishen)
+  if (
+    imgSignal.includes("caishen") || imgSignal.includes("ไฉ่ซิง") ||
+    imgSignal.includes("god-of-wealth") || imgSignal.includes("god of wealth") ||
+    colSignal.includes("caishen") || colSignal.includes("ไฉ่ซิง")
+  ) {
+    return { group: "caishen", label: "เทพเจ้าไฉ่ซิงเอี้ย (โชคลาภ & เงินทอง)" };
+  }
+
+  // 5. ท้าวเวสสุวรรณ (Vessavana)
+  if (
+    imgSignal.includes("vessavana") || imgSignal.includes("เวสสุวรรณ") || imgSignal.includes("ท้าวเวส") ||
+    colSignal.includes("vessavana") || colSignal.includes("เวสสุวรรณ")
+  ) {
+    return { group: "vessavana", label: "ท้าวเวสสุวรรณ (คุ้มครอง & บารมีทรัพย์)" };
+  }
+
+  // 6. พระพิฆเนศ (Ganesha) - ตรวจสอบเฉพาะเจาะจงรูปภาพ
+  if (
+    imgSignal.includes("ganesha") || imgSignal.includes("พิฆเนศ") ||
+    imgSignal.includes("คเณศ") || imgSignal.includes("ganapati")
+  ) {
+    return { group: "ganesha", label: "พระพิฆเนศ (ปัญญา & ความสำเร็จ)" };
+  }
+
+  // 7. พระแม่ทุรคา, พระแม่อุมาเทวี, พระสุรัสวดี (Durga, Uma Parvati, Saraswati)
+  if (
+    imgSignal.includes("durga") || imgSignal.includes("ทุรคา") ||
+    imgSignal.includes("parvati") || imgSignal.includes("ปารวตี") || imgSignal.includes("อุมา") ||
+    imgSignal.includes("saraswati") || imgSignal.includes("สุรัสวดี")
+  ) {
+    let name = "พระแม่ทุรคา (บารมี & ชัยชนะ)";
+    if (imgSignal.includes("saraswati") || imgSignal.includes("สุรัสวดี")) {
+      name = "พระแม่สุรัสวดี (สติปัญญา & ศิลปวิทยา)";
+    } else if (imgSignal.includes("parvati") || imgSignal.includes("อุมา")) {
+      name = "พระแม่อุมาเทวี (เมตตามหานิยม & พูนสุข)";
+    }
+    return { group: "durga", label: name };
+  }
+
+  // 8. พระแม่ลักษมี & เทพีแห่งโชคลาภ (Lakshmi & Fortune Goddess)
+  if (
+    imgSignal.includes("lakshmi") || imgSignal.includes("ลักษมี") ||
+    imgSignal.includes("fortune-goddess") || imgSignal.includes("goddess of fortune")
+  ) {
+    return { group: "lakshmi", label: "พระแม่ลักษมี (ความรัก & มหาโชคลาภ)" };
+  }
+
+  // 9. มหาเทพฮินดู & สุริยเทพ (Vishnu, Krishna, Rama, Murugan, Solar Deities)
+  if (
+    imgSignal.includes("vishnu") || imgSignal.includes("นารายณ์") ||
+    imgSignal.includes("krishna") || imgSignal.includes("กฤษณะ") ||
+    imgSignal.includes("radha") || imgSignal.includes("ราธา") ||
+    imgSignal.includes("lord-rama") || imgSignal.includes("bal-rama") || imgSignal.includes("พระราม") ||
+    imgSignal.includes("murugan") || imgSignal.includes("ขันธกุมาร") ||
+    imgSignal.includes("brahma") || imgSignal.includes("พระพรหม") || imgSignal.includes("มหาพรหม") ||
+    imgSignal.includes("solar-goddess") || imgSignal.includes("sun goddess") || imgSignal.includes("เทพีสุริยะ") ||
+    imgSignal.includes("solar-sovereign") || imgSignal.includes("sun god") || imgSignal.includes("สุริยเทพ")
+  ) {
+    let name = "มหาเทพฮินดู & สุริยเทพ";
+    if (imgSignal.includes("vishnu") || imgSignal.includes("นารายณ์")) name = "พระนารายณ์ (คุ้มครอง & ร่มเย็น)";
+    else if (imgSignal.includes("krishna") || imgSignal.includes("กฤษณะ")) name = "พระกฤษณะ (เมตตามหาเสน่ห์)";
+    else if (imgSignal.includes("murugan") || imgSignal.includes("ขันธกุมาร")) name = "พระขันธกุมาร (กล้าหาญ & สำเร็จ)";
+    else if (imgSignal.includes("lord-rama") || imgSignal.includes("bal-rama") || imgSignal.includes("พระราม")) name = "พระราม (เกียรติยศ & คุณธรรม)";
+    else if (imgSignal.includes("solar-goddess") || imgSignal.includes("sun goddess") || imgSignal.includes("เทพีสุริยะ")) name = "เทพีสุริยะ (แสงทิพย์ & รุ่งโรจน์)";
+    else if (imgSignal.includes("solar-sovereign") || imgSignal.includes("sun god") || imgSignal.includes("สุริยเทพ")) name = "สุริยเทพ (มหาอำนาจ & รุ่งเรือง)";
+    return { group: "deities", label: name };
+  }
+
+  // 10. พระแม่กวนอิม & พระโพธิสัตว์ (Guanyin / Bodhisattva / Buddha)
+  if (
+    imgSignal.includes("guanyin") || imgSignal.includes("กวนอิม") ||
+    imgSignal.includes("bodhisattva") || imgSignal.includes("โพธิสัตว์") ||
+    imgSignal.includes("buddha") || imgSignal.includes("พุทธรูป") || imgSignal.includes("พุทธเจ้า") ||
+    colSignal.includes("bodhisattva") || colSignal.includes("โพธิสัตว์")
+  ) {
+    return { group: "guanyin", label: "พระแม่กวนอิม & พระโพธิสัตว์ (เมตตามหาบารมี)" };
+  }
+
+  // Fallbacks to collection signals
+  // 11. Collection Ganesha
+  if (colSignal.includes("ganesha") || colSignal.includes("พิฆเนศ") || colSignal.includes("คเณศ") || colSignal.includes("ganapati")) {
+    return { group: "ganesha", label: "พระพิฆเนศ (ปัญญา & ความสำเร็จ)" };
+  }
+
+  // 12. Collection Durga
+  if (colSignal.includes("durga") || colSignal.includes("ทุรคา")) {
+    return { group: "durga", label: "พระแม่ทุรคา (บารมี & ชัยชนะ)" };
+  }
+
+  // 13. Collection Lakshmi
+  if (colSignal.includes("lakshmi") || colSignal.includes("goddess-of-fortune")) {
+    return { group: "lakshmi", label: "พระแม่ลักษมี (ความรัก & มหาโชคลาภ)" };
+  }
+
+  // 14. Collection Solar / Deities
+  if (colSignal.includes("solar-goddess") || colSignal.includes("solar-sovereign") || colSignal.includes("สุริยเทพ")) {
+    let name = "สุริยเทพ (มหาอำนาจ & รุ่งเรือง)";
+    if (colSignal.includes("solar-goddess")) name = "เทพีสุริยะ (แสงทิพย์ & รุ่งโรจน์)";
+    return { group: "deities", label: name };
+  }
+
+  // 15. ปลาคาร์ฟมงคล
+  if (imgSignal.includes("koi") || imgSignal.includes("คาร์ฟ") || imgSignal.includes("ปลาคราฟ") || colSignal.includes("koi")) {
+    return { group: "koi", label: "ปลาคาร์ฟมงคล (อุดมสมบูรณ์)" };
+  }
+
+  // 16. มงคลทั่วไป
+  return { group: "spiritual", label: "มงคล & สิ่งศักดิ์สิทธิ์" };
+}
+
 export function classifyDeityGroup(
   title: string,
   category: string = "",
   tags: string[] = []
-): { group: NineJoeWallpaperItem["deityGroup"]; label: string } {
-  const combined = `${title} ${category} ${tags.join(" ")}`.toLowerCase();
-
-  if (combined.includes("caishen") || combined.includes("ไฉ่ซิง") || combined.includes("god of wealth")) {
-    return { group: "caishen", label: "เทพเจ้าไฉ่ซิงเอี้ย (โชคลาภ)" };
-  }
-  if (combined.includes("vessavana") || combined.includes("เวสสุวรรณ") || combined.includes("ท้าวเวส")) {
-    return { group: "vessavana", label: "ท้าวเวสสุวรรณ (คุ้มครอง & บารมี)" };
-  }
-  if (
-    combined.includes("lakshmi") ||
-    combined.includes("ลักษมี") ||
-    combined.includes("goddess of fortune") ||
-    combined.includes("fortune goddess")
-  ) {
-    return { group: "lakshmi", label: "พระแม่ลักษมี & พระแม่ประทานทรัพย์ (ความรัก & มั่งคั่ง)" };
-  }
-  if (combined.includes("ganesha") || combined.includes("พิฆเนศ") || combined.includes("คเณศ")) {
-    return { group: "ganesha", label: "พระพิฆเนศ (ปัญญา & สำเร็จ)" };
-  }
-  if (combined.includes("durga") || combined.includes("ทุรคา")) {
-    return { group: "durga", label: "พระแม่ทุรคา (บารมี & ชัยชนะ)" };
-  }
-  if (combined.includes("koi") || combined.includes("คาร์ฟ") || combined.includes("ปลาคราฟ")) {
-    return { group: "koi", label: "ปลาคาร์ฟมงคล (อุดมสมบูรณ์)" };
-  }
-  if (combined.includes("shiva") || combined.includes("ศิวะ")) {
-    return { group: "spiritual", label: "พระศิวะมหาเทพ (มหาบารมี & ขจัดอุปสรรค)" };
-  }
-  if (combined.includes("nezha") || combined.includes("นาจา")) {
-    return { group: "spiritual", label: "นาจาซาไท้จื้อ (ขจัดอุปสรรค & ชัยชนะ)" };
-  }
-  if (
-    combined.includes("wukong") ||
-    combined.includes("หงอคง") ||
-    combined.includes("white ape") ||
-    combined.includes("ape god") ||
-    combined.includes("วานร") ||
-    combined.includes("hanuman") ||
-    combined.includes("หนุมาน")
-  ) {
-    return { group: "wukong", label: "พญาวานร / หงอคง (อำนาจบารมี & ปกป้อง)" };
-  }
-  if (
-    combined.includes("solar") ||
-    combined.includes("sun god") ||
-    combined.includes("sun goddess") ||
-    combined.includes("สุริยะ") ||
-    combined.includes("สุริยัน")
-  ) {
-    return { group: "spiritual", label: "สุริยเทพ & เทพีสุริยะ (แสงทิพย์ & รุ่งโรจน์)" };
-  }
-  return { group: "spiritual", label: "มงคล & สิ่งศักดิ์สิทธิ์" };
+): { group: DeityGroupKey; label: string } {
+  return classifyDeityItem("", "", title, "", tags);
 }
 
 export function flattenWallpapers(collections: NineJoeCollection[]): NineJoeWallpaperItem[] {
   const items: NineJoeWallpaperItem[] = [];
 
-  // กรองเฉพาะหมวด Spiritual Art เท่านั้นตามความต้องการ
+  // กรองเฉพาะหมวด Spiritual Art
   const spiritualCollections = collections.filter((c) =>
     (c.category || "").toLowerCase().includes("spiritual")
   );
 
   for (const c of spiritualCollections) {
-    const { group, label } = classifyDeityGroup(c.title, c.category, c.tags);
     const images = Array.isArray(c.collection_images) && c.collection_images.length > 0
       ? c.collection_images.slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
       : [{ image_url: c.cover_image, download_url: c.cover_image, thumbnail_url: c.cover_image }];
@@ -123,6 +245,10 @@ export function flattenWallpapers(collections: NineJoeCollection[]): NineJoeWall
     images.forEach((img, idx) => {
       const imgUrl = img.image_url || c.cover_image;
       if (!imgUrl) return;
+
+      const altText = img.alt_text || `${c.title} #${idx + 1}`;
+      // จำแนกองค์เทพและป้ายกำกับระดับแต่ละรูปภาพอย่างแม่นยำ
+      const { group, label } = classifyDeityItem(altText, imgUrl, c.title, c.slug, c.tags);
 
       items.push({
         id: `${c.id}-${idx}`,
@@ -134,7 +260,7 @@ export function flattenWallpapers(collections: NineJoeCollection[]): NineJoeWall
         imageUrl: imgUrl,
         thumbnailUrl: img.thumbnail_url || imgUrl,
         downloadUrl: img.download_url || imgUrl,
-        altText: img.alt_text || `${c.title} #${idx + 1}`,
+        altText,
         tags: c.tags || [],
         deityGroup: group,
         deityLabel: label,
