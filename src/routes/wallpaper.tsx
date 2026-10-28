@@ -34,7 +34,7 @@ export const Route = createFileRoute("/wallpaper")({
     seo({
       title: "วอลเปเปอร์สายมู มงคลพรีเมียม Spiritual Art NineJoe & ยันต์ 5 ธาตุปาจื้อ ดาวน์โหลดฟรี",
       description:
-        "ดาวน์โหลดวอลเปเปอร์สายมูระดับพรีเมียมเฉพาะหมวดหมู่ Spiritual Art จาก NineJoe Collections (เทพเจ้าไฉ่ซิงเอี้ย, ท้าวเวสสุวรรณ, พระแม่ลักษมี, พระพิฆเนศ, ปลาคาร์ฟมงคล) คมชัดระดับ Ultra HD 9:16 ฟรี",
+        "ดาวน์โหลดวอลเปเปอร์สายมูระดับพรีเมียมเฉพาะหมวดหมู่ Spiritual Art จาก NineJoe Collections 15 ชุดใหม่ล่าสุด (พระพิฆเนศน้อย, พญาวานรหงอคง, พระศิวะ, นาจา, สุริยเทพ, ไฉ่ซิงเอี้ย, ท้าวเวสสุวรรณ, ลักษมี) คมชัดระดับ Ultra HD 9:16 ฟรี",
       path: "/wallpaper",
       canonicalUrl: `${siteUrl}/wallpaper`,
       keywords: [
@@ -126,10 +126,11 @@ const ELEMENT_THEMES: ElementTheme[] = [
 
 type FilterKey =
   | "all"
+  | "ganesha"
+  | "wukong"
   | "caishen"
   | "vessavana"
   | "lakshmi"
-  | "ganesha"
   | "durga"
   | "koi"
   | "spiritual";
@@ -137,10 +138,11 @@ type FilterKey =
 const FILTER_BUTTONS: { key: FilterKey; label: string; icon: ReactNode }[] = [
   { key: "all", label: "ทั้งหมด", icon: <Sparkles className="h-3.5 w-3.5 text-gold" /> },
   { key: "ganesha", label: "พระพิฆเนศ", icon: <Sun className="h-3.5 w-3.5 text-amber-400" /> },
-  { key: "durga", label: "พระแม่ทุรคา", icon: <Flame className="h-3.5 w-3.5 text-orange-400" /> },
+  { key: "wukong", label: "พญาวานร / หงอคง", icon: <Flame className="h-3.5 w-3.5 text-red-400" /> },
   { key: "caishen", label: "ไฉ่ซิงเอี้ย", icon: <Coins className="h-3.5 w-3.5 text-amber-400" /> },
   { key: "vessavana", label: "ท้าวเวสสุวรรณ", icon: <Shield className="h-3.5 w-3.5 text-rose-400" /> },
   { key: "lakshmi", label: "พระแม่ลักษมี", icon: <Gem className="h-3.5 w-3.5 text-pink-400" /> },
+  { key: "durga", label: "พระแม่ทุรคา", icon: <Flame className="h-3.5 w-3.5 text-orange-400" /> },
   { key: "koi", label: "ปลาคาร์ฟมงคล", icon: <Fish className="h-3.5 w-3.5 text-sky-400" /> },
   { key: "spiritual", label: "มงคลอื่นๆ", icon: <Star className="h-3.5 w-3.5 text-gold" /> },
 ];
@@ -203,10 +205,11 @@ function WallpaperPage() {
     return {
       all: allWallpapers.length,
       ganesha: allWallpapers.filter((w) => w.deityGroup === "ganesha").length,
-      durga: allWallpapers.filter((w) => w.deityGroup === "durga").length,
+      wukong: allWallpapers.filter((w) => w.deityGroup === "wukong").length,
       caishen: allWallpapers.filter((w) => w.deityGroup === "caishen").length,
       vessavana: allWallpapers.filter((w) => w.deityGroup === "vessavana").length,
       lakshmi: allWallpapers.filter((w) => w.deityGroup === "lakshmi").length,
+      durga: allWallpapers.filter((w) => w.deityGroup === "durga").length,
       koi: allWallpapers.filter((w) => w.deityGroup === "koi").length,
       spiritual: allWallpapers.filter((w) => w.deityGroup === "spiritual").length,
     };

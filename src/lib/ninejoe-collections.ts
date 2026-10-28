@@ -35,7 +35,7 @@ export interface NineJoeWallpaperItem {
   downloadUrl: string;
   altText: string;
   tags: string[];
-  deityGroup: "caishen" | "vessavana" | "lakshmi" | "ganesha" | "durga" | "koi" | "spiritual";
+  deityGroup: "caishen" | "vessavana" | "lakshmi" | "ganesha" | "wukong" | "durga" | "koi" | "spiritual";
   deityLabel: string;
 }
 
@@ -88,10 +88,11 @@ export function classifyDeityGroup(
     combined.includes("หงอคง") ||
     combined.includes("white ape") ||
     combined.includes("ape god") ||
+    combined.includes("วานร") ||
     combined.includes("hanuman") ||
     combined.includes("หนุมาน")
   ) {
-    return { group: "spiritual", label: "พญาวานร / หงอคง / หนุมาน (อำนาจ & คุ้มครอง)" };
+    return { group: "wukong", label: "พญาวานร / หงอคง (อำนาจบารมี & ปกป้อง)" };
   }
   if (
     combined.includes("solar") ||
@@ -150,8 +151,49 @@ export async function fetchNineJoeCollections(): Promise<NineJoeCollection[]> {
     return memoryCache;
   }
 
+  // กำหนดให้ 15 คอลเลกชันใหม่ล่าสุด (137 ภาพ Ultra HD) เป็นชุดหลักที่อยู่บนสุดเสมอ
+  const newestSlugsList = [
+    "crystal-lotus-bal-ganesha",
+    "mythic-sun-wukong-golden-ember",
+    "radiant-golden-lotus-ganesha",
+    "celestial-white-ape-god",
+    "cosmic-sapphire-maha-ganesha",
+    "vibrant-water-splash-ganesha",
+    "royal-elephant-bal-ganesha",
+    "heavenly-golden-temple-ganesha",
+    "divine-azure-waterfall-ganesha",
+    "cosmic-mahadeva-lord-shiva",
+    "radiant-solar-goddess",
+    "blazing-solar-sovereign",
+    "golden-astral-bal-ganesha",
+    "mythic-nezha-golden-flame",
+    "crimson-lotus-prince-nezha",
+  ];
+  const newestSlugSet = new Set(newestSlugsList);
+
+  // 15 คอลเลกชันใหม่ตั้งต้นจาก FALLBACK_COLLECTIONS
+  let newestCollections: NineJoeCollection[] = FALLBACK_COLLECTIONS.filter((c) =>
+    newestSlugSet.has(c.slug)
+  );
+
+  // พยายามซิงค์ชุดใหม่ล่าสุดจาก ninejoe.online seed เพื่อความสดใหม่สูงสุด
   try {
-    // ดึงเฉพาะหมวด Spiritual Art จาก NineJoe Supabase โดยตรง
+    const seedRes = await fetch("https://ninejoe.online/collections-seed.json", {
+      cache: "no-store",
+    });
+    if (seedRes.ok) {
+      const seedData = (await seedRes.json()) as NineJoeCollection[];
+      if (Array.isArray(seedData) && seedData.length > 0) {
+        newestCollections = seedData;
+      }
+    }
+  } catch (seedErr) {
+    console.warn("Using bundled fallback newest collections:", seedErr);
+  }
+
+  // ดึงคอลเลกชันเพิ่มเติมจาก Supabase เพื่อให้มีภาพเสริมครบทุกเทพเจ้า
+  let olderCollections: NineJoeCollection[] = [];
+  try {
     const url = `${SUPABASE_URL}/rest/v1/collections?select=id,slug,title,description,category,cover_image,tags,updated_at,collection_images(image_url,thumbnail_url,download_url,alt_text,sort_order)&category=ilike.*Spiritual*&status=eq.published&order=created_at.desc`;
     const res = await fetch(url, {
       headers: {
@@ -160,28 +202,28 @@ export async function fetchNineJoeCollections(): Promise<NineJoeCollection[]> {
       },
     });
 
-    if (!res.ok) {
-      throw new Error(`Supabase request failed: ${res.status}`);
-    }
-
-    const data = (await res.json()) as NineJoeCollection[];
-    if (Array.isArray(data) && data.length > 0) {
-      const spiritualOnly = data.filter((c) =>
-        (c.category || "").toLowerCase().includes("spiritual")
-      );
-      // Merge live data with FALLBACK_COLLECTIONS so any new collections missing from Supabase still display
-      const liveSlugs = new Set(spiritualOnly.map((c) => c.slug));
-      const missingFromLive = FALLBACK_COLLECTIONS.filter((c) => !liveSlugs.has(c.slug));
-      const merged = [...spiritualOnly, ...missingFromLive];
-      memoryCache = merged;
-      lastFetchTime = now;
-      return merged;
+    if (res.ok) {
+      const data = (await res.json()) as NineJoeCollection[];
+      if (Array.isArray(data) && data.length > 0) {
+        olderCollections = data.filter(
+          (c) => (c.category || "").toLowerCase().includes("spiritual") && !newestSlugSet.has(c.slug)
+        );
+      }
     }
   } catch (err) {
-    console.warn("Failed to fetch live NineJoe collections, using fallback seed:", err);
+    console.warn("Failed to fetch live NineJoe collections from Supabase, using fallback:", err);
   }
 
-  return FALLBACK_COLLECTIONS;
+  // หาก Supabase ดึงไม่ได้ ให้ใช้คอลเลกชันเก่าที่เหลือจาก FALLBACK_COLLECTIONS
+  if (olderCollections.length === 0) {
+    olderCollections = FALLBACK_COLLECTIONS.filter((c) => !newestSlugSet.has(c.slug));
+  }
+
+  // นำ 15 คอลเลกชันใหม่ล่าสุดขึ้นบนสุดเสมอ! ตามด้วยคอลเลกชันเดิม
+  const merged = [...newestCollections, ...olderCollections];
+  memoryCache = merged;
+  lastFetchTime = now;
+  return merged;
 }
 
 /**
