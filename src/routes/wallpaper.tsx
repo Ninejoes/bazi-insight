@@ -20,6 +20,8 @@ import {
   Download,
   X,
   Lightbulb,
+  Loader2,
+  ChevronDown,
 } from "lucide-react";
 import {
   FALLBACK_COLLECTIONS,
@@ -163,6 +165,12 @@ function WallpaperPage() {
   const [selectedWallpaper, setSelectedWallpaper] = useState<NineJoeWallpaperItem | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
+  // การโหลดภาพแบบเลื่อนลงมาทีละชุด (Progressive Loading / Infinite Scroll)
+  const BATCH_SIZE = 24;
+  const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
   // Custom BaZi Talisman Generator State
   const [selectedTheme, setSelectedTheme] = useState<ElementTheme>(ELEMENT_THEMES[0]);
   const [ownerName, setOwnerName] = useState("");
@@ -207,6 +215,41 @@ function WallpaperPage() {
       return true;
     });
   }, [allWallpapers, filterKey, searchQuery]);
+
+  // เมื่อเปลี่ยนหมวดหมู่หรือคำค้นหา ให้เริ่มแสดงจาก 24 รูปแรกเสมอ
+  useEffect(() => {
+    setVisibleCount(BATCH_SIZE);
+  }, [filterKey, searchQuery]);
+
+  // ตัดภาพเฉพาะชุดที่กำลังแสดง (เริ่มต้น 24 รูป และทยอยเพิ่มทีละ 24 รูปเมื่อเลื่อนลงมา)
+  const displayedWallpapers = useMemo(() => {
+    return filteredWallpapers.slice(0, visibleCount);
+  }, [filteredWallpapers, visibleCount]);
+
+  // ตรวจจับเมื่อผู้ใช้เลื่อนหน้าจอมาใกล้ถึงด้านล่าง ให้โหลดชุดถัดไปอัตโนมัติ
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && visibleCount < filteredWallpapers.length) {
+          setIsLoadingMore(true);
+          const timer = setTimeout(() => {
+            setVisibleCount((prev) => Math.min(prev + BATCH_SIZE, filteredWallpapers.length));
+            setIsLoadingMore(false);
+          }, 120);
+          return () => clearTimeout(timer);
+        }
+      },
+      {
+        rootMargin: "350px", // โหลดล่วงหน้าก่อนถึงด้านล่าง 350px เพื่อความลื่นไหลต่อเนื่อง
+      }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [visibleCount, filteredWallpapers.length]);
 
   // สถิติตัวเลขแต่ละหมวด (เฉพาะ Spiritual Art)
   const counts = useMemo(() => {
@@ -475,8 +518,9 @@ function WallpaperPage() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-                {filteredWallpapers.map((item) => {
+              <>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                {displayedWallpapers.map((item) => {
                   const isDownloading = downloadingId === item.id;
                   return (
                     <div
@@ -538,6 +582,76 @@ function WallpaperPage() {
                   );
                 })}
               </div>
+
+              {/* ตัวควบคุม Progressive Loading & Infinite Scroll */}
+              <div className="mt-8 flex flex-col items-center justify-center gap-4">
+                {/* Sentinel element สำหรับ IntersectionObserver */}
+                {visibleCount < filteredWallpapers.length && (
+                  <div ref={sentinelRef} className="h-4 w-full" aria-hidden="true" />
+                )}
+
+                {/* แถบแสดงสถานะจำนวนภาพ & Progress */}
+                <div className="flex flex-col items-center gap-2.5 text-center">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>
+                      กำลังแสดง{" "}
+                      <strong className="font-semibold text-gold">{displayedWallpapers.length}</strong> จาก{" "}
+                      <strong className="text-foreground">{filteredWallpapers.length}</strong> ภาพ
+                    </span>
+                    {filteredWallpapers.length > 0 && (
+                      <span className="rounded-full bg-gold/10 px-2 py-0.5 text-[10px] font-medium text-gold">
+                        {Math.round((displayedWallpapers.length / filteredWallpapers.length) * 100)}%
+                      </span>
+                    )}
+                  </div>
+
+                  {/* แถบ Progress Bar สีทองหรูหรา */}
+                  <div className="h-1.5 w-48 overflow-hidden rounded-full bg-stone-900 border border-gold/20">
+                    <div
+                      className="h-full bg-gradient-gold transition-all duration-300"
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          Math.round((displayedWallpapers.length / (filteredWallpapers.length || 1)) * 100)
+                        )}%`,
+                      }}
+                    />
+                  </div>
+
+                  {/* สถานะกำลังโหลด หรือปุ่มโหลดเพิ่มสำหรับกดด้วยตัวเอง */}
+                  {visibleCount < filteredWallpapers.length ? (
+                    <div className="mt-1 flex flex-col items-center gap-2">
+                      {isLoadingMore ? (
+                        <div className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-5 py-2 text-xs font-medium text-gold backdrop-blur-sm animate-pulse">
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-gold" />
+                          <span>กำลังโหลดภาพชุดถัดไป...</span>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setVisibleCount((prev) => Math.min(prev + BATCH_SIZE, filteredWallpapers.length));
+                          }}
+                          className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-stone-950/80 px-5 py-2 text-xs font-medium text-gold shadow-gold hover:bg-gold/20 hover:border-gold transition-all hover:scale-105"
+                        >
+                          <ChevronDown className="h-3.5 w-3.5" />
+                          <span>
+                            โหลดภาพเพิ่มเติม (+{Math.min(BATCH_SIZE, filteredWallpapers.length - visibleCount)} ภาพ)
+                          </span>
+                        </button>
+                      )}
+                      <p className="text-[11px] text-muted-foreground/70">
+                        เลื่อนหน้าจอลงมาด้านล่างเพื่อโหลดภาพชุดถัดไปอัตโนมัติ (รอบละ 24 ภาพ)
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="mt-1 text-xs text-muted-foreground/80">
+                      ✨ แสดงครบทุกภาพในหมวดนี้แล้ว ({filteredWallpapers.length} ภาพ)
+                    </div>
+                  )}
+                </div>
+              </div>
+              </>
             )}
 
             {/* แบนเนอร์พาร์ทเนอร์ NineJoe */}
