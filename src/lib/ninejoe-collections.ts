@@ -77,6 +77,31 @@ export function classifyDeityGroup(
   if (combined.includes("koi") || combined.includes("คาร์ฟ") || combined.includes("ปลาคราฟ")) {
     return { group: "koi", label: "ปลาคาร์ฟมงคล (อุดมสมบูรณ์)" };
   }
+  if (combined.includes("shiva") || combined.includes("ศิวะ")) {
+    return { group: "spiritual", label: "พระศิวะมหาเทพ (มหาบารมี & ขจัดอุปสรรค)" };
+  }
+  if (combined.includes("nezha") || combined.includes("นาจา")) {
+    return { group: "spiritual", label: "นาจาซาไท้จื้อ (ขจัดอุปสรรค & ชัยชนะ)" };
+  }
+  if (
+    combined.includes("wukong") ||
+    combined.includes("หงอคง") ||
+    combined.includes("white ape") ||
+    combined.includes("ape god") ||
+    combined.includes("hanuman") ||
+    combined.includes("หนุมาน")
+  ) {
+    return { group: "spiritual", label: "พญาวานร / หงอคง / หนุมาน (อำนาจ & คุ้มครอง)" };
+  }
+  if (
+    combined.includes("solar") ||
+    combined.includes("sun god") ||
+    combined.includes("sun goddess") ||
+    combined.includes("สุริยะ") ||
+    combined.includes("สุริยัน")
+  ) {
+    return { group: "spiritual", label: "สุริยเทพ & เทพีสุริยะ (แสงทิพย์ & รุ่งโรจน์)" };
+  }
   return { group: "spiritual", label: "มงคล & สิ่งศักดิ์สิทธิ์" };
 }
 
@@ -159,6 +184,1247 @@ export async function fetchNineJoeCollections(): Promise<NineJoeCollection[]> {
  * Fallback Seed Data: คอลเลกชันจริง 10 ชุดจาก ninejoe.online
  */
 export const FALLBACK_COLLECTIONS: NineJoeCollection[] = [
+  {
+    "id": "0b7f12b1-1704-4cea-a4f5-00bcfafb438c",
+    "slug": "crystal-lotus-bal-ganesha",
+    "title": "Crystal Lotus Bal Ganesha – พระพิฆเนศน้อยบัวแก้วคริสตัลออโรร่า",
+    "description": "คอลเลกชันพระพิฆเนศน้อยประทับดอกบัวแก้วคริสตัลเรืองแสงออโรร่ามหาลาภ เสริมพลังปัญญา บารมีความสำเร็จ ขจัดอุปสรรคทั้งปวง และนำพาความสุขความร่มเย็น",
+    "category": "🌟 Spiritual Art",
+    "cover_image": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-01.png",
+    "tags": [
+      "Spiritual",
+      "Ganesha",
+      "Bal Ganesha",
+      "Crystal Lotus",
+      "Aurora",
+      "Wisdom",
+      "Success"
+    ],
+    "collection_images": [
+      {
+        "alt_text": "พระพิฆเนศน้อยบัวแก้วคริสตัลออโรร่า #1 — Crystal Lotus Bal Ganesha – พระพิฆเนศน้อยบัวแก้วคริสตัลออโรร่า",
+        "image_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-01.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-01.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-01.png",
+        "sort_order": 0
+      },
+      {
+        "alt_text": "พระพิฆเนศน้อยบัวแก้วคริสตัลออโรร่า #2 — Crystal Lotus Bal Ganesha – พระพิฆเนศน้อยบัวแก้วคริสตัลออโรร่า",
+        "image_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-02.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-02.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-02.png",
+        "sort_order": 1
+      },
+      {
+        "alt_text": "พระพิฆเนศน้อยบัวแก้วคริสตัลออโรร่า #3 — Crystal Lotus Bal Ganesha – พระพิฆเนศน้อยบัวแก้วคริสตัลออโรร่า",
+        "image_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-03.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-03.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-03.png",
+        "sort_order": 2
+      },
+      {
+        "alt_text": "พระพิฆเนศน้อยบัวแก้วคริสตัลออโรร่า #4 — Crystal Lotus Bal Ganesha – พระพิฆเนศน้อยบัวแก้วคริสตัลออโรร่า",
+        "image_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-04.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-04.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-04.png",
+        "sort_order": 3
+      },
+      {
+        "alt_text": "พระพิฆเนศน้อยบัวแก้วคริสตัลออโรร่า #5 — Crystal Lotus Bal Ganesha – พระพิฆเนศน้อยบัวแก้วคริสตัลออโรร่า",
+        "image_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-05.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-05.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-05.png",
+        "sort_order": 4
+      },
+      {
+        "alt_text": "พระพิฆเนศน้อยบัวแก้วคริสตัลออโรร่า #6 — Crystal Lotus Bal Ganesha – พระพิฆเนศน้อยบัวแก้วคริสตัลออโรร่า",
+        "image_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-06.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-06.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-06.png",
+        "sort_order": 5
+      },
+      {
+        "alt_text": "พระพิฆเนศน้อยบัวแก้วคริสตัลออโรร่า #7 — Crystal Lotus Bal Ganesha – พระพิฆเนศน้อยบัวแก้วคริสตัลออโรร่า",
+        "image_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-07.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-07.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-07.png",
+        "sort_order": 6
+      },
+      {
+        "alt_text": "พระพิฆเนศน้อยบัวแก้วคริสตัลออโรร่า #8 — Crystal Lotus Bal Ganesha – พระพิฆเนศน้อยบัวแก้วคริสตัลออโรร่า",
+        "image_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-08.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-08.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/crystal-lotus-bal-ganesha/crystal-lotus-bal-ganesha-08.png",
+        "sort_order": 7
+      }
+    ]
+  },
+  {
+    "id": "aec658d3-4739-401f-a4fe-84bfec425331",
+    "slug": "mythic-sun-wukong-golden-ember",
+    "title": "Mythic Sun Wukong – พญาวานรทองคำเพลิงชาญชัย",
+    "description": "คอลเลกชันซุนหงอคง พญาวานรทองคำเพลิง สไตล์หมึกจีนโบราณประกายเปลวทอง เสริมพลังอำนาจ ชัยชนะเหนืออุปสรรค ความเฉลียวฉลาด และความกล้าหาญไร้พ่าย",
+    "category": "🌟 Spiritual Art",
+    "cover_image": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-01.png",
+    "tags": [
+      "Spiritual",
+      "Sun Wukong",
+      "Monkey King",
+      "Golden Ink",
+      "Power",
+      "Victory",
+      "Courage"
+    ],
+    "collection_images": [
+      {
+        "alt_text": "พญาวานรทองคำเพลิง ซุนหงอคง #1 — Mythic Sun Wukong – พญาวานรทองคำเพลิงชาญชัย",
+        "image_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-01.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-01.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-01.png",
+        "sort_order": 0
+      },
+      {
+        "alt_text": "พญาวานรทองคำเพลิง ซุนหงอคง #2 — Mythic Sun Wukong – พญาวานรทองคำเพลิงชาญชัย",
+        "image_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-02.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-02.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-02.png",
+        "sort_order": 1
+      },
+      {
+        "alt_text": "พญาวานรทองคำเพลิง ซุนหงอคง #3 — Mythic Sun Wukong – พญาวานรทองคำเพลิงชาญชัย",
+        "image_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-03.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-03.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-03.png",
+        "sort_order": 2
+      },
+      {
+        "alt_text": "พญาวานรทองคำเพลิง ซุนหงอคง #4 — Mythic Sun Wukong – พญาวานรทองคำเพลิงชาญชัย",
+        "image_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-04.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-04.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-04.png",
+        "sort_order": 3
+      },
+      {
+        "alt_text": "พญาวานรทองคำเพลิง ซุนหงอคง #5 — Mythic Sun Wukong – พญาวานรทองคำเพลิงชาญชัย",
+        "image_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-05.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-05.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-05.png",
+        "sort_order": 4
+      },
+      {
+        "alt_text": "พญาวานรทองคำเพลิง ซุนหงอคง #6 — Mythic Sun Wukong – พญาวานรทองคำเพลิงชาญชัย",
+        "image_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-06.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-06.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-06.png",
+        "sort_order": 5
+      },
+      {
+        "alt_text": "พญาวานรทองคำเพลิง ซุนหงอคง #7 — Mythic Sun Wukong – พญาวานรทองคำเพลิงชาญชัย",
+        "image_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-07.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-07.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-07.png",
+        "sort_order": 6
+      },
+      {
+        "alt_text": "พญาวานรทองคำเพลิง ซุนหงอคง #8 — Mythic Sun Wukong – พญาวานรทองคำเพลิงชาญชัย",
+        "image_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-08.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-08.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-08.png",
+        "sort_order": 7
+      },
+      {
+        "alt_text": "พญาวานรทองคำเพลิง ซุนหงอคง #9 — Mythic Sun Wukong – พญาวานรทองคำเพลิงชาญชัย",
+        "image_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-09.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-09.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-09.png",
+        "sort_order": 8
+      },
+      {
+        "alt_text": "พญาวานรทองคำเพลิง ซุนหงอคง #10 — Mythic Sun Wukong – พญาวานรทองคำเพลิงชาญชัย",
+        "image_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-10.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-10.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/mythic-sun-wukong-golden-ember/mythic-sun-wukong-golden-ember-10.png",
+        "sort_order": 9
+      }
+    ]
+  },
+  {
+    "id": "512c681d-2cfc-4fd7-ac1f-2ae33af6d315",
+    "slug": "radiant-golden-lotus-ganesha",
+    "title": "Radiant Golden Lotus Ganesha – พระพิฆเนศบัวทองคำมหาลาภ",
+    "description": "คอลเลกชันพระพิฆเนศประทับบัวทองคำมหาลาภ เปล่งรัศมีทองคำทอประกายแห่งความอุดมสมบูรณ์ เสริมโชคลาภ เงินทองไหลมาเทมา และธุรกิจการค้ารุ่งเรือง",
+    "category": "🌟 Spiritual Art",
+    "cover_image": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-01.png",
+    "tags": [
+      "Spiritual",
+      "Ganesha",
+      "Golden Lotus",
+      "Wealth",
+      "Prosperity",
+      "Abundance"
+    ],
+    "collection_images": [
+      {
+        "alt_text": "พระพิฆเนศบัวทองคำมหาลาภ #1 — Radiant Golden Lotus Ganesha – พระพิฆเนศบัวทองคำมหาลาภ",
+        "image_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-01.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-01.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-01.png",
+        "sort_order": 0
+      },
+      {
+        "alt_text": "พระพิฆเนศบัวทองคำมหาลาภ #2 — Radiant Golden Lotus Ganesha – พระพิฆเนศบัวทองคำมหาลาภ",
+        "image_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-02.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-02.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-02.png",
+        "sort_order": 1
+      },
+      {
+        "alt_text": "พระพิฆเนศบัวทองคำมหาลาภ #3 — Radiant Golden Lotus Ganesha – พระพิฆเนศบัวทองคำมหาลาภ",
+        "image_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-03.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-03.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-03.png",
+        "sort_order": 2
+      },
+      {
+        "alt_text": "พระพิฆเนศบัวทองคำมหาลาภ #4 — Radiant Golden Lotus Ganesha – พระพิฆเนศบัวทองคำมหาลาภ",
+        "image_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-04.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-04.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-04.png",
+        "sort_order": 3
+      },
+      {
+        "alt_text": "พระพิฆเนศบัวทองคำมหาลาภ #5 — Radiant Golden Lotus Ganesha – พระพิฆเนศบัวทองคำมหาลาภ",
+        "image_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-05.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-05.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-05.png",
+        "sort_order": 4
+      },
+      {
+        "alt_text": "พระพิฆเนศบัวทองคำมหาลาภ #6 — Radiant Golden Lotus Ganesha – พระพิฆเนศบัวทองคำมหาลาภ",
+        "image_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-06.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-06.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-06.png",
+        "sort_order": 5
+      },
+      {
+        "alt_text": "พระพิฆเนศบัวทองคำมหาลาภ #7 — Radiant Golden Lotus Ganesha – พระพิฆเนศบัวทองคำมหาลาภ",
+        "image_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-07.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-07.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-07.png",
+        "sort_order": 6
+      },
+      {
+        "alt_text": "พระพิฆเนศบัวทองคำมหาลาภ #8 — Radiant Golden Lotus Ganesha – พระพิฆเนศบัวทองคำมหาลาภ",
+        "image_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-08.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-08.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-08.png",
+        "sort_order": 7
+      },
+      {
+        "alt_text": "พระพิฆเนศบัวทองคำมหาลาภ #9 — Radiant Golden Lotus Ganesha – พระพิฆเนศบัวทองคำมหาลาภ",
+        "image_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-09.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-09.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-09.png",
+        "sort_order": 8
+      },
+      {
+        "alt_text": "พระพิฆเนศบัวทองคำมหาลาภ #10 — Radiant Golden Lotus Ganesha – พระพิฆเนศบัวทองคำมหาลาภ",
+        "image_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-10.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-10.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/radiant-golden-lotus-ganesha/radiant-golden-lotus-ganesha-10.png",
+        "sort_order": 9
+      }
+    ]
+  },
+  {
+    "id": "202b6b05-7843-47a4-a877-0d4950d0b5d9",
+    "slug": "celestial-white-ape-god",
+    "title": "Celestial White Ape God – พญาวานรเผือกหมึกทองคำ",
+    "description": "คอลเลกชันพญาวานรเผือกหมึกทองคำ วิจิตรศิลป์พู่กันจีนโบราณ สัญลักษณ์แห่งความจงรักภักดี แคล้วคลาดปลอดภัย ปกป้องคุ้มครอง และความสำเร็จอันรุ่งโรจน์",
+    "category": "🌟 Spiritual Art",
+    "cover_image": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-01.png",
+    "tags": [
+      "Spiritual",
+      "Hanuman",
+      "Wukong",
+      "White Ape",
+      "Golden Ink",
+      "Protection",
+      "Success"
+    ],
+    "collection_images": [
+      {
+        "alt_text": "พญาวานรเผือกหมึกทองคำนำโชค #1 — Celestial White Ape God – พญาวานรเผือกหมึกทองคำ",
+        "image_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-01.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-01.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-01.png",
+        "sort_order": 0
+      },
+      {
+        "alt_text": "พญาวานรเผือกหมึกทองคำนำโชค #2 — Celestial White Ape God – พญาวานรเผือกหมึกทองคำ",
+        "image_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-02.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-02.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-02.png",
+        "sort_order": 1
+      },
+      {
+        "alt_text": "พญาวานรเผือกหมึกทองคำนำโชค #3 — Celestial White Ape God – พญาวานรเผือกหมึกทองคำ",
+        "image_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-03.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-03.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-03.png",
+        "sort_order": 2
+      },
+      {
+        "alt_text": "พญาวานรเผือกหมึกทองคำนำโชค #4 — Celestial White Ape God – พญาวานรเผือกหมึกทองคำ",
+        "image_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-04.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-04.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-04.png",
+        "sort_order": 3
+      },
+      {
+        "alt_text": "พญาวานรเผือกหมึกทองคำนำโชค #5 — Celestial White Ape God – พญาวานรเผือกหมึกทองคำ",
+        "image_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-05.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-05.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-05.png",
+        "sort_order": 4
+      },
+      {
+        "alt_text": "พญาวานรเผือกหมึกทองคำนำโชค #6 — Celestial White Ape God – พญาวานรเผือกหมึกทองคำ",
+        "image_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-06.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-06.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-06.png",
+        "sort_order": 5
+      },
+      {
+        "alt_text": "พญาวานรเผือกหมึกทองคำนำโชค #7 — Celestial White Ape God – พญาวานรเผือกหมึกทองคำ",
+        "image_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-07.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-07.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-07.png",
+        "sort_order": 6
+      },
+      {
+        "alt_text": "พญาวานรเผือกหมึกทองคำนำโชค #8 — Celestial White Ape God – พญาวานรเผือกหมึกทองคำ",
+        "image_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-08.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-08.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-08.png",
+        "sort_order": 7
+      },
+      {
+        "alt_text": "พญาวานรเผือกหมึกทองคำนำโชค #9 — Celestial White Ape God – พญาวานรเผือกหมึกทองคำ",
+        "image_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-09.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-09.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-09.png",
+        "sort_order": 8
+      },
+      {
+        "alt_text": "พญาวานรเผือกหมึกทองคำนำโชค #10 — Celestial White Ape God – พญาวานรเผือกหมึกทองคำ",
+        "image_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-10.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-10.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/celestial-white-ape-god/celestial-white-ape-god-10.png",
+        "sort_order": 9
+      }
+    ]
+  },
+  {
+    "id": "82ccdf67-2621-453c-acb5-c23cd0e88fac",
+    "slug": "cosmic-sapphire-maha-ganesha",
+    "title": "Cosmic Sapphire Maha Ganesha – พระพิฆเนศกายแซฟไฟร์จักรวาล",
+    "description": "คอลเลกชันพระพิฆเนศกายสีน้ำเงินแซฟไฟร์ประกายดาราจักร มหาพลังคอสมิกแห่งสติปัญญา บารมี และการเปิดขุมทรัพย์แห่งความมั่งคั่งมหาศาล",
+    "category": "🌟 Spiritual Art",
+    "cover_image": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-01.png",
+    "tags": [
+      "Spiritual",
+      "Ganesha",
+      "Sapphire",
+      "Cosmic",
+      "Galaxy",
+      "Wisdom",
+      "Fortune"
+    ],
+    "collection_images": [
+      {
+        "alt_text": "พระพิฆเนศกายแซฟไฟร์จักรวาล #1 — Cosmic Sapphire Maha Ganesha – พระพิฆเนศกายแซฟไฟร์จักรวาล",
+        "image_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-01.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-01.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-01.png",
+        "sort_order": 0
+      },
+      {
+        "alt_text": "พระพิฆเนศกายแซฟไฟร์จักรวาล #2 — Cosmic Sapphire Maha Ganesha – พระพิฆเนศกายแซฟไฟร์จักรวาล",
+        "image_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-02.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-02.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-02.png",
+        "sort_order": 1
+      },
+      {
+        "alt_text": "พระพิฆเนศกายแซฟไฟร์จักรวาล #3 — Cosmic Sapphire Maha Ganesha – พระพิฆเนศกายแซฟไฟร์จักรวาล",
+        "image_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-03.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-03.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-03.png",
+        "sort_order": 2
+      },
+      {
+        "alt_text": "พระพิฆเนศกายแซฟไฟร์จักรวาล #4 — Cosmic Sapphire Maha Ganesha – พระพิฆเนศกายแซฟไฟร์จักรวาล",
+        "image_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-04.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-04.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-04.png",
+        "sort_order": 3
+      },
+      {
+        "alt_text": "พระพิฆเนศกายแซฟไฟร์จักรวาล #5 — Cosmic Sapphire Maha Ganesha – พระพิฆเนศกายแซฟไฟร์จักรวาล",
+        "image_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-05.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-05.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-05.png",
+        "sort_order": 4
+      },
+      {
+        "alt_text": "พระพิฆเนศกายแซฟไฟร์จักรวาล #6 — Cosmic Sapphire Maha Ganesha – พระพิฆเนศกายแซฟไฟร์จักรวาล",
+        "image_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-06.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-06.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-06.png",
+        "sort_order": 5
+      },
+      {
+        "alt_text": "พระพิฆเนศกายแซฟไฟร์จักรวาล #7 — Cosmic Sapphire Maha Ganesha – พระพิฆเนศกายแซฟไฟร์จักรวาล",
+        "image_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-07.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-07.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-07.png",
+        "sort_order": 6
+      },
+      {
+        "alt_text": "พระพิฆเนศกายแซฟไฟร์จักรวาล #8 — Cosmic Sapphire Maha Ganesha – พระพิฆเนศกายแซฟไฟร์จักรวาล",
+        "image_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-08.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-08.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-08.png",
+        "sort_order": 7
+      },
+      {
+        "alt_text": "พระพิฆเนศกายแซฟไฟร์จักรวาล #9 — Cosmic Sapphire Maha Ganesha – พระพิฆเนศกายแซฟไฟร์จักรวาล",
+        "image_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-09.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-09.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-09.png",
+        "sort_order": 8
+      },
+      {
+        "alt_text": "พระพิฆเนศกายแซฟไฟร์จักรวาล #10 — Cosmic Sapphire Maha Ganesha – พระพิฆเนศกายแซฟไฟร์จักรวาล",
+        "image_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-10.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-10.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/cosmic-sapphire-maha-ganesha/cosmic-sapphire-maha-ganesha-10.png",
+        "sort_order": 9
+      }
+    ]
+  },
+  {
+    "id": "4c7907d5-f6be-48f8-a00a-65d91216a118",
+    "slug": "vibrant-water-splash-ganesha",
+    "title": "Vibrant Water-Splash Dancing Ganesha – พระพิฆเนศร่ายรำสายธาราสวรรค์",
+    "description": "คอลเลกชันพระพิฆเนศปางร่ายรำนาฏราช สาดละอองน้ำสายรุ้งเปี่ยมชีวิตชีวา เสริมพลังความสุข ความคิดสร้างสรรค์ โชคลาภสดใส และความสมปรารถนาในทุกกิจการ",
+    "category": "🌟 Spiritual Art",
+    "cover_image": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-01.png",
+    "tags": [
+      "Spiritual",
+      "Ganesha",
+      "Dancing Ganesha",
+      "Water Splash",
+      "Joy",
+      "Vitality",
+      "Prosperity"
+    ],
+    "collection_images": [
+      {
+        "alt_text": "พระพิฆเนศปางร่ายรำนาฏราชสาดสายธาราสวรรค์ #1 — Vibrant Water-Splash Dancing Ganesha – พระพิฆเนศร่ายรำสายธาราสวรรค์",
+        "image_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-01.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-01.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-01.png",
+        "sort_order": 0
+      },
+      {
+        "alt_text": "พระพิฆเนศปางร่ายรำนาฏราชสาดสายธาราสวรรค์ #2 — Vibrant Water-Splash Dancing Ganesha – พระพิฆเนศร่ายรำสายธาราสวรรค์",
+        "image_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-02.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-02.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-02.png",
+        "sort_order": 1
+      },
+      {
+        "alt_text": "พระพิฆเนศปางร่ายรำนาฏราชสาดสายธาราสวรรค์ #3 — Vibrant Water-Splash Dancing Ganesha – พระพิฆเนศร่ายรำสายธาราสวรรค์",
+        "image_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-03.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-03.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-03.png",
+        "sort_order": 2
+      },
+      {
+        "alt_text": "พระพิฆเนศปางร่ายรำนาฏราชสาดสายธาราสวรรค์ #4 — Vibrant Water-Splash Dancing Ganesha – พระพิฆเนศร่ายรำสายธาราสวรรค์",
+        "image_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-04.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-04.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-04.png",
+        "sort_order": 3
+      },
+      {
+        "alt_text": "พระพิฆเนศปางร่ายรำนาฏราชสาดสายธาราสวรรค์ #5 — Vibrant Water-Splash Dancing Ganesha – พระพิฆเนศร่ายรำสายธาราสวรรค์",
+        "image_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-05.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-05.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-05.png",
+        "sort_order": 4
+      },
+      {
+        "alt_text": "พระพิฆเนศปางร่ายรำนาฏราชสาดสายธาราสวรรค์ #6 — Vibrant Water-Splash Dancing Ganesha – พระพิฆเนศร่ายรำสายธาราสวรรค์",
+        "image_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-06.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-06.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-06.png",
+        "sort_order": 5
+      },
+      {
+        "alt_text": "พระพิฆเนศปางร่ายรำนาฏราชสาดสายธาราสวรรค์ #7 — Vibrant Water-Splash Dancing Ganesha – พระพิฆเนศร่ายรำสายธาราสวรรค์",
+        "image_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-07.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-07.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-07.png",
+        "sort_order": 6
+      },
+      {
+        "alt_text": "พระพิฆเนศปางร่ายรำนาฏราชสาดสายธาราสวรรค์ #8 — Vibrant Water-Splash Dancing Ganesha – พระพิฆเนศร่ายรำสายธาราสวรรค์",
+        "image_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-08.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-08.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-08.png",
+        "sort_order": 7
+      },
+      {
+        "alt_text": "พระพิฆเนศปางร่ายรำนาฏราชสาดสายธาราสวรรค์ #9 — Vibrant Water-Splash Dancing Ganesha – พระพิฆเนศร่ายรำสายธาราสวรรค์",
+        "image_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-09.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-09.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-09.png",
+        "sort_order": 8
+      },
+      {
+        "alt_text": "พระพิฆเนศปางร่ายรำนาฏราชสาดสายธาราสวรรค์ #10 — Vibrant Water-Splash Dancing Ganesha – พระพิฆเนศร่ายรำสายธาราสวรรค์",
+        "image_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-10.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-10.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/vibrant-water-splash-ganesha/water-splash-dancing-ganesha-10.png",
+        "sort_order": 9
+      }
+    ]
+  },
+  {
+    "id": "230c6c86-c2d4-4a72-ade7-bd07d905a61c",
+    "slug": "royal-elephant-bal-ganesha",
+    "title": "Royal Elephant Bal Ganesha – พระพิฆเนศน้อยคชสารเผือกทรงเครื่องทอง",
+    "description": "คอลเลกชันพระพิฆเนศน้อยประทับคชสารเผือกมงคล เส้นสายทองคำพู่กันจีนโบราณ เสริมวาสนา บารมียิ่งใหญ่ ผู้ใหญ่อุปถัมภ์ค้ำชู และเกียรติยศชื่อเสียง",
+    "category": "🌟 Spiritual Art",
+    "cover_image": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-01.png",
+    "tags": [
+      "Spiritual",
+      "Ganesha",
+      "White Elephant",
+      "Royal",
+      "Golden Ink",
+      "Nobility",
+      "Honor"
+    ],
+    "collection_images": [
+      {
+        "alt_text": "พระพิฆเนศน้อยคชสารเผือกทรงเครื่องทองคำ #1 — Royal Elephant Bal Ganesha – พระพิฆเนศน้อยคชสารเผือกทรงเครื่องทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-01.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-01.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-01.png",
+        "sort_order": 0
+      },
+      {
+        "alt_text": "พระพิฆเนศน้อยคชสารเผือกทรงเครื่องทองคำ #2 — Royal Elephant Bal Ganesha – พระพิฆเนศน้อยคชสารเผือกทรงเครื่องทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-02.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-02.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-02.png",
+        "sort_order": 1
+      },
+      {
+        "alt_text": "พระพิฆเนศน้อยคชสารเผือกทรงเครื่องทองคำ #3 — Royal Elephant Bal Ganesha – พระพิฆเนศน้อยคชสารเผือกทรงเครื่องทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-03.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-03.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-03.png",
+        "sort_order": 2
+      },
+      {
+        "alt_text": "พระพิฆเนศน้อยคชสารเผือกทรงเครื่องทองคำ #4 — Royal Elephant Bal Ganesha – พระพิฆเนศน้อยคชสารเผือกทรงเครื่องทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-04.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-04.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-04.png",
+        "sort_order": 3
+      },
+      {
+        "alt_text": "พระพิฆเนศน้อยคชสารเผือกทรงเครื่องทองคำ #5 — Royal Elephant Bal Ganesha – พระพิฆเนศน้อยคชสารเผือกทรงเครื่องทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-05.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-05.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-05.png",
+        "sort_order": 4
+      },
+      {
+        "alt_text": "พระพิฆเนศน้อยคชสารเผือกทรงเครื่องทองคำ #6 — Royal Elephant Bal Ganesha – พระพิฆเนศน้อยคชสารเผือกทรงเครื่องทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-06.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-06.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-06.png",
+        "sort_order": 5
+      },
+      {
+        "alt_text": "พระพิฆเนศน้อยคชสารเผือกทรงเครื่องทองคำ #7 — Royal Elephant Bal Ganesha – พระพิฆเนศน้อยคชสารเผือกทรงเครื่องทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-07.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-07.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-07.png",
+        "sort_order": 6
+      },
+      {
+        "alt_text": "พระพิฆเนศน้อยคชสารเผือกทรงเครื่องทองคำ #8 — Royal Elephant Bal Ganesha – พระพิฆเนศน้อยคชสารเผือกทรงเครื่องทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-08.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-08.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-08.png",
+        "sort_order": 7
+      },
+      {
+        "alt_text": "พระพิฆเนศน้อยคชสารเผือกทรงเครื่องทองคำ #9 — Royal Elephant Bal Ganesha – พระพิฆเนศน้อยคชสารเผือกทรงเครื่องทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-09.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-09.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/royal-elephant-bal-ganesha/royal-elephant-bal-ganesha-09.png",
+        "sort_order": 8
+      }
+    ]
+  },
+  {
+    "id": "d153500d-c2ef-44ae-a3af-5abf7b47de6f",
+    "slug": "heavenly-golden-temple-ganesha",
+    "title": "Heavenly Golden Temple Ganesha – พระพิฆเนศสวรรค์วิมานทองคำ",
+    "description": "คอลเลกชันพระพิฆเนศแสงสวรรค์เหนือมหาปราสาททองคำ ส่องประกายแสงทิพย์แห่งความศักดิ์สิทธิ์ เสริมความสงบร่มเย็น เมตตามหานิยม และปาฏิหาริย์แห่งโชคลาภ",
+    "category": "🌟 Spiritual Art",
+    "cover_image": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-01.png",
+    "tags": [
+      "Spiritual",
+      "Ganesha",
+      "Golden Temple",
+      "Heavenly",
+      "Divine Light",
+      "Miracles"
+    ],
+    "collection_images": [
+      {
+        "alt_text": "พระพิฆเนศสวรรค์วิมานทองคำบันดาลโชค #1 — Heavenly Golden Temple Ganesha – พระพิฆเนศสวรรค์วิมานทองคำ",
+        "image_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-01.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-01.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-01.png",
+        "sort_order": 0
+      },
+      {
+        "alt_text": "พระพิฆเนศสวรรค์วิมานทองคำบันดาลโชค #2 — Heavenly Golden Temple Ganesha – พระพิฆเนศสวรรค์วิมานทองคำ",
+        "image_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-02.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-02.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-02.png",
+        "sort_order": 1
+      },
+      {
+        "alt_text": "พระพิฆเนศสวรรค์วิมานทองคำบันดาลโชค #3 — Heavenly Golden Temple Ganesha – พระพิฆเนศสวรรค์วิมานทองคำ",
+        "image_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-03.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-03.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-03.png",
+        "sort_order": 2
+      },
+      {
+        "alt_text": "พระพิฆเนศสวรรค์วิมานทองคำบันดาลโชค #4 — Heavenly Golden Temple Ganesha – พระพิฆเนศสวรรค์วิมานทองคำ",
+        "image_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-04.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-04.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-04.png",
+        "sort_order": 3
+      },
+      {
+        "alt_text": "พระพิฆเนศสวรรค์วิมานทองคำบันดาลโชค #5 — Heavenly Golden Temple Ganesha – พระพิฆเนศสวรรค์วิมานทองคำ",
+        "image_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-05.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-05.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-05.png",
+        "sort_order": 4
+      },
+      {
+        "alt_text": "พระพิฆเนศสวรรค์วิมานทองคำบันดาลโชค #6 — Heavenly Golden Temple Ganesha – พระพิฆเนศสวรรค์วิมานทองคำ",
+        "image_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-06.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-06.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-06.png",
+        "sort_order": 5
+      },
+      {
+        "alt_text": "พระพิฆเนศสวรรค์วิมานทองคำบันดาลโชค #7 — Heavenly Golden Temple Ganesha – พระพิฆเนศสวรรค์วิมานทองคำ",
+        "image_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-07.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-07.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-07.png",
+        "sort_order": 6
+      },
+      {
+        "alt_text": "พระพิฆเนศสวรรค์วิมานทองคำบันดาลโชค #8 — Heavenly Golden Temple Ganesha – พระพิฆเนศสวรรค์วิมานทองคำ",
+        "image_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-08.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-08.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-08.png",
+        "sort_order": 7
+      },
+      {
+        "alt_text": "พระพิฆเนศสวรรค์วิมานทองคำบันดาลโชค #9 — Heavenly Golden Temple Ganesha – พระพิฆเนศสวรรค์วิมานทองคำ",
+        "image_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-09.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-09.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-09.png",
+        "sort_order": 8
+      },
+      {
+        "alt_text": "พระพิฆเนศสวรรค์วิมานทองคำบันดาลโชค #10 — Heavenly Golden Temple Ganesha – พระพิฆเนศสวรรค์วิมานทองคำ",
+        "image_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-10.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-10.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/heavenly-golden-temple-ganesha/heavenly-golden-temple-ganesha-10.png",
+        "sort_order": 9
+      }
+    ]
+  },
+  {
+    "id": "0b650f00-8801-40e1-ac80-569f59aed209",
+    "slug": "divine-azure-waterfall-ganesha",
+    "title": "Divine Azure Waterfall Ganesha – พระพิฆเนศมหาธาราสวรรค์สีครามทอง",
+    "description": "คอลเลกชันพระพิฆเนศกายสีครามมรกตเครื่องทรงทองคำ ประทับเหนือน้ำตกสวรรค์ มหาธาราแห่งความอุดมสมบูรณ์ เสริมความราบรื่น ร่มเย็นเป็นสุข และทรัพย์สินไม่ขาดสาย",
+    "category": "🌟 Spiritual Art",
+    "cover_image": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-01.png",
+    "tags": [
+      "Spiritual",
+      "Ganesha",
+      "Azure Waterfall",
+      "Heavenly River",
+      "Calm",
+      "Abundance"
+    ],
+    "collection_images": [
+      {
+        "alt_text": "พระพิฆเนศมหาธาราสวรรค์สีครามทอง #1 — Divine Azure Waterfall Ganesha – พระพิฆเนศมหาธาราสวรรค์สีครามทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-01.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-01.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-01.png",
+        "sort_order": 0
+      },
+      {
+        "alt_text": "พระพิฆเนศมหาธาราสวรรค์สีครามทอง #2 — Divine Azure Waterfall Ganesha – พระพิฆเนศมหาธาราสวรรค์สีครามทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-02.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-02.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-02.png",
+        "sort_order": 1
+      },
+      {
+        "alt_text": "พระพิฆเนศมหาธาราสวรรค์สีครามทอง #3 — Divine Azure Waterfall Ganesha – พระพิฆเนศมหาธาราสวรรค์สีครามทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-03.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-03.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-03.png",
+        "sort_order": 2
+      },
+      {
+        "alt_text": "พระพิฆเนศมหาธาราสวรรค์สีครามทอง #4 — Divine Azure Waterfall Ganesha – พระพิฆเนศมหาธาราสวรรค์สีครามทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-04.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-04.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-04.png",
+        "sort_order": 3
+      },
+      {
+        "alt_text": "พระพิฆเนศมหาธาราสวรรค์สีครามทอง #5 — Divine Azure Waterfall Ganesha – พระพิฆเนศมหาธาราสวรรค์สีครามทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-05.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-05.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-05.png",
+        "sort_order": 4
+      },
+      {
+        "alt_text": "พระพิฆเนศมหาธาราสวรรค์สีครามทอง #6 — Divine Azure Waterfall Ganesha – พระพิฆเนศมหาธาราสวรรค์สีครามทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-06.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-06.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-06.png",
+        "sort_order": 5
+      },
+      {
+        "alt_text": "พระพิฆเนศมหาธาราสวรรค์สีครามทอง #7 — Divine Azure Waterfall Ganesha – พระพิฆเนศมหาธาราสวรรค์สีครามทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-07.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-07.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-07.png",
+        "sort_order": 6
+      },
+      {
+        "alt_text": "พระพิฆเนศมหาธาราสวรรค์สีครามทอง #8 — Divine Azure Waterfall Ganesha – พระพิฆเนศมหาธาราสวรรค์สีครามทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-08.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-08.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/divine-azure-waterfall-ganesha/azure-waterfall-maha-ganesha-08.png",
+        "sort_order": 7
+      }
+    ]
+  },
+  {
+    "id": "2ca8c2c5-c2fb-4919-af93-49b556c9d26f",
+    "slug": "cosmic-mahadeva-lord-shiva",
+    "title": "Cosmic Mahadeva Lord Shiva – พระศิวะมหาเทพ กาแล็กซีเขาไกรลาส",
+    "description": "คอลเลกชันพระศิวะมหาเทพ กาแล็กซีดวงดาวเหนือยอดเขาไกรลาส ถือตรีศูลเพลิงประกายทอง เสริมมหาอำนาจบารมี ขจัดอุปสรรคและสิ่งอัปมงคลทั้งปวง หนุนดวงชะตาให้เข้มแข็ง",
+    "category": "🌟 Spiritual Art",
+    "cover_image": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-01.png",
+    "tags": [
+      "Spiritual",
+      "Shiva",
+      "Mahadeva",
+      "Mount Kailash",
+      "Trishula",
+      "Power",
+      "Protection"
+    ],
+    "collection_images": [
+      {
+        "alt_text": "พระศิวะมหาเทพ กาแล็กซีเขาไกรลาส #1 — Cosmic Mahadeva Lord Shiva – พระศิวะมหาเทพ กาแล็กซีเขาไกรลาส",
+        "image_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-01.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-01.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-01.png",
+        "sort_order": 0
+      },
+      {
+        "alt_text": "พระศิวะมหาเทพ กาแล็กซีเขาไกรลาส #2 — Cosmic Mahadeva Lord Shiva – พระศิวะมหาเทพ กาแล็กซีเขาไกรลาส",
+        "image_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-02.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-02.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-02.png",
+        "sort_order": 1
+      },
+      {
+        "alt_text": "พระศิวะมหาเทพ กาแล็กซีเขาไกรลาส #3 — Cosmic Mahadeva Lord Shiva – พระศิวะมหาเทพ กาแล็กซีเขาไกรลาส",
+        "image_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-03.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-03.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-03.png",
+        "sort_order": 2
+      },
+      {
+        "alt_text": "พระศิวะมหาเทพ กาแล็กซีเขาไกรลาส #4 — Cosmic Mahadeva Lord Shiva – พระศิวะมหาเทพ กาแล็กซีเขาไกรลาส",
+        "image_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-04.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-04.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-04.png",
+        "sort_order": 3
+      },
+      {
+        "alt_text": "พระศิวะมหาเทพ กาแล็กซีเขาไกรลาส #5 — Cosmic Mahadeva Lord Shiva – พระศิวะมหาเทพ กาแล็กซีเขาไกรลาส",
+        "image_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-05.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-05.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-05.png",
+        "sort_order": 4
+      },
+      {
+        "alt_text": "พระศิวะมหาเทพ กาแล็กซีเขาไกรลาส #6 — Cosmic Mahadeva Lord Shiva – พระศิวะมหาเทพ กาแล็กซีเขาไกรลาส",
+        "image_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-06.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-06.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-06.png",
+        "sort_order": 5
+      },
+      {
+        "alt_text": "พระศิวะมหาเทพ กาแล็กซีเขาไกรลาส #7 — Cosmic Mahadeva Lord Shiva – พระศิวะมหาเทพ กาแล็กซีเขาไกรลาส",
+        "image_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-07.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-07.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-07.png",
+        "sort_order": 6
+      },
+      {
+        "alt_text": "พระศิวะมหาเทพ กาแล็กซีเขาไกรลาส #8 — Cosmic Mahadeva Lord Shiva – พระศิวะมหาเทพ กาแล็กซีเขาไกรลาส",
+        "image_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-08.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-08.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-08.png",
+        "sort_order": 7
+      },
+      {
+        "alt_text": "พระศิวะมหาเทพ กาแล็กซีเขาไกรลาส #9 — Cosmic Mahadeva Lord Shiva – พระศิวะมหาเทพ กาแล็กซีเขาไกรลาส",
+        "image_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-09.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-09.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-09.png",
+        "sort_order": 8
+      },
+      {
+        "alt_text": "พระศิวะมหาเทพ กาแล็กซีเขาไกรลาส #10 — Cosmic Mahadeva Lord Shiva – พระศิวะมหาเทพ กาแล็กซีเขาไกรลาส",
+        "image_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-10.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-10.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/cosmic-mahadeva-lord-shiva/cosmic-mahadeva-lord-shiva-10.png",
+        "sort_order": 9
+      }
+    ]
+  },
+  {
+    "id": "357176b0-111c-4d3e-a5aa-9a1f58ec6c19",
+    "slug": "radiant-solar-goddess",
+    "title": "Radiant Solar Goddess – เทพีสุริยะแสงทิพย์ประกายทอง",
+    "description": "คอลเลกชันเทพีสุริยะแห่งแสงทิพย์ ประกายทองส่องสว่างนำทางความสำเร็จ เสริมพลังความสดใส ความหวัง พลังชีวิต เมตตามหาเสน่ห์ และเงินทองไม่ขัดสน",
+    "category": "🌟 Spiritual Art",
+    "cover_image": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-01.png",
+    "tags": [
+      "Spiritual",
+      "Sun Goddess",
+      "Solar",
+      "Golden Light",
+      "Hope",
+      "Prosperity",
+      "Blessing"
+    ],
+    "collection_images": [
+      {
+        "alt_text": "เทพีสุริยะแสงทิพย์ประกายทองคำ #1 — Radiant Solar Goddess – เทพีสุริยะแสงทิพย์ประกายทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-01.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-01.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-01.png",
+        "sort_order": 0
+      },
+      {
+        "alt_text": "เทพีสุริยะแสงทิพย์ประกายทองคำ #2 — Radiant Solar Goddess – เทพีสุริยะแสงทิพย์ประกายทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-02.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-02.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-02.png",
+        "sort_order": 1
+      },
+      {
+        "alt_text": "เทพีสุริยะแสงทิพย์ประกายทองคำ #3 — Radiant Solar Goddess – เทพีสุริยะแสงทิพย์ประกายทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-03.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-03.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-03.png",
+        "sort_order": 2
+      },
+      {
+        "alt_text": "เทพีสุริยะแสงทิพย์ประกายทองคำ #4 — Radiant Solar Goddess – เทพีสุริยะแสงทิพย์ประกายทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-04.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-04.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-04.png",
+        "sort_order": 3
+      },
+      {
+        "alt_text": "เทพีสุริยะแสงทิพย์ประกายทองคำ #5 — Radiant Solar Goddess – เทพีสุริยะแสงทิพย์ประกายทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-05.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-05.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-05.png",
+        "sort_order": 4
+      },
+      {
+        "alt_text": "เทพีสุริยะแสงทิพย์ประกายทองคำ #6 — Radiant Solar Goddess – เทพีสุริยะแสงทิพย์ประกายทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-06.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-06.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-06.png",
+        "sort_order": 5
+      },
+      {
+        "alt_text": "เทพีสุริยะแสงทิพย์ประกายทองคำ #7 — Radiant Solar Goddess – เทพีสุริยะแสงทิพย์ประกายทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-07.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-07.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-07.png",
+        "sort_order": 6
+      },
+      {
+        "alt_text": "เทพีสุริยะแสงทิพย์ประกายทองคำ #8 — Radiant Solar Goddess – เทพีสุริยะแสงทิพย์ประกายทอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-08.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-08.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/radiant-solar-goddess/radiant-solar-goddess-08.png",
+        "sort_order": 7
+      }
+    ]
+  },
+  {
+    "id": "2de29b1e-2076-42a1-aad9-06d76651cba2",
+    "slug": "blazing-solar-sovereign",
+    "title": "Blazing Solar Sovereign – สุริยเทพจอมราชันย์ ดาบเพลิงสุริยัน",
+    "description": "คอลเลกชันสุริยเทพจอมราชันย์ ดาบเพลิงสุริยันเรืองอำนาจ เสริมความเป็นผู้นำ ชัยชนะในการแข่งขัน การเลื่อนขั้นเลื่อนตำแหน่ง และเกียรติยศสูงสุด",
+    "category": "🌟 Spiritual Art",
+    "cover_image": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-01.png",
+    "tags": [
+      "Spiritual",
+      "Sun God",
+      "Solar Sovereign",
+      "Flame Sword",
+      "Victory",
+      "Leadership",
+      "Success"
+    ],
+    "collection_images": [
+      {
+        "alt_text": "สุริยเทพจอมราชันย์ ดาบเพลิงสุริยัน #1 — Blazing Solar Sovereign – สุริยเทพจอมราชันย์ ดาบเพลิงสุริยัน",
+        "image_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-01.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-01.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-01.png",
+        "sort_order": 0
+      },
+      {
+        "alt_text": "สุริยเทพจอมราชันย์ ดาบเพลิงสุริยัน #2 — Blazing Solar Sovereign – สุริยเทพจอมราชันย์ ดาบเพลิงสุริยัน",
+        "image_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-02.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-02.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-02.png",
+        "sort_order": 1
+      },
+      {
+        "alt_text": "สุริยเทพจอมราชันย์ ดาบเพลิงสุริยัน #3 — Blazing Solar Sovereign – สุริยเทพจอมราชันย์ ดาบเพลิงสุริยัน",
+        "image_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-03.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-03.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-03.png",
+        "sort_order": 2
+      },
+      {
+        "alt_text": "สุริยเทพจอมราชันย์ ดาบเพลิงสุริยัน #4 — Blazing Solar Sovereign – สุริยเทพจอมราชันย์ ดาบเพลิงสุริยัน",
+        "image_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-04.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-04.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-04.png",
+        "sort_order": 3
+      },
+      {
+        "alt_text": "สุริยเทพจอมราชันย์ ดาบเพลิงสุริยัน #5 — Blazing Solar Sovereign – สุริยเทพจอมราชันย์ ดาบเพลิงสุริยัน",
+        "image_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-05.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-05.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-05.png",
+        "sort_order": 4
+      },
+      {
+        "alt_text": "สุริยเทพจอมราชันย์ ดาบเพลิงสุริยัน #6 — Blazing Solar Sovereign – สุริยเทพจอมราชันย์ ดาบเพลิงสุริยัน",
+        "image_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-06.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-06.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-06.png",
+        "sort_order": 5
+      },
+      {
+        "alt_text": "สุริยเทพจอมราชันย์ ดาบเพลิงสุริยัน #7 — Blazing Solar Sovereign – สุริยเทพจอมราชันย์ ดาบเพลิงสุริยัน",
+        "image_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-07.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-07.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-07.png",
+        "sort_order": 6
+      },
+      {
+        "alt_text": "สุริยเทพจอมราชันย์ ดาบเพลิงสุริยัน #8 — Blazing Solar Sovereign – สุริยเทพจอมราชันย์ ดาบเพลิงสุริยัน",
+        "image_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-08.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-08.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/blazing-solar-sovereign/blazing-solar-sovereign-08.png",
+        "sort_order": 7
+      }
+    ]
+  },
+  {
+    "id": "fa642d22-cdff-49ba-a3c0-608115fbbb72",
+    "slug": "golden-astral-bal-ganesha",
+    "title": "Golden Astral Bal Ganesha – พระพิฆเนศน้อยออร่าทองคำเรืองรอง",
+    "description": "คอลเลกชันพระพิฆเนศน้อยก้าวสู่ความสำเร็จ พร้อมเงาออร่าจักรวาลมหาคเณศทองคำหนุนหลัง เสริมพลังแห่งความมุ่งมั่น ความคิดริเริ่มสร้างสรรค์ และความสำเร็จอันยิ่งใหญ่",
+    "category": "🌟 Spiritual Art",
+    "cover_image": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-01.png",
+    "tags": [
+      "Spiritual",
+      "Ganesha",
+      "Bal Ganesha",
+      "Golden Astral",
+      "Aura",
+      "Divine Light",
+      "Good Fortune"
+    ],
+    "collection_images": [
+      {
+        "alt_text": "พระพิฆเนศน้อยออร่าทองคำเรืองรอง พลังจักรวาลมหาคเณศ #1 — Golden Astral Bal Ganesha – พระพิฆเนศน้อยออร่าทองคำเรืองรอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-01.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-01.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-01.png",
+        "sort_order": 0
+      },
+      {
+        "alt_text": "พระพิฆเนศน้อยออร่าทองคำเรืองรอง พลังจักรวาลมหาคเณศ #2 — Golden Astral Bal Ganesha – พระพิฆเนศน้อยออร่าทองคำเรืองรอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-02.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-02.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-02.png",
+        "sort_order": 1
+      },
+      {
+        "alt_text": "พระพิฆเนศน้อยออร่าทองคำเรืองรอง พลังจักรวาลมหาคเณศ #3 — Golden Astral Bal Ganesha – พระพิฆเนศน้อยออร่าทองคำเรืองรอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-03.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-03.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-03.png",
+        "sort_order": 2
+      },
+      {
+        "alt_text": "พระพิฆเนศน้อยออร่าทองคำเรืองรอง พลังจักรวาลมหาคเณศ #4 — Golden Astral Bal Ganesha – พระพิฆเนศน้อยออร่าทองคำเรืองรอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-04.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-04.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-04.png",
+        "sort_order": 3
+      },
+      {
+        "alt_text": "พระพิฆเนศน้อยออร่าทองคำเรืองรอง พลังจักรวาลมหาคเณศ #5 — Golden Astral Bal Ganesha – พระพิฆเนศน้อยออร่าทองคำเรืองรอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-05.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-05.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-05.png",
+        "sort_order": 4
+      },
+      {
+        "alt_text": "พระพิฆเนศน้อยออร่าทองคำเรืองรอง พลังจักรวาลมหาคเณศ #6 — Golden Astral Bal Ganesha – พระพิฆเนศน้อยออร่าทองคำเรืองรอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-06.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-06.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-06.png",
+        "sort_order": 5
+      },
+      {
+        "alt_text": "พระพิฆเนศน้อยออร่าทองคำเรืองรอง พลังจักรวาลมหาคเณศ #7 — Golden Astral Bal Ganesha – พระพิฆเนศน้อยออร่าทองคำเรืองรอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-07.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-07.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-07.png",
+        "sort_order": 6
+      },
+      {
+        "alt_text": "พระพิฆเนศน้อยออร่าทองคำเรืองรอง พลังจักรวาลมหาคเณศ #8 — Golden Astral Bal Ganesha – พระพิฆเนศน้อยออร่าทองคำเรืองรอง",
+        "image_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-08.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-08.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/golden-astral-bal-ganesha/golden-astral-bal-ganesha-08.png",
+        "sort_order": 7
+      }
+    ]
+  },
+  {
+    "id": "5bbf605e-a6d6-455d-aef5-3789550f94e3",
+    "slug": "mythic-nezha-golden-flame",
+    "title": "Mythic Nezha Golden Flame – นาจาซาไท้จื้อ เพลิงทองคำพู่กันหมึก",
+    "description": "คอลเลกชันนาจาซาไท้จื้อ เหยียบกงล้อเพลิงวายุ ทวนประกายเปลวทอง สไตล์หมึกจีนทรงพลัง เสริมพลังขจัดอุปสรรค ศัตรูพ่ายแพ้ ชัยชนะในการต่อสู้ และความสำเร็จคล่องตัว",
+    "category": "🌟 Spiritual Art",
+    "cover_image": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-01.png",
+    "tags": [
+      "Spiritual",
+      "Nezha",
+      "Third Prince",
+      "Golden Flame",
+      "Wind Fire Wheels",
+      "Protection",
+      "Overcoming Obstacles"
+    ],
+    "collection_images": [
+      {
+        "alt_text": "นาจาซาไท้จื้อ เพลิงทองคำพู่กันหมึก #1 — Mythic Nezha Golden Flame – นาจาซาไท้จื้อ เพลิงทองคำพู่กันหมึก",
+        "image_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-01.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-01.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-01.png",
+        "sort_order": 0
+      },
+      {
+        "alt_text": "นาจาซาไท้จื้อ เพลิงทองคำพู่กันหมึก #2 — Mythic Nezha Golden Flame – นาจาซาไท้จื้อ เพลิงทองคำพู่กันหมึก",
+        "image_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-02.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-02.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-02.png",
+        "sort_order": 1
+      },
+      {
+        "alt_text": "นาจาซาไท้จื้อ เพลิงทองคำพู่กันหมึก #3 — Mythic Nezha Golden Flame – นาจาซาไท้จื้อ เพลิงทองคำพู่กันหมึก",
+        "image_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-03.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-03.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-03.png",
+        "sort_order": 2
+      },
+      {
+        "alt_text": "นาจาซาไท้จื้อ เพลิงทองคำพู่กันหมึก #4 — Mythic Nezha Golden Flame – นาจาซาไท้จื้อ เพลิงทองคำพู่กันหมึก",
+        "image_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-04.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-04.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-04.png",
+        "sort_order": 3
+      },
+      {
+        "alt_text": "นาจาซาไท้จื้อ เพลิงทองคำพู่กันหมึก #5 — Mythic Nezha Golden Flame – นาจาซาไท้จื้อ เพลิงทองคำพู่กันหมึก",
+        "image_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-05.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-05.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-05.png",
+        "sort_order": 4
+      },
+      {
+        "alt_text": "นาจาซาไท้จื้อ เพลิงทองคำพู่กันหมึก #6 — Mythic Nezha Golden Flame – นาจาซาไท้จื้อ เพลิงทองคำพู่กันหมึก",
+        "image_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-06.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-06.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-06.png",
+        "sort_order": 5
+      },
+      {
+        "alt_text": "นาจาซาไท้จื้อ เพลิงทองคำพู่กันหมึก #7 — Mythic Nezha Golden Flame – นาจาซาไท้จื้อ เพลิงทองคำพู่กันหมึก",
+        "image_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-07.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-07.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-07.png",
+        "sort_order": 6
+      },
+      {
+        "alt_text": "นาจาซาไท้จื้อ เพลิงทองคำพู่กันหมึก #8 — Mythic Nezha Golden Flame – นาจาซาไท้จื้อ เพลิงทองคำพู่กันหมึก",
+        "image_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-08.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-08.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/mythic-nezha-golden-flame/mythic-nezha-golden-flame-08.png",
+        "sort_order": 7
+      }
+    ]
+  },
+  {
+    "id": "3d274806-1732-4b08-a59a-6c05e5508a8e",
+    "slug": "crimson-lotus-prince-nezha",
+    "title": "Crimson Lotus Prince Nezha – นาจาปราบมาร ผ้าแพรแดงกงล้ออัคคี",
+    "description": "คอลเลกชันนาจาเทพเจ้าแห่งชัยชนะ สะบัดผ้าแพรแดงหงเหอ พร้อมกงล้อเพลิงอัคคีและทวนศักดิ์สิทธิ์ เสริมความกล้าหาญ ชัยชนะเหนือมารอุปสรรค โชคลาภและการคุ้มครองปลอดภัย",
+    "category": "🌟 Spiritual Art",
+    "cover_image": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-01.png",
+    "tags": [
+      "Spiritual",
+      "Nezha",
+      "Crimson Ribbon",
+      "Lotus Prince",
+      "Fire Wheels",
+      "Victory",
+      "Courage"
+    ],
+    "collection_images": [
+      {
+        "alt_text": "นาจาปราบมาร ผ้าแพรแดงกงล้ออัคคี #1 — Crimson Lotus Prince Nezha – นาจาปราบมาร ผ้าแพรแดงกงล้ออัคคี",
+        "image_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-01.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-01.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-01.png",
+        "sort_order": 0
+      },
+      {
+        "alt_text": "นาจาปราบมาร ผ้าแพรแดงกงล้ออัคคี #2 — Crimson Lotus Prince Nezha – นาจาปราบมาร ผ้าแพรแดงกงล้ออัคคี",
+        "image_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-02.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-02.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-02.png",
+        "sort_order": 1
+      },
+      {
+        "alt_text": "นาจาปราบมาร ผ้าแพรแดงกงล้ออัคคี #3 — Crimson Lotus Prince Nezha – นาจาปราบมาร ผ้าแพรแดงกงล้ออัคคี",
+        "image_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-03.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-03.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-03.png",
+        "sort_order": 2
+      },
+      {
+        "alt_text": "นาจาปราบมาร ผ้าแพรแดงกงล้ออัคคี #4 — Crimson Lotus Prince Nezha – นาจาปราบมาร ผ้าแพรแดงกงล้ออัคคี",
+        "image_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-04.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-04.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-04.png",
+        "sort_order": 3
+      },
+      {
+        "alt_text": "นาจาปราบมาร ผ้าแพรแดงกงล้ออัคคี #5 — Crimson Lotus Prince Nezha – นาจาปราบมาร ผ้าแพรแดงกงล้ออัคคี",
+        "image_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-05.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-05.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-05.png",
+        "sort_order": 4
+      },
+      {
+        "alt_text": "นาจาปราบมาร ผ้าแพรแดงกงล้ออัคคี #6 — Crimson Lotus Prince Nezha – นาจาปราบมาร ผ้าแพรแดงกงล้ออัคคี",
+        "image_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-06.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-06.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-06.png",
+        "sort_order": 5
+      },
+      {
+        "alt_text": "นาจาปราบมาร ผ้าแพรแดงกงล้ออัคคี #7 — Crimson Lotus Prince Nezha – นาจาปราบมาร ผ้าแพรแดงกงล้ออัคคี",
+        "image_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-07.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-07.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-07.png",
+        "sort_order": 6
+      },
+      {
+        "alt_text": "นาจาปราบมาร ผ้าแพรแดงกงล้ออัคคี #8 — Crimson Lotus Prince Nezha – นาจาปราบมาร ผ้าแพรแดงกงล้ออัคคี",
+        "image_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-08.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-08.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-08.png",
+        "sort_order": 7
+      },
+      {
+        "alt_text": "นาจาปราบมาร ผ้าแพรแดงกงล้ออัคคี #9 — Crimson Lotus Prince Nezha – นาจาปราบมาร ผ้าแพรแดงกงล้ออัคคี",
+        "image_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-09.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-09.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-09.png",
+        "sort_order": 8
+      },
+      {
+        "alt_text": "นาจาปราบมาร ผ้าแพรแดงกงล้ออัคคี #10 — Crimson Lotus Prince Nezha – นาจาปราบมาร ผ้าแพรแดงกงล้ออัคคี",
+        "image_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-10.png",
+        "thumbnail_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-10.png",
+        "download_url": "https://ninejoe.online/images/wallpapers/crimson-lotus-prince-nezha/crimson-lotus-prince-nezha-10.png",
+        "sort_order": 9
+      }
+    ]
+  },
   {
     "id": "42fc83ea-252e-4024-9c35-794b38855dc0",
     "slug": "grand-full-moon-lotus-festival",
@@ -1476,4 +2742,5 @@ export const FALLBACK_COLLECTIONS: NineJoeCollection[] = [
       }
     ]
   }
+
 ];
