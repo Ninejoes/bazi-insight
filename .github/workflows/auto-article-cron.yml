@@ -2,12 +2,14 @@ name: Likhitfa Daily Auto Article Cron
 
 on:
   schedule:
-    # 4 runs per day (Bangkok UTC+7)
-    # 07:00 (00:00 UTC) -> รอบเช้า morning
-    # 10:00 (03:00 UTC) -> รอบสาย forenoon
-    # 12:00 (05:00 UTC) -> รอบเที่ยง noon
-    # 15:00 (08:00 UTC) -> รอบบ่าย afternoon
-    - cron: '0 0,3,5,8 * * *'
+    # 5 runs per day (Bangkok UTC+7)
+    # 07:15 (00:15 UTC) -> รอบเช้า morning
+    # 10:15 (03:15 UTC) -> รอบสาย forenoon
+    # 12:15 (05:15 UTC) -> รอบเที่ยง noon
+    # 15:15 (08:15 UTC) -> รอบบ่าย afternoon
+    # 18:15 (11:15 UTC) -> รอบเย็น evening
+    # Using minute 15 instead of 00 to avoid GitHub Actions peak queue drops
+    - cron: '15 0,3,5,8,11 * * *'
   workflow_dispatch:
     inputs:
       slot:
